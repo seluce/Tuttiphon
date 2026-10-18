@@ -103,6 +103,7 @@ test.describe('Administrator', () => {
       await page.locator('h1').getByRole('link', { name: 'Hilfe' }).click()
       await expect(page.locator('.sheet')).toContainText(title)
       await page.keyboard.press('Escape')
+      await expect(page.locator('.sheet')).toHaveCount(0)   // closed before the next page opens its own
     }
   })
 

@@ -3,6 +3,11 @@
 A brief summary of what changes in each version. The newest version is on top; `npm run release` copies its
 section into the release notes `README.txt`. If `docker-compose.yaml` has to be replaced during an update, it says so explicitly.
 
+## 1.0.2 – 2026-10-18
+
+- Phone: the labels in the bar at the bottom stay on one line and centered under their icon. For users the entry
+  “My playlists” is now called “Playlists”, like for administrators.
+
 ## 1.0.1 – 2026-10-18
 
 The names from the time when Tuttiphon was called NaviTool no longer count. **Check before updating:**

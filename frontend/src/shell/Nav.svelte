@@ -25,7 +25,7 @@
   // Users: only what concerns them – easy to grasp
   const USER_NAV = $derived([
     ['#/', 'home', t('For you'), /^\/$/],
-    ['#/playlists', 'playlists', t('My playlists'), /^\/playlist/],
+    ['#/playlists', 'playlists', t('Playlists'), /^\/playlist/],
     ['#/entdecken', 'compass', t('Discover'), /^\/entdecken/],
     ['#/welten', 'globe', t('Music worlds'), /^\/welt/],
     ['#/statistik', 'chart', t('My statistics'), /^\/statistik/],
@@ -62,7 +62,7 @@
 {#snippet link([href, ic, label, re])}
   <a {href} class:on={re.test(route.path)} aria-current={re.test(route.path) ? 'page' : undefined}>
     <Icon name={ic} />
-    <span>{label}</span>
+    <span class="lbl">{label}</span>
     {#if href === '#/playlists' && pending}<span class="count">{pending}</span>{/if}
   </a>
 {/snippet}
@@ -70,7 +70,7 @@
 {#if bottom}
   <nav class="bottomnav" aria-label={t('Navigation')} data-tour="bottomnav">
     {#each items.filter(Boolean).slice(0, 4) as item (item[0])}{@render link(item)}{/each}
-    <button type="button" data-tour="more" class:on={moreOn} aria-haspopup="dialog" onclick={moreMenu}><Icon name="more" /><span>{t('More')}</span></button>
+    <button type="button" data-tour="more" class:on={moreOn} aria-haspopup="dialog" onclick={moreMenu}><Icon name="more" /><span class="lbl">{t('More')}</span></button>
   </nav>
 {:else}
   <nav class="nav" aria-label={t('Navigation')} data-tour="nav">
@@ -91,11 +91,14 @@
   .bottomnav { display: none; }
   @media (max-width: 900px) {
     .bottomnav {
-      display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
       background: color-mix(in srgb, var(--bg-2) 92%, transparent); backdrop-filter: blur(16px); border-top: 1px solid var(--line);
       padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
     }
-    .bottomnav a, .bottomnav button { display: grid; justify-items: center; gap: 2px; font-size: .68rem; font-weight: 650; color: var(--muted); text-decoration: none; padding: 4px 0; position: relative; }
+    .bottomnav a, .bottomnav button { display: grid; justify-items: center; gap: 2px; font-size: .68rem; font-weight: 650; color: var(--muted); text-decoration: none; padding: 4px 0; position: relative; min-width: 0; }
+    @media (max-width: 400px) { .bottomnav a, .bottomnav button { font-size: clamp(.6rem, 2.95vw, .68rem); letter-spacing: -.01em; } }
+    /* one line, centered – a long label would push its icon out of line with the others */
+    .bottomnav .lbl { max-width: 100%; padding: 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
     .bottomnav .on { color: var(--text); }
     .bottomnav .on :global(svg) { color: var(--accent); }
     .bottomnav .count { position: absolute; top: 0; right: calc(50% - 22px); margin: 0; font-size: .62rem; padding: 0 5px; }
