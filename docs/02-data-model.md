@@ -111,7 +111,7 @@ the migration to v10 writes the value they had ([Version and migration](#version
 |---|---|---|---|---|
 | `language` | string | `"en"` (existing installations after the migration to v6: `"de"`) | Server language: logs, notifications, names and descriptions that Tuttiphon assigns itself (`i18n._s()`). Messages to the interface follow the language of the request (header `X-Lang`). A switch also renames the bundled vibes, the person “Family” and `allName`, as long as they still carry their bundled name (`config.localize_defaults()`) | `en` or `de` |
 
-Each device stores the interface language itself (`localStorage` `nt-lang`, Settings → General → Language);
+Each device stores the interface language itself (`localStorage` `tuttiphon-lang`, Settings → General → Language);
 without a choice, the browser language applies.
 
 #### Playlists in general
@@ -604,19 +604,17 @@ flowchart TD
 
 One line per value: `KEY=value`. Empty lines and lines starting with `#` don't count; whitespace around the value
 is dropped, then exactly one pair of matching quotes (`"…"` or `'…'`) around the value is removed.
-`load_env()` merges three sources – later ones win:
+`load_env()` merges two sources – the later one wins:
 
 | Rank | Source | What is read from it |
 |---|---|---|
-| 1 (weakest) | `BASE/deezer-bewertung/.env` (file of an earlier Deezer tool in the Navidrome folder, if present) | only `NAV_BASE_URL` → `NAV_URL`, `NAV_USER` → `NAV_ADMIN_USER`, `NAV_PASS` → `NAV_ADMIN_PASS` |
-| 2 | `.env` in the data folder | all keys with a non-empty value |
-| 3 (strongest) | environment variables of the process (e.g. from docker-compose) | all that start with `NAV_` or `TUTTIPHON_`, plus `RATING_USERS`, `LASTFM_API_KEY` and `NTFY_TOKEN` – only with content: an empty (or whitespace-only) variable, such as `NAV_ADMIN_PASS: ""` in docker-compose, doesn't override the file |
+| 1 (weaker) | `.env` in the data folder | all keys with a non-empty value |
+| 2 (stronger) | environment variables of the process (e.g. from docker-compose) | all that start with `NAV_` or `TUTTIPHON_`, plus `RATING_USERS`, `LASTFM_API_KEY` and `NTFY_TOKEN` – only with content: an empty (or whitespace-only) variable, such as `NAV_ADMIN_PASS: ""` in docker-compose, doesn't override the file |
 
-Afterwards, trailing `/` are removed from `NAV_URL`. The result stays in memory until one of the two
-files changes (modification time, size). `/api/status` reports under `env.locked` which of the keys the interface may
+Afterwards, trailing `/` are removed from `NAV_URL`. The result stays in memory until the file changes
+(modification time, size). `/api/status` reports under `env.locked` which of the keys the interface may
 set (`config.EDITABLE_ENV`, see [Writing](#writing--save_env)) are set non-empty in the environment – the interface
-locks these fields. An administrator password under an old name appears there as `TUTTIPHON_ADMIN_PASSWORD`; other
-variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) are not listed.
+locks these fields. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) are not listed.
 
 ### Keys
 
@@ -627,7 +625,7 @@ variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) are not listed.
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | admin access: song list, scan, playlist sync, accounts, covers | Settings → Navidrome, environment |
 | `NAV_PASS_<ACCOUNT>` | password of a Navidrome account (for stars, personal statistics, mixes from the person's perspective, exact preview) | administrators: password dialog (e.g. Settings → Navidrome), “New person” assistant; users: Settings → My account (`/api/me/password`); sign-in with “Turn on statistics & stars” (not for the admin account) |
 | `RATING_USERS` | accounts for Deezer stars, comma-separated; applies only if `settings.deezer.users` is not set | by hand, environment |
-| `TUTTIPHON_ADMIN_PASSWORD` | password of the [local administrator](07-security.md#local-administrator); if it is set, Tuttiphon requires sign-in. On the network it must not be weak (`config.weak_password()`): at least 8 characters and not a placeholder (`config.PASSWORD_PLACEHOLDERS`: `change-me`, `bitte-aendern`), compared without surrounding spaces and in lowercase; otherwise the start fails and a running server stays locked ([Security](07-security.md#running-without-a-password)). Old names `TUTTIPHON_PASSWORD` and `NAVITOOL_PASSWORD` still count, the new name wins (`config.renamed()`, read via `config.admin_password()`) | environment (docker-compose), by hand; via `PUT /api/env` only with at least 8 characters, and it can't be deleted |
+| `TUTTIPHON_ADMIN_PASSWORD` | password of the [local administrator](07-security.md#local-administrator); if it is set, Tuttiphon requires sign-in. On the network it must not be weak (`config.weak_password()`): at least 8 characters and not the placeholder (`config.PASSWORD_PLACEHOLDERS`: `change-me`), compared without surrounding spaces and in lowercase; otherwise the start fails and a running server stays locked ([Security](07-security.md#running-without-a-password)). Read via `config.admin_password()` | environment (docker-compose), by hand; via `PUT /api/env` only with at least 8 characters, and it can't be deleted |
 | `NTFY_TOKEN` | access token for protected topics on your own ntfy server; `/api/status` only reports whether one exists (`env.ntfyToken`) | by hand, environment |
 | `TUTTIPHON_HOSTS` | additional host names, comma-separated, through which Tuttiphon is reachable without a password (otherwise only `127.0.0.1`, `localhost`, `::1`) | by hand, environment |
 | `TUTTIPHON_TRUSTED_PROXIES` | reverse proxies whose `X-Forwarded-For` and `X-Forwarded-Proto` count: addresses or networks, comma-separated (e.g. `172.16.0.0/12`). Then the sign-in lockout counts each person's own address, and sign-ins via https get the `Secure` cookie ([Security](07-security.md#client-address)) | by hand, environment |
@@ -647,14 +645,8 @@ the `deezer` step, the notice “Passwords missing” under “To review” and 
 ### Writing – `save_env()`
 
 - allowed keys (`config.EDITABLE_ENV`): `NAV_URL`, `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_…`,
-  `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`, `TUTTIPHON_PASSWORD`, `LASTFM_API_KEY`, `NTFY_TOKEN` – the server rejects
-  others;
-- empty string: skipped before anything else happens – the value stays unchanged, and nothing is removed under an old
-  name either; otherwise only printable text without line breaks;
-- the old key `TUTTIPHON_PASSWORD` is saved as `TUTTIPHON_ADMIN_PASSWORD` (under the old name it would no longer count
-  once the new one exists);
-- writing a `TUTTIPHON_…` key removes the same key under its old name `NAVITOOL_…`; writing `TUTTIPHON_ADMIN_PASSWORD`
-  also removes the lines `TUTTIPHON_PASSWORD=` and `NAVITOOL_PASSWORD=`;
+  `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`, `LASTFM_API_KEY`, `NTFY_TOKEN` – the server rejects others;
+- empty string: skipped – the value stays unchanged; otherwise only printable text without line breaks;
 - `null` deletes only a real line `KEY=…`; a commented-out template `# KEY=…` stays;
 - setting replaces the real line; if there is none, a commented-out template is replaced, otherwise the line is appended;
 - if a value starts or ends with whitespace or a quote character, `save_env()` writes it in double
@@ -662,8 +654,7 @@ the `deezer` step, the notice “Passwords missing” under “To review” and 
 - written with `write_atomic(…, mode=0o600)`; `ensure_dirs()` sets a hand-made `.env` to
   `0600` at startup (errors, e.g. with a different owner, are ignored).
 
-Before `save_env()`, `PUT /api/env` (`api_env_save()`) checks: `TUTTIPHON_ADMIN_PASSWORD` (and the old
-`TUTTIPHON_PASSWORD`) only if it isn't weak (`config.weak_password()`), `null` (delete) is rejected (“The
+Before `save_env()`, `PUT /api/env` (`api_env_save()`) checks: `TUTTIPHON_ADMIN_PASSWORD` only if it isn't weak (`config.weak_password()`), `null` (delete) is rejected (“The
 administrator password needs at least 8 characters.”); `NAV_URL` must start with `http://` or `https://`.
 
 The server never outputs passwords and keys; `/api/status` only reports whether they are present (administrators see the
@@ -726,7 +717,7 @@ environment and in `.env` ([Keys](#keys)).
 | `watch.json` | state of the folder watch | scheduler | state, deletable |
 | `watch_files.json` | folders of the music folder with modification time, audio files and subfolders at the last look; written only when something changed | scheduler (`watch.check()`) | state, deletable (the next look reads everything and only takes note); not in the backup |
 | `langzeit.json` | state of [long-term maintenance](05-maintenance.md#long-term-maintenance): last pass, last compaction, usual size of the song list, vanished song IDs with date | `langzeit.run()` | state, deletable (then the 30 days for vanished songs start over) |
-| `seen.json` | `{"tour": [account, …], "welcome": [account, …]}` – accounts (lowercase, `""` without sign-in) that have completed the tour or the welcome assistant; an older `tour_seen.json` (list of accounts, tour only) is read as well and carried over on the next write | `POST /api/seen` or `POST /api/tour/seen` (`auth.mark_seen()`) | state, deletable (then both come back once – the tour only if `tour_seen.json` is missing too, and not on devices that remembered it in the browser, `nt-tour:<account>`/`nt-welcome:<account>`) |
+| `seen.json` | `{"tour": [account, …], "welcome": [account, …]}` – accounts (lowercase, `""` without sign-in) that have completed the tour or the welcome assistant; an older `tour_seen.json` (list of accounts, tour only) is read as well and carried over on the next write | `POST /api/seen` or `POST /api/tour/seen` (`auth.mark_seen()`) | state, deletable (then both come back once – the tour only if `tour_seen.json` is missing too, and not on devices that remembered it in the browser, `tuttiphon-tour:<account>`/`tuttiphon-welcome:<account>`) |
 | `cache/img/`, `cache/artist_info.json` | images and artist info from Navidrome | `images.py`, cleaned up by `tasks.tidy()` | cache, deletable |
 
 Tuttiphon writes all JSON files with `write_atomic()`; only `history.jsonl` is appended to. If a file is missing or
@@ -786,12 +777,11 @@ a restart) – so that roles are correct even then. After a failure, the server 
 ### deezer.json
 
 ```json
-{ "version": 1, "lastRun": "12.10.2026 05:41", "lastFull": "01.10.2026 03:10", "seededFrom": "10.10.2026 22:27",
+{ "version": 1, "lastRun": "12.10.2026 05:41", "lastFull": "01.10.2026 03:10",
   "full": { "started": 1760240000, "total": 22400 },
   "songs": {
     "<song-id-1>": { "r": 412345, "s": 3, "t": 1760240000, "u": { "anna-lena": 3 } },
-    "<song-id-2>": { "r": null, "s": null, "t": 1760240000, "u": {} },
-    "<song-id-3>": { "seed": true } } }
+    "<song-id-2>": { "r": null, "s": null, "t": 1760240000, "u": {} } } }
 ```
 
 | Field | Meaning |
@@ -803,15 +793,9 @@ a restart) – so that roles are correct even then. After a failure, the server 
 | `v` | 2 = checked with the exact search (band and title must match); missing on older entries – the nightly refresh checks those first |
 | `i` | ISRC through which the song was found (MusicBrainz → Deezer) – used directly on the next check |
 | `b` | 1 = as a top song of its band, one star more than the levels give |
-| `seed` | counts as rated without a known rank |
-| `imported` | the rank comes from the log of an earlier full rating |
 | `full` | only while a full check (mode `full`) is running or interrupted: start and song count; afterwards the end is in `lastFull` |
 
-As an additional data source, `deezer.py` reads logs of an earlier full rating under
-`BASE/deezer-bewertung/logs/deezer-rank_<timestamp>.log` (the newest with at least 5000 songs). On the very first run
-in mode `new` (empty file), songs that were in Navidrome before that rating count as rated (`seed`); later runs and
-`/api/deezer/ranks` take their ranks from the same log (`imported`). If `deezer.json` is missing, everything starts
-as on the first run; if there is no such log, all songs count as new. Process and modes: [Maintenance](05-maintenance.md).
+If `deezer.json` is missing, all songs count as new. Process and modes: [Maintenance](05-maintenance.md).
 
 ### plays/
 

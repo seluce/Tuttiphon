@@ -111,7 +111,7 @@
   function needsWelcome() {
     if (!S.me.own.length) return true
     let seen = !!S.me.welcomeSeen   // remembered on the server per account – applies to all devices
-    try { seen ||= !!localStorage.getItem(`nt-welcome:${(S.me.user || '').toLowerCase()}`) } catch { /* private mode */ }
+    try { seen ||= !!localStorage.getItem(`tuttiphon-welcome:${(S.me.user || '').toLowerCase()}`) } catch { /* private mode */ }
     const own = ownPersons()
     return !seen && !own.some((p) => p.likes?.welten?.length || p.likes?.artists?.length) && !S.config.playlists.some((x) => S.me.own.includes(x.person))
   }
@@ -121,8 +121,8 @@
   function needsSetup() {
     if (!isAdmin() || S.config.settings?.setup?.done !== false) return false
     try {
-      if (sessionStorage.getItem('nt-setup')) return false
-      sessionStorage.setItem('nt-setup', '1')
+      if (sessionStorage.getItem('tuttiphon-setup')) return false
+      sessionStorage.setItem('tuttiphon-setup', '1')
     } catch { /* private mode: at every start */ }
     return true
   }

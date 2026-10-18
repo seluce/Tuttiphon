@@ -48,7 +48,7 @@ frontend/
 | `icons.js` | icon names → Lucide; motifs for music worlds/vibes/people; old emojis → icon |
 | `playlist.js` | `plName()`, `plEmoji()`, `plDescribe()`, states `STATE` |
 | `format.js` | numbers, times, `uid()`, `slug()`, gradients for placeholders |
-| `theme.js` | theme light/dark/system (`localStorage` `nt-theme`) |
+| `theme.js` | theme light/dark/system (`localStorage` `tuttiphon-theme`) |
 | `editor.js` | option lists and `openEditor()` (edit sheet of a playlist) |
 | `artist.js` | `openArtist()` (band window), `startRadio()` |
 | `player.svelte.js` | listening: state `player` (list, current track, time), `playList()`, `playTrack()`, `continueWith()`, `toggle()`, `next()`, `prev()`, `seek()`, `stop()` – see [Listening](#listening-and-the-song-window) |
@@ -136,10 +136,10 @@ boundary is drawn by the server, which doesn't send admin data to users in the f
    when Tuttiphon cannot be reached at all; then it also tries again by itself every 10 s.
 3. Users are sent to `#/willkommen` (`needsWelcome()`) if they don't have a profile yet – or have a profile
    without favorite worlds, without favorite bands and without their own playlists and haven't finished the assistant
-   yet (`S.me.welcomeSeen` from the server or `localStorage` `nt-welcome:<account>`). Not if the route is already
+   yet (`S.me.welcomeSeen` from the server or `localStorage` `tuttiphon-welcome:<account>`). Not if the route is already
    `#/willkommen` or `#/hilfe…`; never for administrators.
    Administrators go to `#/einrichtung` (`needsSetup()`) while `settings.setup.done` is `false` – a new
-   installation that nobody has set up yet. Only once per browser session (`sessionStorage` `nt-setup`), not from
+   installation that nobody has set up yet. Only once per browser session (`sessionStorage` `tuttiphon-setup`), not from
    `#/hilfe…`; never for users.
 4. Load status and library; pages that can show little without the library (music world, assistant, person,
    vibes) wait for it.
@@ -151,7 +151,7 @@ boundary is drawn by the server, which doesn't send admin data to users in the f
    browser may offer it before the app has started.
 7. After 1.5 s start the tour – only for administrators and users with a profile, not on
    `#/willkommen` and `#/einrichtung` (the setup assistant starts it when it is done), and only if the account hasn't finished it yet (`S.me.tourSeen` from the server, otherwise
-   `localStorage` `nt-tour:<account>`); see [Tour and welcome](#tour-and-welcome).
+   `localStorage` `tuttiphon-tour:<account>`); see [Tour and welcome](#tour-and-welcome).
 
 ## State and saving
 
@@ -308,7 +308,7 @@ other people. It starts on the default person (`settings.defaultPerson`) and is 
 **Order and collapsing.** The suggestions for the signed-in account's own person come first – not the shared
 person, even if it is linked to the same account –, then “Right for the season”, then the shared person,
 the others and “New music worlds discovered”. Each area collapses and expands via its heading, showing the
-number of suggestions when collapsed; the device remembers this (`localStorage` `nt-entdecken-zu`).
+number of suggestions when collapsed; the device remembers this (`localStorage` `tuttiphon-discover-folded`).
 
 **Hidden suggestions.** ✕ (“Not interested”, at the top right of every card – on a new music world on its picture)
 hides a suggestion for half a year. Below the suggestions it says
@@ -672,9 +672,9 @@ Above it, administrators find the card “Setup assistant” ([Setup assistant](
   When the app page refers to other files than last time (a new version), the files of older versions are removed from
   the cache (`/__build` in the cache remembers the list).
   `lib/install.svelte.js` remembers the browser's install prompt (`beforeinstallprompt`, only over https or
-  localhost) and counts every opening (`localStorage` `nt-visits`). **Hint** `components/InstallHint.svelte` below the
+  localhost) and counts every opening (`localStorage` `tuttiphon-visits`). **Hint** `components/InstallHint.svelte` below the
   header of “For you” and the home page: only on a phone or tablet (`pointer: coarse`), not as an installed app
-  (`display-mode: standalone`), from the second opening on, until it is dismissed or Tuttiphon is installed (`nt-install-hint`,
+  (`display-mode: standalone`), from the second opening on, until it is dismissed or Tuttiphon is installed (`tuttiphon-install-hint`,
   per device). With a prompt “Install” and “Not now”, otherwise the instructions for iPhone (Share → “Add to
   Home Screen”) or Android (menu ⋮ → “Add to Home screen”) and “Got it”. The same is always available
   under Settings → General → “Install as app”.
@@ -714,7 +714,7 @@ Above it, administrators find the card “Setup assistant” ([Setup assistant](
 ### Tour and welcome
 
 Both appear only once per account – on all devices and under every address. This is remembered twice: in the browser
-(`localStorage` `nt-tour:<account>` or `nt-welcome:<account>`) and on the server (`POST /api/seen`, `state/seen.json`;
+(`localStorage` `tuttiphon-tour:<account>` or `tuttiphon-welcome:<account>`) and on the server (`POST /api/seen`, `state/seen.json`;
 `/api/me` delivers `tourSeen`/`welcomeSeen`). If the call fails, it only counts on this device.
 
 | | Tour | Welcome assistant |
@@ -722,7 +722,7 @@ Both appear only once per account – on all devices and under every address. Th
 | Code | `lib/tour.svelte.js`, `components/Tour.svelte` | `pages/Welcome.svelte` (`#/willkommen`), tip cards in `pages/welcome/TipCards.svelte` |
 | for whom | administrators (`ADMIN_STEPS`) and users with a profile (`USER_STEPS`) | users without a profile, or with a profile without preferences and own playlists (`needsWelcome()` in `App.svelte`) |
 | starts | 1.5 s after the app starts, not on `#/willkommen` (`startTour()`) | when the app starts, via redirect, not from `#/hilfe…` |
-| skipped if | `S.me.tourSeen` or `nt-tour:<account>` | `S.me.welcomeSeen` or `nt-welcome:<account>` – without a profile it comes anyway |
+| skipped if | `S.me.tourSeen` or `tuttiphon-tour:<account>` | `S.me.welcomeSeen` or `tuttiphon-welcome:<account>` – without a profile it comes anyway |
 | finished by | the end or “Skip” (`endTour()` → `{what: "tour"}`) | “Create N playlists” or “Continue without playlists” in the Playlists step (`finish()`) or – only with an existing profile – “Later – look around first” on the first page; both call `remember()` → `{what: "welcome"}` |
 | again | Settings → My account (`startTour(true)`, jumps to `#/` first) | via `#/willkommen` (e.g. “Create profile” in the profile and under Settings → My account, as long as there is no profile) |
 
@@ -740,7 +740,7 @@ and in the Favorite bands step the up to 12 most-played bands come first. In the
 | `npm run test:py` | Python tests for `app/` (`tests/python/`, `unittest` from the standard library): rules and local evaluation, mixes, configuration and `.env`, sign-in and permissions, backup, run lock and instances, lyrics/folder watch, conversion to Opus and AAC with real files generated in the test, mix learning, self-check, AI sound analysis (without Essentia, with a simulated analysis process). They run in a fresh temp folder (`tests/python/env.py`, import it before any `app.*`), without network and without the NAS; tests marked with `@unittest.expectedFailure` describe known deviations |
 | `npm run build` | must complete without warnings (Svelte reports, among other things, accessibility issues and misused runes) |
 | `tools/testserver.sh <port> <folder> [--auth] [--web <build>]` | test server with a **copy** of `data/`, auto-apply and folder watch off, no schedules. `--auth` turns on sign-in (sets `TUTTIPHON_ADMIN_PASSWORD` in the copy if it has no administrator password) and prints session cookies for the local administrator and a user account (`--user <account>`) |
-| `node tools/screens.mjs --base … --out … [--cookie nt=…] [--mobile \| --mobile-small] [--light] [--text] [--fresh] [--lang en] '#/…'` | screenshots and console errors per page (`--mobile-small`: a small phone, 360 × 740 – narrow layouts break there first). Without `--fresh` the script sets the browser markers `nt-tour:<account>`/`nt-welcome:<account>` so that tour and welcome don't get in the way; with `--fresh` it leaves them out – but both only appear if the account is also not listed in `state/seen.json` of the data copy |
+| `node tools/screens.mjs --base … --out … [--cookie tuttiphon=…] [--mobile \| --mobile-small] [--light] [--text] [--fresh] [--lang en] '#/…'` | screenshots and console errors per page (`--mobile-small`: a small phone, 360 × 740 – narrow layouts break there first). Without `--fresh` the script sets the browser markers `tuttiphon-tour:<account>`/`tuttiphon-welcome:<account>` so that tour and welcome don't get in the way; with `--fresh` it leaves them out – but both only appear if the account is also not listed in `state/seen.json` of the data copy |
 | `npm run test:e2e` | Playwright: every page as administrator and as a user, computer and phone (Pixel 7), without JavaScript or console errors; sign-in page; redirect without a session (`pages.spec.js`); help: guides with page changes, Esc, the sheet behind the (?), search, jumping to a topic (`help.spec.js`); what the AI sound analysis adds – key, tempo source, instruments and themes in the song window, bands that sound alike, instruments and themes in the search, the assistant and the sound editor, a vibe that stands for a theme, smooth transitions, fingerprints and “Same recording twice” – with the server's answers extended in the browser (`page.route`), because the test copy usually has no AI results (`ai-sound.spec.js`); the setup assistant – redirect of a new installation only for administrators and once per session, all steps without saving before “Finish”, “Skip setup”, locked without a connection, the entry under Settings → General – with a new installation played in the browser and every write answered there (`setup-assistant.spec.js`) |
 
 The browser tests start their own test server on port 8790 (`tests/e2e/setup.js`), warm it up (library,

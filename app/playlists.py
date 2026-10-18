@@ -16,7 +16,7 @@ import re
 import shutil
 
 from . import mixer, rules
-from .config import (BACKUP_DIR, MARKERS, STATE_DIR, load_config, paths, plain_playlist_file, read_text, slug,
+from .config import (BACKUP_DIR, MARKER, STATE_DIR, load_config, paths, plain_playlist_file, read_text, slug,
                      write_atomic)
 from .i18n import N_, _, _s
 from .navidrome import Navidrome, NavidromeError, native_session
@@ -92,7 +92,7 @@ def handmade(cfg):
             data = {}
         if not isinstance(data, dict):
             data = {}
-        if str(data.get("comment", "")).startswith(MARKERS):
+        if str(data.get("comment", "")).startswith(MARKER):
             continue
         out.append({"file": path.name, "name": data.get("name", path.stem), "nsp": data})
     return out
@@ -205,9 +205,9 @@ def _has_marker(path):
     try:
         if path.suffix == ".m3u":
             head = read_text(path)[:400]
-            return any(f"# {m}" in head for m in MARKERS)
+            return f"# {MARKER}" in head
         data = read_nsp(path)
-        return isinstance(data, dict) and str(data.get("comment", "")).startswith(MARKERS)
+        return isinstance(data, dict) and str(data.get("comment", "")).startswith(MARKER)
     except Exception:
         return False
 
@@ -460,7 +460,7 @@ def sync_navidrome(cfg, env, ctx, log=print):
     for filename, np in by_file.items():
         if filename in active:
             continue
-        ours = filename in ever or str(np.get("comment", "")).startswith(MARKERS)
+        ours = filename in ever or str(np.get("comment", "")).startswith(MARKER)
         if ours and not (playlist_dir(cfg) / filename).exists():
             try:
                 native.delete_playlist(np["id"])

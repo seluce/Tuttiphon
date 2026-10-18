@@ -85,7 +85,7 @@ class TestCreate(BackupTest):
     def test_backup_folder_inside_the_data_folder_does_not_nest(self):
         # e.g. BACKUP_DIR=/config/backup in docker-compose.yaml: the folder of the playlist originals
         made = [config.BACKUP_DIR / "2026-01-01_120000_Lieder.nsp", config.BACKUP_DIR / "notiz.txt",
-                config.BACKUP_DIR / "navitool-sicherung-2025-01-01_120000 (1).zip"]
+                config.BACKUP_DIR / "tuttiphon-sicherung-2025-01-01_120000 (1).zip"]
         for p in made:
             p.write_text("x")
             self.addCleanup(p.unlink, missing_ok=True)

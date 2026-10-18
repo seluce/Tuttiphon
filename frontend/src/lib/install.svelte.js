@@ -3,8 +3,8 @@
 // Settings → General. Each device remembers by itself whether the hint was dismissed.
 import { S } from './state.svelte.js'
 
-const KEY = 'nt-install-hint'
-const VISITS = 'nt-visits'
+const KEY = 'tuttiphon-install-hint'
+const VISITS = 'tuttiphon-visits'
 
 /** Is Tuttiphon currently running as an installed app? */
 export const standalone = () => matchMedia('(display-mode: standalone)').matches || !!navigator.standalone

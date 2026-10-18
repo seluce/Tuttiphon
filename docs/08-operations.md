@@ -70,7 +70,7 @@ has no visible terminal; its output cannot be seen (the logs of the runs are sti
 folder (created if it is missing – never the project folder itself). `dev.local.env` is not read, so `TUTTIPHON_BASE` falls back to the folder **above the project folder**
 unless it is set in the environment. The default music
 folder then points nowhere (unless the storage locations are set with absolute paths in the settings; relative paths
-are also resolved relative to `TUTTIPHON_BASE`), and `deezer-bewertung/.env` is not found. So set it beforehand:
+are also resolved relative to `TUTTIPHON_BASE`). So set it beforehand:
 
 ```bash
 TUTTIPHON_BASE=/path/to/navidrome-folder python3 tuttiphon.py run playlists --dry-run
@@ -186,8 +186,7 @@ The image also sets `TUTTIPHON_BASE=/nas`. It only matters for defaults and rela
 music folder is `/nas/Music` (without `ARCHIVE_DIR` the archive `/nas/Archiv`), and relative paths for the music
 folder and the backup folder refer to `/nas`. The template sets all three folders with absolute paths, so `/nas` plays
 no role there.
-Existing installations that mount the whole Navidrome folder at `/nas` (e.g. with `MUSIC_DIR=/nas/Music`) keep working
-unchanged; there, a remaining `deezer-bewertung/.env` in that folder is still read as a fallback for the admin access.
+Installations that mount the whole Navidrome folder at `/nas` (e.g. with `MUSIC_DIR=/nas/Music`) work as well.
 If the music is on another device, an NFS volume works (example in [Installation](installation.md#music-on-another-device)).
 
 Navidrome must see the playlist folder as part of its library. The folder name must be the same for Tuttiphon and
@@ -229,13 +228,12 @@ whole library spans several nights.
 ### Required: `TUTTIPHON_ADMIN_PASSWORD`
 
 The container starts with `--host 0.0.0.0`. `tuttiphon.py` refuses this start (code 2) if `TUTTIPHON_ADMIN_PASSWORD`
-is missing, shorter than 8 characters, or still a placeholder – `change-me` (template) or `bitte-aendern` (old
-template), `config.PASSWORD_PLACEHOLDERS`. The message is in the container log (`docker logs tuttiphon`) and names
-what is wrong: missing, the placeholder in question, or the number of characters, and whether the value comes from
-`docker-compose.yaml` or from the `.env`. The password can be in `environment` or in `/config/.env`; the old names
-`TUTTIPHON_PASSWORD` and `NAVITOOL_PASSWORD` still count (the new name wins). It turns on sign-in and is the
-password of the [local administrator](07-security.md#local-administrator), Tuttiphon's own administrator account.
-Placeholders count in any spelling – `Change-Me`, `CHANGE-ME`, also with spaces around them
+is missing, shorter than 8 characters, or still the placeholder `change-me` from the template
+(`config.PASSWORD_PLACEHOLDERS`). The message is in the container log (`docker logs tuttiphon`) and names
+what is wrong: missing, the placeholder, or the number of characters, and whether the value comes from
+`docker-compose.yaml` or from the `.env`. The password can be in `environment` or in `/config/.env`. It turns on
+sign-in and is the password of the [local administrator](07-security.md#local-administrator), Tuttiphon's own
+administrator account. The placeholder counts in any spelling – `Change-Me`, `CHANGE-ME`, also with spaces around it
 (`config.weak_password()`).
 
 If the password goes missing or becomes weak while the container is running (e.g. the `.env` in `/config` was
@@ -385,25 +383,6 @@ backup from before the update ([Built-in backup](#built-in-backup-appbackuppy));
 lost. Then start the container again. Without a migration the older version reads `config.json` as it is. From 0.17.1
 on, the validation ignores sound filter keys it doesn't know yet (e.g. written by a newer version); older versions
 refuse to save settings that contain such keys.
-
-**Formerly NaviTool:** Up to version 0.13, Tuttiphon was called NaviTool. Existing installations keep running after
-the update without changes; the old `docker-compose.yaml` does not have to be replaced:
-
-| Old | still counts as | where |
-|---|---|---|
-| environment variables `NAVITOOL_*` (e.g. `NAVITOOL_PASSWORD`) – in the environment and in the `.env` | `TUTTIPHON_*`; if both exist, the new name wins | `config.env_var()`, `config.renamed()` |
-| `TUTTIPHON_PASSWORD` (older name of the administrator password) and `NAVITOOL_PASSWORD` | `TUTTIPHON_ADMIN_PASSWORD`; if several exist, the new name wins | `config.renamed()`, `config.admin_password()` |
-| comment “NaviTool: …” (`.nsp`) or header line `# NaviTool` (`.m3u`) | Tuttiphon's own playlist | `config.MARKERS` |
-| `<playlist-folder>/.navitool/` | shared folder of the instances, as long as there is no `.tuttiphon/` there | `instances._named()` |
-| `navitool-sicherung-*.zip` | backup (list, download, cleanup) | `backup.NAME` |
-| header `X-NaviTool: 1` from an old interface that is still open | same as `X-Tuttiphon: 1` | `Handler._handle()` |
-
-Only the new name is written from now on. The update does not rewrite the `.nsp` files themselves (the comment does not
-count in the comparison); at the next sync, the scan step adjusts the description of each playlist in Navidrome
-(“description updated”). Mixes get the new header line the next time they are written. If you save the
-administrator password again, `TUTTIPHON_ADMIN_PASSWORD` replaces old `TUTTIPHON_PASSWORD` and `NAVITOOL_PASSWORD`
-lines in the `.env`. On the PC,
-`./tuttiphon.sh install-launcher` recreates the menu entry and removes the old one (`navitool.desktop`).
 
 **Configuration:** If `config.json` is older than the current version (`CONFIG_VERSION`), `load_config()` migrates it
 by itself on the first load. Before that, it uses `write_atomic()` to save a copy as
@@ -575,8 +554,7 @@ minute during a run (`TaskRunner._run()`), so that long runs are not considered 
   Files older than 7 days are deleted in the process; broken or foreign files (no JSON object, `ts` not a number) are
   skipped. With `foreign_only=True` it also skips status files with the
   own installation ID under another instance ID – the own installation is not “a second Tuttiphon”, e.g. the container
-  from before an update with a different host name (the switch from `navitool` to `tuttiphon` used to show “running
-  twice” for up to 3 minutes) or a `tuttiphon.py run` of the same installation.
+  from before an update with a different host name or a `tuttiphon.py run` of the same installation.
 - Consequences: administrators see the warning “Tuttiphon is running twice” under “To review”. `GET /api/status` lists
   the other instances (`instance.others` with `host`, `docker`, `running`). Both use `others(foreign_only=True)`.
   A PC instance leaves the recap, folder watch and daily refresh to the container as long as the container is active;
@@ -664,7 +642,7 @@ timestamp.
 | “Tuttiphon: the interface needs Node.js (npm run build).” | no `npm` and no build present | install Node.js ≥ 22 |
 | “Another Tuttiphon instance (PC or Docker) is working right now – please try again later.” (interface: HTTP 400; `run`: code 1) | another instance reports `running` or holds `task.lock` in the shared folder | wait; check whether a `run` or a second instance is still running (`GET /api/status`, “To review”). The status of a crashed instance no longer counts after 180 s, and its lock ends with its process ([Multiple instances](#multiple-instances)). |
 | HTTP 400 “A task is already running.” | a run is already in progress in this process | wait for it to finish or cancel it |
-| “Navidrome address missing – Settings → Navidrome”, “Navidrome address invalid (…) – it starts with http:// or https://” / “Navidrome admin access missing” | `NAV_URL` is missing or does not start with `http(s)://`, or the admin access is not set (e.g. after `deezer-bewertung/.env` went away). `navidrome._check_url()` reports this as `NavidromeError` before a connection is attempted; the interface runs anyway | enter the address (with `http://`) and the admin under Settings → Navidrome, or `NAV_URL` in `docker-compose.yaml` |
+| “Navidrome address missing – Settings → Navidrome”, “Navidrome address invalid (…) – it starts with http:// or https://” / “Navidrome admin access missing” | `NAV_URL` is missing or does not start with `http(s)://`, or the admin access is not set. `navidrome._check_url()` reports this as `NavidromeError` before a connection is attempted; the interface runs anyway | enter the address (with `http://`) and the admin under Settings → Navidrome, or `NAV_URL` in `docker-compose.yaml` |
 | “Navidrome API POST /auth/login: HTTP 429” or “… too many requests” | Navidrome rate-limits sign-ins; every new Tuttiphon process (restart, test server, `run`) signs in again | wait a few minutes, don't restart constantly. Tuttiphon itself waits and retries up to three times. |
 | HTTP 429 “Too many failed attempts – please try again in a few minutes.” | Tuttiphon's own lock within 10 minutes: 10 failed sign-ins for the same account from the same address, 30 from the same address, or 50 for the same account from all addresses. “Navidrome not reachable” and an empty password do not count. Behind a reverse proxy without `TUTTIPHON_TRUSTED_PROXIES`, everyone shares the proxy's address | wait ([Security](07-security.md#sign-in-lockout)); behind a proxy set `TUTTIPHON_TRUSTED_PROXIES` ([Reverse proxy](#reverse-proxy-https)) |
 | “Navidrome not reachable (…)” | `NAV_URL` wrong, Navidrome off, network | test the address under Settings → Navidrome |

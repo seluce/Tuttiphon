@@ -268,8 +268,8 @@ def manual_dislikes(lib, user):
             continue
         given = {k.lower(): v for k, v in (entry.get("u") or {}).items()}
         # By hand if the Deezer rating did not set 1 for this account (or did not rate it at all).
-        # Entries from the old log (without "u") do not say what was set back then – there the star counts as
-        # automatic, otherwise machine-given 1 stars would drop out of the mixes for good.
+        # Entries without accounts in "u" do not say who got which star – there the star counts as automatic,
+        # otherwise machine-given 1 stars could drop out of the mixes for good.
         if given and given.get(low) != 1:
             out.add(s["id"])
     return out

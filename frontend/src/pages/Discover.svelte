@@ -85,7 +85,7 @@
   })
 
   /* Collapse sections – the device remembers it */
-  const FOLD_KEY = 'nt-entdecken-zu'
+  const FOLD_KEY = 'tuttiphon-discover-folded'
   let folded = $state(readFolded())
   function readFolded() {
     try { return JSON.parse(localStorage.getItem(FOLD_KEY) || '[]') } catch { return [] }

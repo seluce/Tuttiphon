@@ -15,9 +15,9 @@ listenInstall()
 window.addEventListener('vite:preloadError', () => {
   if (preloading()) return
   let last = 0
-  try { last = Number(sessionStorage.getItem('nt-reloaded') || 0) } catch { /* private mode */ }
+  try { last = Number(sessionStorage.getItem('tuttiphon-reloaded') || 0) } catch { /* private mode */ }
   if (Date.now() - last < 60000) return
-  try { sessionStorage.setItem('nt-reloaded', String(Date.now())) } catch { /* private mode */ }
+  try { sessionStorage.setItem('tuttiphon-reloaded', String(Date.now())) } catch { /* private mode */ }
   location.reload()
 })
 

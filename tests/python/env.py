@@ -3,7 +3,7 @@
 app/config.py already reads TUTTIPHON_DATA, TUTTIPHON_BASE etc. on import. This module
 * creates a fresh temp folder: data/ (data folder), navidrome/ (TUTTIPHON_BASE with Music/00_SmartPlaylists
   and Archiv/) and shared/ (TUTTIPHON_SHARED_DIR for instance registration and run lock),
-* removes credentials and storage locations from the environment (NAV_*, TUTTIPHON_*, old NAVITOOL_*, MUSIC_DIR, PLAYLIST_DIR, ARCHIVE_DIR …),
+* removes credentials and storage locations from the environment (NAV_*, TUTTIPHON_*, MUSIC_DIR, PLAYLIST_DIR, ARCHIVE_DIR …),
 * blocks network access (Navidrome, Deezer, Last.fm, LRCLIB) – a mistake fails immediately instead of sending anything,
 * checks after importing app.config that the temp folder is really used, and removes it at the end.
 """
@@ -32,7 +32,7 @@ for _d in (DATA, PLAYLISTS, ARCHIVE, SHARED):
 
 _DROP = ("MUSIC_DIR", "PLAYLIST_DIR", "ARCHIVE_DIR", "RATING_USERS", "LASTFM_API_KEY", "NTFY_TOKEN")
 for _key in list(os.environ):
-    if _key.startswith(("NAV_", "TUTTIPHON_", "NAVITOOL_")) or _key in _DROP:
+    if _key.startswith(("NAV_", "TUTTIPHON_")) or _key in _DROP:
         del os.environ[_key]
 os.environ.update(TUTTIPHON_DATA=str(DATA), TUTTIPHON_BASE=str(BASE), TUTTIPHON_SHARED_DIR=str(SHARED),
                   TUTTIPHON_NO_SCHEDULER="1", TUTTIPHON_WEB=str(ROOT / "web"))

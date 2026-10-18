@@ -7,7 +7,8 @@ Remembers in state/deezer.json which songs have been rated already.
   full    check all songs again – resumable: when stopped, the next run continues where it left off
   recalc  recalculate stars from the saved ranks (after the levels changed) – without asking Deezer
 Stars changed by hand stay, unless overwriting them is explicitly allowed.
-The levels (rank -> stars) can be adjusted under Settings → Deezer stars; the levels themselves are those of dztnr.py.
+The levels (rank -> stars) can be adjusted under Settings → Deezer stars; the default levels come from dztnr
+(github.com/scatolo/dztnr).
 
 Search (version 2, entry "v": 2): a hit only counts if band and title match (spellings, bracketed additions and
 "feat." are tolerated) – before, the search took the most popular of the first three hits, no matter by whom. If the
@@ -31,7 +32,7 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-from .config import LEGACY_LOG_DIR, STATE_DIR, load_config, rating_users, read_text, user_password, write_atomic
+from .config import STATE_DIR, load_config, rating_users, read_text, user_password, write_atomic
 from .i18n import _, _s, _sn
 from .navidrome import Navidrome, NavidromeError
 
@@ -278,86 +279,6 @@ def _load_for_run(log):
                           "fresh ranks.", name=broken.name))
 
 
-def last_full_run():
-    """Start time of the last full run of dztnr.py (from deezer-bewertung/logs)."""
-    best = None
-    if not LEGACY_LOG_DIR.exists():
-        return None
-    for path in LEGACY_LOG_DIR.glob("deezer-rank_*.log"):
-        m = re.search(r"_(\d+)\.log$", path.name)
-        if not m:
-            continue
-        with path.open("rb") as f:
-            f.seek(0, 2)
-            f.seek(max(0, f.tell() - 600))
-            tail = f.read().decode("utf-8", "ignore")
-        tracks = re.search(r"Tracks: (\d+)", tail)
-        if tracks and int(tracks.group(1)) >= 5000:
-            best = max(best or 0, int(m.group(1)))
-    return best
-
-
-_import_lock = threading.Lock()
-_RANK_LINE = re.compile(r"^\[([^\]]+)\]\s+r:(\d+|\?\?) → ★:(\d) \| (?:\(not found\) )?(.*)$")
-_ALBUM_LINE = re.compile(r"^\[[^\]]+\]\s+Album: .* \(([A-Za-z0-9]+)\)\s*$")
-
-
-def import_legacy(state, songs, users, log=print):
-    """Take over exact ranks from the last dztnr full run – for songs that so far only counted as
-    "already rated". This lets the stars be recalculated after the levels changed."""
-    entries = state.setdefault("songs", {})
-    need = {k for k, v in entries.items() if v.get("seed") and "r" not in v}
-    started = last_full_run()
-    if not need or not started:
-        return 0
-    path = LEGACY_LOG_DIR / f"deezer-rank_{started}.log"
-    if not path.exists():
-        return 0
-    by_key = {}
-    for s in songs:
-        if s["id"] in need:
-            by_key.setdefault((s.get("albumId"), (s.get("title") or "").strip()), []).append(s["id"])
-    album, n = None, 0
-    for line in read_text(path).splitlines():
-        m = _ALBUM_LINE.match(line)
-        if m:
-            album = m.group(1)
-            continue
-        m = _RANK_LINE.match(line)
-        if not m or album is None:
-            continue
-        ts, rank, stars, title = m.groups()
-        for sid in by_key.pop((album, title.strip()), []):
-            try:
-                t = int(dt.datetime.strptime(ts.split(",")[0], "%Y-%m-%d %H:%M:%S").timestamp())
-            except ValueError:
-                t = started
-            if rank == "??":
-                entries[sid] = {"r": None, "s": None, "t": t, "u": {}, "imported": True}
-            else:
-                entries[sid] = {"r": int(rank), "s": int(stars), "t": t, "u": {u: int(stars) for u in users}, "imported": True}
-            n += 1
-    if n:
-        log(_sn(n, "Imported {n} exact Deezer rank from the full run of {date}.",
-                "Imported {n} exact Deezer ranks from the full run of {date}.",
-                date=dt.datetime.fromtimestamp(started).strftime("%d.%m.%Y")))
-    return n
-
-
-def ensure_ranks(songs, cfg=None, env=None):
-    """Once: take over the ranks from the old full run, if that has not happened yet."""
-    from .config import load_env
-    with _import_lock:
-        state = load_state()
-        if not any(v.get("seed") and "r" not in v for v in state.get("songs", {}).values()):
-            return 0
-        users = rating_users(env or load_env(), cfg)
-        n = import_legacy(state, songs, users, log=lambda *_: None)
-        if n:
-            save_state(state)
-        return n
-
-
 _stats_memo = {"key": None, "out": None, "ids": frozenset()}
 
 
@@ -386,10 +307,8 @@ def stats(state=None, songs=None):
         "known": len(entries),
         "found": sum(1 for e in entries.values() if e.get("r")),
         "notFound": sum(1 for e in entries.values() if "r" in e and not e.get("r")),
-        "seeded": sum(1 for e in entries.values() if e.get("seed")),
         "lastRun": state.get("lastRun"),
         "lastFull": state.get("lastFull"),
-        "seededFrom": state.get("seededFrom"),
         "fullRun": None,
     }
     if full:
@@ -399,25 +318,6 @@ def stats(state=None, songs=None):
     if songs is not None:
         out["new"] = sum(1 for s in songs if s["id"] not in entries) if entries else None
     return out
-
-
-def seed_state(state, songs, log, before=None):
-    """First start: everything that was in Navidrome before the last dztnr full run counts as rated."""
-    cutoff = before or last_full_run()
-    if not cutoff:
-        log(_s("No earlier full run found – all songs count as new."))
-        return 0
-    cutoff_iso = dt.datetime.fromtimestamp(cutoff, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
-    n = 0
-    for s in songs:
-        if (s.get("created") or "9999")[:19] < cutoff_iso:
-            state["songs"][s["id"]] = {"seed": True}
-            n += 1
-    state["seededFrom"] = dt.datetime.fromtimestamp(cutoff).strftime("%d.%m.%Y %H:%M")
-    log(_sn(n, "First start: {n} song was already there at the full run of {date} and counts as rated.",
-            "First start: {n} songs were already there at the full run of {date} and count as rated.",
-            date=state["seededFrom"]))
-    return n
 
 
 def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overwrite_manual=None, cfg=None):
@@ -431,12 +331,6 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
     log(_sn(len(songs), "{n} song in Navidrome.", "{n} songs in Navidrome."))
 
     state = _load_for_run(log)
-    if not state.get("songs") and mode in ("new", "both"):
-        seed_state(state, songs, log)
-        if not dry_run:
-            save_state(state)
-    if not dry_run and import_legacy(state, songs, rating_users(env, cfg), log):
-        save_state(state)
 
     users = {}
     for user in rating_users(env, cfg):
@@ -622,7 +516,7 @@ def _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, 
         if prev.get("s"):   # wrongly matched by the old search: remove the stars Tuttiphon set
             for user, (nav, current) in users.items():
                 cur = current.get(song["id"], 0) or 0
-                last_set = prev.get("u", {}).get(user, prev.get("s") if prev.get("seed") else None)
+                last_set = prev.get("u", {}).get(user)
                 if cur and cur == last_set and not dry_run:
                     try:
                         nav.set_rating(song["id"], 0)
@@ -639,8 +533,6 @@ def _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, 
         for user, (nav, current) in users.items():
             cur = current.get(song["id"], 0) or 0
             last_set = prev.get("u", {}).get(user)
-            if last_set is None and prev.get("seed"):
-                last_set = prev.get("s")   # taken over from the old log: back then the calculated star was set
             manual = cur and cur != stars and cur != last_set
             if manual and not overwrite_manual:
                 result["kept"] += 1

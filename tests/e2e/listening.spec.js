@@ -37,7 +37,7 @@ test.describe('As an app on the phone', () => {
   test('hint from the second visit on, stays gone once dismissed', async ({ page }, info) => {
     test.skip(info.project.name !== 'phone', 'phone only')
     await page.addInitScript(() => {
-      if (!sessionStorage.getItem('erster')) { localStorage.setItem('nt-visits', '1'); sessionStorage.setItem('erster', '1') }
+      if (!sessionStorage.getItem('erster')) { localStorage.setItem('tuttiphon-visits', '1'); sessionStorage.setItem('erster', '1') }
     })
     expect(await visit(page, '#/')).toEqual([])
     const hint = page.getByRole('note').filter({ hasText: 'Tuttiphon als App' })

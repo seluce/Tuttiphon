@@ -1,6 +1,6 @@
 // Open pages in headless Chromium: screenshots + errors from the console.
 //
-//   node tools/screens.mjs --base http://127.0.0.1:8792 --out <dir> [--cookie nt=…] [--mobile] [--light] [--text] '#/' '#/playlists' …
+//   node tools/screens.mjs --base http://127.0.0.1:8792 --out <dir> [--cookie tuttiphon=…] [--mobile] [--light] [--text] '#/' '#/playlists' …
 //
 //   --cookie  session (see tools/testserver.sh --auth)   --mobile  phone (Pixel 7)   --light  light theme
 //   --mobile-small  small phone (360 × 740) – narrow layouts break here first
@@ -44,8 +44,8 @@ if (cookie) {
 if (!fresh) {
   await context.addInitScript((u) => {
     try {
-      localStorage.setItem('nt-tour', '1')
-      if (u) { localStorage.setItem(`nt-tour:${u}`, '1'); localStorage.setItem(`nt-welcome:${u}`, '1') }
+      localStorage.setItem('tuttiphon-tour', '1')
+      if (u) { localStorage.setItem(`tuttiphon-tour:${u}`, '1'); localStorage.setItem(`tuttiphon-welcome:${u}`, '1') }
     } catch {}
   }, account)
 }

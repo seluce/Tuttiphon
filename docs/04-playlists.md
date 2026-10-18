@@ -735,7 +735,7 @@ by hand if
 - the Deezer rating never rated the song (no entry in `state/deezer.json`), or
 - it set something other than 1 for this account or did not rate this account at all (field `u` of the entry).
 
-Entries without `u` (taken over from the old log) do not say what was set back then; there the star counts as
+Entries without accounts in `u` do not say who got which star; there the star counts as
 automatic – otherwise machine-assigned 1 stars would drop out of the mixes for good. This only works if the song list
 contains exactly this account's stars (`person_lib()` with a stored password, or the default library with
 exact stars of the same account); otherwise nothing is excluded.

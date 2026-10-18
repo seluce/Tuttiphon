@@ -20,7 +20,7 @@
   const target = '/' + appHash()
   // No sign-in needed at all (or already signed in)? Then go straight on.
   fetch('/api/me', { headers: { 'X-Tuttiphon': '1' } }).then((r) => { if (r.ok) location.replace(target) }).catch(() => {})
-  try { username = localStorage.getItem('nt-user') || '' } catch { /* private mode */ }
+  try { username = localStorage.getItem('tuttiphon-user') || '' } catch { /* private mode */ }
   // only when opening: with a remembered name go straight to the password field – not on every typed letter
   $effect(() => { (untrack(() => username) ? pwInput : userInput)?.focus() })
   $effect(() => { document.title = t('Tuttiphon – Sign in') })
@@ -50,7 +50,7 @@
       })
       const data = await res.json().catch(() => ({}))
       if (res.ok) {
-        try { if (name) localStorage.setItem('nt-user', name) } catch { /* does not matter */ }
+        try { if (name) localStorage.setItem('tuttiphon-user', name) } catch { /* does not matter */ }
         location.replace(target)
         return
       }

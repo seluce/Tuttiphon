@@ -10,7 +10,7 @@ export const LANGUAGES = [
   { key: 'en', name: 'English' },
   { key: 'de', name: 'Deutsch' },
 ]
-const STORE = 'nt-lang'
+const STORE = 'tuttiphon-lang'
 
 /** The saved choice on this device: 'auto' (follow the browser) or a language key. */
 export function choice() {

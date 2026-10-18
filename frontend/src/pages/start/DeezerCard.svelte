@@ -41,7 +41,7 @@
     {@render stat(d.new || 0, t('waiting'))}
   </div>
   <p class="muted small my-3">
-    {d.lastRun ? t('Last run: {when}', { when: serverDate(d.lastRun) }) : d.seededFrom ? t('Rated up to {when}', { when: serverDate(d.seededFrom) }) : ''}{d.lastFull ? t(' · last full check {when}', { when: serverDate(d.lastFull) }) : ''}
+    {d.lastRun ? t('Last run: {when}', { when: serverDate(d.lastRun) }) : ''}{d.lastFull ? t(' · last full check {when}', { when: serverDate(d.lastFull) }) : ''}
   </p>
   <div class="btns">
     {#if !rateInTodo}

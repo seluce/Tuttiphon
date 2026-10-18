@@ -214,5 +214,5 @@ server's counterpart is `python3 tools/i18n_check.py` with the same placeholder 
 npm run build
 tools/testserver.sh 8791 <workdir>                  # copy of the data, auto-apply off
 tools/testserver.sh 8792 <workdir> --auth           # with sign-in, prints cookies for admin and user (--user <account>)
-node tools/screens.mjs --base http://127.0.0.1:8792 --out <folder> --cookie nt=… [--mobile] [--light] '#/' '#/playlists'
+node tools/screens.mjs --base http://127.0.0.1:8792 --out <folder> --cookie tuttiphon=… [--mobile] [--light] '#/' '#/playlists'
 ```

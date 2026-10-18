@@ -1,10 +1,5 @@
 {
  "Deezer does not respond (tried several times)": "Deezer antwortet nicht (mehrfach versucht)",
- "Imported {n} exact Deezer rank from the full run of {date}.": "{n} genauer Deezer-Rang aus dem Komplettlauf vom {date} übernommen.",
- "Imported {n} exact Deezer ranks from the full run of {date}.": "{n} genaue Deezer-Ränge aus dem Komplettlauf vom {date} übernommen.",
- "No earlier full run found – all songs count as new.": "Kein früherer Komplettlauf gefunden – alle Songs gelten als neu.",
- "First start: {n} song was already there at the full run of {date} and counts as rated.": "Erster Start: {n} Song war beim Komplettlauf vom {date} schon dabei und gilt als bewertet.",
- "First start: {n} songs were already there at the full run of {date} and count as rated.": "Erster Start: {n} Songs waren beim Komplettlauf vom {date} schon dabei und gelten als bewertet.",
  "{n} song in Navidrome.": "{n} Song in Navidrome.",
  "{n} songs in Navidrome.": "{n} Songs in Navidrome.",
  "⚠ No password for “{user}” – please enter it under Settings → Navidrome.": "⚠ Kein Passwort für „{user}“ – bitte unter Einstellungen → Navidrome eintragen.",

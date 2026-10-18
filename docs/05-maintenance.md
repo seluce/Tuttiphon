@@ -671,8 +671,7 @@ discarded.
 ### Procedure
 
 1. Fetch all songs via the admin account (Subsonic `search3` with an empty query, in pages of 500).
-2. Load `state/deezer.json`. If it is empty and the mode is `new` or `both`, it is filled for the first time (see
-   [Ranks from existing logs](#ranks-from-existing-logs)).
+2. Load `state/deezer.json` (missing or empty: all songs count as new).
 3. For each account that should get stars, sign in with its password and read its current stars. If a password is
    missing, the account is skipped with a warning; if all are missing, the step aborts with an error (except in a dry run).
 4. Select the songs according to the mode, look them up in blocks of 200 with 4 threads and set stars; after each
@@ -758,8 +757,8 @@ it
 - differs from the calculated value and
 - is not the value Tuttiphon last set for this account (`u` in the entry).
 
-For entries from the old log (`seed`), `u` is missing; there, the stored star `s` counts as the last one set (if it is
-missing too, none does). So for them too, a differing star counts as set manually and stays.
+If `u` has no value for the account, Tuttiphon never set a star there – a differing star counts as set by hand and
+stays.
 
 Such stars stay, unless `overwrite_manual` (option) or `settings.deezer.overwriteManual` is on; the log then says
 “<account>: N★ by hand, stays”. Otherwise Tuttiphon sets the star with `setRating` – signed in as the respective
@@ -788,20 +787,8 @@ missing, the log refers to Settings → Navidrome.
 ```
 
 `r` rank (`null` = not found), `s` stars, `t` time of the check, `u` last set stars per account, `v` 2 = checked with
-the exact search, `i` ISRC (if found that way), `b` 1 = one extra star as a top track; in addition there are entries
-`{"seed": true}` and the flag `imported`. Full description in [02-data-model.md](02-data-model.md).
-
-### Ranks from existing logs
-
-If there is a folder `deezer-bewertung/logs/` under `TUTTIPHON_BASE` with logs of Deezer full runs
-(`deezer-rank_<unixtime>.log`), Tuttiphon uses them as a data source:
-
-- `last_full_run()` looks for the most recent log that, according to its final line, covered at least 5000 tracks.
-- `seed_state()`: if `state/deezer.json` is empty and the mode is `new` or `both`, all songs that were in Navidrome
-  before this run count as rated (`{"seed": true}`, `seededFrom`). Without such a log, all songs count as new.
-- `import_legacy()` takes over the exact ranks and stars from the log for these songs (matched by album ID and title),
-  so that the stars can later be recalculated with changed thresholds. This happens in the Deezer step and when
-  opening the threshold setting (`ensure_ranks()`, not during a Deezer run).
+the exact search, `i` ISRC (if found that way), `b` 1 = one extra star as a top track. Full description in
+[02-data-model.md](02-data-model.md).
 
 ### Settings `settings.deezer`
 

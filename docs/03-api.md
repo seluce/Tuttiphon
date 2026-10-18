@@ -30,7 +30,7 @@ How sign-in, roles and the filters for users work in detail is described in
 
 | Rule | Value |
 |---|---|
-| Required header | `X-Tuttiphon: 1` (or the old `X-NaviTool: 1`) – otherwise `403 {"error": "forbidden"}`. This includes `POST /api/login`; the only exception is `POST /api/logout`. |
+| Required header | `X-Tuttiphon: 1` – otherwise `403 {"error": "forbidden"}`. This includes `POST /api/login`; the only exception is `POST /api/logout`. |
 | Language | `X-Lang: en` or `de` (the interface sends it with every request): error messages and texts in the response come in this language, otherwise in the server's language (`settings.language`). Cached responses (`_memoized`) are kept per language. |
 | Body | a JSON **object** in UTF-8; an empty body counts as `{}`. The `Content-Type` is not evaluated. |
 | Size | at most 2,000,000 bytes (`MAX_BODY`), 10 MiB for a cover upload. Above that: `413`, and the connection is closed. |
@@ -185,8 +185,8 @@ The “Users” column in the tables below lists what the server leaves out for 
 
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
-| `POST /api/login` | public, header `X-Tuttiphon: 1` required (otherwise `403`) | Body `{"username", "password", "remember"}` – `remember` defaults to `true`; an empty user name or `notfall` = [local administrator](07-security.md#local-administrator) | `{"ok": true, "user": "<name>"}` and `Set-Cookie: nt=…` (new session in `state/sessions.json`; `Secure` via https through a trusted reverse proxy); errors `401 {"error": <message>}`, `429` when locked out |
-| `POST /api/logout` | public, no `X-Tuttiphon` needed | Cookie `nt` | ends the session of this token on the server (`auth.end_session()`) – afterwards the token is no longer valid, not even as a copy; response `{"ok": true}` and a cookie `nt=` with `Max-Age=0` |
+| `POST /api/login` | public, header `X-Tuttiphon: 1` required (otherwise `403`) | Body `{"username", "password", "remember"}` – `remember` defaults to `true`; an empty user name or `notfall` = [local administrator](07-security.md#local-administrator) | `{"ok": true, "user": "<name>"}` and `Set-Cookie: tuttiphon=…` (new session in `state/sessions.json`; `Secure` via https through a trusted reverse proxy); errors `401 {"error": <message>}`, `429` when locked out |
+| `POST /api/logout` | public, no `X-Tuttiphon` needed | Cookie `tuttiphon` | ends the session of this token on the server (`auth.end_session()`) – afterwards the token is no longer valid, not even as a copy; response `{"ok": true}` and a cookie `tuttiphon=` with `Max-Age=0` |
 | `GET /api/me` | signed in | – | `{"user", "name", "fullName", "role", "local", "persons", "own", "notfall", "passwordStored", "passwordRejected", "tourSeen", "welcomeSeen"}` – `passwordRejected`: a password is stored, but Navidrome no longer accepts it ([07](07-security.md#turn-on-statistics--stars)); without sign-in (local): `{"user": null, "name": "", "role": "admin", "local": true, "persons", "own", "tourSeen", "welcomeSeen": true}` |
 | `POST /api/me/password` | signed in with a Navidrome account (not the local administrator, not local) | Body `{"password": "…"}` stores it, `{"password": null}` (or no field) forgets it | `{"ok": true}` |
 | `POST /api/seen` | signed in, affects only one's own account | Body `{"what": "tour"}` or `{"what": "welcome"}` | `{"ok": true}`; any other value → `400 "Unknown"` |
@@ -261,9 +261,8 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
   stored”, `rejected` “stored, but Navidrome no longer accepts it” (checked in the background, at most every 6 hours;
   unknown counts as `false`), `key` is the `.env` key. `locked` lists the keys the interface could otherwise set (`config.EDITABLE_ENV`,
   see [below](#settings--credentials)) that are set non-empty in the environment – they take precedence over `.env`
-  and can't be changed in the interface. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_BASE` …) don't appear; an
-  administrator password under an old name (`TUTTIPHON_PASSWORD`, `NAVITOOL_PASSWORD`) appears as
-  `TUTTIPHON_ADMIN_PASSWORD`. Passwords themselves are in no response.
+  and can't be changed in the interface. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_BASE` …) don't appear.
+  Passwords themselves are in no response.
 - `instance.others` are the other instances that have checked in within the last 180 s – only other installations
   (`instances.others(foreign_only=True)`: announcements with the own installation ID from `state/install_id` don't
   count); `running` = a run is in progress there ([02](02-data-model.md#shared-folder-tuttiphon),
@@ -422,12 +421,10 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 
 - `PUT /api/env` writes only the keys the interface may set via `save_env()` (`config.EDITABLE_ENV`: `NAV_URL`,
   `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`,
-  `TUTTIPHON_PASSWORD`, `LASTFM_API_KEY`, `NTFY_TOKEN`). Empty string = unchanged (nothing is removed, not even under
-  an old name), `null` = delete. `TUTTIPHON_PASSWORD` is saved as `TUTTIPHON_ADMIN_PASSWORD`; writing it drops the old
-  lines `TUTTIPHON_PASSWORD=` and `NAVITOOL_PASSWORD=`. Errors: `400 "Unknown key: …"`, `400` for line breaks/control
-  characters. Beforehand, `api_env_save()` checks: the administrator password (`TUTTIPHON_ADMIN_PASSWORD`, also under
-  the old name `TUTTIPHON_PASSWORD`) must not be weak (`config.weak_password()`: at least 8 characters, not a
-  placeholder `change-me`/`bitte-aendern` in any spelling), and it can't be deleted (`null`) (`400 "The administrator
+  `LASTFM_API_KEY`, `NTFY_TOKEN`). Empty string = unchanged, `null` = delete. Errors: `400 "Unknown key: …"`, `400`
+  for line breaks/control characters. Beforehand, `api_env_save()` checks: the administrator password
+  (`TUTTIPHON_ADMIN_PASSWORD`) must not be weak (`config.weak_password()`: at least 8 characters, not the placeholder
+  `change-me` in any spelling), and it can't be deleted (`null`) (`400 "The administrator
   password needs at least 8 characters."`);
   `NAV_URL` must start with `http://` or `https://` (`400` “Please enter the address with http:// or https:// …”;
   `null` deletes it). After that the library is reloaded. This endpoint doesn't check passwords for `NAV_PASS_*` – the interface does that beforehand

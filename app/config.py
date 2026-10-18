@@ -13,14 +13,11 @@ from pathlib import Path
 from .i18n import LANGS, N_, _, _s
 
 ROOT = Path(__file__).resolve().parent.parent      # program: the project folder (/app in the container)
-# Until version 0.13 the program was called NaviTool: environment variables NAVITOOL_* still apply (e.g. NAVITOOL_PASSWORD
-# in an old docker-compose.yaml) – the new name TUTTIPHON_* takes precedence.
-PREFIX, OLD_PREFIX = "TUTTIPHON_", "NAVITOOL_"
-# Password of the local administrator (sign-in without Navidrome, turns on sign-in). Before 0.16 it was called
-# TUTTIPHON_PASSWORD (before that NAVITOOL_PASSWORD) – both still apply, the new name takes precedence.
-ADMIN_PASSWORD, OLD_ADMIN_PASSWORD = "TUTTIPHON_ADMIN_PASSWORD", "TUTTIPHON_PASSWORD"
-# placeholders in the templates – with them the container refuses to start on the network
-PASSWORD_PLACEHOLDERS = ("change-me", "bitte-aendern")   # i18n-ignore
+PREFIX = "TUTTIPHON_"   # own environment variables
+# Password of the local administrator (sign-in without Navidrome, turns on sign-in)
+ADMIN_PASSWORD = "TUTTIPHON_ADMIN_PASSWORD"
+# placeholder in the template – with it the container refuses to start on the network
+PASSWORD_PLACEHOLDERS = ("change-me",)
 
 
 def weak_password(pw):
@@ -29,20 +26,8 @@ def weak_password(pw):
 
 
 def env_var(name, default=None):
-    """Environment variable TUTTIPHON_<name>, otherwise NAVITOOL_<name> (old name), otherwise default."""
-    return os.environ.get(PREFIX + name) or os.environ.get(OLD_PREFIX + name) or default
-
-
-def renamed(values):
-    """{key: value} with old keys NAVITOOL_* also under TUTTIPHON_*, and the old TUTTIPHON_PASSWORD also as
-    TUTTIPHON_ADMIN_PASSWORD (the new name wins)."""
-    out = dict(values)
-    for key, value in values.items():
-        if key.startswith(OLD_PREFIX):
-            out.setdefault(PREFIX + key[len(OLD_PREFIX):], value)
-    if out.get(OLD_ADMIN_PASSWORD):
-        out.setdefault(ADMIN_PASSWORD, out[OLD_ADMIN_PASSWORD])
-    return out
+    """Environment variable TUTTIPHON_<name>, otherwise default."""
+    return os.environ.get(PREFIX + name) or default
 
 
 def admin_password(env=None):
@@ -66,11 +51,8 @@ BACKUP_DIR = DATA_DIR / "backup"
 WEB_DIR = Path(env_var("WEB") or ROOT / "web")
 # Storage locations: environment (docker-compose) > settings > default
 PATH_ENV = {"music": "MUSIC_DIR", "playlists": "PLAYLIST_DIR", "archive": "ARCHIVE_DIR"}
-LEGACY_ENV = BASE / "deezer-bewertung" / ".env"
-LEGACY_LOG_DIR = BASE / "deezer-bewertung" / "logs"
 
 MARKER = "Tuttiphon"   # start of the "comment" of every generated playlist
-MARKERS = (MARKER, "NaviTool")   # playlists still written under the old name are recognized too
 CONFIG_VERSION = 11
 
 _lock = threading.RLock()
@@ -167,9 +149,9 @@ _env_cache = {"key": None, "env": None}
 
 
 def load_env():
-    """Merge the credentials: old .env in the Navidrome folder (deezer-bewertung/) < <data>/.env < environment.
-    Kept in memory until one of the files changes (spares the NAS share)."""
-    key = (_stamp(LEGACY_ENV), _stamp(ENV_FILE))
+    """Merge the credentials: <data>/.env < environment.
+    Kept in memory until the file changes (spares the NAS share)."""
+    key = _stamp(ENV_FILE)
     if _env_cache["key"] == key and _env_cache["env"] is not None:
         return dict(_env_cache["env"])
     env = _load_env_files()
@@ -178,20 +160,14 @@ def load_env():
 
 
 def environment():
-    """Credentials and switches from the environment (docker-compose) – old names NAVITOOL_* also under TUTTIPHON_*.
+    """Credentials and switches from the environment (docker-compose).
     Empty variables (e.g. NAV_ADMIN_PASS: "" in docker-compose) do not count: they do not override the .env."""
-    return renamed({k: v for k, v in os.environ.items() if v.strip() and (
-        k.startswith(("NAV_", PREFIX, OLD_PREFIX)) or k in ("RATING_USERS", "LASTFM_API_KEY", "NTFY_TOKEN"))})
+    return {k: v for k, v in os.environ.items() if v.strip() and (
+        k.startswith(("NAV_", PREFIX)) or k in ("RATING_USERS", "LASTFM_API_KEY", "NTFY_TOKEN"))}
 
 
 def _load_env_files():
-    env = {}
-    legacy = _read_env_file(LEGACY_ENV)
-    if legacy:
-        env["NAV_URL"] = legacy.get("NAV_BASE_URL", "")
-        env["NAV_ADMIN_USER"] = legacy.get("NAV_USER", "")
-        env["NAV_ADMIN_PASS"] = legacy.get("NAV_PASS", "")
-    env.update(renamed({k: v for k, v in _read_env_file(ENV_FILE).items() if v}))
+    env = {k: v for k, v in _read_env_file(ENV_FILE).items() if v}
     env.update(environment())   # the environment (docker-compose) takes precedence over the .env
     env["NAV_URL"] = env.get("NAV_URL", "").rstrip("/")
     return env
@@ -294,7 +270,7 @@ def rating_users(env, cfg=None):
 
 # keys of the .env the interface may set (everything else only through docker-compose/the environment)
 EDITABLE_ENV = re.compile(r"^(NAV_URL|NAV_PUBLIC_URL|NAV_ADMIN_USER|NAV_ADMIN_PASS|NAV_PASS_\w+|RATING_USERS|"
-                          r"TUTTIPHON_ADMIN_PASSWORD|TUTTIPHON_PASSWORD|LASTFM_API_KEY|NTFY_TOKEN)$")
+                          r"TUTTIPHON_ADMIN_PASSWORD|LASTFM_API_KEY|NTFY_TOKEN)$")
 
 
 def save_env(updates):
@@ -305,14 +281,8 @@ def save_env(updates):
         for key, value in updates.items():
             if not allowed.match(key):
                 raise ValueError(_("Unknown key: {key}", key=key))
-            if value == "":   # empty = unchanged – before anything is removed under an old name
+            if value == "":   # empty = unchanged
                 continue
-            if key == OLD_ADMIN_PASSWORD:   # the old name is saved under the new one (otherwise it would not count)
-                key = ADMIN_PASSWORD
-            if key.startswith(PREFIX):   # the same entry under the old name NAVITOOL_* is dropped
-                lines = [l for l in lines if not re.match(rf"^\s*{re.escape(OLD_PREFIX + key[len(PREFIX):])}=", l)]
-            if key == ADMIN_PASSWORD:   # … and the administrator password under its older names
-                lines = [l for l in lines if not re.match(r"^\s*(TUTTIPHON|NAVITOOL)_PASSWORD=", l)]
             if value is not None and (not isinstance(value, str) or not value.isprintable()):
                 raise ValueError(_("Only plain text values without line breaks/control characters are allowed"))
             active = next((i for i, l in enumerate(lines) if re.match(rf"^\s*{re.escape(key)}=", l)), None)

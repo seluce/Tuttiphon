@@ -3,6 +3,21 @@
 A brief summary of what changes in each version. The newest version is on top; `npm run release` copies its
 section into the release notes `README.txt`. If `docker-compose.yaml` has to be replaced during an update, it says so explicitly.
 
+## 1.0.1 – 2026-10-18
+
+The names from the time when Tuttiphon was called NaviTool no longer count. **Check before updating:**
+
+- The administrator password is only read as `TUTTIPHON_ADMIN_PASSWORD`. `NAVITOOL_PASSWORD` and `TUTTIPHON_PASSWORD`
+  no longer count – with only one of them, the container does not start. Rename any other `NAVITOOL_…` variable to
+  `TUTTIPHON_…` as well, in `docker-compose.yaml` and in `config/.env`.
+- Everyone signs in once more (the session cookie has a new name); each browser also forgets its theme and language
+  choice once.
+- Backups named `navitool-sicherung-….zip` are no longer listed or cleaned up – keep them elsewhere or delete them.
+- The hidden folder `.navitool/` in the playlist folder is no longer used (Tuttiphon uses `.tuttiphon/`) and can be
+  deleted after the update. Playlists still marked "NaviTool" count as hand-made.
+- Gone as well: reading the credentials and logs of an earlier Deezer rating script from `deezer-bewertung/` in the
+  Navidrome folder, and rebuilding runs from before the history existed from their logs.
+
 ## 1.0.0 – 2026-10-17
 
 - First public version on GitHub. The ready-made image is `ghcr.io/seluce/tuttiphon` – installation with

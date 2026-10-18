@@ -26,7 +26,6 @@ Icon=multimedia-player
 Terminal=false
 Categories=AudioVideo;Audio;
 EOF
-    rm -f "$HOME/.local/share/applications/navitool.desktop"   # entry from the time when Tuttiphon was called NaviTool
     echo "Menu entry created: $target"
     exit 0 ;;
   "") ;;

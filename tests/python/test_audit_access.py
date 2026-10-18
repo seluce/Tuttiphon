@@ -29,25 +29,20 @@ class TestAdminPassword(unittest.TestCase):
             config.ENV_FILE.write_text(self.env_before)
         env.reset_caches()
 
-    def test_empty_value_keeps_the_password_under_an_old_name(self):
-        for old in ("TUTTIPHON_PASSWORD", "NAVITOOL_PASSWORD"):
-            config.ENV_FILE.write_text(f"{old}=altes-passwort\n")
-            env.reset_caches()
-            config.save_env({"TUTTIPHON_ADMIN_PASSWORD": "", "TUTTIPHON_PASSWORD": "", "NAV_URL": "http://nav.test"})
-            env.reset_caches()
-            self.assertEqual(config.admin_password(), "altes-passwort", old)
-            self.assertTrue(auth.required())
-
-    def test_old_name_is_saved_as_the_new_one(self):
+    def test_empty_value_keeps_the_password(self):
         config.ENV_FILE.write_text("TUTTIPHON_ADMIN_PASSWORD=erstes-passwort\n")
         env.reset_caches()
-        config.save_env({"TUTTIPHON_PASSWORD": "zweites-passwort"})
+        config.save_env({"TUTTIPHON_ADMIN_PASSWORD": "", "NAV_URL": "http://nav.test"})
+        env.reset_caches()
+        self.assertEqual(config.admin_password(), "erstes-passwort")
+        self.assertTrue(auth.required())
+        config.save_env({"TUTTIPHON_ADMIN_PASSWORD": "zweites-passwort"})
         env.reset_caches()
         self.assertEqual(config.admin_password(), "zweites-passwort")
-        self.assertNotIn("TUTTIPHON_PASSWORD=", config.ENV_FILE.read_text())
+        self.assertEqual(config.ENV_FILE.read_text().count("TUTTIPHON_ADMIN_PASSWORD="), 1)
 
     def test_placeholders_in_any_spelling(self):
-        for pw in ("change-me", "Change-Me", " CHANGE-ME ", "Bitte-Aendern", "kurz", "", None, 5):
+        for pw in ("change-me", "Change-Me", " CHANGE-ME ", "kurz", "", None, 5):
             self.assertTrue(config.weak_password(pw), pw)
         self.assertFalse(config.weak_password("ein-gutes-passwort"))
         with self.assertRaises(ValueError):

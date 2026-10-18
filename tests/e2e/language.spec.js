@@ -16,7 +16,7 @@ test.describe('Language', () => {
     await expect(page.getByText('Aussehen', { exact: true })).toHaveCount(0)
     await expect(page.locator('nav').first()).toContainText('Settings')
     expect(await page.evaluate(() => window.stillTheSamePage)).toBe(true)
-    expect(await page.evaluate(() => [document.documentElement.lang, localStorage.getItem('nt-lang')])).toEqual(['en', 'en'])
+    expect(await page.evaluate(() => [document.documentElement.lang, localStorage.getItem('tuttiphon-lang')])).toEqual(['en', 'en'])
 
     await page.reload()
     await expect(page.getByText('Appearance', { exact: true })).toBeVisible()   // kept for the next visit

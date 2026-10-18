@@ -318,10 +318,9 @@ class TestManualDislikes(FeedbackTest):
             "hand1": {"r": 10, "s": 3, "t": 1, "u": {"Jonas": 3}},
             "anderes-konto": {"r": 10, "s": 1, "t": 1, "u": {"niklas": 1}},
             "zwei": {"r": 10, "s": 1, "t": 1, "u": {"jonas": 1}},
-            "alt-protokoll": {"seed": True},              # from the old log: unknown who set it
             "alt-unbekannt": {"r": None, "s": None, "t": 1, "u": {}},
         })
-        self.songs += [song("alt-protokoll", rating=1), song("alt-unbekannt", rating=1)]   # count as automatic
+        self.songs += [song("alt-unbekannt", rating=1)]   # counts as automatic
 
     def write_deezer(self, songs):
         feedback.DEEZER_STATE.write_text(json.dumps({"songs": songs}))
@@ -347,13 +346,13 @@ class TestManualDislikes(FeedbackTest):
     def test_without_deezer_state_every_one_star_counts(self):
         feedback.DEEZER_STATE.unlink()
         self.assertEqual(feedback.manual_dislikes(self.lib(), "Jonas"),
-                         {"deezer1", "hand1", "ohne-deezer", "anderes-konto", "alt-protokoll", "alt-unbekannt"})
+                         {"deezer1", "hand1", "ohne-deezer", "anderes-konto", "alt-unbekannt"})
 
     def test_deezer_state_is_reread_when_changed(self):
         self.assertNotIn("deezer1", feedback.manual_dislikes(self.lib(), "Jonas"))
         self.write_deezer({"deezer1": {"r": 900, "s": 3, "t": 2, "u": {"Jonas": 3, "niklas": 4}}})   # different size
         self.assertEqual(feedback.manual_dislikes(self.lib(), "Jonas"),
-                         {"deezer1", "hand1", "ohne-deezer", "anderes-konto", "alt-protokoll", "alt-unbekannt"})
+                         {"deezer1", "hand1", "ohne-deezer", "anderes-konto", "alt-unbekannt"})
 
 
 if __name__ == "__main__":

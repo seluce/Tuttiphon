@@ -86,7 +86,6 @@ export default {
   'not found': 'nicht gefunden',
   'waiting': 'warten',
   'Last run: {when}': 'Zuletzt: {when}',
-  'Rated up to {when}': 'Bewertet bis {when}',
   ' · last full check {when}': ' · letzte Komplettprüfung {when}',
   'Rate new songs': 'Neue bewerten',
   'Retry songs not found': 'Nicht gefundene nochmal',

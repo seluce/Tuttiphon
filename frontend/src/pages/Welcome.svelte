@@ -57,7 +57,7 @@
   if (!S.library) loadLibrary().catch(() => {})
 
   const remember = () => {
-    try { localStorage.setItem(`nt-welcome:${(me.user || '').toLowerCase()}`, 'done') } catch { /* does not matter */ }
+    try { localStorage.setItem(`tuttiphon-welcome:${(me.user || '').toLowerCase()}`, 'done') } catch { /* does not matter */ }
     if (S.me) S.me.welcomeSeen = true
     api('/api/seen', { body: { what: 'welcome' } }).catch(() => { /* then only on this device */ })
   }

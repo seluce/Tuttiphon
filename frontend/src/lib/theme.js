@@ -1,8 +1,8 @@
-// Theme: system | light | dark – saved in the browser (key nt-theme, as before).
+// Theme: system | light | dark – saved in the browser (key tuttiphon-theme).
 // index.html sets the attribute before the first paint; here it is changed when switching.
 
 export const themeChoice = () => {
-  try { return localStorage.getItem('nt-theme') || 'system' } catch { return 'system' }
+  try { return localStorage.getItem('tuttiphon-theme') || 'system' } catch { return 'system' }
 }
 
 export function applyTheme(mode = themeChoice()) {
@@ -11,6 +11,6 @@ export function applyTheme(mode = themeChoice()) {
 }
 
 export function setTheme(mode) {
-  try { localStorage.setItem('nt-theme', mode) } catch { /* private mode */ }
+  try { localStorage.setItem('tuttiphon-theme', mode) } catch { /* private mode */ }
   applyTheme(mode)
 }

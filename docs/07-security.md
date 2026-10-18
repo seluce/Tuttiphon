@@ -12,9 +12,8 @@ filtered and every save is merged on the server side.
 ## Two operating modes
 
 Which one applies is decided solely by `TUTTIPHON_ADMIN_PASSWORD`, the password of the
-[local administrator](#local-administrator) (from the environment or `.env`, re-read by the server every 10 s). The old
-names `TUTTIPHON_PASSWORD` and `NAVITOOL_PASSWORD` still count; if several are set, the new name wins
-(`config.renamed()`, `config.admin_password()`).
+[local administrator](#local-administrator) (from the environment or `.env`, re-read by the server every 10 s;
+`config.admin_password()`).
 
 | | without `TUTTIPHON_ADMIN_PASSWORD` | with `TUTTIPHON_ADMIN_PASSWORD` |
 |---|---|---|
@@ -44,7 +43,7 @@ flowchart TD
     L -- logout --> LO["sign out"]
     L -- no --> M{"Password set?"}
     M -- no --> LOC["local admin"]
-    M -- yes --> T{"Cookie nt valid<br/>(signature, expiry, session known)<br/>and role not none?"}
+    M -- yes --> T{"Cookie tuttiphon valid<br/>(signature, expiry, session known)<br/>and role not none?"}
     T -- no --> PUB{"public file?<br/>(normalized path)"}
     PUB -- yes --> ST["serve"]
     PUB -- no --> E401["401 (API, images)<br/>302 → /login.html (pages)"]
@@ -116,7 +115,7 @@ asks for the password again.
 
 Tuttiphon's own administrator account, without a Navidrome account – for the first setup and for when Navidrome is
 unreachable: user name empty (sign-in page → “Local administrator”, field “Administrator password”) and the password
-from `TUTTIPHON_ADMIN_PASSWORD` (old names: [Two operating modes](#two-operating-modes)). The comparison runs in
+from `TUTTIPHON_ADMIN_PASSWORD`. The comparison runs in
 constant time (`hmac.compare_digest`); a wrong password → “The administrator password is wrong.” The session belongs to
 the internal user `@notfall` (`auth.NOTFALL`):
 
@@ -218,7 +217,7 @@ There are three roles (`auth.ROLES`): `admin`, `user`, `none`. `auth.role_of()` 
 
 ### Token
 
-A session is a signed token in the cookie `nt` (`auth.make_token()` / `auth.read_token()`) with a
+A session is a signed token in the cookie `tuttiphon` (`auth.make_token()` / `auth.read_token()`) with a
 session ID that the server keeps in `state/sessions.json`:
 
 ```text
@@ -267,12 +266,12 @@ doesn't bring them back. The entry contains only the account name.
 
 ## Running without a password
 
-Without `TUTTIPHON_ADMIN_PASSWORD` (or one of its old names) there is no sign-in; whoever reaches the server is an
+Without `TUTTIPHON_ADMIN_PASSWORD` there is no sign-in; whoever reaches the server is an
 administrator. Three safeguards keep this restricted to your own computer:
 
 - **Start:** `tuttiphon.py serve` aborts if `--host` is not `127.0.0.1`, `localhost` or `::1` and the administrator
-  password is weak (`config.weak_password()`): missing, shorter than 8 characters or a placeholder
-  (`config.PASSWORD_PLACEHOLDERS`: `change-me` from the template, `bitte-aendern` from the old one) in any spelling –
+  password is weak (`config.weak_password()`): missing, shorter than 8 characters or the placeholder
+  (`config.PASSWORD_PLACEHOLDERS`: `change-me` from the template) in any spelling –
   compared without surrounding spaces and in lowercase, so `Change-Me` counts too. The message names what is wrong.
   This can only be forced with `--unsafe-no-password`.
 - **Network lock while running:** `web.serve(host, port, strict=True)` sets `Handler.network` if the server is bound
@@ -323,8 +322,7 @@ header centrally in `frontend/src/lib/api.js`.
 This includes `POST /api/login` (checked before the sign-in itself, so a refused request doesn't count toward the
 [sign-in lockout](#sign-in-lockout)): a plain HTML form on a third-party site could otherwise send sign-in attempts
 through a visitor's browser (a form needs no preflight), e.g. to guess passwords from inside the home network. The
-sign-in page sends the header like the rest of the interface. The old header `X-NaviTool: 1` counts the
-same (an interface from before the renaming that is still open).
+sign-in page sends the header like the rest of the interface.
 
 Only `POST /api/logout` is exempt. `GET` doesn't need the header – that's why changes never belong in a `GET`
 endpoint.
@@ -421,12 +419,10 @@ All passwords and keys are in `.env` in the data folder (`data/.env` on the PC, 
 environment variables. Format, keys and precedence: [02 – Data model](02-data-model.md#env--credentials).
 
 - `save_env()` writes only the keys the interface may set (`config.EDITABLE_ENV`: `NAV_URL`, `NAV_PUBLIC_URL`,
-  `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`, `TUTTIPHON_PASSWORD`,
-  `LASTFM_API_KEY`, `NTFY_TOKEN`), only printable values without line breaks, and always sets the file to permissions
-  **`0600`** (`write_atomic(…, mode=0o600)`). An empty value is skipped before anything else happens – so
-  `{"TUTTIPHON_ADMIN_PASSWORD": ""}` can't remove a password stored under an old name. The old key
-  `TUTTIPHON_PASSWORD` is saved as `TUTTIPHON_ADMIN_PASSWORD`; writing it drops the lines `TUTTIPHON_PASSWORD=` and
-  `NAVITOOL_PASSWORD=`. `write_atomic()` creates the temporary file with the target permissions right away
+  `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`, `LASTFM_API_KEY`,
+  `NTFY_TOKEN`), only printable values without line breaks, and always sets the file to permissions
+  **`0600`** (`write_atomic(…, mode=0o600)`). An empty value is skipped – so `{"TUTTIPHON_ADMIN_PASSWORD": ""}`
+  can't remove the password. `write_atomic()` creates the temporary file with the target permissions right away
   (`os.open(…, mode)`), so it is never readable by others, not even briefly. `config.ensure_dirs()` sets a
   hand-made `.env` to `0600` at startup, as well as `state/secret` and
   `state/sessions.json` (if the file belongs to another user and that fails, Tuttiphon runs anyway).
@@ -437,8 +433,6 @@ environment variables. Format, keys and precedence: [02 – Data model](02-data-
 - The data folder is never the project folder: without `TUTTIPHON_DATA` it is always `<project>/data` – so backups
   with credentials can't end up in Git ([02 – Data folder](02-data-model.md#the-data-folder)).
 - Environment variables (`NAV_*`, `TUTTIPHON_*`, `RATING_USERS`, `LASTFM_API_KEY`) take precedence over the file.
-- If present, `load_env()` also reads `deezer-bewertung/.env` under `TUTTIPHON_BASE` as the lowest-priority source for
-  the address and admin access (`NAV_BASE_URL`, `NAV_USER`, `NAV_PASS`).
 - **No response contains a password or a key**: the server only reports whether something is stored
   (`adminOk`, `users[].ok`, `passwordStored`, `lastfm`, `auth`).
 
@@ -475,7 +469,7 @@ travels over HTTP within the home network to Tuttiphon (with one, only from the 
 | `POST /api/seen`, `POST /api/tour/seen` | record “tour/welcome done” only for the signed-in account (`auth.current()["user"]`), never for one sent along; only the values `tour` and `welcome` |
 | `api_env_test()` | a stored password is only sent to the stored `NAV_URL`; for a new address the password must be sent along – so “Test connection” can't be used to send a stored password to a foreign server |
 | `api_accounts_save()` | self-protection: one's own account can't take away its own admin role (see [Roles](#roles)); role `none` ends all sessions of the account |
-| `api_env_save()` | `TUTTIPHON_ADMIN_PASSWORD` (also under the old name `TUTTIPHON_PASSWORD`) only if `config.weak_password()` doesn't object (at least 8 characters, not a placeholder `change-me`/`bitte-aendern` in any spelling), can't be deleted; `NAV_URL` and `NAV_PUBLIC_URL` only with `http://` or `https://` – the link address of the interface (`nav_web_url()`) also ignores any other value from the environment (no `javascript:` links) |
+| `api_env_save()` | `TUTTIPHON_ADMIN_PASSWORD` only if `config.weak_password()` doesn't object (at least 8 characters, not the placeholder `change-me` in any spelling), can't be deleted; `NAV_URL` and `NAV_PUBLIC_URL` only with `http://` or `https://` – the link address of the interface (`nav_web_url()`) also ignores any other value from the environment (no `javascript:` links) |
 | `POST /api/notify/test` | at most one test message per 30 seconds and account, topic only from letters, digits, `-`, `_`; users only with one of their own people and only to that person's topic (also the one just being entered) – never to the administrator's topic or one another person uses, and without a topic there is no fallback to the administrator's (`notify.test(fallback=False)`); without a person only administrators. `view_config()` gives users only `enabled` and `server` of `settings.notify` – never the administrator's topic; other people's ntfy topics stay private, like all person fields except name, icon, color, prefix |
 | `POST /api/push/*` | devices always apply to the signed-in account; “administrator device” only with role `admin`. Only push addresses via `https` at the known push services are accepted (`webpush.PUSH_HOSTS`: Google, Mozilla, Apple, Microsoft) – so no subscription can make Tuttiphon request addresses in the local network; the subscription's keys are checked for length and form; at most 10 devices per account; test message at most every 30 seconds |
 | Notifications through the app | content end-to-end encrypted (RFC 8291) – the push service only sees size and time; sender key `state/push_keys.json` with permissions 0600, never in a response (only the public part via `GET /api/push/key`) |

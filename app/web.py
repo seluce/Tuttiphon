@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from . import audio, auth, autowelten, i18n, backup, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
 from .i18n import N_, _, _s, _sn
-from .config import (ADMIN_PASSWORD, CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, OLD_ADMIN_PASSWORD, STATE_DIR,
+from .config import (ADMIN_PASSWORD, CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, STATE_DIR,
                      WEB_DIR, ConfigDamaged, admin_password, env_var, environment, load_config, load_env, pass_key, paths, paths_info,
                      rating_users, read_bytes, read_text, save_env, save_from_ui, update_config, user_password,
                      weak_password, write_atomic)
@@ -291,8 +291,8 @@ def _status_full():
             "lastfm": bool(env.get("LASTFM_API_KEY")),
             "ntfyToken": bool(env.get("NTFY_TOKEN")),
             # values from docker-compose/the environment take precedence – the interface cannot change them
-            # (only keys the interface could set otherwise; the old name of the administrator password counts as new)
-            "locked": sorted(k for k in environment() if EDITABLE_ENV.match(k) and k != OLD_ADMIN_PASSWORD),
+            # (only keys the interface could set otherwise)
+            "locked": sorted(k for k in environment() if EDITABLE_ENV.match(k)),
         },
         "deezer": deezer.stats(),
         "steps": [{"id": s, "title": _(STEP_TITLES[s])} for s in pipeline(cfg)],   # i18n-ignore
@@ -1212,10 +1212,9 @@ def api_users():
 
 
 def api_env_save(body):
-    for key in (ADMIN_PASSWORD, OLD_ADMIN_PASSWORD):   # turns on sign-in – never delete or shorten it
-        pw = body.get(key, "")
-        if pw != "" and weak_password(pw):
-            raise ValueError(_("The administrator password needs at least 8 characters."))
+    pw = body.get(ADMIN_PASSWORD, "")   # turns on sign-in – never delete or shorten it
+    if pw != "" and weak_password(pw):
+        raise ValueError(_("The administrator password needs at least 8 characters."))
     for key in ("NAV_URL", "NAV_PUBLIC_URL"):   # becomes a link in the interface: only http(s), never javascript: …
         if key in body and body[key] not in (None, "") and not re.match(r"^https?://[^\s/]+", str(body[key]), re.I):
             raise ValueError(_("Please enter the address with http:// or https://, e.g. http://192.168.1.10:4533"))
@@ -1312,12 +1311,7 @@ def api_lastfm_test(body):
 
 
 def api_deezer_ranks():
-    """Rank distribution for the star setting (the first time, it takes over the ranks of the old full run)."""
-    if not (RUNNER.running() and "deezer" in (RUNNER.steps or [])):
-        try:
-            deezer.ensure_ranks(CACHE.get().songs)
-        except Exception:   # without Navidrome simply without taking them over
-            pass
+    """Rank distribution for the star setting."""
     return {**deezer.rank_histogram(), "defaults": deezer.DEFAULT_THRESHOLDS}
 
 
@@ -1775,7 +1769,7 @@ class Handler(BaseHTTPRequestHandler):
         return dict(c.strip().split("=", 1) for c in (self.headers.get("Cookie") or "").split(";") if "=" in c)
 
     def _session_user(self):
-        return auth.read_token(self._cookies().get("nt", ""))
+        return auth.read_token(self._cookies().get("tuttiphon", ""))
 
     def _login(self):
         now = time.time()
@@ -1825,7 +1819,7 @@ class Handler(BaseHTTPRequestHandler):
             raise
         release(False)
         events.say(_s("Signed in: {who}", who=_who(user)))
-        cookie = f"nt={auth.make_token(user)}; Path=/; Max-Age={auth.SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax"
+        cookie = f"tuttiphon={auth.make_token(user)}; Path=/; Max-Age={auth.SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax"
         if https:   # reached via https through a trusted reverse proxy: never send the cookie unencrypted
             cookie += "; Secure"
         return self._json({"ok": True, "user": user}, headers={"Set-Cookie": cookie})
@@ -1968,14 +1962,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({"error": _("Access only via 127.0.0.1 – or set TUTTIPHON_ADMIN_PASSWORD")}, 421)
             auth.set_current({"user": None, "role": "none", "own": [], "persons": [], "local": False})
             if path == "/api/login" and method == "POST":
-                if "1" not in (self.headers.get("X-Tuttiphon"), self.headers.get("X-NaviTool")):
+                if self.headers.get("X-Tuttiphon") != "1":
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – sign-in only from the interface
                 return self._login()
             clean = posixpath.normpath(urllib.parse.unquote(path))   # “/assets/../help/…” is not public
             public = clean in ("/login.html", "/favicon.svg", "/manifest.webmanifest", "/sw.js") or clean.startswith(("/icons/", "/assets/"))
             if path == "/api/logout" and method == "POST":
-                auth.end_session(self._cookies().get("nt", ""))   # really end the session, not just delete the cookie
-                return self._json({"ok": True}, headers={"Set-Cookie": "nt=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax"})
+                auth.end_session(self._cookies().get("tuttiphon", ""))   # really end the session, not just delete the cookie
+                return self._json({"ok": True}, headers={"Set-Cookie": "tuttiphon=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax"})
             user = self._session_user() if needs_login else None
             m = auth.me(user) if (user or not needs_login) else None
             if m and m["role"] == "none":   # access blocked in the meantime
@@ -2014,8 +2008,8 @@ class Handler(BaseHTTPRequestHandler):
                     return self._static(path)
                 route = self.GET_ROUTES.get(path)
                 return self._json(route(query)) if route else self._json({"error": "not found"}, 404)   # i18n-ignore – technical code
-            # protection against foreign pages posting to localhost (X-NaviTool: interface from before the renaming)
-            if "1" not in (self.headers.get("X-Tuttiphon"), self.headers.get("X-NaviTool")):
+            # protection against foreign pages posting to localhost
+            if self.headers.get("X-Tuttiphon") != "1":
                 return self._json({"error": "forbidden"}, 403)   # i18n-ignore – technical code
             if method == "POST" and path == "/api/cover/upload":   # raw data instead of JSON
                 data = self.rfile.read(self._length(10 * 1024 * 1024))

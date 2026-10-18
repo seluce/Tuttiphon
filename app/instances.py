@@ -2,9 +2,7 @@
 
 PC and container do not necessarily share the data folder (PC: data/, container: /config) – but they surely share
 the playlist folder on the NAS share that Navidrome reads. So the announcement and the lock live in a hidden
-subfolder there: <playlist folder>/.tuttiphon/ (Navidrome skips hidden folders). If .navitool/ already exists there
-(from the time when Tuttiphon was called NaviTool), that folder stays in use – so old and new instances still see
-each other.
+subfolder there: <playlist folder>/.tuttiphon/ (Navidrome skips hidden folders).
 
 * Every instance writes its own file instance-<id>.json every minute with a timestamp and “is a run going on?”.
 * Each installation (data folder) has its own random id (state/install_id). Reports with the own installation id come
@@ -56,12 +54,6 @@ def install_id():
     return value
 
 
-def _named(parent):
-    """<playlist folder>/.tuttiphon – or .navitool, as long as only the old folder exists."""
-    new, old = parent / ".tuttiphon", parent / ".navitool"
-    return old if old.is_dir() and not new.exists() else new
-
-
 def shared_dir():
     """Folder for announcement and lock (created, writable for all instances). Remembered for one minute."""
     if _state["dir"] is not None and time.time() - _state["at"] < 60:
@@ -72,7 +64,7 @@ def shared_dir():
     else:
         from .playlists import playlist_dir
         try:
-            folder = _named(playlist_dir(load_config()))
+            folder = playlist_dir(load_config()) / ".tuttiphon"
         except Exception:   # settings broken or similar – then locally
             folder = STATE_DIR
     try:

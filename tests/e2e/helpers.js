@@ -7,10 +7,10 @@ export const state = () => JSON.parse(readFileSync(STATE, 'utf8'))
 
 /** Sign in as a role; the tour and the welcome assistant count as already seen. */
 export async function login(context, role) {
-  await context.addCookies([{ name: 'nt', value: state()[role], url: 'http://127.0.0.1:8790' }])
+  await context.addCookies([{ name: 'tuttiphon', value: state()[role], url: 'http://127.0.0.1:8790' }])
   await context.addInitScript((u) => {
-    localStorage.setItem(`nt-tour:${u}`, '1')
-    localStorage.setItem(`nt-welcome:${u}`, '1')
+    localStorage.setItem(`tuttiphon-tour:${u}`, '1')
+    localStorage.setItem(`tuttiphon-welcome:${u}`, '1')
   }, state()[`${role}Account`] || '')
 }
 

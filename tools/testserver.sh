@@ -9,7 +9,7 @@
 #                 admin = local administrator, user = a user account (--user <account>, otherwise TUTTIPHON_TEST_USER
 #                 from dev.local.env, otherwise the first user account of the copied configuration)
 #   --web <dir>   own build folder (otherwise web/ in the project) – e.g. after `npx vite build --outDir <dir>`
-# Output with --auth: the lines "admin-cookie: nt=…" and "user-cookie:  nt=…" (tests/e2e/setup.js reads them).
+# Output with --auth: the lines "admin-cookie: tuttiphon=…" and "user-cookie:  tuttiphon=…" (tests/e2e/setup.js reads them).
 # Stop: PID from `ss -ltnp | grep :<port>` – never pkill -f.
 set -euo pipefail
 cd "$(dirname "$(readlink -f "$0")")/.."
@@ -45,8 +45,8 @@ w["enabled"] = False; s["watch"] = w
 json.dump(c, open(p, "w"), ensure_ascii=False, indent=1)
 PY
 fi
-# sign-in needs an administrator password (also under its old names) – a random one for the copy
-if [ "$auth" = 1 ] && ! grep -qE '^(TUTTIPHON_ADMIN_PASSWORD|TUTTIPHON_PASSWORD|NAVITOOL_PASSWORD)=.' "$data/.env" 2>/dev/null; then
+# sign-in needs an administrator password – a random one for the copy
+if [ "$auth" = 1 ] && ! grep -qE '^TUTTIPHON_ADMIN_PASSWORD=.' "$data/.env" 2>/dev/null; then
   printf '\nTUTTIPHON_ADMIN_PASSWORD=test-%s\n' "$(head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n')" >> "$data/.env"
 fi
 # TUTTIPHON_SHARED_DIR: instance registration and run lock in the work dir instead of the real playlist folder
@@ -61,9 +61,9 @@ cfg = config.load_config()
 # the account for the "user" role: given, otherwise the first user account of the configuration
 user = sys.argv[1] or next((a for a, v in (cfg.get("accounts") or {}).items() if (v or {}).get("role") == "user"), "") \
     or next((p["user"] for p in cfg["personen"] if p.get("user")), "")
-print("admin-cookie: nt=" + auth.make_token(auth.NOTFALL))
+print("admin-cookie: tuttiphon=" + auth.make_token(auth.NOTFALL))
 if user:
-    print("user-cookie:  nt=" + auth.make_token(user))
+    print("user-cookie:  tuttiphon=" + auth.make_token(user))
 PY
 fi
 nohup python3 tuttiphon.py serve --port "$port" --no-browser >"$work/server-$port.log" 2>&1 &

@@ -299,8 +299,6 @@ The **Navidrome folder** (`TUTTIPHON_BASE`; on the PC from `dev.local.env`, othe
 the Docker image `/nas`) contains `Music/` by default (with `00_SmartPlaylists/` inside, which holds the hidden folder
 `.tuttiphon/` for instance registrations and the run lock) and `Archiv/`. The template `docker-compose.yaml` mounts the
 music folder and the archive individually instead (`MUSIC_DIR=/music`, `ARCHIVE_DIR=/archive`).
-If `deezer-bewertung/` is also there, Tuttiphon reads its `.env` file as the lowest-priority source for the
-admin access and `logs/deezer-rank_*.log` as a source for Deezer ranks that were already determined.
 
 ## Command line
 
@@ -318,7 +316,7 @@ python3 tuttiphon.py run deezer --deezer-mode full
 
 | Option | Default | Effect |
 |---|---|---|
-| `--host` | `127.0.0.1` | address the server binds to; IPv6 addresses (`::1`, `::`) work too. For anything other than `127.0.0.1`, `localhost`, `::1`, `TUTTIPHON_ADMIN_PASSWORD` must be set and not weak (`config.weak_password()`): at least 8 characters and not a placeholder (`change-me`, `bitte-aendern`) in any spelling; the message names what is wrong. While running, the server then stays locked (`503`) if the password goes missing. For `0.0.0.0` the startup message shows the address `http://127.0.0.1:<port>/`, for `::` `http://[::1]:<port>/`, other IPv6 addresses in square brackets. |
+| `--host` | `127.0.0.1` | address the server binds to; IPv6 addresses (`::1`, `::`) work too. For anything other than `127.0.0.1`, `localhost`, `::1`, `TUTTIPHON_ADMIN_PASSWORD` must be set and not weak (`config.weak_password()`): at least 8 characters and not the placeholder `change-me` in any spelling; the message names what is wrong. While running, the server then stays locked (`503`) if the password goes missing. For `0.0.0.0` the startup message shows the address `http://127.0.0.1:<port>/`, for `::` `http://[::1]:<port>/`, other IPv6 addresses in square brackets. |
 | `--port` | `8765` | port |
 | `--no-browser` | off | don't open a browser |
 | `--unsafe-no-password` | off | start on the network despite a missing or too short password; also turns off the lock while running (`serve(…, strict=False)`). Only a warning appears: with a too short password or the placeholder “… but the administrator password is too short or still the placeholder!”, without a password the notice that there is then no sign-in and the server only answers requests via `127.0.0.1`/`localhost` and the names in `TUTTIPHON_HOSTS` – see [Security](07-security.md). |
@@ -367,7 +365,7 @@ When the script builds the interface is described in [Operations](08-operations.
 | Variable | Effect | Default | Code |
 |---|---|---|---|
 | `TUTTIPHON_DATA` | data folder (`config.json`, `.env`, `state/`, `logs/`, `backup/`) | `<project>/data` (created at startup; never the project folder itself) · Docker: `/config` | `config.py` |
-| `TUTTIPHON_BASE` | Navidrome folder: basis for the default music folder (`Music/`), for relative music folder paths and for `deezer-bewertung/` | the folder above the project folder · `tuttiphon.sh`: from `dev.local.env` · Docker image: `/nas` (matters only for defaults and relative paths) | `config.py` |
+| `TUTTIPHON_BASE` | Navidrome folder: basis for the default music folder (`Music/`) and for relative music folder paths | the folder above the project folder · `tuttiphon.sh`: from `dev.local.env` · Docker image: `/nas` (matters only for defaults and relative paths) | `config.py` |
 | `TUTTIPHON_WEB` | folder of the built interface (for tests with a separate build) | `<project>/web` | `config.py` |
 | `TUTTIPHON_MODELS` | folder of the AI models | `<project>/models` · Docker image: `/app/models` | `ml.py` |
 | `MUSIC_DIR` | music folder, takes precedence over the settings; relative to `TUTTIPHON_BASE` | – · `docker-compose.yaml`: `/music` | `config.paths()` |
@@ -380,10 +378,9 @@ When the script builds the interface is described in [Operations](08-operations.
 
 The order of the storage locations (environment > settings > default) is described in [Operations](08-operations.md#storage-locations).
 
-**Credentials and switches** – via `config.load_env()`. The sources in ascending priority: `deezer-bewertung/.env`
-in the Navidrome folder (where the keys are called `NAV_BASE_URL`, `NAV_USER`, `NAV_PASS`), then `<data>/.env` (empty
+**Credentials and switches** – via `config.load_env()`. The sources in ascending priority: `<data>/.env` (empty
 values don't count), then the environment. From the environment Tuttiphon takes all variables starting with `NAV_` or
-`TUTTIPHON_` (or the old `NAVITOOL_`), as well as `RATING_USERS`, `LASTFM_API_KEY` and `NTFY_TOKEN` – only with a
+`TUTTIPHON_`, as well as `RATING_USERS`, `LASTFM_API_KEY` and `NTFY_TOKEN` – only with a
 non-empty value; an empty variable (e.g. `NAV_ADMIN_PASS: ""` in `docker-compose.yaml`) doesn't override the `.env`.
 
 | Variable | Effect | Can be saved via `PUT /api/env` |
@@ -394,14 +391,13 @@ non-empty value; an empty variable (e.g. `NAV_ADMIN_PASS: ""` in `docker-compose
 | `NAV_PASS_<ACCOUNT>` | password of a Navidrome account for stars, statistics and an exact preview. Account name in upper case; characters other than letters, digits and `_` become `_` (`config.pass_key()`). | yes |
 | `RATING_USERS` | comma-separated accounts for which Deezer sets stars (`config.rating_users()`). Only applies as long as the setting `deezer.users` is not a list (default `null`); without either: all accounts of the people. | yes (the interface has no field for it) |
 | `LASTFM_API_KEY` | key for Last.fm | yes |
-| `TUTTIPHON_ADMIN_PASSWORD` | turns on sign-in and is the password of the [local administrator](07-security.md#local-administrator); required when starting on the network. The old names `TUTTIPHON_PASSWORD` and `NAVITOOL_PASSWORD` still count; the new name wins (`config.renamed()`) | yes |
+| `TUTTIPHON_ADMIN_PASSWORD` | turns on sign-in and is the password of the [local administrator](07-security.md#local-administrator); required when starting on the network | yes |
 | `TUTTIPHON_HOSTS` | additional allowed host names, comma-separated (only effective without a password) | no, only `.env` or environment |
 | `TUTTIPHON_TRUSTED_PROXIES` | reverse proxies whose `X-Forwarded-For`/`X-Forwarded-Proto` count, addresses or networks, comma-separated (e.g. `172.16.0.0/12`): the sign-in lockout then counts each person's own address, sign-ins via https get the `Secure` cookie ([Security](07-security.md#behind-a-reverse-proxy)) | no, only `.env` or environment |
 
 Whatever is set with a value in the environment takes precedence. Of the keys the interface may set
 (`config.EDITABLE_ENV`: the “yes” rows above plus `NTFY_TOKEN`), the interface receives those set in the environment in
-`GET /api/status` as `env.locked` and locks the fields; an old name of the administrator password counts as
-`TUTTIPHON_ADMIN_PASSWORD`. Which keys `save_env()` may write is described in [Data model](02-data-model.md).
+`GET /api/status` as `env.locked` and locks the fields. Which keys `save_env()` may write is described in [Data model](02-data-model.md).
 
 **Set only in the Docker image:**
 

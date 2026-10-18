@@ -31,18 +31,9 @@ STEP_TITLES = {
     "scan": N_("Navidrome scan & sync"),
     "deezer": N_("Deezer rating"),
 }
-# Titles in older log files (data) -> step id; the English titles come from STEP_TITLES (see _from_log)
-# i18n-ignore-start
-LEGACY_TITLES = {"FLAC → Opus umwandeln": "flac", "Musik in Opus umwandeln": "flac", "Doppelte Lyrics aufräumen": "lyrics",
-                 "Smart-Playlists schreiben": "playlists", "Navidrome-Scan": "scan",
-                 "Musik umwandeln": "flac", "Lyrics suchen & aufräumen": "lyrics", "Fehlende Cover holen": "cover",
-                 "Musik verstehen (Klang, KI & Last.fm)": "analyse", "Playlists schreiben": "playlists",
-                 "Navidrome-Scan & Abgleich": "scan", "Deezer-Bewertung": "deezer"}
-# i18n-ignore-end
 # How a step ended: stored as data ("ok", "warnung", "fehler", "abgebrochen"), shown as text in the log
 RESULT_TEXTS = {"ok": N_("{step}: ok"), "warnung": N_("{step}: warning"), "fehler": N_("{step}: error"),
                 "abgebrochen": N_("{step}: canceled")}
-RESULT_CODES = {"warning": "warnung", "error": "fehler", "canceled": "abgebrochen"}   # i18n-ignore – English log -> stored value
 PIPELINE = ["flac", "lyrics", "cover", "analyse", "playlists", "scan", "deezer"]   # all steps in a fixed order
 EXTRAS_EVERY = 6 * 3600   # lyrics index and new music worlds after pure playlist runs at most this often
 WATCH_BUDGET = 2          # minutes for loudness and fingerprints in a folder-watch run (once the library is done, only
@@ -120,30 +111,8 @@ def history(limit=30):
                 out.append(json.loads(line))
             except ValueError:
                 pass
-    known = {e.get("log") for e in out}
-    out += [e for e in (_from_log(p) for p in LOG_DIR.glob("*.log") if p.name not in known) if e]
     out.sort(key=lambda e: e["start"], reverse=True)
     return out[:limit]
-
-
-def _from_log(path):
-    """Rebuild runs from before the history existed from their log file (German or English)."""
-    titles = {v: k for k, v in STEP_TITLES.items()} | LEGACY_TITLES
-    m = re.match(r"(\d{4}-\d{2}-\d{2})_(\d{2})(\d{2})(\d{2})_", path.name)
-    if not m:
-        return None
-    text = path.read_text(encoding="utf-8", errors="replace")
-    head = re.search(r"▶ (.+?) – ", text)
-    done = re.search(r"■ (?:Fertig|Done)\. (.+)", text)   # i18n-ignore
-    results = {}
-    if done:
-        for part in done.group(1).split(", "):
-            title, _, res = part.rpartition(": ")
-            if title in titles:
-                results[titles[title]] = RESULT_CODES.get(res.strip(), res.strip())
-    start = f"{m.group(1)}T{m.group(2)}:{m.group(3)}:{m.group(4)}"
-    return {"start": start, "end": start, "name": head.group(1) if head else path.stem, "steps": list(results),
-            "results": results, "summary": {}, "log": path.name, "dryRun": "Probelauf" in text or "(dry run)" in text}
 
 
 class _InstanceLock:

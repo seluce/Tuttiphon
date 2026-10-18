@@ -44,7 +44,7 @@ const USER_STEPS = translated(() => [
 export const tour = $state({ active: false, steps: [], i: 0, dir: 1, guide: null, title: '', back: '', skipped: [] })
 
 /** Browser key: tour already seen? Per account – several people can sign in on the same device. */
-export const tourKey = () => (S.me?.user ? `nt-tour:${S.me.user.toLowerCase()}` : 'nt-tour')
+export const tourKey = () => (S.me?.user ? `tuttiphon-tour:${S.me.user.toLowerCase()}` : 'tuttiphon-tour')
 
 /**
  * Start the tour – without force only if it was never shown on this device.

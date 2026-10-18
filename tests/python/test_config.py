@@ -184,10 +184,9 @@ class TestValidateConfig(unittest.TestCase):
 class EnvFileTest(unittest.TestCase):
     def setUp(self):
         env.reset_caches()
-        for path in (config.ENV_FILE, config.LEGACY_ENV):
-            path.unlink(missing_ok=True)
+        config.ENV_FILE.unlink(missing_ok=True)
         self.addCleanup(env.reset_caches)
-        self.addCleanup(lambda: [p.unlink(missing_ok=True) for p in (config.ENV_FILE, config.LEGACY_ENV)])
+        self.addCleanup(config.ENV_FILE.unlink, missing_ok=True)
 
     def lines(self):
         return config.ENV_FILE.read_text(encoding="utf-8").splitlines()
@@ -213,7 +212,7 @@ class TestSaveEnv(EnvFileTest):
         for updates in ({"PATH": "/x"}, {"NAV_PASS_": "x"}, {"nav_url": "x"}):
             with self.assertRaises(ValueError):
                 config.save_env(updates)
-        for value in ("a\nTUTTIPHON_PASSWORD=x", "tab\tx", 5):
+        for value in ("a\nTUTTIPHON_ADMIN_PASSWORD=x", "tab\tx", 5):
             with self.assertRaises(ValueError):
                 config.save_env({"NAV_ADMIN_PASS": value})
         self.assertFalse(config.ENV_FILE.exists())
@@ -235,13 +234,11 @@ class TestSaveEnv(EnvFileTest):
 
 class TestLoadEnv(EnvFileTest):
     def test_sources_and_precedence(self):
-        config.LEGACY_ENV.parent.mkdir(parents=True, exist_ok=True)
-        config.LEGACY_ENV.write_text('NAV_BASE_URL="http://alt.invalid/"\nNAV_USER=alt-admin\nNAV_PASS=alt-pw\n')
         config.ENV_FILE.write_text("NAV_URL=\nNAV_ADMIN_PASS=datei-pw\nNAV_PASS_JONAS='jonas-pw'\nSONSTWAS=1\n")
         with mock.patch.dict(os.environ, {"NAV_ADMIN_USER": "umgebung-admin", "NAV_ADMIN_PASS": "",
                                           "NAV_PASS_JONAS": "   ", "HOME_TEST": "x"}):
             e = config.load_env()
-        self.assertEqual(e["NAV_URL"], "http://alt.invalid")          # empty value in .env does not override
+        self.assertEqual(e["NAV_URL"], "")                            # empty value in .env counts as not set
         self.assertEqual(e["NAV_ADMIN_USER"], "umgebung-admin")       # environment wins
         self.assertEqual(e["NAV_ADMIN_PASS"], "datei-pw")             # empty variable does not override the file
         self.assertEqual(e["NAV_PASS_JONAS"], "jonas-pw")               # only spaces: likewise

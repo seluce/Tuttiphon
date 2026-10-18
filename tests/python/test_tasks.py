@@ -142,13 +142,13 @@ class TestInstances(InstanceTest):
         self.assertFalse(instances.busy_elsewhere())
 
     def test_same_installation_under_another_name_is_not_a_second_tuttiphon(self):
-        # e.g. the container before an update, when its host name changed from "navitool" to "tuttiphon"
+        # e.g. the container before an update, when its host name changed
         own = instances.install_id()
         self.assertRegex(own, r"^[0-9a-f]{16}$")
         self.assertEqual(instances.install_id(), own)                      # stays the same
         instances._state["install"] = None
         self.assertEqual(instances.install_id(), own)                      # read back from the data folder
-        self.other("docker:navitool", running=True, install=own)
+        self.other("docker:alt", running=True, install=own)
         self.other("pc:laptop", running=False, install="0123456789abcdef")
         self.assertEqual([o["host"] for o in instances.others(foreign_only=True)], ["laptop"])
         self.assertEqual(len(instances.others()), 2)

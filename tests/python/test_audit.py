@@ -19,7 +19,7 @@ class FakeNav:
         self.set.append((sid, stars))
 
 
-class TestDeezerSeed(unittest.TestCase):
+class TestDeezerManual(unittest.TestCase):
     def apply(self, prev, current):
         nav = FakeNav()
         result = {"processed": 0, "found": 0, "notFound": 0, "kept": 0, "set": 0}
@@ -28,13 +28,13 @@ class TestDeezerSeed(unittest.TestCase):
                       "full", False, False, result, lambda *_: None, thresholds=[0, 10, 20, 30, 40])
         return nav.set, result
 
-    def test_hand_set_star_on_seed_song_stays(self):
-        # entry from the old log without "u": a differing star was set by hand and stays
-        changed, result = self.apply({"seed": True}, 5)
+    def test_star_tuttiphon_never_set_counts_as_by_hand(self):
+        # entry without "u" for this account: a differing star was set by hand and stays
+        changed, result = self.apply({}, 5)
         self.assertEqual((changed, result["kept"]), ([], 1))
 
-    def test_seed_star_set_by_old_script_is_updated(self):
-        changed, _ = self.apply({"seed": True, "s": 3}, 3)
+    def test_star_tuttiphon_set_is_updated(self):
+        changed, _ = self.apply({"r": 900, "s": 3, "t": 1, "u": {"niklas": 3}}, 3)
         self.assertEqual(changed, [("s1", 1)])
 
 

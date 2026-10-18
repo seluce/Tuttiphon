@@ -26,8 +26,7 @@ from .config import BACKUP_DIR, BASE, CONFIG_FILE, DATA_DIR, ENV_FILE, STATE_DIR
 from .i18n import _, _sn
 
 PREFIX = "tuttiphon-sicherung-"   # file name (data)
-# also backups from the time when Tuttiphon was called NaviTool – they count when cleaning up and stay downloadable
-NAME = re.compile(r"^(?:tuttiphon|navitool)-sicherung-(\d{4}-\d{2}-\d{2}_\d{6})\.zip$")
+NAME = re.compile(rf"^{PREFIX}(\d{{4}}-\d{{2}}-\d{{2}}_\d{{6}})\.zip$")
 # cache, logins and locks do not belong in a backup – nor the id of the installation (a restored copy elsewhere is
 # another installation, see instances.install_id)
 SKIP_STATE = ("cache", "sessions.json", "task.lock", "install_id")
