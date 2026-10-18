@@ -659,6 +659,10 @@ without the owner's stars] – all as expected.” or “… – j differ.” On
 
 ## Step `deezer`: Stars from Deezer popularity
 
+Origin: the approach and the default rank levels come from [dztnr](https://github.com/scatolo/dztnr) (a fork of
+[sptnr](https://github.com/krestaino/sptnr), MIT – notice in [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md)); `app/deezer.py` is
+Tuttiphon's own implementation for several accounts.
+
 `_step_deezer()` takes the mode from the option `deezer_mode`. Without the option, the setting
 `settings.deezer.pipelineMode` applies: `"missing"` becomes the internal mode `both` (new **and** previously not found
 songs), anything else becomes `new`. Then the step calls `deezer.run()`. If stars have changed, the library cache is

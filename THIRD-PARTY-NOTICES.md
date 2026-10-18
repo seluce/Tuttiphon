@@ -45,6 +45,37 @@ in `app/ml_worker.py`) by the **Music Technology Group, Universitat Pompeu Fabra
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). They are used unchanged; the image downloads
 them while it is built. The license allows non-commercial use only – the MTG offers a commercial license on request.
 
+## Deezer star ratings: dztnr and sptnr
+
+The idea of turning Deezer's popularity rank into star ratings in Navidrome, and the default rank levels, come from
+[dztnr](https://github.com/scatolo/dztnr) by scatolo, a fork of [sptnr](https://github.com/krestaino/sptnr) by Kevin
+Restaino. Tuttiphon's implementation (`app/deezer.py`) is its own and extends the idea to several accounts; the notice
+of the original is reproduced here:
+
+```
+MIT License
+
+Copyright (c) 2024 Kevin Restaino
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## Tailwind CSS
 
 ```

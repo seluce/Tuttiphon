@@ -78,6 +78,14 @@ Python 3 (standard library) and Node.js 22 (Svelte 5, Vite, Tailwind). `npm ci`,
 starts it on the PC; tests: `npm run test:py` and `npm run test:i18n`. More in the
 [technical handbook](docs/README.md) and [frontend/README.md](frontend/README.md).
 
+## Acknowledgements
+
+The Deezer star ratings build on [dztnr](https://github.com/scatolo/dztnr) by scatolo, a fork of
+[sptnr](https://github.com/krestaino/sptnr) by Kevin Restaino – the idea of turning Deezer's popularity rank into
+stars and its rank levels come from there. Thanks also to [Navidrome](https://www.navidrome.org/), the
+[Essentia](https://essentia.upf.edu/) team at the Music Technology Group, [LRCLIB](https://lrclib.net) and
+[AcoustID/Chromaprint](https://acoustid.org/chromaprint).
+
 ## License
 
 [AGPL-3.0-or-later](LICENSE). The AI models are by the Music Technology Group, Universitat Pompeu Fabra, under

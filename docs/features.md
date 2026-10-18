@@ -54,6 +54,9 @@ people actually know, and the *only the hits* playlists know what a hit is. The 
 fit, with a fallback over MusicBrainz and ISRC), the levels are adjustable, the best-known songs of each band get a
 bonus star, and **stars someone gave by hand are kept** unless you choose to overwrite them.
 
+The idea and the default rank levels come from [dztnr](https://github.com/scatolo/dztnr) by scatolo (a fork of
+[sptnr](https://github.com/krestaino/sptnr) by Kevin Restaino); Tuttiphon extends it to several accounts.
+
 ## Lyrics, synced and plain
 
 <img src="images/song.png" alt="Song window with synced lyrics, key, tempo and instruments" width="900">

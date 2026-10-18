@@ -8,6 +8,9 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 - First public version on GitHub. The ready-made image is `ghcr.io/seluce/tuttiphon` – installation with
   `docker-compose.yaml` as described in the README. Everything before was a beta (0.x); there are no changes to the
   program compared with 0.17.1.
+- Credits: the Deezer star ratings build on [dztnr](https://github.com/scatolo/dztnr) by scatolo, a fork of
+  [sptnr](https://github.com/krestaino/sptnr) by Kevin Restaino (MIT) – named in the README and in
+  THIRD-PARTY-NOTICES.md.
 
 ## 0.17.1 – 2026-10-17
 
