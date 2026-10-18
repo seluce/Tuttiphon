@@ -1,0 +1,50 @@
+# Checks every push and pull request: Python compiles, translations complete, Python tests, interface builds without
+# warnings, links in the handbook. The browser tests (npm run test:e2e) need a real Navidrome and stay local.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Berlin
+    # "shell: bash" runs every step with -o pipefail (GitHub's default is bash -e without it): a failing command in
+    # "npm run build | tee build.log" then fails the step instead of being hidden by tee
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install ffmpeg and the optional Python packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          pip install "pillow==11.3.0" "mutagen==1.47.0" "cryptography==44.0.3"
+      - run: npm ci --no-audit --no-fund
+      - name: Python compiles
+        run: python3 -m py_compile app/*.py tuttiphon.py
+      - name: Translations
+        run: npm run test:i18n
+      - name: Interface builds without warnings
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build.log
+          if grep -qi "warn" build.log; then echo "::error::The interface builds with warnings"; exit 1; fi
+      - name: Python tests
+        run: npm run test:py
+      - name: Links in the handbook
+        run: python3 tools/check-links.py

@@ -1,0 +1,28 @@
+# Tuttiphon – setup and all options: docs/installation.md. Adjust the lines marked CHANGE.
+services:
+  tuttiphon:
+    image: ghcr.io/seluce/tuttiphon:latest
+    container_name: tuttiphon
+    hostname: tuttiphon
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    user: "1000:1000"                          # CHANGE: owner of the music files (ls -n)
+    ports:
+      - "8765:8765"
+    mem_limit: 2g
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    volumes:                                   # create the folders first, owned by "user:" (README: Installation)
+      - ./config:/config
+      - /path/to/music:/music                  # CHANGE: the music folder Navidrome reads
+      - /path/to/music-archive:/archive        # CHANGE: originals after converting
+      - ./backups:/backup
+    environment:
+      TZ: Europe/Berlin                        # CHANGE
+      TUTTIPHON_ADMIN_PASSWORD: "change-me"    # CHANGE: at least 8 characters, write "$" as "$$"
+      NAV_URL: "http://192.168.1.10:4533"      # CHANGE: Navidrome as seen from the container
+      MUSIC_DIR: /music
+      ARCHIVE_DIR: /archive
+      BACKUP_DIR: /backup

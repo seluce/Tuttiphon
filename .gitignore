@@ -1,0 +1,46 @@
+# ============================================================
+# Data and credentials NEVER belong in the repository.
+# data/ holds config.json (persons, playlists), .env (passwords),
+# state/ (session key, analysis, listening history), logs/ and backup/.
+# ============================================================
+data/
+
+# In case data ever ends up in the project folder (old layout, TUTTIPHON_DATA not set)
+/config.json
+/state/
+/logs/
+/backup/
+/sicherungen/
+.env
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+
+# AI models (the Docker image downloads them while building: python3 app/ml_worker.py --download models)
+/models/
+
+# Release folder (npm run release) – generated, contains credentials with --with-data
+/release/
+
+# Interface: web/ is built from frontend/ (npm run build) – not in Git
+node_modules/
+/web/
+test-results/
+playwright-report/
+
+# Editor & system
+.vscode/
+.idea/
+*.swp
+*.log
+.DS_Store
+.claude/settings.local.json
+
+# Personal, never in Git: the maintainer's own environment (Claude Code reads CLAUDE.local.md automatically) and local
+# settings for tuttiphon.sh / tools/testserver.sh (e.g. TUTTIPHON_BASE, TUTTIPHON_TEST_USER)
+CLAUDE.local.md
+dev.local.env
+# Working instructions for Claude Code – stay local, not part of the published project
+CLAUDE.md

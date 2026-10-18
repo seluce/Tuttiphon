@@ -1,0 +1,14 @@
+{
+ "⚠ Audio fingerprints: the file was damaged – set aside as {name}, starting over.": "⚠ Audio-Fingerabdrücke: Die Datei war beschädigt – beiseitegelegt als {name}, es geht von vorn los.",
+ "⚠ Audio fingerprints: file not readable ({error}) – skipped.": "⚠ Audio-Fingerabdrücke: Datei nicht lesbar ({error}) – übersprungen.",
+ "Audio fingerprints: {done} songs done, {open} pending (until {time}).": "Audio-Fingerabdrücke: {done} Songs fertig, {open} offen (bis {time}).",
+ "Audio fingerprints: {done} songs done, {open} pending.": "Audio-Fingerabdrücke: {done} Songs fertig, {open} offen.",
+ "  {n} fingerprinted, {errors} not readable.": "  {n} erfasst, {errors} nicht lesbar.",
+ "  {n} fingerprinted.": "  {n} erfasst.",
+ "Audio fingerprints: {n} recording is there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Audio-Fingerabdrücke: {n} Aufnahme liegt mehrfach vor ({dup} Dateien zu viel, verglichen in {secs} s) – siehe Einstellungen → Bibliothek prüfen.",
+ "Audio fingerprints: {n} recordings are there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Audio-Fingerabdrücke: {n} Aufnahmen liegen mehrfach vor ({dup} Dateien zu viel, verglichen in {secs} s) – siehe Einstellungen → Bibliothek prüfen.",
+ "⚠ Audio fingerprints: {error}": "⚠ Audio-Fingerabdrücke: {error}",
+ "Settings: same recording twice – yes/no expected": "Einstellungen: Dieselbe Aufnahme doppelt – ja/nein erwartet",
+ "Same recording twice": "Dieselbe Aufnahme doppelt",
+ "The same audio as more than one file – also across formats, folders and albums, for example a FLAC file still next to its converted Opus file, or a song on an album and on a best-of. One copy is enough; a lossless original that has already been converted belongs in the archive.": "Derselbe Klang als mehrere Dateien – auch über Formate, Ordner und Alben hinweg, etwa eine FLAC-Datei noch neben ihrer umgewandelten Opus-Datei oder ein Song auf einem Album und auf einer Best-of. Eine Kopie genügt; ein verlustfreies Original, das schon umgewandelt ist, gehört ins Archiv."
+}

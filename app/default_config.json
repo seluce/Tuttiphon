@@ -1,0 +1,1294 @@
+{
+  "version": 11,
+  "settings": {
+    "language": "en",
+    "playlistDir": "Music/00_SmartPlaylists",
+    "filePrefix": "Auto – ",
+    "namePattern": "{welt} · {stil}",
+    "allName": "All",
+    "limit": 100,
+    "minDuration": 120,
+    "allMinRating": 3,
+    "public": true,
+    "excludeTitles": [
+      "(Live",
+      "[Live",
+      "- Live",
+      "– Live",
+      "Live)",
+      "Live]",
+      "Live 19",
+      "Live 20",
+      "Live at",
+      "Live aus",
+      "Live from",
+      "Unplugged",
+      "Instrumental",
+      "Karaoke",
+      "Playback"
+    ],
+    "defaultPerson": "familie",
+    "hitsShare": 0.3,
+    "autoApply": true,
+    "dailyMode": "playlists",
+    "dailyAt": "05:30",
+    "pipeline": [
+      "flac",
+      "lyrics",
+      "cover",
+      "analyse",
+      "playlists",
+      "scan",
+      "deezer"
+    ],
+    "start": {
+      "sections": [
+        {
+          "id": "heute",
+          "on": true
+        },
+        {
+          "id": "todo",
+          "on": true
+        },
+        {
+          "id": "woche",
+          "on": true
+        },
+        {
+          "id": "neu",
+          "on": true
+        },
+        {
+          "id": "playlists",
+          "on": true
+        },
+        {
+          "id": "karten",
+          "on": true
+        },
+        {
+          "id": "verlauf",
+          "on": true
+        }
+      ],
+      "showSteps": true
+    },
+    "navidrome": {
+      "scan": "quick"
+    },
+    "deezer": {
+      "thresholds": [
+        10000,
+        100000,
+        300000,
+        600000,
+        850000
+      ],
+      "users": null,
+      "overwriteManual": false,
+      "pipelineMode": "new",
+      "rate": 9
+    },
+    "lyrics": {
+      "cleanup": true,
+      "fetch": true,
+      "savePlain": true,
+      "instrumental": "mark",
+      "retryDays": 30,
+      "workers": 6,
+      "upgradePlain": true,
+      "providers": [
+        {
+          "id": "lrclib",
+          "on": true
+        },
+        {
+          "id": "netease",
+          "on": false
+        }
+      ],
+      "budgetMinutes": 5
+    },
+    "opus": {
+      "enabled": false,
+      "bitrate": 160,
+      "formats": [
+        "flac"
+      ],
+      "original": "archive",
+      "archiveDir": "Archiv",
+      "minAgeMinutes": 10,
+      "owner": "",
+      "jobs": 1
+    },
+    "paths": {
+      "music": "",
+      "playlists": "",
+      "archive": ""
+    },
+    "watch": {
+      "enabled": false,
+      "interval": 15,
+      "convert": true,
+      "lyrics": true,
+      "deezer": true
+    },
+    "analysis": {
+      "enabled": true,
+      "depth": "standard",
+      "budgetMinutes": 10,
+      "workers": 0,
+      "lastfmBudget": 3,
+      "classify": "suggest",
+      "autoThreshold": 0.75,
+      "autoNew": true,
+      "ml": true,
+      "mlBudget": 15,
+      "mlThreads": 2,
+      "fingerprints": true,
+      "night": {
+        "enabled": true,
+        "from": "01:00",
+        "to": "05:00"
+      }
+    },
+    "backup": {
+      "enabled": true,
+      "keep": 14,
+      "dir": ""
+    },
+    "mixLearn": true,
+    "smoothTransitions": true,
+    "kinderschutz": {
+      "allow": []
+    },
+    "notify": {
+      "enabled": false,
+      "server": "https://ntfy.sh",
+      "topic": "",
+      "url": "",
+      "events": {
+        "failed": true,
+        "newMusic": true,
+        "autoAssigned": true,
+        "favorites": true,
+        "review": true
+      }
+    },
+    "welten": {
+      "auto": true
+    },
+    "loudness": {
+      "enabled": false,
+      "album": true
+    },
+    "covers": {
+      "enabled": true
+    },
+    "seasonRest": true,
+    "setup": {
+      "done": false
+    }
+  },
+  "personen": [
+    {
+      "id": "familie",
+      "name": "Family",
+      "icon": "i:home",
+      "user": "",
+      "public": true,
+      "prefix": "",
+      "likes": {
+        "welten": [],
+        "stile": [],
+        "artists": []
+      },
+      "dislikes": {
+        "artists": [],
+        "genres": []
+      }
+    }
+  ],
+  "welten": [],
+  "stile": [
+    {
+      "id": "rock",
+      "name": "Rock & Punk",
+      "icon": "i:guitar",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Rock",
+        "Punk",
+        "Metal",
+        "Grunge",
+        "Neue Deutsche H"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "metal",
+      "name": "Metal",
+      "icon": "i:skull",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Metal",
+        "Neue Deutsche H"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "hiphop",
+      "name": "Hip-Hop & Rap",
+      "icon": "i:mic",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Hip Hop",
+        "Hip-Hop",
+        "Rap",
+        "Trap",
+        "Boom Bap"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "pop",
+      "name": "Pop",
+      "icon": "i:piano",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Pop"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "dance",
+      "name": "Dance & Electronic",
+      "icon": "i:disco",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Dance",
+        "House",
+        "Techno",
+        "Trance",
+        "Electro",
+        "Edm",
+        "Happy Hardcore",
+        "Club",
+        "Disco",
+        "Hands Up",
+        "Hardstyle",
+        "Breakbeat",
+        "Big Beat",
+        "Dubstep",
+        "Drum And Bass"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "eurodance",
+      "name": "Eurodance",
+      "icon": "i:party",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Eurodance",
+        "Europop",
+        "Euro-Disco",
+        "Euro House",
+        "Happy Hardcore",
+        "Hands Up",
+        "Italo Dance",
+        "Bubblegum Dance",
+        "Hi-Nrg",
+        "Euro-Trance"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "folk",
+      "name": "Folk & Acoustic",
+      "icon": "i:campfire",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Folk",
+        "Singer-Songwriter",
+        "Acoustic",
+        "Americana",
+        "Bluegrass",
+        "Country",
+        "Celtic",
+        "Sea Shanty",
+        "Stomp And Holler"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "chill",
+      "name": "Calm & Chill",
+      "icon": "i:moon",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Ambient",
+        "Ballad",
+        "New Age",
+        "Downtempo",
+        "Chill",
+        "Lo-Fi",
+        "Easy Listening",
+        "Dream Pop",
+        "Trip Hop",
+        "Slowcore",
+        "Lounge",
+        "Quiet Storm"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klassik",
+      "name": "Classical & Orchestral",
+      "icon": "i:notes",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Classical",
+        "Orchestral",
+        "Symphony",
+        "Cinematic",
+        "Opera"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "soul",
+      "name": "Soul, Funk & Jazz",
+      "icon": "i:waves",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Soul",
+        "Funk",
+        "R&B",
+        "Motown",
+        "Jazz",
+        "Blues",
+        "Big Band"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "latin",
+      "name": "Reggae & Latin",
+      "icon": "i:palm",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Reggae",
+        "Dancehall",
+        "Ska",
+        "Latin",
+        "Samba",
+        "Reggaeton",
+        "Afro",
+        "Lambada",
+        "Tango",
+        "Batucada",
+        "Moombahton"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "schlager",
+      "name": "Schlager & NDW",
+      "icon": "i:party",
+      "group": "Genre",
+      "kind": "normal",
+      "genres": [
+        "Schlager",
+        "Neue Deutsche Welle"
+      ],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "tanzen",
+      "name": "Dance & Romp",
+      "icon": "i:footprints",
+      "group": "Thema",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [
+        "Tanz",
+        "Party",
+        "Bewegung",
+        "Disco",
+        "Fitness",
+        "Dance",
+        "Move"
+      ],
+      "titles": [
+        "Tanz",
+        "Hüpf",
+        "Party",
+        "Dance",
+        "Jump"
+      ],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "schlafen",
+      "name": "Sleep & Dream",
+      "icon": "i:bed",
+      "group": "Thema",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [
+        "Schlaflieder",
+        "zum Entspannen",
+        "Lullab",
+        "Sleep",
+        "Bedtime"
+      ],
+      "titles": [
+        "Schlaflied",
+        "Wiegenlied",
+        "Gute Nacht",
+        "Gute-Nacht",
+        "Lullaby",
+        "Sleep",
+        "Bedtime",
+        "Goodnight",
+        "Good Night"
+      ],
+      "excludeElsewhere": {
+        "albums": [
+          "Schlaflieder",
+          "zum Entspannen",
+          "Lullabies"
+        ],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "sommer",
+      "name": "Summer & Sun",
+      "icon": "i:sun",
+      "group": "Thema",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [
+        "Sommer",
+        "Summer"
+      ],
+      "titles": [
+        "Sommer",
+        "Sonne",
+        "Summer",
+        "Strand",
+        "Urlaub",
+        "Ferien",
+        "Beach"
+      ],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": [
+        "06-01",
+        "08-31"
+      ],
+      "filters": {}
+    },
+    {
+      "id": "fruehling",
+      "name": "Spring & Easter",
+      "icon": "i:flower",
+      "group": "Jahreszeit",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [
+        "Frühlingslieder",
+        "Osterlieder",
+        "Spring",
+        "Easter"
+      ],
+      "titles": [
+        "Frühling",
+        "Ostern",
+        "Osterhase",
+        "Osterei",
+        "Spring",
+        "Easter"
+      ],
+      "excludeElsewhere": {
+        "albums": [
+          "Frühlingslieder",
+          "Osterlieder"
+        ],
+        "titles": [
+          "Osterhase",
+          "Osterei"
+        ],
+        "genres": []
+      },
+      "season": [
+        "03-01",
+        "04-30"
+      ],
+      "filters": {}
+    },
+    {
+      "id": "herbst",
+      "name": "Autumn & Lanterns",
+      "icon": "i:leaf",
+      "group": "Jahreszeit",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [
+        "Laterne",
+        "Herbstlieder",
+        "Autumn",
+        "Lantern"
+      ],
+      "titles": [
+        "Laterne",
+        "Sankt Martin",
+        "St. Martin",
+        "Herbst",
+        "Autumn",
+        "Lantern"
+      ],
+      "excludeElsewhere": {
+        "albums": [
+          "Laterne"
+        ],
+        "titles": [
+          "Laterne",
+          "Sankt Martin",
+          "St. Martin"
+        ],
+        "genres": []
+      },
+      "season": [
+        "09-15",
+        "11-15"
+      ],
+      "filters": {}
+    },
+    {
+      "id": "halloween",
+      "name": "Halloween",
+      "icon": "i:ghost",
+      "group": "Jahreszeit",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [
+        "Halloween"
+      ],
+      "titles": [
+        "Halloween",
+        "Gespenst",
+        "Grusel",
+        "Ghost",
+        "Spooky"
+      ],
+      "excludeElsewhere": {
+        "albums": [
+          "Halloween"
+        ],
+        "titles": [],
+        "genres": []
+      },
+      "season": [
+        "10-01",
+        "11-01"
+      ],
+      "filters": {}
+    },
+    {
+      "id": "winter",
+      "name": "Winter & Snow",
+      "icon": "i:snowflake",
+      "group": "Jahreszeit",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [
+        "Winter",
+        "Snow"
+      ],
+      "titles": [
+        "Winter",
+        "Schnee",
+        "Snow"
+      ],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": [
+        "12-01",
+        "02-28"
+      ],
+      "filters": {}
+    },
+    {
+      "id": "weihnachten",
+      "name": "Christmas",
+      "icon": "i:xmas",
+      "group": "Jahreszeit",
+      "kind": "normal",
+      "genres": [
+        "Christmas"
+      ],
+      "artists": [],
+      "albums": [
+        "Weihnacht",
+        "Christmas",
+        "Xmas",
+        "Noël",
+        "Carols"
+      ],
+      "titles": [
+        "Weihnacht",
+        "Christmas",
+        "Xmas",
+        "Jingle Bell",
+        "Nikolaus",
+        "Christkind",
+        "Tannenbaum",
+        "Rudolph",
+        "Stille Nacht"
+      ],
+      "excludeElsewhere": {
+        "albums": [
+          "Weihnacht",
+          "Christmas",
+          "Xmas",
+          "Noël",
+          "Carols"
+        ],
+        "titles": [
+          "Weihnacht",
+          "Christmas",
+          "Xmas",
+          "Jingle Bell",
+          "Nikolaus",
+          "Christkind",
+          "Tannenbaum"
+        ],
+        "genres": [
+          "Christmas"
+        ]
+      },
+      "season": [
+        "11-25",
+        "01-06"
+      ],
+      "filters": {}
+    },
+    {
+      "id": "jahreszeit",
+      "name": "Right for the season",
+      "icon": "i:calendar",
+      "group": "Jahreszeit",
+      "kind": "season",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "70er",
+      "name": "70s",
+      "icon": "i:radio",
+      "group": "Zeitreise",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "years": [
+          1970,
+          1979
+        ]
+      }
+    },
+    {
+      "id": "80er",
+      "name": "80s",
+      "icon": "i:cassette",
+      "group": "Zeitreise",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "years": [
+          1980,
+          1989
+        ]
+      }
+    },
+    {
+      "id": "90er",
+      "name": "90s",
+      "icon": "i:disc",
+      "group": "Zeitreise",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "years": [
+          1990,
+          1999
+        ]
+      }
+    },
+    {
+      "id": "2000er",
+      "name": "2000s",
+      "icon": "i:player",
+      "group": "Zeitreise",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "years": [
+          2000,
+          2009
+        ]
+      }
+    },
+    {
+      "id": "2010er",
+      "name": "2010s",
+      "icon": "i:smartphone",
+      "group": "Zeitreise",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "years": [
+          2010,
+          2019
+        ]
+      }
+    },
+    {
+      "id": "2020er",
+      "name": "2020s",
+      "icon": "i:headphones",
+      "group": "Zeitreise",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "years": [
+          2020,
+          2029
+        ]
+      }
+    },
+    {
+      "id": "tophits",
+      "name": "Top hits",
+      "icon": "i:star",
+      "group": "Spezial",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "minRating": 4
+      }
+    },
+    {
+      "id": "lieblinge",
+      "name": "Favorite songs",
+      "icon": "i:heart",
+      "group": "Spezial",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "loved": true
+      }
+    },
+    {
+      "id": "neu",
+      "name": "Newly added",
+      "icon": "i:new",
+      "group": "Spezial",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "addedDays": 60
+      }
+    },
+    {
+      "id": "wiederentdecken",
+      "name": "Not heard in a while",
+      "icon": "i:repeat",
+      "group": "Spezial",
+      "kind": "normal",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {
+        "notPlayedDays": 90,
+        "minRating": 3
+      }
+    },
+    {
+      "id": "klang-schlaf",
+      "name": "Falling asleep",
+      "icon": "i:bed",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "moods": [
+          "schlaf"
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-morgen",
+      "name": "Good morning",
+      "icon": "i:sun",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "moods": [
+          "froh"
+        ],
+        "arousal": [
+          0.25,
+          0.7
+        ]
+      },
+      "arc": "rise",
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-ruhig",
+      "name": "Calm & gentle",
+      "icon": "i:moon",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "moods": [
+          "ruhig"
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-gute-laune",
+      "name": "Good mood",
+      "icon": "i:sun",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "moods": [
+          "froh"
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-tanzbar",
+      "name": "Danceable",
+      "icon": "i:disco",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "moods": [
+          "tanzbar"
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-toben",
+      "name": "Running wild",
+      "icon": "i:zap",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "energy": [
+          0.62,
+          1
+        ],
+        "dance": [
+          0.4,
+          1
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-power",
+      "name": "Full power",
+      "icon": "i:flame",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "arousal": [
+          0.7,
+          1
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-hintergrund",
+      "name": "In the background",
+      "icon": "i:waves",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "approachable": [
+          0.6,
+          1
+        ],
+        "engaging": [
+          0,
+          0.6
+        ],
+        "arousal": [
+          0,
+          0.55
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    },
+    {
+      "id": "klang-zuhoeren",
+      "name": "For listening closely",
+      "icon": "i:headphones",
+      "group": "Klang",
+      "kind": "normal",
+      "sound": {
+        "engaging": [
+          0.75,
+          1
+        ],
+        "dance": [
+          0,
+          0.55
+        ]
+      },
+      "genres": [],
+      "artists": [],
+      "albums": [],
+      "titles": [],
+      "excludeElsewhere": {
+        "albums": [],
+        "titles": [],
+        "genres": []
+      },
+      "season": null,
+      "filters": {}
+    }
+  ],
+  "playlists": [],
+  "dismissed": [],
+  "ignored": []
+}

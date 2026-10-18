@@ -1,0 +1,15 @@
+# Only the program goes into the image – no data, credentials, caches or builds from the PC
+*
+!Dockerfile
+!tuttiphon.py
+!CHANGELOG.md
+!LICENSE
+!THIRD-PARTY-NOTICES.md
+!app
+!frontend
+!package.json
+!package-lock.json
+!vite.config.js
+app/__pycache__
+**/__pycache__
+**/node_modules

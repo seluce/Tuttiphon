@@ -1,0 +1,74 @@
+# Builds the Docker image and publishes it on the GitHub Container Registry when a release is published
+# (tag = the version from app/version.py, e.g. 1.0.0 or v1.0.0): ghcr.io/<owner>/tuttiphon:<version>, plus :latest
+# when this tag is the newest published release (never a pre-release, never an older version built again).
+# By hand ("Run workflow") only from a version tag. The build stops if the AI models cannot be downloaded.
+# Only linux/amd64 – the AI sound analysis (essentia-tensorflow) exists for x86-64 only.
+# The first push creates the package as private: set it to public once (package settings → Change visibility).
+name: Docker image
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-image
+  cancel-in-progress: false
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Image name and version
+        id: meta
+        run: |
+          echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/tuttiphon" >> "$GITHUB_OUTPUT"
+          echo "version=$(sed -n 's/^VERSION = "\(.*\)"/\1/p' app/version.py)" >> "$GITHUB_OUTPUT"
+      - name: Only from a version tag that matches app/version.py
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          [ "$GITHUB_REF_TYPE" = "tag" ] || { echo "::error::Run this workflow from a version tag, not from a branch"; exit 1; }
+          [ "${GITHUB_REF_NAME#v}" = "$VERSION" ] \
+            || { echo "::error::Tag $GITHUB_REF_NAME does not match app/version.py ($VERSION)"; exit 1; }
+      - name: Tags
+        id: tags
+        env:
+          IMAGE: ${{ steps.meta.outputs.image }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          PRERELEASE: ${{ github.event.release.prerelease || false }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # :latest only for the newest published release – GitHub's "latest release" is never a pre-release or a draft
+          newest=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)
+          [ -n "$newest" ] || echo "::warning::The newest release could not be read – :latest stays where it is"
+          {
+            echo "list<<EOF"
+            echo "$IMAGE:$VERSION"
+            if [ "$PRERELEASE" != "true" ] && [ "$newest" = "$GITHUB_REF_NAME" ]; then
+              echo "$IMAGE:latest"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            VERSION=${{ steps.meta.outputs.version }}
+            MODELS_REQUIRED=1
+          tags: ${{ steps.tags.outputs.list }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
