@@ -1203,6 +1203,14 @@ def api_accounts_save(body):
     return {"ok": True}
 
 
+def api_login_info():
+    """For the sign-in page, without signing in: can people sign in with their Navidrome account yet? Only once the
+    address and the admin access are there – before that only the local administrator gets in (and the setup
+    assistant connects Navidrome)."""
+    env = load_env()
+    return {"navidrome": bool(env.get("NAV_URL") and env.get("NAV_ADMIN_USER") and env.get("NAV_ADMIN_PASS"))}
+
+
 def api_users():
     try:
         native = playlists.native_api(load_env())
@@ -1965,6 +1973,8 @@ class Handler(BaseHTTPRequestHandler):
                 if self.headers.get("X-Tuttiphon") != "1":
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – sign-in only from the interface
                 return self._login()
+            if path == "/api/login" and method == "GET":   # public: which sign-in the page offers
+                return self._json(api_login_info())
             clean = posixpath.normpath(urllib.parse.unquote(path))   # “/assets/../help/…” is not public
             public = clean in ("/login.html", "/favicon.svg", "/manifest.webmanifest", "/sw.js") or clean.startswith(("/icons/", "/assets/"))
             if path == "/api/logout" and method == "POST":
@@ -2280,10 +2290,10 @@ def startup_report():
             state = _s("created when needed")
         else:
             state = _s("MISSING")
-        out.append(f"  {label}: {path} – {state}")
+        out.append("  " + label + f": {path} – " + state)   # + keeps the English form for the server log
     env = load_env()
     url = env.get("NAV_URL") or _s("address missing (Settings → Navidrome)")
-    out.append(f"  Navidrome: {url}" if env.get("NAV_ADMIN_USER")
+    out.append("  Navidrome: " + url if env.get("NAV_ADMIN_USER")
                else _s("  Navidrome: {url} – admin access not entered yet", url=url))
     ok, why = ml.available()
     out.append(_s("  AI sound analysis: {state}", state=_s("ready") if ok else why))
@@ -2295,7 +2305,7 @@ def startup_report():
         parts.append(_s("night analysis {start}–{end}", start=night.get("from") or "01:00", end=night.get("to") or "05:00"))
     if (st.get("watch") or {}).get("enabled"):
         parts.append(_s("folder watch on"))
-    out.append(" · ".join(parts))
+    out.append(i18n.join(" · ", parts))
     return out
 
 

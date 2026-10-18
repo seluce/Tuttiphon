@@ -109,7 +109,7 @@ the migration to v10 writes the value they had ([Version and migration](#version
 
 | Key | Type | Default | Meaning | Validation |
 |---|---|---|---|---|
-| `language` | string | `"en"` (existing installations after the migration to v6: `"de"`) | Server language: logs, notifications, names and descriptions that Tuttiphon assigns itself (`i18n._s()`). Messages to the interface follow the language of the request (header `X-Lang`). A switch also renames the bundled vibes, the person “Family” and `allName`, as long as they still carry their bundled name (`config.localize_defaults()`) | `en` or `de` |
+| `language` | string | `"en"` (existing installations after the migration to v6: `"de"`) | Server language: run logs, notifications, names and descriptions that Tuttiphon assigns itself (`i18n._s()`); the server log (`docker logs`) is always English. Messages to the interface follow the language of the request (header `X-Lang`). A switch also renames the bundled vibes, the person “Family” and `allName`, as long as they still carry their bundled name (`config.localize_defaults()`) | `en` or `de` |
 
 Each device stores the interface language itself (`localStorage` `tuttiphon-lang`, Settings → General → Language);
 without a choice, the browser language applies.

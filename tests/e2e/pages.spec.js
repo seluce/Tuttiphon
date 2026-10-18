@@ -45,6 +45,18 @@ test('sign-in page', async ({ page }) => {
   await expect(page.getByText('Administrator-Passwort', { exact: true })).toBeVisible()
 })
 
+test('sign-in page of a new installation: only the local administrator', async ({ page }) => {
+  // not connected to Navidrome yet (played in the browser – the test copy is connected)
+  await page.route('**/api/login', (route) => route.request().method() === 'GET'
+    ? route.fulfill({ json: { navidrome: false } }) : route.continue())
+  await page.goto('/login.html')
+  await expect(page.getByText('Noch nicht eingerichtet')).toBeVisible()
+  await expect(page.getByText('Administrator-Passwort', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('Benutzername')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Zurück zur normalen Anmeldung' })).toHaveCount(0)
+  await expect(page.locator('#password')).toBeFocused()
+})
+
 test('without a session it goes to sign-in', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/login\.html/)

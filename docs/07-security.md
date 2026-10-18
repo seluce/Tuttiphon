@@ -36,8 +36,9 @@ flowchart TD
     P -- no --> H{"Host header localhost<br/>or in TUTTIPHON_HOSTS?"}
     H -- no --> E421["421"]
     H -- yes --> L
-    P -- yes --> L{"POST /api/login<br/>or /api/logout?"}
-    L -- login --> XL{"Header X-Tuttiphon: 1?"}
+    P -- yes --> L{"/api/login<br/>or POST /api/logout?"}
+    L -- "GET login" --> LI["{navidrome: bool}"]
+    L -- "POST login" --> XL{"Header X-Tuttiphon: 1?"}
     XL -- no --> F403
     XL -- yes --> LX["sign in"]
     L -- logout --> LO["sign out"]
@@ -115,7 +116,9 @@ asks for the password again.
 
 Tuttiphon's own administrator account, without a Navidrome account – for the first setup and for when Navidrome is
 unreachable: user name empty (sign-in page → “Local administrator”, field “Administrator password”) and the password
-from `TUTTIPHON_ADMIN_PASSWORD`. The comparison runs in
+from `TUTTIPHON_ADMIN_PASSWORD`. As long as Navidrome is not connected (address or admin access missing), the sign-in
+page offers only this access: it asks the public `GET /api/login`, which answers nothing but `{"navidrome": bool}` –
+a Navidrome account could not sign in yet, and without the admin access every account would count as a user. The comparison runs in
 constant time (`hmac.compare_digest`); a wrong password → “The administrator password is wrong.” The session belongs to
 the internal user `@notfall` (`auth.NOTFALL`):
 

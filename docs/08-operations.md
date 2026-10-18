@@ -618,10 +618,15 @@ request while a server on the network has no proper administrator password; 500 
 (under a lock, with `flush`; in the image, `PYTHONUNBUFFERED=1` makes sure nothing gets stuck). On the PC this ends up
 in the terminal – a server started via the menu entry has none, so it cannot be seen there.
 
+The server log is **always English**, whatever the server language: every translated text carries its English form
+(`i18n.Text`, `.en`), and `say()` as well as the console output of `tuttiphon.py` print it (`i18n.english()`). The run
+logs in `logs/` and in the interface stay in the server language. Lines glued together with `+` keep both forms;
+`i18n.join()` and `i18n.said()` (message of an exception) do the same for lists and errors.
+
 | When | Lines | Code |
 |---|---|---|
 | Startup | “Tuttiphon <version> is starting[ in the Docker container]”, then indented per storage location “Data/Music/Playlists/Archive/Backups: <path> – writable \| NOT writable \| created when needed \| MISSING”, “Navidrome: <NAV_URL>” (or “address missing …”, possibly with “– admin access not entered yet”), “AI sound analysis: ready” or the reason, “Daily at <dailyAt>: <mode> · night analysis <from>–<to> · folder watch on” (the last two only if turned on). In the container then “Ready – port 8765”; on the PC instead (without timestamp) “Tuttiphon is running at http://…/ (Ctrl+C quits)”. If the overview fails: “(Startup overview not possible: …)” | `tuttiphon.py`, `web.startup_report()` |
-| Run | every non-indented, non-empty line of the run log: “▶ <name> – <date time>”, “━━ <step> ━━”, messages from the steps (e.g. “Scan finished: …”, “Classification: …”), “❌ …”, “⏸ Short pause for “…” …”, “■ Done. <step>: <result>, …”. Indented detail lines are only in `logs/` | `TaskRunner.log()` (only in the server, not with `run`) |
+| Run | every non-indented, non-empty line of the run log, in English: “▶ <name> – <date time>”, “━━ <step> ━━”, messages from the steps (e.g. “Scan finished: …”, “Classification: …”), “❌ …”, “⏸ Short pause for “…” …”, “■ Done. <step>: <result>, …”. Indented detail lines are only in `logs/` | `TaskRunner.log()` (only in the server, not with `run`) |
 | Sign-in | “Signed in: <account>”, “Sign-in failed: <name>” (only failed attempts that count), “Sign-in blocked (too many failed attempts): <name>”; the local administrator is called “Local administrator” (`web._who()`) | `Handler._login()` |
 | Error | “⚠ Error at <method> <path>: <type>: <text>” for every request that ends with `500` | `Handler._handle()` |
 | Backup | “Backup created: <file> (<n> KB) in <folder>” – only the daily one, not “Back up now” | `web._backup_daily()` |

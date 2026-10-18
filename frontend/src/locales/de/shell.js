@@ -309,6 +309,7 @@ export default {
   'Signing in did not work.': 'Anmelden hat nicht geklappt.',
   'Tuttiphon cannot be reached right now. Please try again shortly.': 'Tuttiphon ist gerade nicht erreichbar. Bitte gleich nochmal versuchen.',
   'Tuttiphon’s own administrator – works without Navidrome.': 'Der eigene Administrator von Tuttiphon – funktioniert auch ohne Navidrome.',
+  'Not set up yet: sign in as local administrator – the setup assistant then connects Tuttiphon to Navidrome.': 'Noch nicht eingerichtet: Melde dich als lokaler Administrator an – der Einrichtungsassistent verbindet Tuttiphon dann mit Navidrome.',
   'Username': 'Benutzername',
   'Administrator password': 'Administrator-Passwort',
   'Password': 'Passwort',

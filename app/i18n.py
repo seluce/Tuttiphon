@@ -9,6 +9,10 @@ area). A missing entry shows the English text.
   (Settings → General), "en" or "de".
 * _n / _sn – the same with a count: _n(n, "{n} song", "{n} songs").
 
+The server log (stdout – docker logs) is always English: a translated text is a Text that also carries its English
+form (.en, also for values that are translated texts themselves); events.say() and the run log print english(text).
+Texts glued together with + keep both forms, f-strings and str.join() do not – use a template or join() for log lines.
+
 Values go into {placeholders}: _("Unknown playlist: {name}", name=x) – any name works, also "text". Only literal texts – tools/i18n_check.py reads
 them from the code. Never translate at import time (the language changes per request and with the setting): fixed
 texts in module-level constants are marked with N_("…") and translated where they are used, e.g. _(STEP_TITLES[s]).
@@ -68,22 +72,77 @@ def tr(text, lang, /, **values):
     return s.format(**values) if values else s
 
 
+class Text(str):
+    """A translated text that also knows its English form (.en) – for the server log, which is always English."""
+
+    def __new__(cls, local, en):
+        obj = super().__new__(cls, local)
+        obj.en = en
+        return obj
+
+    def __getnewargs__(self):   # copy.deepcopy() and pickle rebuild it with both forms
+        return str(self), self.en
+
+    def __add__(self, other):
+        return Text(str.__add__(self, str(other)), self.en + english(other))
+
+    def __radd__(self, other):
+        return Text(str(other) + str(self), english(other) + self.en)
+
+
+def english(text):
+    """English form of a text (Text) or of an exception whose message is one – everything else as it is."""
+    if isinstance(text, BaseException):
+        args = text.args
+        return english(args[0]) if len(args) == 1 and isinstance(args[0], Text) else str(text)
+    return text.en if isinstance(text, Text) else str(text)
+
+
+def said(error):
+    """Message of an exception for a log line – with its English form if it is a translated text."""
+    msg, en = str(error), english(error)
+    return Text(msg, en) if en != msg else msg
+
+
+def join(sep, parts):
+    """sep.join(parts) that keeps the English form of translated parts."""
+    parts = list(parts)
+    local = sep.join(str(x) for x in parts)
+    en = sep.join(english(x) for x in parts)
+    return Text(local, en) if en != local else local
+
+
+def _has_en(value):
+    return isinstance(value, Text) or (isinstance(value, BaseException) and len(value.args) == 1
+                                       and isinstance(value.args[0], Text))
+
+
+def _both(text, lang, values):
+    """Text in lang – with its English form if that differs (values that are Texts go in as their English form)."""
+    local = tr(text, lang, **values)
+    has_text = any(_has_en(v) for v in values.values())
+    if lang == "en" and not has_text:
+        return local
+    en = tr(text, "en", **({k: english(v) if _has_en(v) else v for k, v in values.items()} if has_text else values))
+    return Text(local, en) if en != local else local
+
+
 def N_(text, /):
     """Marks a fixed text for translation without translating it (constants; translated where used)."""
     return text
 
 
 def _(text, /, **values):
-    return tr(text, current(), **values)
+    return _both(text, current(), values)
 
 
 def _s(text, /, **values):
-    return tr(text, server_lang(), **values)
+    return _both(text, server_lang(), values)
 
 
 def _n(n, one, other, /, **values):
-    return tr(one if n == 1 else other, current(), n=n, **values)
+    return _both(one if n == 1 else other, current(), {"n": n, **values})
 
 
 def _sn(n, one, other, /, **values):
-    return tr(one if n == 1 else other, server_lang(), n=n, **values)
+    return _both(one if n == 1 else other, server_lang(), {"n": n, **values})

@@ -15,7 +15,7 @@ import webbrowser
 
 sys.dont_write_bytecode = True   # no __pycache__ folders on the NAS
 
-from app.i18n import _s, _sn  # noqa: E402
+from app.i18n import _s, _sn, english  # noqa: E402
 from app.tasks import PIPELINE, STEP_TITLES, TaskRunner, pipeline  # noqa: E402
 
 
@@ -46,7 +46,7 @@ def main():
     from app.config import ensure_dirs
     problem = ensure_dirs()
     if problem:
-        print("✕ " + problem, flush=True)
+        print("✕ " + english(problem), flush=True)   # the console (docker logs) is always English
         return 2
     if args.cmd == "run":
         steps = pipeline() if "all" in args.steps else args.steps
@@ -57,7 +57,7 @@ def main():
             runner.start(steps, background=False, deezer_mode=args.deezer_mode, overwrite_manual=args.overwrite_manual,
                          full_scan=args.full_scan, dry_run=args.dry_run, lyrics_all=args.lyrics_all)
         except RuntimeError as e:   # e.g. another instance is working right now
-            print(f"✕ {e}", flush=True)
+            print("✕ " + english(e), flush=True)
             return 1
         return 0 if all(r == "ok" for r in runner.results.values()) else 1
 
@@ -85,14 +85,14 @@ def main():
                               "characters ({source}).", source=source)
             fix = _s("Please enter your own password with at least 8 characters in docker-compose.yaml (or in the .env "
                      "in the data folder) and restart.")
-            print(f"✕ {problem} {fix}", flush=True)
+            print(f"✕ {english(problem)} {english(fix)}", flush=True)
             return 2
         if pw:
-            print(_s("⚠ Tuttiphon is reachable on the network, but the administrator password is too short or still the "
-                     "placeholder!"), flush=True)
+            print(english(_s("⚠ Tuttiphon is reachable on the network, but the administrator password is too short or "
+                             "still the placeholder!")), flush=True)
         else:
-            print(_s("⚠ Without TUTTIPHON_ADMIN_PASSWORD there is no login – Tuttiphon then only answers requests via "
-                     "127.0.0.1/localhost and the names in TUTTIPHON_HOSTS."), flush=True)
+            print(english(_s("⚠ Without TUTTIPHON_ADMIN_PASSWORD there is no login – Tuttiphon then only answers "
+                             "requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.")), flush=True)
     server = serve(host, port, strict=not getattr(args, "unsafe_no_password", False))
     shown = "127.0.0.1" if host == "0.0.0.0" else "[::1]" if host == "::" else f"[{host}]" if ":" in host else host
     url = f"http://{shown}:{port}/"
@@ -107,7 +107,7 @@ def main():
     if IN_DOCKER:
         events.say(_s("Ready – port {port}", port=port))
     else:
-        print(_s("Tuttiphon is running at {url}  (Ctrl+C quits)", url=url), flush=True)
+        print(english(_s("Tuttiphon is running at {url}  (Ctrl+C quits)", url=url)), flush=True)
     if not getattr(args, "no_browser", False):
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
     def terminate(*_args):   # docker stop / restart: like Ctrl+C – cancel the running task so it saves its progress

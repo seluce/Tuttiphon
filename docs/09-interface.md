@@ -175,6 +175,9 @@ reverse proxy answers 502–504 – `api()` marks such errors with `offline`), t
 at the top of the page, the status is asked again every 5 s, and as soon as the server answers the change is saved.
 `api()` errors carry `status`; without an error text from the server they say “The server reported an error (status)”.
 A 401 leads to the sign-in page with the address within the app (`/login.html#/…`), and after signing in back there.
+The sign-in page asks `GET /api/login` first: as long as Navidrome is not connected (`{"navidrome": false}`, e.g. a new
+installation), it opens straight as the local administrator with a hint and without the switch to the normal sign-in;
+after signing in, the setup assistant takes over.
 
 **Undo.** Before a change `snapshot()`, afterwards `toast('…', { undo: true })`. The button restores the previous state,
 closes open overlays (which would otherwise keep working on old objects) and saves. The toast disappears by

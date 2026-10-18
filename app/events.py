@@ -1,11 +1,14 @@
 """Messages for the server log (in the container: docker logs or UGOS → Container → Log).
 
 Short and with a timestamp: what Tuttiphon is doing right now – start, runs and their results, schedules, logins,
-errors. The detailed logs of the runs stay in logs/ (interface: History). Callers translate with _s().
+errors. The detailed logs of the runs stay in logs/ (interface: History). Callers translate with _s() as usual – the
+server log itself is always English (i18n.english(): the English form of the text).
 """
 import re
 import threading
 import time
+
+from .i18n import english
 
 _lock = threading.Lock()
 # control characters (also the Unicode line and paragraph separators and the invisible direction marks) – values
@@ -22,5 +25,5 @@ def clean(text, keep_lines=True):
 def say(text):
     stamp = time.strftime("%d.%m. %H:%M:%S")
     with _lock:
-        for line in clean(text).splitlines() or [""]:
+        for line in clean(english(text)).splitlines() or [""]:
             print(f"[{stamp}] {line}", flush=True)

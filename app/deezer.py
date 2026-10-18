@@ -33,7 +33,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 from .config import STATE_DIR, load_config, rating_users, read_text, user_password, write_atomic
-from .i18n import _, _s, _sn
+from .i18n import _, _s, _sn, said
 from .navidrome import Navidrome, NavidromeError
 
 STATE_FILE = STATE_DIR / "deezer.json"
@@ -342,7 +342,7 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
             nav = Navidrome(env["NAV_URL"], user, pw)
             users[user] = (nav, {s["id"]: s.get("userRating", 0) for s in nav.all_songs()})
         except NavidromeError as e:
-            log(f"⚠ {e}")
+            log("⚠ " + said(e))
             from . import auth
             if auth.wrong_password(e):   # the interface then asks for the password again
                 auth.note_password(user, False)

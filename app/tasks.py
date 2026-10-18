@@ -11,7 +11,7 @@ import traceback
 
 from . import deezer, events, instances, playlists, rules
 from .config import LOG_DIR, STATE_DIR, load_config, load_env, read_text, update_config, write_atomic
-from .i18n import N_, _, _s, _sn
+from .i18n import N_, _, _s, _sn, english, join, said
 from .library import CACHE
 from .navidrome import Navidrome
 from .rules import BuildContext
@@ -193,7 +193,11 @@ class TaskRunner:
     # ------------------------------------------------------------------ Log
     def log(self, text=""):
         stamp = time.strftime("%H:%M:%S")
-        for line in (ANSI.sub("", str(text)).splitlines() or [""]):
+        lines = ANSI.sub("", str(text)).splitlines() or [""]
+        en = ANSI.sub("", english(text)).splitlines() or [""]   # the server log is always English
+        if len(en) != len(lines):
+            en = lines
+        for line, line_en in zip(lines, en):
             with self.lock:
                 self.seq += 1
                 self.lines.append((self.seq, stamp, line))
@@ -203,9 +207,9 @@ class TaskRunner:
                 self.logfile.write(f"[{stamp}] {line}\n")
                 self.logfile.flush()
             if self.echo:
-                print(line, flush=True)
+                print(line_en, flush=True)
             elif line.strip() and not line[0].isspace():   # server: headings and results into the server log
-                events.say(line)
+                events.say(line_en)
 
     def status(self, since=0):
         with self.lock:
@@ -252,7 +256,7 @@ class TaskRunner:
                         "full": _s("Deezer: full check"), "recalc": _s("Deezer: recalculate stars"),
                         "both": _s("Deezer: new + not found"), "refresh": _s("Deezer: refresh")}.get(mode, "Deezer: ")
             else:
-                name = " + ".join(_s(STEP_TITLES[s]) for s in steps)   # i18n-ignore
+                name = join(" + ", (_s(STEP_TITLES[s]) for s in steps))   # i18n-ignore
         self.name = name
         self.results = {}
         self.finished_at = None
@@ -344,7 +348,7 @@ class TaskRunner:
         self.logfile = path.open("w", encoding="utf-8")
         ctx = {"summary": {}, "steps": list(steps)}
         try:
-            self.log(f"▶ {self.name} – {started:%d.%m.%Y %H:%M}")
+            self.log("▶ " + self.name + f" – {started:%d.%m.%Y %H:%M}")   # + keeps the English form of the name
             self._langzeit(opts)
             for pos, step in enumerate(steps):
                 if self.stop.is_set():
@@ -353,20 +357,20 @@ class TaskRunner:
                 self._pos = pos
                 self.step = step
                 self.log("")
-                self.log(f"━━ {_s(STEP_TITLES[step])} ━━")   # i18n-ignore
+                self.log("━━ " + _s(STEP_TITLES[step]) + " ━━")   # i18n-ignore
                 t0 = time.time()
                 try:
                     ok = getattr(self, f"_step_{step}")(ctx, **opts)
                     self.results[step] = "abgebrochen" if self.stop.is_set() else "ok" if ok is not False else "warnung"
                 except Exception as e:   # one step must not prevent the others
                     self.results[step] = "fehler"
-                    self.log(f"❌ {e}")
+                    self.log("❌ " + said(e))
                     if not isinstance(e, RuntimeError):
                         self.log(traceback.format_exc().strip().splitlines()[-1])
                 self.log(f"   ({int(time.time() - t0)} s)")
             self.step = None
             self.log("")
-            done = ", ".join(_s(RESULT_TEXTS[r], step=_s(STEP_TITLES[s])) for s, r in self.results.items())   # i18n-ignore
+            done = join(", ", (_s(RESULT_TEXTS[r], step=_s(STEP_TITLES[s])) for s, r in self.results.items()))   # i18n-ignore
             self.log(_s("■ Done. {results}", results=done))
         finally:
             ended = dt.datetime.now()
@@ -451,7 +455,7 @@ class TaskRunner:
             try:
                 out["lastfm"] = lastfm.refresh(names, log=self.log, stop=self.stop, budget=0 if analyse_full else an.get("lastfmBudget", 3))
             except Exception as e:   # noqa: BLE001 – Last.fm must never prevent sound analysis and AI
-                self.log(f"⚠ Last.fm: {e}")
+                self.log("⚠ Last.fm: " + said(e))
         else:
             self.log(_s("Last.fm: no key entered – similar bands and tags are missing (Settings → Intelligence)."))
         if self.stop.is_set():

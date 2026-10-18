@@ -1,12 +1,13 @@
 <!-- Sign-in with the Navidrome account – or as local administrator (TUTTIPHON_ADMIN_PASSWORD). -->
 <script>
-  import { untrack } from 'svelte'
+  import { tick, untrack } from 'svelte'
   import Icon from './components/Icon.svelte'
   import { t, lang } from './lib/i18n.svelte.js'
   import { appHash } from './lib/api.js'
 
   const NORMAL_SUB = $derived(t('Sign in with your Navidrome account – with the same name and password as in Symfonium.'))
   let notfall = $state(false)
+  let setup = $state(false)   // not connected to Navidrome yet: only the local administrator can sign in
   let username = $state('')
   let password = $state('')
   let remember = $state(true)
@@ -21,6 +22,13 @@
   // No sign-in needed at all (or already signed in)? Then go straight on.
   fetch('/api/me', { headers: { 'X-Tuttiphon': '1' } }).then((r) => { if (r.ok) location.replace(target) }).catch(() => {})
   try { username = localStorage.getItem('tuttiphon-user') || '' } catch { /* private mode */ }
+  // new installation: straight to the local administrator – a Navidrome account cannot sign in yet
+  fetch('/api/login').then((r) => (r.ok ? r.json() : null)).then(async (d) => {
+    if (d?.navidrome !== false) return
+    setup = notfall = true
+    await tick()
+    pwInput?.focus()
+  }).catch(() => {})
   // only when opening: with a remembered name go straight to the password field – not on every typed letter
   $effect(() => { (untrack(() => username) ? pwInput : userInput)?.focus() })
   $effect(() => { document.title = t('Tuttiphon – Sign in') })
@@ -69,7 +77,8 @@
     <div class="grid justify-items-center gap-1.5 text-center mb-1">
       <img src="/favicon.svg" alt="" class="size-[60px]" />
       <h1 class="text-[1.5rem]">Tuttiphon</h1>
-      <p class="muted text-[.92rem]">{notfall ? t('Tuttiphon’s own administrator – works without Navidrome.') : NORMAL_SUB}</p>
+      <p class="muted text-[.92rem]">{setup ? t('Not set up yet: sign in as local administrator – the setup assistant then connects Tuttiphon to Navidrome.')
+        : notfall ? t('Tuttiphon’s own administrator – works without Navidrome.') : NORMAL_SUB}</p>
     </div>
     {#if !notfall}
       <div class="grid gap-1.5">
@@ -96,9 +105,11 @@
     {/if}
     <button class="btn primary py-[13px]" disabled={busy}>{busy ? t('One moment …') : t('Sign in')}</button>
     {#if error}<div class="err-t text-[.9rem] text-center" role="alert">{error}</div>{/if}
-    <button type="button" class="link underline underline-offset-[3px] justify-self-center p-1 font-normal" onclick={toggleMode}>
-      {notfall ? t('Back to normal sign-in') : t('Local administrator')}
-    </button>
+    {#if !setup}
+      <button type="button" class="link underline underline-offset-[3px] justify-self-center p-1 font-normal" onclick={toggleMode}>
+        {notfall ? t('Back to normal sign-in') : t('Local administrator')}
+      </button>
+    {/if}
     {#if notfall}
       <p class="text-[.82rem] muted text-center">{t('The password set in docker-compose.yaml during setup. The local administrator has all rights and works even when Navidrome cannot be reached.')}</p>
     {/if}

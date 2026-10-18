@@ -95,5 +95,7 @@ volumes:
 
 ## Language
 
-Each browser chooses its language (Settings → General) and switches instantly. The server language – for playlist
-names in Navidrome, notifications and logs – is set there too.
+Everyone chooses the language of the interface for their own device (Settings → General – users too) and it
+switches instantly; the sign-in page follows that choice, otherwise the browser's language. The server language – for
+playlist names in Navidrome, notifications and the run logs – is set there too, by administrators only. The container
+log (`docker logs`) is always English.

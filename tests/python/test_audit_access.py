@@ -97,6 +97,19 @@ class TestServer(unittest.TestCase):
         with mock.patch.object(web, "admin_password", return_value=""):
             self.assertNotEqual(self.request("GET", "/api/status")[0], 503)   # only on the PC: local without sign-in
 
+    def test_sign_in_page_learns_whether_navidrome_is_connected(self):
+        # public, before signing in: until address and admin access are there, only the local administrator gets in
+        with mock.patch.object(web, "admin_password", return_value="ein-gutes-passwort"):
+            with mock.patch.object(web, "load_env", return_value={"NAV_URL": "http://nav.test"}):
+                status, data, _ = self.request("GET", "/api/login")
+                self.assertEqual((status, json.loads(data)), (200, {"navidrome": False}))
+            full = {"NAV_URL": "http://nav.test", "NAV_ADMIN_USER": "admin-test", "NAV_ADMIN_PASS": "pw-test"}
+            with mock.patch.object(web, "load_env", return_value=full):
+                status, data, _ = self.request("GET", "/api/login")
+                self.assertEqual(json.loads(data), {"navidrome": True})
+                self.assertNotIn(b"admin-test", data)   # nothing but the yes/no
+            self.assertEqual(self.request("GET", "/api/status")[0], 401)   # everything else still needs a sign-in
+
     def test_sign_in_only_from_the_interface(self):
         with mock.patch.object(web, "admin_password", return_value="ein-gutes-passwort"):
             status, _, _ = self.request("POST", "/api/login", {"username": "", "password": "falsch-falsch"})

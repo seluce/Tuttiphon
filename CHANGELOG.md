@@ -5,6 +5,10 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 
 ## 1.0.2 – 2026-10-18
 
+- The container log (`docker logs`) is always English, whatever the server language. The run logs in the interface
+  keep the server language.
+- A new installation opens the sign-in page straight as the local administrator: until Navidrome is connected, a
+  Navidrome account cannot sign in anyway. After signing in, the setup assistant connects it.
 - Phone: the labels in the bar at the bottom stay on one line and centered under their icon. For users the entry
   “My playlists” is now called “Playlists”, like for administrators.
 
