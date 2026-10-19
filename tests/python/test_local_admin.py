@@ -1,4 +1,4 @@
-"""Password of the local administrator set in the browser (1.1): only a hash is kept, the first start on the network
+"""Password of the local administrator set in the browser: only a hash is kept, the first start on the network
 waits for the setup with a one-time code from the server log, changing it needs the current one, docker-compose wins."""
 from tests.python import env  # noqa: F401  (before app.*)
 
@@ -97,7 +97,7 @@ class HashTest(unittest.TestCase):
             code, created = localadmin.setup_code()
         self.assertTrue(created)
         self.assertRegex(code, r"^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$")
-        self.assertIn(f"enter the setup code {code}", out.getvalue())   # the server log, in English
+        self.assertIn(f"] Setup code: {code}  (also in setup-code.txt", out.getvalue())   # own line, in English
         self.assertEqual(localadmin.setup_code(), (code, False))         # stays the same, also after a restart
         self.assertEqual(stat.S_IMODE(localadmin.CODE_FILE.stat().st_mode), 0o600)
         self.assertTrue(localadmin.check_code(code))
@@ -106,6 +106,15 @@ class HashTest(unittest.TestCase):
         self.assertFalse(localadmin.check_code(""))
         localadmin.CODE_FILE.unlink()
         self.assertFalse(localadmin.check_code(code))
+
+    def test_opening_the_setup_page_writes_the_code_again(self):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            code, _created = localadmin.setup_code()
+            localadmin.remind()   # just said – not again right away
+            self.assertEqual(out.getvalue().count("Setup code:"), 1)
+            with mock.patch.object(localadmin, "REMIND_EVERY", 0):
+                localadmin.remind()
+        self.assertEqual(out.getvalue().count(f"Setup code: {code}"), 2)   # the same code, once more
 
 
 def _loopback(address, *args, **kwargs):

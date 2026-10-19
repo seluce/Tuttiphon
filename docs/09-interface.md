@@ -177,12 +177,15 @@ at the top of the page, the status is asked again every 5 s, and as soon as the 
 A 401 leads to the sign-in page with the address within the app (`/login.html#/…`), and after signing in back there.
 The sign-in page (`Login.svelte`) asks `GET /api/login` first. In setup mode (`{"setup": true}`: a new installation on
 the network without an administrator password, [Security](07-security.md#setup-mode)) it shows only the setup form:
-“Setup code” (`XXXX-XXXX`, with a hint that it is in the container log and in `setup-code.txt`), “New administrator
+“Setup code” (`XXXX-XXXX`) with “Where is the code?”: the log line “Setup code:” (Docker app of the NAS or
+`docker logs tuttiphon`; opening the page writes it there again) and `setup-code.txt` in the folder `config`, “New administrator
 password” and “Repeat password”, button “Set password and sign in” (`POST /api/setup`); it checks beforehand that the
 code isn't empty, the password has at least 8 characters and both are the same; there is no switch to the normal
 sign-in. As long as Navidrome is not connected (`{"navidrome": false}`), it opens straight as the local administrator
 with a hint and without the switch to the normal sign-in. In both cases the setup assistant takes over after signing
-in.
+in. In the mode of the local administrator, “Forgot the password?” (a `<details>`) explains the reset: delete
+`config/state/admin_password.json` (then the setup with a new code follows), or look it up in `docker-compose.yaml`
+when it comes from there. The help has the same two answers in the administrators' questions (`help/texts.js`).
 
 **Undo.** Before a change `snapshot()`, afterwards `toast('…', { undo: true })`. The button restores the previous state,
 closes open overlays (which would otherwise keep working on old objects) and saves. The toast disappears by

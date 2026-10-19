@@ -24,8 +24,10 @@ from .i18n import _, _s
 HASH_FILE = STATE_DIR / "admin_password.json"
 CODE_FILE = DATA_DIR / "setup-code.txt"
 CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # without 0/O and 1/I – easy to type off the log
+REMIND_EVERY = 120   # seconds: opening the setup page writes the code to the log again at most this often
 _lock = threading.Lock()
 _cache = {"key": None, "hash": ""}
+_said = {"at": 0.0}
 
 
 def _b64(data):
@@ -163,8 +165,18 @@ def setup_code():
 
 
 def announce(code):
-    events.say(_s("No administrator password yet – open Tuttiphon in the browser and enter the setup code {code} "
-                  "(also in setup-code.txt in the data folder).", code=code))
+    """The code on a line of its own – easy to find in the log of a NAS ("Setup code:")."""
+    _said["at"] = time.monotonic()
+    events.say(_s("No administrator password yet – open Tuttiphon in the browser and set it with the setup code."))
+    events.say(_s("Setup code: {code}  (also in setup-code.txt in the data folder)", code=code))
+
+
+def remind():
+    """The setup page was opened: the code once more in the log – it may have scrolled away or the log was rotated."""
+    if time.monotonic() - _said["at"] >= REMIND_EVERY:
+        code, created = setup_code()
+        if not created:
+            announce(code)
 
 
 def check_code(code):

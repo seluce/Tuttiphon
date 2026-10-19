@@ -18,6 +18,9 @@ test('first start: setup code and a new password', async ({ page }) => {
   await page.goto('/login.html')
   await expect(page.getByText('Willkommen! Lege zuerst das Passwort')).toBeVisible()
   await expect(page.locator('#code')).toBeFocused()
+  await expect(page.getByText('Wo finde ich den Code?')).toBeVisible()
+  await expect(page.getByText('docker logs tuttiphon')).toBeVisible()
+  await expect(page.getByText('setup-code.txt', { exact: true })).toBeVisible()
   await expect(page.getByLabel('Benutzername')).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Lokaler Administrator' })).toHaveCount(0)
 

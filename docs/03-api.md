@@ -189,7 +189,7 @@ The “Users” column in the tables below lists what the server leaves out for 
 
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
-| `GET /api/login` | public | – | `{"setup": bool, "navidrome": bool}` (`api_login_info()`) – `setup`: setup mode, no administrator password yet on the network; the sign-in page then shows only the setup form. `navidrome`: whether people can sign in with their Navidrome account yet (`NAV_URL` and the admin access are set); with `false` the sign-in page offers only the local administrator |
+| `GET /api/login` | public | – | `{"setup": bool, "navidrome": bool}` (`api_login_info()`) – `setup`: setup mode, no administrator password yet on the network; the sign-in page then shows only the setup form, and the request writes the code to the server log once more (at most every 2 minutes, `localadmin.remind()`). `navidrome`: whether people can sign in with their Navidrome account yet (`NAV_URL` and the admin access are set); with `false` the sign-in page offers only the local administrator |
 | `POST /api/login` | public, header `X-Tuttiphon: 1` required (otherwise `403`) | Body `{"username", "password", "remember"}` – `remember` defaults to `true`; an empty user name or `notfall` = [local administrator](07-security.md#local-administrator) | `{"ok": true, "user": "<name>"}` and `Set-Cookie: tuttiphon=…` (new session in `state/sessions.json`; `Secure` via https through a trusted reverse proxy); errors `401 {"error": <message>}`, `429` when locked out |
 | `POST /api/setup` | public, header `X-Tuttiphon: 1` required (otherwise `403`); only in [setup mode](07-security.md#setup-mode) (bound to a network address, no administrator password), otherwise `409` | Body `{"code", "password"}` – the setup code from the server log or `setup-code.txt` (case and `-` don't matter) and the new password of the local administrator | `{"ok": true, "user": "@notfall"}` and `Set-Cookie: tuttiphon=…` (`Secure` via https through a trusted reverse proxy); the hash goes to `state/admin_password.json`, `setup-code.txt` is deleted. Errors `401` (wrong code – counts toward the lockout –, weak password), `409`, `429` |
 | `POST /api/logout` | public, no `X-Tuttiphon` needed | Cookie `tuttiphon` | ends the session of this token on the server (`auth.end_session()`) – afterwards the token is no longer valid, not even as a copy; response `{"ok": true}` and a cookie `tuttiphon=` with `Max-Age=0` |
@@ -220,8 +220,8 @@ The “Users” column in the tables below lists what the server leaves out for 
   failed attempts): …”; the local administrator appears there as “Local administrator” (`web._who()`). Passwords never
   appear. `/api/setup` writes “Setup: the password of the local administrator is set.”, a wrong code “Sign-in failed:
   setup code”.
-- `/api/setup` (`Handler._setup()`): wrong code → `401` “The setup code is wrong – it is in the container log and in
-  setup-code.txt in the data folder.”, a weak password (`config.weak_password()`) → `401` “The administrator password
+- `/api/setup` (`Handler._setup()`): wrong code → `401` “The setup code is wrong – look for the line “Setup code:” in
+  the container log, or open setup-code.txt in the data folder.”, a weak password (`config.weak_password()`) → `401` “The administrator password
   needs at least 8 characters.” (doesn't count toward the lockout). Of two requests at the same moment only the first
   sets the password (`_setup_lock`); the second gets `401` “Tuttiphon is already set up …”. Afterwards the server is
   no longer in setup mode, and the setup assistant follows as usual ([07 – Setup mode](07-security.md#setup-mode)).

@@ -2,8 +2,10 @@
 
 A brief summary of what changes in each version. The newest version is on top; `npm run release` copies its
 section into the release notes `README.txt`. If `docker-compose.yaml` has to be replaced during an update, it says so explicitly.
+Changes that are not released yet are collected under “Unreleased” – the version number and the date follow when they
+are released.
 
-## 1.1.0 – 2026-10-19
+## Unreleased
 
 - **No password in docker-compose.yaml any more.** At the first start Tuttiphon opens straight to its setup: you set
   the password of the local administrator in the browser, with a one-time setup code from the container log (also in

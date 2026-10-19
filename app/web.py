@@ -1865,8 +1865,8 @@ class Handler(BaseHTTPRequestHandler):
                 if localadmin.configured():
                     raise auth.LoginError(_("Tuttiphon is already set up – sign in as local administrator."), counts=False)
                 if not localadmin.check_code(body.get("code")):
-                    raise auth.LoginError(_("The setup code is wrong – it is in the container log and in setup-code.txt "
-                                            "in the data folder."))
+                    raise auth.LoginError(_("The setup code is wrong – look for the line “Setup code:” in the container "
+                                            "log, or open setup-code.txt in the data folder."))
                 password = body.get("password")
                 if not isinstance(password, str) or weak_password(password):
                     raise auth.LoginError(_("The administrator password needs at least 8 characters."), counts=False)
@@ -2052,6 +2052,8 @@ class Handler(BaseHTTPRequestHandler):
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – sign-in only from the interface
                 return self._login()
             if path == "/api/login" and method == "GET":   # public: which sign-in the page offers
+                if setup:
+                    localadmin.remind()   # the setup page is open: the code into the log once more
                 return self._json(api_login_info(setup))
             if path == "/api/setup" and method == "POST":
                 if self.headers.get("X-Tuttiphon") != "1":
