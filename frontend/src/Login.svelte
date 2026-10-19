@@ -124,7 +124,13 @@
         <label for="code" class="font-semibold text-[.9rem]">{t('Setup code')}</label>
         <input bind:this={codeInput} bind:value={code} id="code" name="code" class="input py-3 font-mono tracking-[.15em] uppercase"
           type="text" autocomplete="one-time-code" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="XXXX-XXXX" required /><!-- i18n-ignore: format of the code -->
-        <span class="text-[.8rem] muted">{t('It is in the container log – in the Docker app of your NAS under the container’s log – and in the file setup-code.txt in Tuttiphon’s data folder.')}</span>
+        <div class="text-[.8rem] muted grid gap-1">
+          <b class="text-text font-semibold">{t('Where is the code?')}</b>
+          <ul class="list-disc pl-4 grid gap-1">
+            <li>{@html t('In the log of the container, in the line <b>Setup code:</b> – in the Docker app of your NAS under the container’s log, or with <code>docker logs tuttiphon</code>. Opening this page writes it there again, so it is near the end.')}</li>
+            <li>{@html t('In the file <b>setup-code.txt</b> in Tuttiphon’s data folder – the folder <code>config</code> next to docker-compose.yaml.')}</li>
+          </ul>
+        </div>
       </div>
     {/if}
     {#if !notfall}
@@ -168,6 +174,11 @@
       <p class="text-[.82rem] muted text-center">{t('At least 8 characters. Keep it safe, e.g. in a password manager – it is the way in when Navidrome cannot be reached. After that, the setup assistant connects Navidrome.')}</p>
     {:else if notfall}
       <p class="text-[.82rem] muted text-center">{t('The password set during setup. The local administrator has all rights and works even when Navidrome cannot be reached.')}</p>
+      <details class="text-[.82rem] muted">
+        <summary class="cursor-pointer text-center">{t('Forgot the password?')}</summary>
+        <p class="mt-1.5">{@html t('Set in the browser: delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml). A few seconds later this page asks for a new one – with a new setup code from the container log. Everything else stays as it is.')}</p>
+        <p class="mt-1.5">{@html t('Set in docker-compose.yaml: it is there as <code>TUTTIPHON_ADMIN_PASSWORD</code>.')}</p>
+      </details>
     {/if}
   </form>
 </div>

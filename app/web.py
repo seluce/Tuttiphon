@@ -250,8 +250,9 @@ def api_status():
 
 
 def api_changelog():
-    """CHANGELOG.md as a list: [{"version", "date", "items": [text, …], "levels": [0|1, …]}], newest first.
-    A nested bullet ("  - …") is an item of its own with level 1 (it belongs to the item above it)."""
+    """CHANGELOG.md as a list: [{"version", "date", "unreleased", "items": [text, …], "levels": [0|1, …]}], newest
+    first. Headings "## <version>" (older ones "## <version> – <date>") and "## Unreleased" (changes of a build between
+    releases). A nested bullet ("  - …") is an item of its own with level 1 (it belongs to the item above it)."""
     from .config import ROOT
     try:
         text = read_text(ROOT / "CHANGELOG.md")
@@ -259,9 +260,10 @@ def api_changelog():
         return []
     out, cur = [], None
     for line in text.splitlines():
-        head = re.match(r"^##\s+(\S+)\s+[–-]\s+(.+)$", line)
+        head = re.match(r"^##\s+(\S+)(?:\s+[–-]\s+(.+?))?\s*$", line)
         if head:
-            cur = {"version": head.group(1), "date": head.group(2).strip(), "items": [], "levels": []}
+            cur = {"version": head.group(1), "date": (head.group(2) or "").strip(),
+                   "unreleased": head.group(1).lower() == "unreleased", "items": [], "levels": []}
             out.append(cur)
         elif cur and line.startswith("- "):
             cur["items"].append(line[2:].strip())
@@ -1865,8 +1867,8 @@ class Handler(BaseHTTPRequestHandler):
                 if localadmin.configured():
                     raise auth.LoginError(_("Tuttiphon is already set up – sign in as local administrator."), counts=False)
                 if not localadmin.check_code(body.get("code")):
-                    raise auth.LoginError(_("The setup code is wrong – it is in the container log and in setup-code.txt "
-                                            "in the data folder."))
+                    raise auth.LoginError(_("The setup code is wrong – look for the line “Setup code:” in the container "
+                                            "log, or open setup-code.txt in the data folder."))
                 password = body.get("password")
                 if not isinstance(password, str) or weak_password(password):
                     raise auth.LoginError(_("The administrator password needs at least 8 characters."), counts=False)
@@ -2052,6 +2054,8 @@ class Handler(BaseHTTPRequestHandler):
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – sign-in only from the interface
                 return self._login()
             if path == "/api/login" and method == "GET":   # public: which sign-in the page offers
+                if setup:
+                    localadmin.remind()   # the setup page is open: the code into the log once more
                 return self._json(api_login_info(setup))
             if path == "/api/setup" and method == "POST":
                 if self.headers.get("X-Tuttiphon") != "1":

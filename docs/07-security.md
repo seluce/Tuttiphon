@@ -180,10 +180,13 @@ is `""`) doesn't run without sign-in, but waits for its setup (`setup` in `_hand
 - **Setup code:** `localadmin.setup_code()` draws 8 characters from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (without
   `0`/`O` and `1`/`I`, `secrets.choice()`) and keeps them as `XXXX-XXXX` in `<data>/setup-code.txt` (permissions
   `0600`, outside `state/` and therefore never in a backup). The code stays the same until it is used, also across
-  restarts; a missing or damaged file gets a new one. The server log (always English) shows it: “No administrator
-  password yet – open Tuttiphon in the browser and enter the setup code XXXX-XXXX (also in setup-code.txt in the data
-  folder).” – `tuttiphon.py` at every start while the setup is pending, `Handler._admin()` (at most every 10 s) as soon
-  as setup mode begins while the server runs, e.g. after `admin_password.json` was deleted.
+  restarts; a missing or damaged file gets a new one. The server log (always English) shows it on a line of its own
+  (`localadmin.announce()`): “No administrator password yet – open Tuttiphon in the browser and set it with the setup
+  code.” and “Setup code: XXXX-XXXX  (also in setup-code.txt in the data folder)” – `tuttiphon.py` at every start while
+  the setup is pending, `Handler._admin()` (at most every 10 s) as soon as setup mode begins while the server runs, e.g.
+  after `admin_password.json` was deleted, and `GET /api/login` when the setup page is opened (`localadmin.remind()`, at
+  most every 2 minutes) – so the code is near the end of the log even if it was rotated meanwhile. The setup page names
+  both places (log line “Setup code:”, `docker logs tuttiphon`, `config/setup-code.txt`).
 - **`POST /api/setup`** (`Handler._setup()`, public, only with `X-Tuttiphon: 1`) with `{"code", "password"}`: outside
   setup mode `409` “Tuttiphon is already set up – sign in as local administrator.” The code is compared without case
   and separators in constant time (`localadmin.check_code()`); a wrong one → `401` and counts toward the

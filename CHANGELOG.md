@@ -2,20 +2,24 @@
 
 A brief summary of what changes in each version. The newest version is on top; `npm run release` copies its
 section into the release notes `README.txt`. If `docker-compose.yaml` has to be replaced during an update, it says so explicitly.
+Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
+released.
 
-## 1.1.0 – 2026-10-19
+## 1.1.0
 
 - **No password in docker-compose.yaml any more.** At the first start Tuttiphon opens straight to its setup: you set
-  the password of the local administrator in the browser, with a one-time setup code from the container log (also in
-  `config/setup-code.txt`). The code makes sure that nobody else who reaches the page first can claim it. Only a hash
-  of the password is kept.
+  the password of the local administrator in the browser, with a one-time setup code. The code makes sure that nobody
+  else who reaches the page first can claim it. Only a hash of the password is kept.
+- The setup page says where the code is: in the container log on the line “Setup code:” (written there again whenever
+  the page is opened) and in `config/setup-code.txt`.
 - The password can be changed under Settings → Users & permissions (with the current one). Forgotten: delete
-  `config/state/admin_password.json` – Tuttiphon then asks again with a new code.
+  `config/state/admin_password.json` – Tuttiphon then asks again with a new code. The sign-in page and the help
+  explain both.
 - `TUTTIPHON_ADMIN_PASSWORD` stays as an option: if it is set, it applies as before and can only be changed there.
   **Existing installations need no change.** To switch, remove the line, recreate the container and enter the setup
   code from the log. The interface can no longer write it into `config/.env`.
 
-## 1.0.2 – 2026-10-18
+## 1.0.2
 
 - The container log (`docker logs`) is always English, whatever the server language. The run logs in the interface
   keep the server language.
@@ -24,7 +28,7 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 - Phone: the labels in the bar at the bottom stay on one line and centered under their icon. For users the entry
   “My playlists” is now called “Playlists”, like for administrators.
 
-## 1.0.1 – 2026-10-18
+## 1.0.1
 
 The names from the time when Tuttiphon was called NaviTool no longer count. **Check before updating:**
 
@@ -39,7 +43,7 @@ The names from the time when Tuttiphon was called NaviTool no longer count. **Ch
 - Gone as well: reading the credentials and logs of an earlier Deezer rating script from `deezer-bewertung/` in the
   Navidrome folder, and rebuilding runs from before the history existed from their logs.
 
-## 1.0.0 – 2026-10-17
+## 1.0.0
 
 - First public version on GitHub. The ready-made image is `ghcr.io/seluce/tuttiphon` – installation with
   `docker-compose.yaml` as described in the README. Everything before was a beta (0.x); there are no changes to the
@@ -48,7 +52,7 @@ The names from the time when Tuttiphon was called NaviTool no longer count. **Ch
   [sptnr](https://github.com/krestaino/sptnr) by Kevin Restaino (MIT) – named in the README and in
   THIRD-PARTY-NOTICES.md.
 
-## 0.17.1 – 2026-10-17
+## 0.17.1
 
 Fixes from a comprehensive audit (security, files, configuration, performance, interface, texts, release).
 
@@ -119,7 +123,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   - The README is short now (features, quick start, links); details moved to docs/features.md and
     docs/installation.md.
 
-## 0.17.0 – 2026-10-17
+## 0.17.0
 
 - New **setup assistant** for new installations: after the first sign-in an administrator is asked step by step what
   Tuttiphon should do – connection to Navidrome, converting lossless files (Opus, AAC or off, and what happens to the
@@ -150,7 +154,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   (key, tempo, instruments, sound vector): new music first, the rest night after night; until then the two new
   vibes only find the songs already done. The image brings two more small models (about 1 MB).
 
-## 0.16.0 – 2026-10-17
+## 0.16.0
 
 - New version numbers: everything so far is a beta (0.x) – 1.0.0 will be the first public version on GitHub.
   The earlier versions 1.0.0 … 2.1.1 are now 0.1.0 … 0.15.1.
@@ -236,7 +240,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   - A fresh checkout without a data/ folder creates one instead of writing into the project folder.
   - The image runs as a normal user by default and contains the license.
 
-## 0.15.1 – 2026-10-16
+## 0.15.1
 
 - The handbook, README, change log and release notes are now in English (the release notes file is
   `README.txt`). The interface still speaks German for German browsers.
@@ -244,7 +248,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - The mood “ohne Gesang” is called “no vocals” in English everywhere (German unchanged).
 - New bands are classified right away only if they reach the stricter of 0.75 and the configured threshold.
 
-## 0.15.0 – 2026-10-16
+## 0.15.0
 
 - Tuttiphon speaks English and German. The interface follows the browser’s language; it can be switched per
   device under Settings → General → Language. With a German browser, everything stays German, word for word as before.
@@ -256,7 +260,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - Small fixes: with a count of 1 it now says “1 song”, “1 playlist” instead of “1 songs”; under “Via ntfy” a space
   was missing.
 
-## 0.14.0 – 2026-10-14
+## 0.14.0
 
 - NaviTool is now called **Tuttiphon** – tutti, all together, like the whole family. The name changes in the interface, in the app icon
   on the phone, in notifications and in the playlist descriptions.
@@ -265,14 +269,14 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   changes the description of every playlist in Navidrome to the new name once.
 - On the iPhone, an icon already placed on the home screen keeps its old name until it is added again.
 
-## 0.13.0 – 2026-10-14
+## 0.13.0
 
 - Music import: optionally AAC instead of Opus (Settings → Music import → Target format). iPhone, iPad and Mac
   play AAC everywhere; the default is 224 kbit/s, selectable from 128 to 320. Tags are carried over completely, including MusicBrainz IDs,
   ISRC and multiple artists, the way Navidrome reads them, plus the cover. The switch applies to new conversions –
   existing Opus files stay as they are. Opus remains the default.
 
-## 0.12.0 – 2026-10-13
+## 0.12.0
 
 - Notifications via the app: instead of ntfy, messages now come straight from Tuttiphon to the phone, without an
   extra app. Turn on each device once – administrators under Settings → Notifications, everyone else
@@ -282,7 +286,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   with search by band, song or word and the filter Blocked/Allowed. Each song shows which words were found;
   “allow all” unblocks an entire band at once, with Undo.
 
-## 0.11.0 – 2026-10-13
+## 0.11.0
 
 - More accurate Deezer stars: a match only counts if band and title fit – previously about one song in twenty
   got another song’s rank, for example Pentatonix “Bored” got that of “Bohemian Rhapsody”. If the search finds nothing,
@@ -297,7 +301,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in Symfonium, and
   all songs play equally loud.
 
-## 0.10.0 – 2026-10-13
+## 0.10.0
 
 - Music worlds: “Rebuild” rebuilds a world with a scene entirely from that scene, with its name and
   icon – beforehand Tuttiphon shows which bands drop out and whether playlists get different names. Bands that become free
@@ -305,11 +309,11 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - Discover: your own suggestions are on top, then those for the season, then the family’s. Each section can be
   collapsed; the device remembers it.
 
-## 0.9.3 – 2026-10-13
+## 0.9.3
 
 - “What do you like to listen to?” only asks as long as Tuttiphon doesn’t already know the taste from listening.
 
-## 0.9.2 – 2026-10-13
+## 0.9.2
 
 - Statistics on the phone: for the most played bands, the bar sits below the name – the names are fully readable. The same
   in “Who’s in it?” and in the assistant.
@@ -318,12 +322,12 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   page, all hidden ones can be brought back right away – so Discover never runs empty. Deleted music worlds stay
   gone, even when restoring under My account.
 
-## 0.9.1 – 2026-10-13
+## 0.9.1
 
 - On the phone, the second time it is opened, Tuttiphon suggests once to put it on the home screen as an app – with a
   button where the browser offers this, otherwise with short instructions. Once dismissed, the hint does not come back.
 
-## 0.9.0 – 2026-10-13
+## 0.9.0
 
 - Listening in the browser: tapping a song plays it – in a playlist’s sample, in the assistant’s
   preview, among a band’s popular songs. A small player at the bottom shows what is playing; on the phone also on the
@@ -336,7 +340,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   only 6 bands at first.
 - Kid-safe mode also applies to listening in: explicit songs can’t be played.
 
-## 0.8.0 – 2026-10-13
+## 0.8.0
 
 - Less memory: the song list takes about a third of what it used to, every additional account with open
   statistics about 15 instead of 70 MB. In operation Tuttiphon thus needs about 110 instead of 170 MB.
@@ -348,7 +352,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   conversion to Opus – is forgotten; very old skip marks of the mixes are dropped; once a month the
   lyrics index is compacted. If the music folder is unreachable at the moment, nothing is forgotten.
 
-## 0.7.0 – 2026-10-13
+## 0.7.0
 
 - Missing covers: for albums without any picture, Tuttiphon fetches a cover from the Cover Art Archive or from Deezer and places it as
   cover.jpg next to the music – during “Update everything” and once a week at night. Existing pictures stay; new
@@ -371,7 +375,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - docker-compose.yml limits the container logs to 30 MB. Applying the new file is optional – if you do, first enter
   the password and paths from your previous file.
 
-## 0.6.0 – 2026-10-13
+## 0.6.0
 
 - Music worlds form on their own: Tuttiphon recognizes from genres, Last.fm tags, AI music style, language and decade
   which worlds the collection yields – such as The 80s, The 90s, Eurodance, German rap, Pop & charts, Schlager &
@@ -384,11 +388,11 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - The lyrics search also recognizes the language of every song. On the first start, the lyrics are read in
   once more for this.
 
-## 0.5.1 – 2026-10-13
+## 0.5.1
 
 - Playlists: “Empty trash” deletes all playlists in the trash at once – with confirmation and “Undo”.
 
-## 0.5.0 – 2026-10-13
+## 0.5.0
 
 - New from your favorite bands: whatever is added by the bands someone likes or listens to most lands as a
   playlist under Discover. On the home page, such albums carry the badge “Favorite band”.
@@ -406,7 +410,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
   to each person with their own topic for news from their favorite bands and the monthly recap.
 - Help: new guides for kid-safe mode and notifications, topics and questions about everything new.
 
-## 0.4.0 – 2026-10-13
+## 0.4.0
 
 - New hands-on help: under “What would you like to do?” there are guides such as “Mix for your phone”, “Make suggestions
   better” or “Stop hearing something”. “Show me” leads step by step through the real interface – on the phone
@@ -415,7 +419,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - The help can be searched. Topics expand and collapse; buttons appear in the text just as in the interface.
 - New help topic “Search & moods”.
 
-## 0.3.0 – 2026-10-13
+## 0.3.0
 
 - Taste from listening: Tuttiphon recognizes from plays in Symfonium, favorites and stars given by the listeners themselves
   which music worlds and bands someone likes. Stars from the Deezer rating don’t count here.
@@ -442,7 +446,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - Version number and this changelog under Settings → General.
 - Texts in the interface only explain the function.
 
-## 0.2.0 – 2026-10-13
+## 0.2.0
 
 - Sign-in: the cursor no longer jumps into the password field while typing the name.
 - Tour: anyone who finishes or skips it won’t see it again on any device.
@@ -453,7 +457,7 @@ Fixes from a comprehensive audit (security, files, configuration, performance, i
 - Docker: the image sets the read permissions itself. docker-compose.yml rebuilds on every create – for this, add
   `pull_policy: build` under `image:` once.
 
-## 0.1.0 – 2026-10-12
+## 0.1.0
 
 - First version as a Docker container on a NAS.
 - New interface, sign-in with the Navidrome account and a separate view for each family account.

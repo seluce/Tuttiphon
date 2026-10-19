@@ -234,9 +234,12 @@ none:
 
 1. Without any administrator password the server starts in [setup mode](07-security.md#setup-mode) and writes a
    one-time setup code to the container log (`docker logs tuttiphon`, or the log of the container in the Docker app of
-   the NAS): “No administrator password yet – open Tuttiphon in the browser and enter the setup code XXXX-XXXX (also in
-   setup-code.txt in the data folder).” The same code is in `/config/setup-code.txt` (`./config/setup-code.txt` next
-   to `docker-compose.yaml`); it stays the same across restarts and is written to the log again at every start.
+   the NAS): “No administrator password yet – open Tuttiphon in the browser and set it with the setup code.” and on a
+   line of its own “Setup code: XXXX-XXXX  (also in setup-code.txt in the data folder)” – search the log for
+   “Setup code:”. The same code is in `/config/setup-code.txt` (`./config/setup-code.txt` next to
+   `docker-compose.yaml`); it stays the same across restarts and is written to the log again at every start and
+   whenever the setup page is opened (at most every 2 minutes, `localadmin.remind()`), so it is near the end of the log.
+   The setup page explains both places.
 2. `http://<NAS-IP>:8765` shows the setup form: setup code, new password (at least 8 characters) twice. Afterwards the
    browser is signed in as local administrator, only a hash of the password is kept (`/config/state/admin_password.json`),
    and `setup-code.txt` is gone. The code proves that whoever sets the password has access to the server – otherwise
@@ -365,9 +368,10 @@ skipped.
 3. Start `./tuttiphon.sh`. The script rebuilds the interface if the sources are newer, and runs `npm ci` if
    `package-lock.json` has changed.
 
-**Version and changes:** The program version is in `app/version.py` (`VERSION`). It is incremented with every
-release, and `CHANGELOG.md` gets a section `## <version> – <date>` at the top with items
-`- …`; if `docker-compose.yaml` has to be replaced during the update, this is stated there explicitly. The version
+**Version and changes:** The program version is in `app/version.py` (`VERSION`). Between releases it is the last
+released version with `+dev`, and new items are collected in `CHANGELOG.md` under `## Unreleased` (`npm run release`
+then marks the folder as not released; the image workflow never builds such a version). For a release the version is
+set and the section becomes `## <version>` – without a date – with items `- …`; if `docker-compose.yaml` has to be replaced during the update, this is stated there explicitly. The version
 appears in the first line of the [server log](#server-log), in `GET /api/status` (`version`, also for users)
 and under Settings → General → “About Tuttiphon”; there, “What’s new?” shows administrators the last five
 sections (`GET /api/changelog`). It has nothing to do with the version of the configuration (`CONFIG_VERSION`, below).
@@ -650,7 +654,7 @@ logs in `logs/` and in the interface stay in the server language. Lines glued to
 | Startup | “Tuttiphon <version> is starting[ in the Docker container]”, then indented per storage location “Data/Music/Playlists/Archive/Backups: <path> – writable \| NOT writable \| created when needed \| MISSING”, “Navidrome: <NAV_URL>” (or “address missing …”, possibly with “– admin access not entered yet”), “AI sound analysis: ready” or the reason, “Daily at <dailyAt>: <mode> · night analysis <from>–<to> · folder watch on” (the last two only if turned on). In the container then “Ready – port 8765”; on the PC instead (without timestamp) “Tuttiphon is running at http://…/ (Ctrl+C quits)”. If the overview fails: “(Startup overview not possible: …)” | `tuttiphon.py`, `web.startup_report()` |
 | Run | every non-indented, non-empty line of the run log, in English: “▶ <name> – <date time>”, “━━ <step> ━━”, messages from the steps (e.g. “Scan finished: …”, “Classification: …”), “❌ …”, “⏸ Short pause for “…” …”, “■ Done. <step>: <result>, …”. Indented detail lines are only in `logs/` | `TaskRunner.log()` (only in the server, not with `run`) |
 | Sign-in | “Signed in: <account>”, “Sign-in failed: <name>” (only failed attempts that count), “Sign-in blocked (too many failed attempts): <name>”; the local administrator is called “Local administrator” (`web._who()`), a wrong setup code “setup code” | `Handler._login()`, `Handler._limited()` |
-| Setup | “No administrator password yet – open Tuttiphon in the browser and enter the setup code XXXX-XXXX (also in setup-code.txt in the data folder).” – at every start while the setup is pending and as soon as setup mode begins while running (e.g. after deleting `state/admin_password.json`); “Setup: the password of the local administrator is set.”; “The password of the local administrator was changed.” (Settings → Users & permissions) | `tuttiphon.py`, `localadmin.announce()`, `Handler._setup()`, `Handler._admin_password()` |
+| Setup | “No administrator password yet – open Tuttiphon in the browser and set it with the setup code.” followed by a line of its own “Setup code: XXXX-XXXX  (also in setup-code.txt in the data folder)” – at every start while the setup is pending, as soon as setup mode begins while running (e.g. after deleting `state/admin_password.json`) and when the setup page is opened (at most every 2 minutes); “Setup: the password of the local administrator is set.”; “The password of the local administrator was changed.” (Settings → Users & permissions) | `tuttiphon.py`, `localadmin.announce()`, `Handler._setup()`, `Handler._admin_password()` |
 | Error | “⚠ Error at <method> <path>: <type>: <text>” for every request that ends with `500` | `Handler._handle()` |
 | Backup | “Backup created: <file> (<n> KB) in <folder>” – only the daily one, not “Back up now” | `web._backup_daily()` |
 | Shutdown | “Canceling the running task “<name>”, saving its progress …” (only if a run is in progress), “Shut down.” | `tuttiphon.py` |

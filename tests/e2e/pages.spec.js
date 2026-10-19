@@ -43,6 +43,8 @@ test('sign-in page', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Anmelden' })).toBeVisible()
   await page.getByRole('button', { name: 'Lokaler Administrator' }).click()
   await expect(page.getByText('Administrator-Passwort', { exact: true })).toBeVisible()
+  await page.getByText('Passwort vergessen?').click()   // how to reset it, right on the sign-in page
+  await expect(page.getByText('admin_password.json')).toBeVisible()
 })
 
 test('sign-in page of a new installation: only the local administrator', async ({ page }) => {

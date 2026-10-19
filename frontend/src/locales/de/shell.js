@@ -323,7 +323,6 @@ export default {
   'Local administrator': 'Lokaler Administrator',
   'Welcome! First set the password of the local administrator – Tuttiphon’s own administrator with all rights.': 'Willkommen! Lege zuerst das Passwort des lokalen Administrators fest – des eigenen Administrators von Tuttiphon mit allen Rechten.',
   'Setup code': 'Einrichtungscode',
-  'It is in the container log – in the Docker app of your NAS under the container’s log – and in the file setup-code.txt in Tuttiphon’s data folder.': 'Er steht im Container-Protokoll – in der Docker-App deines NAS beim Protokoll des Containers – und in der Datei setup-code.txt im Datenordner von Tuttiphon.',
   'New administrator password': 'Neues Administrator-Passwort',
   'Set password and sign in': 'Passwort festlegen und anmelden',
   'At least 8 characters. Keep it safe, e.g. in a password manager – it is the way in when Navidrome cannot be reached. After that, the setup assistant connects Navidrome.': 'Mindestens 8 Zeichen. Bewahre es gut auf, z. B. in einem Passwort-Manager – damit kommst du auch hinein, wenn Navidrome nicht erreichbar ist. Danach verbindet der Einrichtungsassistent Navidrome.',
@@ -332,4 +331,10 @@ export default {
   'The password needs at least 8 characters.': 'Das Passwort braucht mindestens 8 Zeichen.',
   'The two passwords are not the same.': 'Die beiden Passwörter stimmen nicht überein.',
   'Repeat password': 'Passwort wiederholen',
+  'Where is the code?': 'Wo finde ich den Code?',
+  'In the log of the container, in the line <b>Setup code:</b> – in the Docker app of your NAS under the container’s log, or with <code>docker logs tuttiphon</code>. Opening this page writes it there again, so it is near the end.': 'Im Protokoll des Containers, in der Zeile <b>Setup code:</b> – in der Docker-App deines NAS beim Protokoll des Containers oder mit <code>docker logs tuttiphon</code>. Beim Öffnen dieser Seite schreibt Tuttiphon ihn erneut hinein, er steht also weit unten.',
+  'In the file <b>setup-code.txt</b> in Tuttiphon’s data folder – the folder <code>config</code> next to docker-compose.yaml.': 'In der Datei <b>setup-code.txt</b> im Datenordner von Tuttiphon – dem Ordner <code>config</code> neben docker-compose.yaml.',
+  'Forgot the password?': 'Passwort vergessen?',
+  'Set in the browser: delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml). A few seconds later this page asks for a new one – with a new setup code from the container log. Everything else stays as it is.': 'Im Browser festgelegt: Lösche die Datei <b>admin_password.json</b> im Ordner <code>state</code> des Datenordners (<code>config/state</code> neben docker-compose.yaml). Wenige Sekunden später fragt diese Seite nach einem neuen – mit einem neuen Einrichtungscode aus dem Container-Protokoll. Alles andere bleibt, wie es ist.',
+  'Set in docker-compose.yaml: it is there as <code>TUTTIPHON_ADMIN_PASSWORD</code>.': 'In docker-compose.yaml festgelegt: Es steht dort als <code>TUTTIPHON_ADMIN_PASSWORD</code>.',
 }

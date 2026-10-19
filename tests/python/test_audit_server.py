@@ -410,6 +410,14 @@ class ResponsesTest(unittest.TestCase):
         self.assertEqual(out[0]["items"], ["Top item continued", "Group:", "first sub continued", "second sub"])
         self.assertEqual(out[0]["levels"], [0, 0, 1, 1])
 
+    def test_changelog_without_dates_and_unreleased(self):
+        text = "# Changes\n\n## Unreleased\n\n- New\n\n## 1.1.0\n\n- Feature\n\n## 1.0 – 2026-10-17\n\n- Old\n"
+        with mock.patch.object(web, "read_text", lambda path: text):
+            out = web.api_changelog()
+        self.assertEqual([(v["version"], v["date"], v["unreleased"]) for v in out],
+                         [("Unreleased", "", True), ("1.1.0", "", False), ("1.0", "2026-10-17", False)])
+        self.assertEqual(out[1]["items"], ["Feature"])
+
 
 class SmallFixesTest(unittest.TestCase):
     def test_m3u_name_without_line_breaks(self):

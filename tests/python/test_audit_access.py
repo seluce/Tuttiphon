@@ -1,5 +1,5 @@
 """Findings of the 0.16 audit: the administrator password cannot be deleted by an empty value, placeholders in any
-spelling, on the network never without a password (1.1: the setup with the code instead), sign-in only from the
+spelling, on the network never without a password (now: the setup with the code instead), sign-in only from the
 interface, the sign-in lock per account and address, trusted reverse proxies, links in the shared folder are not
 followed."""
 from tests.python import env  # noqa: F401  (before app.*)

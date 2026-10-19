@@ -8,7 +8,8 @@
 #                               e.g. from the PC to the NAS; same as: npm run release -- --with-data)
 #
 # Version: app/version.py. What changes: CHANGELOG.md – the section for the current version must exist and goes
-# into README.txt (which also says when docker-compose.yaml has to be replaced).
+# into README.txt (which also says when docker-compose.yaml has to be replaced). Between releases the version ends in
+# "+dev" and the section is "## Unreleased" – such a folder is marked as not released.
 #
 # Why a list of what MAY go in (and not "everything except …"): data/ contains credentials. With an exclusion
 # list one forgotten entry is enough for them to end up in the program part. At the end the script also checks
@@ -32,8 +33,12 @@ done
 
 VERSION=$(sed -n 's/^VERSION = "\(.*\)"/\1/p' app/version.py)
 [ -n "$VERSION" ] || { echo "✕ No version in app/version.py"; exit 1; }
-NOTES=$(awk -v v="$VERSION" '$0 ~ "^## "v" " {on=1; print; next} /^## / {on=0} on' CHANGELOG.md)
-[ -n "$NOTES" ] || { echo "✕ CHANGELOG.md has no section \"## $VERSION – …\""; exit 1; }
+case "$VERSION" in
+  *+dev) SECTION="Unreleased"; LABEL=" (not released yet)" ;;
+  *) SECTION="$VERSION"; LABEL="" ;;
+esac
+NOTES=$(awk -v v="$SECTION" 'index($0, "## " v) == 1 && (length($0) == length(v) + 3 || substr($0, length(v) + 4, 1) == " ") {on=1; print; next} /^## / {on=0} on' CHANGELOG.md)
+[ -n "$NOTES" ] || { echo "✕ CHANGELOG.md has no section \"## $SECTION\""; exit 1; }
 echo "▶ Checking … (version $VERSION)"
 LOGS=$(mktemp -d "${TMPDIR:-/tmp}/tuttiphon-release.XXXXXX")
 python3 -m py_compile app/*.py tuttiphon.py
@@ -112,7 +117,7 @@ else
 fi
 files=$(find "$TARGET" -path "$TARGET/first-install" -prune -o -type f -print | wc -l)
 cat > "$TARGET/README.txt" <<TXT
-Tuttiphon $VERSION – release of $stamp ($ref)
+Tuttiphon $VERSION$LABEL – release of $stamp ($ref)
 
 Everything to build Tuttiphon yourself on the server (instead of the ready-made image ghcr.io/seluce/tuttiphon).
 Target: the folder of your Docker project, e.g. /volume1/docker/tuttiphon – the settings live there in the
@@ -150,6 +155,6 @@ $(echo "$NOTES" | sed 's/^/ /')
 Contents: $files files (program, interface sources, Dockerfile, docker-compose.example.yaml, licenses)
 TXT
 
-echo "✓ $TARGET/ done – Tuttiphon $VERSION, $files files$( [ "$WITH_DATA" = 1 ] && echo ", plus first-install/config/")."
+echo "✓ $TARGET/ done – Tuttiphon $VERSION$LABEL, $files files$( [ "$WITH_DATA" = 1 ] && echo ", plus first-install/config/")."
 [ "$WITH_DATA" = 1 ] || echo "  (without data – for moving an installation with first-install/config/: npm run release:with-data)"
 echo "  Copy the contents into the folder of the Docker project – see $TARGET/README.txt"

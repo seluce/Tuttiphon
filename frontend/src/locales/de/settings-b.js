@@ -279,4 +279,5 @@ export default {
   'With a password, Tuttiphon asks everyone to sign in – with their Navidrome account or as local administrator.': 'Mit einem Passwort verlangt Tuttiphon von allen eine Anmeldung – mit dem Navidrome-Konto oder als lokaler Administrator.',
   'Please enter the current password.': 'Bitte das bisherige Passwort eingeben.',
   'Password changed ✓': 'Passwort geändert ✓',
+  'Not released yet': 'Noch nicht veröffentlicht',
 }

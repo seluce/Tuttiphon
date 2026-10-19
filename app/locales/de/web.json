@@ -105,11 +105,12 @@
  "Access only via 127.0.0.1 – or set an administrator password (Settings → Users & permissions).": "Zugriff nur über 127.0.0.1 – oder ein Administrator-Passwort festlegen (Einstellungen → Benutzer & Rechte).",
  "Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the placeholder – please set at least 8 characters.": "Tuttiphon ist gesperrt: TUTTIPHON_ADMIN_PASSWORD ist zu kurz oder noch der Platzhalter – bitte mindestens 8 Zeichen setzen.",
  "Tuttiphon is already set up – sign in as local administrator.": "Tuttiphon ist schon eingerichtet – melde dich als lokaler Administrator an.",
- "The setup code is wrong – it is in the container log and in setup-code.txt in the data folder.": "Der Einrichtungscode stimmt nicht – er steht im Container-Protokoll und in setup-code.txt im Datenordner.",
  "setup code": "Einrichtungscode",
  "Setup: the password of the local administrator is set.": "Einrichtung: Das Passwort des lokalen Administrators ist festgelegt.",
  "The password of the local administrator was changed.": "Das Passwort des lokalen Administrators wurde geändert.",
  "The password of the local administrator is set in docker-compose.yaml – change it there.": "Das Passwort des lokalen Administrators steht in docker-compose.yaml – ändere es dort.",
  "The current password is wrong.": "Das bisherige Passwort stimmt nicht.",
- "No administrator password yet – open Tuttiphon in the browser and enter the setup code {code} (also in setup-code.txt in the data folder).": "Noch kein Administrator-Passwort – öffne Tuttiphon im Browser und gib den Einrichtungscode {code} ein (steht auch in setup-code.txt im Datenordner)."
+ "No administrator password yet – open Tuttiphon in the browser and set it with the setup code.": "Noch kein Administrator-Passwort – öffne Tuttiphon im Browser und lege es mit dem Einrichtungscode fest.",
+ "Setup code: {code}  (also in setup-code.txt in the data folder)": "Einrichtungscode: {code}  (steht auch in setup-code.txt im Datenordner)",
+ "The setup code is wrong – look for the line “Setup code:” in the container log, or open setup-code.txt in the data folder.": "Der Einrichtungscode stimmt nicht – such im Container-Protokoll die Zeile „Setup code:“ oder öffne setup-code.txt im Datenordner."
 }
