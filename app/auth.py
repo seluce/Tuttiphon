@@ -4,9 +4,10 @@
   directly with Navidrome and does not have to manage any passwords itself.
 * Roles: Navidrome administrators are administrators in Tuttiphon, everyone else is a user.
   Settings → Users & permissions changes this per account (also “no access”).
-* Local administrator: Tuttiphon's own administrator with the password from TUTTIPHON_ADMIN_PASSWORD (docker-compose)
-  – no Navidrome account, so it also works when Navidrome is not reachable. Internally the user "@notfall".
-* Without TUTTIPHON_ADMIN_PASSWORD (Tuttiphon only locally on the PC) there is no login; you are administrator.
+* Local administrator: Tuttiphon's own administrator – password set in the browser at the first start or as
+  TUTTIPHON_ADMIN_PASSWORD (docker-compose), see app/localadmin.py. No Navidrome account, so it also works when
+  Navidrome is not reachable. Internally the user "@notfall".
+* Without such a password (Tuttiphon only locally on the PC) there is no login; you are administrator.
 """
 import base64
 import hashlib
@@ -17,8 +18,9 @@ import secrets
 import threading
 import time
 
-from .config import (STATE_DIR, admin_password, load_config, load_env, pass_key, read_text, save_env, update_config,
-                     user_password, write_atomic)
+from . import localadmin
+from .config import (STATE_DIR, load_config, load_env, pass_key, read_text, save_env, update_config, user_password,
+                     write_atomic)
 from .i18n import _
 from .navidrome import Navidrome, NavidromeError
 
@@ -37,7 +39,7 @@ class LoginError(Exception):
 
 
 def required(env=None):
-    return bool(admin_password(env))
+    return localadmin.configured(env)
 
 
 def _secret():
@@ -83,7 +85,7 @@ def _save_sessions(data):
 
 def _notfall_mark():
     """Mark of the current administrator password: when it changes, all sessions of the local administrator end."""
-    return _sign("notfall:" + admin_password())[:16]
+    return _sign("notfall:" + localadmin.identity())[:16]
 
 
 def make_token(user, days=SESSION_DAYS):
@@ -378,8 +380,7 @@ def login(username, password, remember=True):
     if not isinstance(password, str) or not password:
         raise LoginError(_("Please enter the password."), counts=False)
     if not username or username.lower() in ("notfall", NOTFALL):
-        master = admin_password(env)
-        if master and hmac.compare_digest(password.encode("utf-8"), master.encode("utf-8")):
+        if localadmin.check(password, env):
             return NOTFALL
         raise LoginError(_("The administrator password is wrong."))
     try:

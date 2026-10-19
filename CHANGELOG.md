@@ -3,6 +3,18 @@
 A brief summary of what changes in each version. The newest version is on top; `npm run release` copies its
 section into the release notes `README.txt`. If `docker-compose.yaml` has to be replaced during an update, it says so explicitly.
 
+## 1.1.0 – 2026-10-19
+
+- **No password in docker-compose.yaml any more.** At the first start Tuttiphon opens straight to its setup: you set
+  the password of the local administrator in the browser, with a one-time setup code from the container log (also in
+  `config/setup-code.txt`). The code makes sure that nobody else who reaches the page first can claim it. Only a hash
+  of the password is kept.
+- The password can be changed under Settings → Users & permissions (with the current one). Forgotten: delete
+  `config/state/admin_password.json` – Tuttiphon then asks again with a new code.
+- `TUTTIPHON_ADMIN_PASSWORD` stays as an option: if it is set, it applies as before and can only be changed there.
+  **Existing installations need no change.** To switch, remove the line, recreate the container and enter the setup
+  code from the log. The interface can no longer write it into `config/.env`.
+
 ## 1.0.2 – 2026-10-18
 
 - The container log (`docker logs`) is always English, whatever the server language. The run logs in the interface

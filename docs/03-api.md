@@ -21,8 +21,8 @@ How sign-in, roles and the filters for users work in detail is described in
   the Python version ([07](07-security.md#further-safeguards)).
 - JSON bodies: `NaN`, `Infinity` and numbers beyond the float range (`1e999`) are refused with `400 "invalid request"`.
 - Routes live in three tables of the `Handler` class: `GET_ROUTES`, `POST_ROUTES`, `PUT_ROUTES`. In addition there are
-  special paths that `_handle()` intercepts first: `/api/login`, `/api/logout`, `/img/…`, `/live/…`, `/cover`,
-  `/api/cover/upload` and the static files.
+  special paths that `_handle()` intercepts first: `/api/login`, `/api/setup`, `/api/logout`, `/img/…`, `/live/…`,
+  `/cover`, `/api/admin-password`, `/api/cover/upload` and the static files.
 - Query parameters become a simple dictionary (`parse_qsl`); with duplicate names the last one wins, all values
   are strings.
 
@@ -30,7 +30,7 @@ How sign-in, roles and the filters for users work in detail is described in
 
 | Rule | Value |
 |---|---|
-| Required header | `X-Tuttiphon: 1` – otherwise `403 {"error": "forbidden"}`. This includes `POST /api/login`; the only exception is `POST /api/logout`. |
+| Required header | `X-Tuttiphon: 1` – otherwise `403 {"error": "forbidden"}`. This includes `POST /api/login` and `POST /api/setup`; the only exception is `POST /api/logout`. |
 | Language | `X-Lang: en` or `de` (the interface sends it with every request): error messages and texts in the response come in this language, otherwise in the server's language (`settings.language`). Cached responses (`_memoized`) are kept per language. |
 | Body | a JSON **object** in UTF-8; an empty body counts as `{}`. The `Content-Type` is not evaluated. |
 | Size | at most 2,000,000 bytes (`MAX_BODY`), 10 MiB for a cover upload. Above that: `413`, and the connection is closed. |
@@ -59,15 +59,16 @@ All errors from routes come as `{"error": "<text>"}`; `_handle()` does the mappi
 | Status | Trigger |
 |---|---|
 | `400` | `ValueError`, `KeyError`, `RuntimeError`, `NavidromeError`, `StopIteration` – domain errors (“Playlist not found”, “A task is already running.”, “Another Tuttiphon instance … is working right now …”), missing required fields (with `KeyError` the key is in the text, e.g. `"'id'"`), errors from Navidrome |
-| `401` | no valid session for `/api/…`, `/img/…`, `/live/…`, `/cover` → `{"error": "login"}` (also after signing out and for an account with role `none`); wrong credentials at `/api/login` |
+| `401` | no valid session for `/api/…`, `/img/…`, `/live/…`, `/cover` → `{"error": "login"}` (also after signing out, for an account with role `none` and in setup mode); wrong credentials at `/api/login`; wrong setup code or weak password at `/api/setup` |
 | `302` | no valid session for all other non-public paths → `Location: /login.html` |
-| `403` | path in `ADMIN_ONLY` without the admin role (`"Only administrators may do this."`), `PermissionError` without an error number (someone else's person/playlist), missing `X-Tuttiphon` header (`"forbidden"`, also at `/api/login`) |
+| `403` | path in `ADMIN_ONLY` without the admin role (`"Only administrators may do this."`), `PermissionError` without an error number (someone else's person/playlist), missing `X-Tuttiphon` header (`"forbidden"`, also at `/api/login` and `/api/setup`) |
 | `404` | unknown API path or missing static file (`{"error": "not found"}`); image not available (empty body) |
 | `413` | body too large (`"Request too large"`) |
-| `421` | called via a foreign host name without an administrator password (`"Access only via 127.0.0.1 – or set TUTTIPHON_ADMIN_PASSWORD"`) |
-| `429` | sign-in lockout after too many failed attempts (per account and address, per address, per account) |
+| `409` | `POST /api/setup` outside setup mode (`"Tuttiphon is already set up – sign in as local administrator."`) |
+| `421` | called via a foreign host name without an administrator password and not bound to a network address (`"Access only via 127.0.0.1 – or set an administrator password (Settings → Users & permissions)."`) |
+| `429` | sign-in lockout after too many failed attempts (per account and address, per address, per account; setup code; current password at `/api/admin-password`) |
 | `500` | any other exception – the answer only says `"Something went wrong – the details are in the server log."`; the server log shows “⚠ Error at <method> <path>: <type>: <text>” |
-| `503` | `PermissionError` from the file system (`"A file was not accessible just now – please try again in a moment."`); `index.html` is missing, i.e. the interface hasn't been built (plain text instead of JSON); bound to a network address while the administrator password is missing or weak – for **every** request, before all other checks (`"Tuttiphon is locked: the administrator password is missing or too short – please set TUTTIPHON_ADMIN_PASSWORD (at least 8 characters)."`, [07](07-security.md#running-without-a-password)) |
+| `503` | `PermissionError` from the file system (`"A file was not accessible just now – please try again in a moment."`); `index.html` is missing, i.e. the interface hasn't been built (plain text instead of JSON); bound to a network address while `TUTTIPHON_ADMIN_PASSWORD` is weak – for **every** request, before all other checks (`"Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the placeholder – please set at least 8 characters."`, [07](07-security.md#running-without-a-password)) |
 
 `PermissionError` is also the class the file system raises for missing permissions (e.g. briefly on the
 NFS share). `_handle()` tells the two cases apart by `errno`: if an error number is set, the error comes from the
@@ -95,7 +96,7 @@ and `/assets/…` are reachable without a session. The check uses the normalized
 | Abbreviation | Meaning |
 |---|---|
 | public | reachable without a session |
-| signed in | any valid session (role `admin` or `user`). Without `TUTTIPHON_ADMIN_PASSWORD`, every access via localhost is a local admin. |
+| signed in | any valid session (role `admin` or `user`). Without an administrator password (neither `TUTTIPHON_ADMIN_PASSWORD` nor one set in the browser) and bound to loopback, every access via localhost is a local admin; on the network that is setup mode, where only the public paths work until the setup ([07](07-security.md#setup-mode)). |
 | Admin | path is in `Handler.ADMIN_ONLY` → otherwise `403` |
 | Admin (function) | path is open to everyone, the function calls `auth.require_admin()` |
 | own | signed in, but only for one's own people or playlists (`_own_person()`, `_own_playlist_id()`) – otherwise `403` |
@@ -106,7 +107,9 @@ The “Users” column in the tables below lists what the server leaves out for 
 
 | Method | Path | Access | Section |
 |---|---|---|---|
+| GET | `/api/login` | public | [Session](#session) |
 | POST | `/api/login` | public | [Session](#session) |
+| POST | `/api/setup` | public (only in setup mode) | [Session](#session) |
 | POST | `/api/logout` | public | [Session](#session) |
 | GET | `/api/me` | signed in | [Session](#session) |
 | POST | `/api/me/password` | signed in | [Session](#session) |
@@ -156,6 +159,7 @@ The “Users” column in the tables below lists what the server leaves out for 
 | GET | `/api/users` | Admin | [Settings & credentials](#settings--credentials) |
 | GET | `/api/accounts` | Admin | [Settings & credentials](#settings--credentials) |
 | PUT | `/api/accounts` | Admin | [Settings & credentials](#settings--credentials) |
+| POST | `/api/admin-password` | Admin | [Settings & credentials](#settings--credentials) |
 | GET | `/api/intel` | Admin | [Settings & credentials](#settings--credentials) |
 | GET | `/api/opus/info` | Admin | [Settings & credentials](#settings--credentials) |
 | GET | `/api/lyrics/stats` | Admin | [Settings & credentials](#settings--credentials) |
@@ -185,8 +189,9 @@ The “Users” column in the tables below lists what the server leaves out for 
 
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
-| `GET /api/login` | public | – | `{"navidrome": bool}` – whether people can sign in with their Navidrome account yet (`NAV_URL` and the admin access are set, `api_login_info()`); with `false` the sign-in page offers only the local administrator |
+| `GET /api/login` | public | – | `{"setup": bool, "navidrome": bool}` (`api_login_info()`) – `setup`: setup mode, no administrator password yet on the network; the sign-in page then shows only the setup form. `navidrome`: whether people can sign in with their Navidrome account yet (`NAV_URL` and the admin access are set); with `false` the sign-in page offers only the local administrator |
 | `POST /api/login` | public, header `X-Tuttiphon: 1` required (otherwise `403`) | Body `{"username", "password", "remember"}` – `remember` defaults to `true`; an empty user name or `notfall` = [local administrator](07-security.md#local-administrator) | `{"ok": true, "user": "<name>"}` and `Set-Cookie: tuttiphon=…` (new session in `state/sessions.json`; `Secure` via https through a trusted reverse proxy); errors `401 {"error": <message>}`, `429` when locked out |
+| `POST /api/setup` | public, header `X-Tuttiphon: 1` required (otherwise `403`); only in [setup mode](07-security.md#setup-mode) (bound to a network address, no administrator password), otherwise `409` | Body `{"code", "password"}` – the setup code from the server log or `setup-code.txt` (case and `-` don't matter) and the new password of the local administrator | `{"ok": true, "user": "@notfall"}` and `Set-Cookie: tuttiphon=…` (`Secure` via https through a trusted reverse proxy); the hash goes to `state/admin_password.json`, `setup-code.txt` is deleted. Errors `401` (wrong code – counts toward the lockout –, weak password), `409`, `429` |
 | `POST /api/logout` | public, no `X-Tuttiphon` needed | Cookie `tuttiphon` | ends the session of this token on the server (`auth.end_session()`) – afterwards the token is no longer valid, not even as a copy; response `{"ok": true}` and a cookie `tuttiphon=` with `Max-Age=0` |
 | `GET /api/me` | signed in | – | `{"user", "name", "fullName", "role", "local", "persons", "own", "notfall", "passwordStored", "passwordRejected", "tourSeen", "welcomeSeen"}` – `passwordRejected`: a password is stored, but Navidrome no longer accepts it ([07](07-security.md#turn-on-statistics--stars)); without sign-in (local): `{"user": null, "name": "", "role": "admin", "local": true, "persons", "own", "tourSeen", "welcomeSeen": true}` |
 | `POST /api/me/password` | signed in with a Navidrome account (not the local administrator, not local) | Body `{"password": "…"}` stores it, `{"password": null}` (or no field) forgets it | `{"ok": true}` |
@@ -207,12 +212,19 @@ The “Users” column in the tables below lists what the server leaves out for 
 - Sign-in lockout: in 10 minutes at most 10 failed attempts per account (user name in lowercase, empty = local
   administrator) from the same address, 30 per address and 50 per account from all addresses together, then `429`.
   “Navidrome is not reachable right now” and an empty password don't count. The address is the direct peer – behind a
-  reverse proxy listed in `TUTTIPHON_TRUSTED_PROXIES` the one from `X-Forwarded-For`. Details:
+  reverse proxy listed in `TUTTIPHON_TRUSTED_PROXIES` the one from `X-Forwarded-For`. A wrong setup code at
+  `/api/setup` counts separately: 10 per address and 50 from all addresses together. Details:
   [07 – Sign-in lockout](07-security.md#sign-in-lockout).
 - `/api/login` writes “Signed in: <account>” to the server log, for counting failed attempts “Sign-in
   failed: <entered name, lowercase>” and for a lockout “Sign-in blocked (too many
   failed attempts): …”; the local administrator appears there as “Local administrator” (`web._who()`). Passwords never
-  appear.
+  appear. `/api/setup` writes “Setup: the password of the local administrator is set.”, a wrong code “Sign-in failed:
+  setup code”.
+- `/api/setup` (`Handler._setup()`): wrong code → `401` “The setup code is wrong – it is in the container log and in
+  setup-code.txt in the data folder.”, a weak password (`config.weak_password()`) → `401` “The administrator password
+  needs at least 8 characters.” (doesn't count toward the lockout). Of two requests at the same moment only the first
+  sets the password (`_setup_lock`); the second gets `401` “Tuttiphon is already set up …”. Afterwards the server is
+  no longer in setup mode, and the setup assistant follows as usual ([07 – Setup mode](07-security.md#setup-mode)).
 
 ## Configuration
 
@@ -251,7 +263,7 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
-| `GET /api/status` | signed in | – | `env` (`url`, `webUrl`, `admin`, `adminOk`, `users[{name, ok, key, rejected}]`, `auth`, `publicUrl`, `lastfm`, `locked`), `deezer`, `steps`, `allSteps`, `daily`, `watch`, `paths`, `instance{docker, others[{host, docker, running}]}`, `navidrome{ok, version, scan}` or `{ok: false, error}` | only `navidrome{ok, version, scan}`, `env{users (own accounts only), auth, webUrl, lastfm}`, `daily`, `instance{docker, others: []}`; `steps`/`allSteps` empty |
+| `GET /api/status` | signed in | – | `env` (`url`, `webUrl`, `admin`, `adminOk`, `users[{name, ok, key, rejected}]`, `auth`, `adminPassword`, `publicUrl`, `lastfm`, `locked`), `deezer`, `steps`, `allSteps`, `daily`, `watch`, `paths`, `instance{docker, others[{host, docker, running}]}`, `navidrome{ok, version, scan}` or `{ok: false, error}` | only `navidrome{ok, version, scan}`, `env{users (own accounts only), auth, webUrl, lastfm}`, `daily`, `instance{docker, others: []}`; `steps`/`allSteps` empty |
 | `GET /api/home` | signed in | – | `{"newAlbums", "favNew", "songs", "albums", "artists", "playlists", "personen"}` (numbers, `playlists` = active playlists of all people). Each album carries `fav`: by a favorite band of the signed-in person (administrators: of the default person and of their own account, `rules.favorite_artists()`); those from the last 45 days come first, `favNew` counts them | `fav` from one's own people |
 | `GET /api/library` | signed in | `refresh=1` reloads the library from Navidrome | Index: `artists[[name, songs, id]]`, `genres`, `albums`, `songs`, `suffix`, `mp3Albums`, `loved`, `played`, `similar`, `untagged`, `autoArtists`, `weltInfo`, `scenes`, `ratingsExact`, `ratingSource`, `deezer` | unfiltered |
 | `GET /api/welt` | signed in | `id` of the music world | `members`, `songs`, `covers`, `artists`, `memberList[{name, id, songs, auto}]`, `similar`, `playlists`, `excluded`, `scene`, `forMe` | `playlists` visible ones only; `forMe` always from one's own account |
@@ -263,7 +275,10 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
   unknown counts as `false`), `key` is the `.env` key. `locked` lists the keys the interface could otherwise set (`config.EDITABLE_ENV`,
   see [below](#settings--credentials)) that are set non-empty in the environment – they take precedence over `.env`
   and can't be changed in the interface. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_BASE` …) don't appear.
-  Passwords themselves are in no response.
+  Passwords themselves are in no response. `auth`: the local administrator has a password, so sign-in is on
+  (`localadmin.configured()`); `adminPassword` says where it comes from (`localadmin.source()`): `"env"`
+  (`TUTTIPHON_ADMIN_PASSWORD` in `docker-compose.yaml` or `.env`), `"stored"` (set in the browser, a hash in
+  `state/admin_password.json`) or `""` (none) – Settings → Users & permissions shows the matching form.
 - `instance.others` are the other instances that have checked in within the last 180 s – only other installations
   (`instances.others(foreign_only=True)`: announcements with the own installation ID from `state/install_id` don't
   count); `running` = a run is in progress there ([02](02-data-model.md#shared-folder-tuttiphon),
@@ -408,6 +423,7 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `GET /api/users` | – | `[{name, admin, fullName}]` of the Navidrome accounts; Navidrome unreachable → `400 {"error"}` |
 | `GET /api/accounts` | – | `[{name, fullName, navidromeAdmin, role, override, lastLogin, persons, passwordStored, passwordRejected}]` |
 | `PUT /api/accounts` | Body `{"user", "role"}`, `role` = `admin`, `user`, `none` or `null` (remove the override) | `{"ok": true}` |
+| `POST /api/admin-password` | Body `{"current", "password"}` – `current` only needed when the password was set in the browser | `{"ok": true}`, for the local administrator itself (and on the PC without sign-in) with `Set-Cookie: tuttiphon=…` – see below |
 | `GET /api/intel` | – | `{"lastfm", "audio", "ml", "classify", "stile", "moods", "fingerprints"}` – status of Last.fm, sound analysis, AI sound analysis, classification and audio fingerprints (see below) |
 | `GET /api/opus/info` | `refresh=1` searches anew instead of using the cache | `{"ffmpeg", "aac", "musicDir", "archiveDir", "pending", "sample"}` – `aac`: whether mutagen is available (needed for AAC) or with `error` |
 | `GET /api/lyrics/stats` | – | summary of the last lyrics run plus `lastRun`, `backlog` |
@@ -421,15 +437,24 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `POST /api/notify/test` | Body optional `topic`; with `person` for that person's topic | `{"ok": true}` or `{"ok": false, "error"}` – test message via ntfy |
 
 - `PUT /api/env` writes only the keys the interface may set via `save_env()` (`config.EDITABLE_ENV`: `NAV_URL`,
-  `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`,
-  `LASTFM_API_KEY`, `NTFY_TOKEN`). Empty string = unchanged, `null` = delete. Errors: `400 "Unknown key: …"`, `400`
-  for line breaks/control characters. Beforehand, `api_env_save()` checks: the administrator password
-  (`TUTTIPHON_ADMIN_PASSWORD`) must not be weak (`config.weak_password()`: at least 8 characters, not the placeholder
-  `change-me` in any spelling), and it can't be deleted (`null`) (`400 "The administrator
-  password needs at least 8 characters."`);
-  `NAV_URL` must start with `http://` or `https://` (`400` “Please enter the address with http:// or https:// …”;
-  `null` deletes it). After that the library is reloaded. This endpoint doesn't check passwords for `NAV_PASS_*` – the interface does that beforehand
-  with `/api/env/test`.
+  `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `LASTFM_API_KEY`,
+  `NTFY_TOKEN`). Empty string = unchanged, `null` = delete. Errors: `400 "Unknown key: …"` – also for
+  `TUTTIPHON_ADMIN_PASSWORD`, which goes through `/api/admin-password` –, `400` for line breaks/control characters.
+  Beforehand, `api_env_save()` checks: `NAV_URL` and `NAV_PUBLIC_URL` must start with `http://` or `https://` (`400`
+  “Please enter the address with http:// or https:// …”; `null` deletes it). After that the library is reloaded.
+  This endpoint doesn't check passwords for `NAV_PASS_*` – the interface does that beforehand with `/api/env/test`.
+- `POST /api/admin-password` (`Handler._admin_password()`, in `ADMIN_ONLY`, header `X-Tuttiphon` as for every
+  `POST`) sets or changes the password of the [local administrator](07-security.md#local-administrator); only its hash
+  is stored. By source (`env.adminPassword`): `"env"` → `400` “The password of the local administrator is set in
+  docker-compose.yaml – change it there.”; `"stored"` → `current` must match, otherwise `400` “The current password is
+  wrong.” (`400` rather than `401`, so the interface doesn't jump to the sign-in; it counts under the lockout keys of
+  the local administrator, `u:@notfall|<address>`, `ip:<address>` and `u:@notfall`, then `429`); `""` (none yet: on
+  the PC without network binding, where there is no sign-in yet – or in setup mode for an administrator signed in with
+  a Navidrome account) → no current password needed, and from now on sign-in is required. A weak new password →
+  `400` “The administrator password needs at least 8 characters.” On success the server log says “The password of the
+  local administrator was changed.”, all sessions of the local administrator end (`auth._notfall_mark()`), and if the
+  caller is the local administrator or the PC without sign-in, the answer carries a new session cookie for `@notfall`
+  – this browser stays signed in.
 - `POST /api/env/test`: the address must start with `http://` or `https://`. If it differs from the
   stored `NAV_URL` and `password` is missing, the server responds `{"ok": false, "error": "For a new address, please
   enter the password as well."}` – stored passwords are only sent to the configured address. Without `user`,

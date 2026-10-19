@@ -54,7 +54,8 @@ Requirements: Navidrome with an admin account, Docker with Compose on x86-64 (am
    chown 1000:1000 config backups /path/to/music-archive
    ```
 3. Start it: `docker compose up -d`
-4. Open `http://<server>:8765`, sign in as **Local administrator** – the setup assistant takes it from there.
+4. Open `http://<server>:8765` and set the password of the **local administrator** – with the one-time setup
+   code from the container log (`docker logs tuttiphon`). The setup assistant takes it from there.
 
 Updating: `docker compose pull && docker compose up -d`. All details, settings and environment variables:
 [Installation and configuration](docs/installation.md).

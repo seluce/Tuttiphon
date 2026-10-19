@@ -94,17 +94,21 @@ Tuttiphon sync name, owner and visibility.
 
 1. `tuttiphon.py` reads the options and calls `config.ensure_dirs()`: creates the data folder, `state/`, `logs/`, `backup/`,
    write test. If that fails, the process exits with code 2.
-2. If the server is to be reachable not only via loopback, `TUTTIPHON_ADMIN_PASSWORD` must be set and not weak
-   (`config.weak_password()`, see [command line](#tuttiphonpy)). Otherwise the process exits with code 2 (with
-   `--unsafe-no-password` only a warning).
+2. If the server is to be reachable not only via loopback and `TUTTIPHON_ADMIN_PASSWORD` is set (environment or
+   `.env`), it must not be weak (`config.weak_password()`, see [command line](#tuttiphonpy)). Otherwise the process
+   exits with code 2 (with `--unsafe-no-password` only a warning). Without any administrator password – neither that
+   variable nor one set in the browser (`localadmin.source()`) – it starts anyway, in
+   [setup mode](07-security.md#setup-mode).
 3. `web.serve(host, port, strict)` sets `Handler.network` for a non-loopback address (`strict=False` with
-   `--unsafe-no-password`): from then on the server answers every request with `503` while the administrator password
-   is missing or weak ([Security](07-security.md#running-without-a-password)). It opens the `ThreadingHTTPServer` (with
+   `--unsafe-no-password`): from then on the server answers every request with `503` while `TUTTIPHON_ADMIN_PASSWORD`
+   is weak, and without any administrator password it requires sign-in and only lets the setup with the setup code
+   through ([Security](07-security.md#running-without-a-password)). It opens the `ThreadingHTTPServer` (with
    an IPv6 address such as `::1` or `::` with `AF_INET6`) and starts `warm_up()`. Without `TUTTIPHON_NO_SCHEDULER=1` these follow: `heartbeat()` (instance registration, `app/instances.py`), a
    thread for `rueckblick.snapshot_all()` and the scheduler thread `daily_loop()`.
 4. `web.startup_report()` writes an overview to the server log (`events.say()`): version, storage locations with
    their state, Navidrome address, AI sound analysis, schedules. In the container “Ready – port 8765” follows, on the PC the line
-   “Tuttiphon is running at http://…/ (Ctrl+C quits)”. See [Operations](08-operations.md#server-log).
+   “Tuttiphon is running at http://…/ (Ctrl+C quits)”. In setup mode the line with the setup code comes last
+   (`localadmin.setup_code()`, at every start while the setup is pending). See [Operations](08-operations.md#server-log).
 5. After 0.8 s a timer opens the browser (not with `--no-browser`).
 6. The main thread runs `serve_forever()` until Ctrl+C or `SIGTERM` (e.g. `docker stop`) arrives. If a
    run is in progress then, `RUNNER.cancel()` cancels it, and the process waits up to 20 s so that the run can save its state
@@ -197,6 +201,7 @@ The scheduler catches errors and tries again in the next pass.
 | Navidrome sessions | `navidrome.native_session()` | one per account, for the lifetime of the process |
 | Navidrome accounts | `auth.navidrome_users()` | cached for 10 min; if the query fails (any exception), the last state applies, after a restart the one from `state/navidrome_users.json`, and for 60 s it doesn't ask again |
 | Sessions | `auth._load_sessions()` | `state/sessions.json` in memory until the file changes |
+| Administrator password | `Handler._pw_cache`, `localadmin._cache` | source and plain password, read again at most every 10 s (`Handler._admin()`); the hash from `state/admin_password.json` in memory until the file changes; setting a password resets both |
 | Song lists of other accounts | `stats._cache` | 10 min per account; the scheduler releases older ones every minute (`stats.purge()`). Only one request per account loads at a time, a second one waits for it. Loaded page by page and laid over the default list (`stats.overlay()`): songs with the same stars, favorites and plays are the same entries, only the rest are copies – around 15 MB per account instead of a second full list |
 | Live log | `TaskRunner.lines` | the last up to 4,000 lines, available via `GET /api/task?since=…` |
 | Queued runs | `TaskRunner._chain` | after `pause_for()`: the apply run and the continuation; empty as long as nothing is paused |
@@ -213,6 +218,7 @@ run.
 |---|---|
 | `web.py` | HTTP server with JSON API, serves `web/` and images; auto-apply, scheduler |
 | `auth.py` | sign-in via Navidrome or as local administrator, signed sessions with a server-side session list, roles, per-account filters |
+| `localadmin.py` | password of the local administrator: source (`TUTTIPHON_ADMIN_PASSWORD` or a hash set in the browser, `state/admin_password.json`), checking, setting, the one-time setup code of the first start ([Security](07-security.md#local-administrator)) |
 | `config.py` | paths, credentials (`.env`; which keys the interface may set: `EDITABLE_ENV`; `weak_password()`), loading, checking, migrating and saving `config.json`; `write_atomic()`, `read_text()` |
 | `tasks.py` | runs: `TaskRunner` executes steps, logs, writes the history, pauses briefly for an apply run (`pause_for()`); instance lock; daily tidy-up (`tidy()`) |
 | `events.py` | server log: `say()` writes short lines with date and time to standard output (in the container `docker logs`) |
@@ -316,10 +322,10 @@ python3 tuttiphon.py run deezer --deezer-mode full
 
 | Option | Default | Effect |
 |---|---|---|
-| `--host` | `127.0.0.1` | address the server binds to; IPv6 addresses (`::1`, `::`) work too. For anything other than `127.0.0.1`, `localhost`, `::1`, `TUTTIPHON_ADMIN_PASSWORD` must be set and not weak (`config.weak_password()`): at least 8 characters and not the placeholder `change-me` in any spelling; the message names what is wrong. While running, the server then stays locked (`503`) if the password goes missing. For `0.0.0.0` the startup message shows the address `http://127.0.0.1:<port>/`, for `::` `http://[::1]:<port>/`, other IPv6 addresses in square brackets. |
+| `--host` | `127.0.0.1` | address the server binds to; IPv6 addresses (`::1`, `::`) work too. For anything other than `127.0.0.1`, `localhost`, `::1`, sign-in is always required: a `TUTTIPHON_ADMIN_PASSWORD` that is set must not be weak (`config.weak_password()`: at least 8 characters and not the placeholder `change-me` in any spelling; otherwise code 2, the message names what is wrong and where the value comes from); without any administrator password the server starts in [setup mode](07-security.md#setup-mode) and writes the setup code to the log. While running, it stays locked (`503`) if the variable becomes weak, and goes back to setup mode if the password goes missing. For `0.0.0.0` the startup message shows the address `http://127.0.0.1:<port>/`, for `::` `http://[::1]:<port>/`, other IPv6 addresses in square brackets. |
 | `--port` | `8765` | port |
 | `--no-browser` | off | don't open a browser |
-| `--unsafe-no-password` | off | start on the network despite a missing or too short password; also turns off the lock while running (`serve(…, strict=False)`). Only a warning appears: with a too short password or the placeholder “… but the administrator password is too short or still the placeholder!”, without a password the notice that there is then no sign-in and the server only answers requests via `127.0.0.1`/`localhost` and the names in `TUTTIPHON_HOSTS` – see [Security](07-security.md). |
+| `--unsafe-no-password` | off | start on the network despite a too short password, and without setup mode when there is none; also turns off the lock while running (`serve(…, strict=False)`). Only a warning appears: with a too short password or the placeholder “… but the administrator password is too short or still the placeholder!”, without a password the notice that there is then no sign-in and the server only answers requests via `127.0.0.1`/`localhost` and the names in `TUTTIPHON_HOSTS` – see [Security](07-security.md). |
 
 **`run`** – steps without the interface (for cron or a systemd timer):
 
@@ -338,7 +344,7 @@ the command line.
 **Exit codes:** `0` = done; for `run` only if every step is `ok`. `1` = at least one step `warnung`,
 `fehler` or `abgebrochen` (warning, error, canceled) – or the run couldn't start at all because another instance is working (message “✕ Another
 Tuttiphon instance (PC or Docker) is working right now – please try again later.”). `2` = data folder not
-writable or network start without a valid password.
+writable or network start with a weak `TUTTIPHON_ADMIN_PASSWORD`.
 
 `tuttiphon.py` sets `sys.dont_write_bytecode` so that no `__pycache__` folders are created.
 
@@ -391,7 +397,7 @@ non-empty value; an empty variable (e.g. `NAV_ADMIN_PASS: ""` in `docker-compose
 | `NAV_PASS_<ACCOUNT>` | password of a Navidrome account for stars, statistics and an exact preview. Account name in upper case; characters other than letters, digits and `_` become `_` (`config.pass_key()`). | yes |
 | `RATING_USERS` | comma-separated accounts for which Deezer sets stars (`config.rating_users()`). Only applies as long as the setting `deezer.users` is not a list (default `null`); without either: all accounts of the people. | yes (the interface has no field for it) |
 | `LASTFM_API_KEY` | key for Last.fm | yes |
-| `TUTTIPHON_ADMIN_PASSWORD` | turns on sign-in and is the password of the [local administrator](07-security.md#local-administrator); required when starting on the network | yes |
+| `TUTTIPHON_ADMIN_PASSWORD` | optional: the password of the [local administrator](07-security.md#local-administrator) in plain text instead of one set in the browser – it wins over a stored one and can then only be changed here; turns on sign-in. On the network it must not be weak | no, only `.env` or environment |
 | `TUTTIPHON_HOSTS` | additional allowed host names, comma-separated (only effective without a password) | no, only `.env` or environment |
 | `TUTTIPHON_TRUSTED_PROXIES` | reverse proxies whose `X-Forwarded-For`/`X-Forwarded-Proto` count, addresses or networks, comma-separated (e.g. `172.16.0.0/12`): the sign-in lockout then counts each person's own address, sign-ins via https get the `Secure` cookie ([Security](07-security.md#behind-a-reverse-proxy)) | no, only `.env` or environment |
 

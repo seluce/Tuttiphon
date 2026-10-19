@@ -36,9 +36,9 @@ in [Data model](02-data-model.md).
 4. starts `python3 tuttiphon.py serve --port 8765`. The server binds to `127.0.0.1` and opens the browser after
    0.8 s.
 
-Without `TUTTIPHON_ADMIN_PASSWORD` there is no sign-in on the PC: whoever opens `http://127.0.0.1:8765` is
-administrator. If an administrator password is set in `data/.env`, sign-in is turned on on the PC as well – see
-[Security](07-security.md).
+Without an administrator password there is no sign-in on the PC: whoever opens `http://127.0.0.1:8765` is
+administrator. Once one is set – under Settings → Users & permissions, or as `TUTTIPHON_ADMIN_PASSWORD` in
+`data/.env` –, sign-in is turned on on the PC as well – see [Security](07-security.md).
 
 The script passes all other calls on to `tuttiphon.py` (`./tuttiphon.sh run …`). Options and exit codes:
 [Command line](01-architecture.md#command-line).
@@ -168,7 +168,7 @@ credentials and a build from the PC thus never get into the image.
 | `logging` | `json-file`, `max-size 10m`, `max-file 3` | container output at most 30 MB (Tuttiphon has its own logs in `config/logs/`) |
 | `mem_limit` | `2g` | upper limit; in operation about 130–300 MB, during the night analysis with the AI up to about 1.6 GB (see [Memory and CPU](#memory-and-cpu)) |
 | `volumes` | see below | |
-| `environment` | `TZ`, `TUTTIPHON_ADMIN_PASSWORD` (required, placeholder `change-me`), `NAV_URL` (example `http://192.168.1.10:4533`), `MUSIC_DIR=/music`, `ARCHIVE_DIR=/archive`, `BACKUP_DIR=/backup`; optional (listed in [Installation → Configuration](installation.md#configuration)): `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PUBLIC_URL`, `LASTFM_API_KEY`, `TUTTIPHON_TRUSTED_PROXIES` (example `172.16.0.0/12`, see [Reverse proxy](#reverse-proxy-https)) | all variables: [Environment variables](01-architecture.md#environment-variables) |
+| `environment` | `TZ`, `NAV_URL` (example `http://192.168.1.10:4533`), `MUSIC_DIR=/music`, `ARCHIVE_DIR=/archive`, `BACKUP_DIR=/backup` – no password: it is set in the browser at the first start ([below](#first-start-administrator-password)); optional (listed in [Installation → Configuration](installation.md#configuration)): `TUTTIPHON_ADMIN_PASSWORD`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PUBLIC_URL`, `LASTFM_API_KEY`, `TUTTIPHON_TRUSTED_PROXIES` (example `172.16.0.0/12`, see [Reverse proxy](#reverse-proxy-https)) | all variables: [Environment variables](01-architecture.md#environment-variables) |
 
 Values set in `environment` take precedence over `/config/.env`, and the interface cannot change them (the fields are
 locked). Empty values such as `NAV_ADMIN_PASS: ""` do not count; then the `.env` applies.
@@ -225,39 +225,58 @@ night analysis (default 01:00–05:00), so that Navidrome stays smooth during th
 ([Maintenance](05-maintenance.md#night-analysis)). One song takes a few seconds on the NAS; the first pass over the
 whole library spans several nights.
 
-### Required: `TUTTIPHON_ADMIN_PASSWORD`
+### First start: administrator password
 
-The container starts with `--host 0.0.0.0`. `tuttiphon.py` refuses this start (code 2) if `TUTTIPHON_ADMIN_PASSWORD`
-is missing, shorter than 8 characters, or still the placeholder `change-me` from the template
-(`config.PASSWORD_PLACEHOLDERS`). The message is in the container log (`docker logs tuttiphon`) and names
-what is wrong: missing, the placeholder, or the number of characters, and whether the value comes from
-`docker-compose.yaml` or from the `.env`. The password can be in `environment` or in `/config/.env`. It turns on
-sign-in and is the password of the [local administrator](07-security.md#local-administrator), Tuttiphon's own
-administrator account. The placeholder counts in any spelling – `Change-Me`, `CHANGE-ME`, also with spaces around it
-(`config.weak_password()`).
+The container starts with `--host 0.0.0.0`, so it never runs without sign-in. The password of the
+[local administrator](07-security.md#local-administrator) – Tuttiphon's own administrator account, the way in when
+Navidrome cannot be reached – is set in the browser at the first start; the template `docker-compose.yaml` contains
+none:
 
-If the password goes missing or becomes weak while the container is running (e.g. the `.env` in `/config` was
-edited), Tuttiphon doesn't fall back to “no sign-in”: it answers every request with HTTP 503 “Tuttiphon is locked: the
-administrator password is missing or too short – please set TUTTIPHON_ADMIN_PASSWORD (at least 8 characters).”
-until a proper password is back – within 10 s, without a restart
+1. Without any administrator password the server starts in [setup mode](07-security.md#setup-mode) and writes a
+   one-time setup code to the container log (`docker logs tuttiphon`, or the log of the container in the Docker app of
+   the NAS): “No administrator password yet – open Tuttiphon in the browser and enter the setup code XXXX-XXXX (also in
+   setup-code.txt in the data folder).” The same code is in `/config/setup-code.txt` (`./config/setup-code.txt` next
+   to `docker-compose.yaml`); it stays the same across restarts and is written to the log again at every start.
+2. `http://<NAS-IP>:8765` shows the setup form: setup code, new password (at least 8 characters) twice. Afterwards the
+   browser is signed in as local administrator, only a hash of the password is kept (`/config/state/admin_password.json`),
+   and `setup-code.txt` is gone. The code proves that whoever sets the password has access to the server – otherwise
+   the first stranger to open the page would become administrator.
+3. Changing it later: Settings → Users & permissions, card “Local administrator” (current password, new one twice).
+   Forgotten: delete `config/state/admin_password.json` – within about 10 s Tuttiphon waits for the setup again and
+   logs a new code. User-facing description: [Installation](installation.md#installation).
+
+Alternatively the password can be set in plain text as `TUTTIPHON_ADMIN_PASSWORD` in `environment` or in
+`/config/.env` (`$` written as `$$` in the compose file). It wins over one set in the browser and can then only be
+changed there (the interface shows a note instead of the form). It must not be weak: `tuttiphon.py` refuses the start
+(code 2) if it is shorter than 8 characters or the placeholder `change-me` (`config.PASSWORD_PLACEHOLDERS`) in any
+spelling – `Change-Me`, `CHANGE-ME`, also with spaces around it (`config.weak_password()`). The message is in the
+container log and names the placeholder or the number of characters and whether the value comes from
+`docker-compose.yaml` or from the `.env`.
+
+If the variable becomes weak while the container is running (e.g. the `.env` in `/config` was edited), Tuttiphon
+answers every request with HTTP 503 “Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the
+placeholder – please set at least 8 characters.” until a proper password is back – within 10 s, without a restart
 ([Security](07-security.md#running-without-a-password)). Meanwhile the health check fails as well (`curl -f` on
-`/login.html` gets the 503), so Docker shows the container as unhealthy.
+`/login.html` gets the 503), so Docker shows the container as unhealthy. In setup mode the health check stays green:
+`/login.html` is public.
 
 ### Setup
 
 1. Create a project folder on the NAS (e.g. `/volume1/docker/tuttiphon`) and put the template `docker-compose.yaml`
    into it. To build the image yourself instead, the files from `.dockerignore` go there as well (or the contents of
    `release/`, see [Updates](#updates)); Node on the NAS is not needed.
-2. In `docker-compose.yaml`, adjust the lines marked `CHANGE`: `user:`, the music folder and the archive, `TZ`, your
-   own `TUTTIPHON_ADMIN_PASSWORD` and `NAV_URL`.
+2. In `docker-compose.yaml`, adjust the lines marked `CHANGE`: `user:`, the music folder and the archive, `TZ` and
+   `NAV_URL`. A password doesn't go there (step 5).
 3. Create the folders for `/config` (`./config`), `/backup` (`./backups`) and the archive beforehand and give `user:`
    write access – a folder that Docker creates for a missing bind mount belongs to `root:root`, and the container
    then ends with code 2 and restarts over and over. In the project folder, with the numbers from `user:`:
    `mkdir -p config backups /path/to/music-archive && chown 1000:1000 config backups /path/to/music-archive`.
 4. Start the project: `docker compose up -d` (pulls the image; building it yourself: `docker compose up -d --build`).
    UGREEN: Docker → Project → Create; Synology: Container Manager → Project → Create.
-5. Open `http://<NAS-IP>:8765` and sign in with a Navidrome admin or as “Local administrator” (with
-   `TUTTIPHON_ADMIN_PASSWORD`). On a new installation the **setup assistant** opens: it checks the connection to
+5. Open `http://<NAS-IP>:8765`: the sign-in page asks for the **setup code** and the new password of the local
+   administrator ([above](#first-start-administrator-password)); the code is in the container log and in
+   `config/setup-code.txt`. With `TUTTIPHON_ADMIN_PASSWORD` in the compose file, sign in as “Local administrator”
+   instead. On a new installation the **setup assistant** opens next: it checks the connection to
    Navidrome (enter the admin access there if it is not in the compose file) and asks step by step what Tuttiphon
    should do – conversion (off until you choose it), lyrics, the sound analysis, Deezer stars, what runs by itself.
    Nothing but the connection is saved before “Finish”; a first run only starts if you ask for it. Skipped or closed,
@@ -498,6 +517,8 @@ responsible instance, so not on the PC while a container is running) and on dema
 | `state/selfcheck.json` | result of the last self-check | optional (recreated at the next scan) |
 | `state/secret` | key for the session cookies (permissions 0600) | optional – without it Tuttiphon creates a new one, and everyone has to sign in again |
 | `state/sessions.json` | valid sessions (permissions 0600) | optional – without it everyone has to sign in again |
+| `state/admin_password.json` | hash of the password of the local administrator set in the browser (permissions 0600) | **yes** – without it the server waits for the setup with a new code again |
+| `setup-code.txt` | one-time setup code, only until the password is set (permissions 0600) | no – not in the built-in backup; a new one is created when needed |
 | `state/navidrome_users.json` | account list last read from Navidrome (roles when Navidrome is not reachable) | no – fetched again |
 | `state/install_id` | ID of this installation ([Multiple instances](#multiple-instances)) | no – not in the built-in backup; created again |
 | `state/cache/` | image cache, artist info | no – pure cache |
@@ -505,7 +526,8 @@ responsible instance, so not on the PC while a container is running) and on dema
 Not to be backed up are the instance status files (`instance-*.json`) and the lock file `task.lock` in the shared
 folder – normally `<playlist-folder>/.tuttiphon/`, so not in the data folder at all; as a fallback `state/`.
 
-In the container, `docker-compose.yaml` is also part of the backup, because it contains paths and the password.
+In the container, `docker-compose.yaml` is also part of the backup, because it contains paths and possibly
+`TUTTIPHON_ADMIN_PASSWORD`.
 
 Tuttiphon tidies up logs, history and image cache once a day by itself (`tasks.tidy()`): logs older than
 90 days and cached images not renewed for 60 days are deleted, `history.jsonl` is shortened to the last 2000
@@ -610,7 +632,7 @@ that the lock against other instances prevents does not appear in the history at
 **API errors** come as JSON `{"error": "…"}`: 400 for invalid input, Navidrome errors and runs that cannot
 start; 401 without sign-in; 403 without permission; 413 for a request that is too large (over 2 MB, cover upload over
 10 MB); 429 after too many failed sign-ins; 503 when a file on the share was briefly not accessible, or for every
-request while a server on the network has no proper administrator password; 500 with the error type.
+request while a server on the network has a weak `TUTTIPHON_ADMIN_PASSWORD`; 500 with the error type.
 
 ### Server log
 
@@ -627,29 +649,32 @@ logs in `logs/` and in the interface stay in the server language. Lines glued to
 |---|---|---|
 | Startup | “Tuttiphon <version> is starting[ in the Docker container]”, then indented per storage location “Data/Music/Playlists/Archive/Backups: <path> – writable \| NOT writable \| created when needed \| MISSING”, “Navidrome: <NAV_URL>” (or “address missing …”, possibly with “– admin access not entered yet”), “AI sound analysis: ready” or the reason, “Daily at <dailyAt>: <mode> · night analysis <from>–<to> · folder watch on” (the last two only if turned on). In the container then “Ready – port 8765”; on the PC instead (without timestamp) “Tuttiphon is running at http://…/ (Ctrl+C quits)”. If the overview fails: “(Startup overview not possible: …)” | `tuttiphon.py`, `web.startup_report()` |
 | Run | every non-indented, non-empty line of the run log, in English: “▶ <name> – <date time>”, “━━ <step> ━━”, messages from the steps (e.g. “Scan finished: …”, “Classification: …”), “❌ …”, “⏸ Short pause for “…” …”, “■ Done. <step>: <result>, …”. Indented detail lines are only in `logs/` | `TaskRunner.log()` (only in the server, not with `run`) |
-| Sign-in | “Signed in: <account>”, “Sign-in failed: <name>” (only failed attempts that count), “Sign-in blocked (too many failed attempts): <name>”; the local administrator is called “Local administrator” (`web._who()`) | `Handler._login()` |
+| Sign-in | “Signed in: <account>”, “Sign-in failed: <name>” (only failed attempts that count), “Sign-in blocked (too many failed attempts): <name>”; the local administrator is called “Local administrator” (`web._who()`), a wrong setup code “setup code” | `Handler._login()`, `Handler._limited()` |
+| Setup | “No administrator password yet – open Tuttiphon in the browser and enter the setup code XXXX-XXXX (also in setup-code.txt in the data folder).” – at every start while the setup is pending and as soon as setup mode begins while running (e.g. after deleting `state/admin_password.json`); “Setup: the password of the local administrator is set.”; “The password of the local administrator was changed.” (Settings → Users & permissions) | `tuttiphon.py`, `localadmin.announce()`, `Handler._setup()`, `Handler._admin_password()` |
 | Error | “⚠ Error at <method> <path>: <type>: <text>” for every request that ends with `500` | `Handler._handle()` |
 | Backup | “Backup created: <file> (<n> KB) in <folder>” – only the daily one, not “Back up now” | `web._backup_daily()` |
 | Shutdown | “Canceling the running task “<name>”, saving its progress …” (only if a run is in progress), “Shut down.” | `tuttiphon.py` |
 
-`tuttiphon.py` prints warnings before the start (password missing or too short) and aborts with code 2 without a
-timestamp.
+`tuttiphon.py` prints warnings before the start (with `--unsafe-no-password`: password missing or too short) and
+aborts with code 2 without a timestamp.
 
 ### Common errors
 
 | Message / symptom | Cause | Fix |
 |---|---|---|
 | “The data folder … is not writable” at startup, code 2 | data folder missing or with wrong permissions; in the container, `/config` is not writable for `user:` | create the folder, set permissions for the UID:GID from `user:` |
-| “Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is missing …” (or “… is still the placeholder “change-me” …”, “… has only n characters …”), code 2 | start with `--host` ≠ loopback without a valid password | your own password (≥ 8 characters) in `docker-compose.yaml` or `.env` |
-| HTTP 503 “Tuttiphon is locked: the administrator password is missing or too short – please set TUTTIPHON_ADMIN_PASSWORD (at least 8 characters).” for every page | the server is bound to a network address and the administrator password went missing or became weak while it runs (e.g. `.env` edited) | set your own password (≥ 8 characters) in `docker-compose.yaml` or `.env`; it takes effect within 10 s ([Required: `TUTTIPHON_ADMIN_PASSWORD`](#required-tuttiphon_admin_password)) |
-| HTTP 421 “Access only via 127.0.0.1 – or set TUTTIPHON_ADMIN_PASSWORD” | without a password, only the host `127.0.0.1`/`localhost`/`::1` is allowed | open via `127.0.0.1`, set a password, or add the name to `TUTTIPHON_HOSTS` |
+| “Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is still the placeholder “change-me” (…)” or “… has only n characters (…)”, followed by “Please enter your own password with at least 8 characters in docker-compose.yaml (or remove the line and set the password in the browser) and restart.”, code 2 | start with `--host` ≠ loopback with a weak `TUTTIPHON_ADMIN_PASSWORD`; the brackets say whether it comes from `docker-compose.yaml`/environment or from the `.env` | your own password (≥ 8 characters) there – or remove the line and set the password in the browser with the setup code |
+| HTTP 503 “Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the placeholder – please set at least 8 characters.” for every page | the server is bound to a network address and `TUTTIPHON_ADMIN_PASSWORD` became weak while it runs (e.g. `.env` edited) | set your own password (≥ 8 characters) in `docker-compose.yaml` or `.env` – in `.env` it takes effect within 10 s – or remove the line ([First start](#first-start-administrator-password)) |
+| HTTP 421 “Access only via 127.0.0.1 – or set an administrator password (Settings → Users & permissions).” | without a password and not bound to a network address, only the host `127.0.0.1`/`localhost`/`::1` is allowed | open via `127.0.0.1`, set a password (Settings → Users & permissions), or add the name to `TUTTIPHON_HOSTS` |
+| Sign-in page asks for a setup code – where is it? | no administrator password yet ([setup mode](07-security.md#setup-mode)) | in the container log (`docker logs tuttiphon`, line “No administrator password yet – … setup code XXXX-XXXX …”, repeated at every start) and in `setup-code.txt` in the data folder (`config/` next to `docker-compose.yaml`) |
+| Password of the local administrator forgotten | – | set in the browser: delete `state/admin_password.json` in the data folder – within about 10 s Tuttiphon is back in setup mode and logs a new code (on the PC without network binding: no sign-in until a new one is set). From `docker-compose.yaml`: look it up there, or change it and recreate the container |
 | HTTP 503 “the interface has not been built yet” | `web/index.html` is missing | `npm run build` or `./tuttiphon.sh` |
 | “Tuttiphon: the interface needs Node.js (npm run build).” | no `npm` and no build present | install Node.js ≥ 22 |
 | “Another Tuttiphon instance (PC or Docker) is working right now – please try again later.” (interface: HTTP 400; `run`: code 1) | another instance reports `running` or holds `task.lock` in the shared folder | wait; check whether a `run` or a second instance is still running (`GET /api/status`, “To review”). The status of a crashed instance no longer counts after 180 s, and its lock ends with its process ([Multiple instances](#multiple-instances)). |
 | HTTP 400 “A task is already running.” | a run is already in progress in this process | wait for it to finish or cancel it |
 | “Navidrome address missing – Settings → Navidrome”, “Navidrome address invalid (…) – it starts with http:// or https://” / “Navidrome admin access missing” | `NAV_URL` is missing or does not start with `http(s)://`, or the admin access is not set. `navidrome._check_url()` reports this as `NavidromeError` before a connection is attempted; the interface runs anyway | enter the address (with `http://`) and the admin under Settings → Navidrome, or `NAV_URL` in `docker-compose.yaml` |
 | “Navidrome API POST /auth/login: HTTP 429” or “… too many requests” | Navidrome rate-limits sign-ins; every new Tuttiphon process (restart, test server, `run`) signs in again | wait a few minutes, don't restart constantly. Tuttiphon itself waits and retries up to three times. |
-| HTTP 429 “Too many failed attempts – please try again in a few minutes.” | Tuttiphon's own lock within 10 minutes: 10 failed sign-ins for the same account from the same address, 30 from the same address, or 50 for the same account from all addresses. “Navidrome not reachable” and an empty password do not count. Behind a reverse proxy without `TUTTIPHON_TRUSTED_PROXIES`, everyone shares the proxy's address | wait ([Security](07-security.md#sign-in-lockout)); behind a proxy set `TUTTIPHON_TRUSTED_PROXIES` ([Reverse proxy](#reverse-proxy-https)) |
+| HTTP 429 “Too many failed attempts – please try again in a few minutes.” | Tuttiphon's own lock within 10 minutes: 10 failed sign-ins for the same account from the same address, 30 from the same address, or 50 for the same account from all addresses; for the setup code 10 from the same address or 50 from all addresses. “Navidrome not reachable” and an empty password do not count. Behind a reverse proxy without `TUTTIPHON_TRUSTED_PROXIES`, everyone shares the proxy's address | wait ([Security](07-security.md#sign-in-lockout)); behind a proxy set `TUTTIPHON_TRUSTED_PROXIES` ([Reverse proxy](#reverse-proxy-https)) |
 | “Navidrome not reachable (…)” | `NAV_URL` wrong, Navidrome off, network | test the address under Settings → Navidrome |
 | “Credentials incomplete for user '…'” | `NAV_URL`, admin name or admin password missing | Settings → Navidrome or `.env`/compose |
 | “Navidrome error 40: … (user …)” | wrong password for this account | enter the password again |
@@ -678,7 +703,8 @@ copies `data/` once into the work folder (in a Git worktree without `data/`, the
 turns off auto-apply and folder watch there, and starts a server with `TUTTIPHON_NO_SCHEDULER=1` on
 `127.0.0.1:<port>`. It puts the instance status and run lock into the work folder with
 `TUTTIPHON_SHARED_DIR=<work-dir>/shared`, not into the real playlist folder. With `--auth` it sets
-`TUTTIPHON_ADMIN_PASSWORD` in the copy if there is no administrator password yet (under none of its three names) and
+a random `TUTTIPHON_ADMIN_PASSWORD` in the copy's `.env` if that has no such line yet (it only checks
+`TUTTIPHON_ADMIN_PASSWORD`; a password set in the browser in the copy is then overridden – the environment wins) and
 prints session cookies for the local administrator and a user account
 (`--user <account>`, otherwise `TUTTIPHON_TEST_USER` from `dev.local.env`, otherwise the first account with the role
 “user” in the copied configuration).

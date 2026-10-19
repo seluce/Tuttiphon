@@ -312,8 +312,8 @@
   </Bullets>
   <p>{@html t('You change the roles under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a>. Anyone signing in as a user for the first time is guided by a short assistant: profile, favorite worlds, favorite bands, dislikes and the first playlists.')}</p>
   <Steps>
-    <li><span>{@html t('Set <code>TUTTIPHON_ADMIN_PASSWORD</code> in docker-compose.yaml – the password of the <b>local administrator</b>. It turns on sign-in.')}</span></li>
-    <li><span>{t('Restart the container. From now on Tuttiphon asks for a username and password.')}</span></li>
+    <li><span>{@html t('At the first start you set the password of the <b>local administrator</b> in the browser – with the setup code from the container log. It turns on sign-in; you change it later under Settings → Users & permissions.')}</span></li>
+    <li><span>{t('From then on Tuttiphon asks everyone for their username and password.')}</span></li>
     <li><span>{t('Make it reachable via https through a reverse proxy such as nginx – then Tuttiphon can also be installed as an app.')}</span></li>
   </Steps>
   <p>{t('The local administrator signs in on the sign-in page under “Local administrator”. It works even when Navidrome can’t be reached and has full permissions. You stay signed in for 90 days; “Sign out” is in the menu under your own name.')}</p>

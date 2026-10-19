@@ -64,34 +64,34 @@ def main():
     from app.web import serve
     host = getattr(args, "host", "127.0.0.1")
     port = getattr(args, "port", 8765)
+    from app import localadmin
     from app.config import PASSWORD_PLACEHOLDERS, admin_password, environment, weak_password
     pw = admin_password()
-    if host not in ("127.0.0.1", "localhost", "::1") and weak_password(pw):
-        if not getattr(args, "unsafe_no_password", False):
-            import os
-            # say exactly what is wrong and where the value came from – without showing the password itself
-            source = (_s("from docker-compose.yaml/environment") if admin_password(environment())
-                      else _s("from the .env in the data folder"))
-            if not pw:
-                problem = _s("Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is missing – "
-                             "neither in the environment (docker-compose.yaml) nor in the .env in the data folder.")
-            elif pw.strip().lower() in PASSWORD_PLACEHOLDERS:
-                problem = _s("Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is still the "
-                             "placeholder “{placeholder}” ({source}).", placeholder=pw, source=source)
-            else:
-                problem = _sn(len(pw), "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has "
-                                       "only {n} character ({source}).",
-                              "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} "
-                              "characters ({source}).", source=source)
-            fix = _s("Please enter your own password with at least 8 characters in docker-compose.yaml (or in the .env "
-                     "in the data folder) and restart.")
-            print(f"✕ {english(problem)} {english(fix)}", flush=True)
-            return 2
-        if pw:
+    on_network = host not in ("127.0.0.1", "localhost", "::1")
+    unsafe = getattr(args, "unsafe_no_password", False)
+    if on_network and pw and weak_password(pw) and not unsafe:
+        # a password from docker-compose.yaml/.env that is too weak: say exactly what is wrong and where the value
+        # came from – without showing the password itself (none at all is fine: then the setup in the browser)
+        source = (_s("from docker-compose.yaml/environment") if admin_password(environment())
+                  else _s("from the .env in the data folder"))
+        if pw.strip().lower() in PASSWORD_PLACEHOLDERS:
+            problem = _s("Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is still the "
+                         "placeholder “{placeholder}” ({source}).", placeholder=pw, source=source)
+        else:
+            problem = _sn(len(pw), "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has "
+                                   "only {n} character ({source}).",
+                          "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} "
+                          "characters ({source}).", source=source)
+        fix = _s("Please enter your own password with at least 8 characters in docker-compose.yaml (or remove the "
+                 "line and set the password in the browser) and restart.")
+        print(f"✕ {english(problem)} {english(fix)}", flush=True)   # the console (docker logs) is always English
+        return 2
+    if on_network and unsafe:
+        if pw and weak_password(pw):
             print(english(_s("⚠ Tuttiphon is reachable on the network, but the administrator password is too short or "
                              "still the placeholder!")), flush=True)
-        else:
-            print(english(_s("⚠ Without TUTTIPHON_ADMIN_PASSWORD there is no login – Tuttiphon then only answers "
+        elif not localadmin.configured():
+            print(english(_s("⚠ Without an administrator password there is no login – Tuttiphon then only answers "
                              "requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.")), flush=True)
     server = serve(host, port, strict=not getattr(args, "unsafe_no_password", False))
     shown = "127.0.0.1" if host == "0.0.0.0" else "[::1]" if host == "::" else f"[{host}]" if ":" in host else host
@@ -108,6 +108,10 @@ def main():
         events.say(_s("Ready – port {port}", port=port))
     else:
         print(english(_s("Tuttiphon is running at {url}  (Ctrl+C quits)", url=url)), flush=True)
+    if on_network and not unsafe and not localadmin.configured():   # first start: waiting for the setup in the browser
+        code, created = localadmin.setup_code()
+        if not created:   # a new one was announced right away – an existing one again at every start
+            localadmin.announce(code)
     if not getattr(args, "no_browser", False):
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
     def terminate(*_args):   # docker stop / restart: like Ctrl+C – cancel the running task so it saves its progress

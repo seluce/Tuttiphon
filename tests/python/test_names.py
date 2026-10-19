@@ -33,19 +33,16 @@ class EnvironmentTest(unittest.TestCase):
             env.reset_caches()
             self.assertEqual(config.admin_password(), "aus-der-compose")
             self.assertTrue(auth.required())
-            self.assertIn("TUTTIPHON_ADMIN_PASSWORD", config.environment())   # field counts as set by docker-compose
-        config.save_env({"TUTTIPHON_ADMIN_PASSWORD": "aus-der-datei"})
+            self.assertIn("TUTTIPHON_ADMIN_PASSWORD", config.environment())
+        config.ENV_FILE.write_text("TUTTIPHON_ADMIN_PASSWORD=aus-der-datei\n")
         env.reset_caches()
         self.assertEqual(config.admin_password(), "aus-der-datei")
-        self.assertEqual(config.ENV_FILE.read_text().strip(), "TUTTIPHON_ADMIN_PASSWORD=aus-der-datei")
 
     def test_placeholders_are_no_administrator_password(self):
-        from app import web
-        for placeholder in config.PASSWORD_PLACEHOLDERS:
+        from app import localadmin
+        for placeholder in config.PASSWORD_PLACEHOLDERS + ("kurz",):
             with self.assertRaises(ValueError):
-                web.api_env_save({"TUTTIPHON_ADMIN_PASSWORD": placeholder})
-        with self.assertRaises(ValueError):
-            web.api_env_save({"TUTTIPHON_ADMIN_PASSWORD": "kurz"})
+                localadmin.set_password(placeholder)
 
 
 class PlaylistMarkerTest(unittest.TestCase):

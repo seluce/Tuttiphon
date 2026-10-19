@@ -4,6 +4,7 @@
   import Select from '../../components/Select.svelte'
   import PersonAvatar from '../../components/PersonAvatar.svelte'
   import Card from './Card.svelte'
+  import AdminPassword from './AdminPassword.svelte'
   import { S, findPerson } from '../../lib/state.svelte.js'
   import { toast } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
@@ -77,8 +78,9 @@
 
 <Card title={t('Local administrator')} icon="shield">
   <p class="muted small">{env.auth
-    ? t('Besides the Navidrome accounts there is Tuttiphon’s own administrator: choose “Local administrator” on the sign-in page and enter TUTTIPHON_ADMIN_PASSWORD from docker-compose.yaml. It has all rights and works even when Navidrome cannot be reached.')
-    : t('Not set up yet: Tuttiphon only asks for a sign-in once an administrator password is set as TUTTIPHON_ADMIN_PASSWORD in docker-compose.yaml. Without it, Tuttiphon can only be reached from its own computer.')}</p>
+    ? t('Besides the Navidrome accounts there is Tuttiphon’s own administrator: choose “Local administrator” on the sign-in page and enter its password. It has all rights and works even when Navidrome cannot be reached.')
+    : t('Not set up yet: Tuttiphon only asks for a sign-in once the local administrator has a password. Without it, Tuttiphon can only be reached from its own computer.')}</p>
+  <AdminPassword />
 </Card>
 
 <style>

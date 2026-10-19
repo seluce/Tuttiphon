@@ -16,9 +16,9 @@ from pathlib import Path
 from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import audio, auth, autowelten, i18n, backup, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
+from . import audio, auth, autowelten, i18n, backup, localadmin, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
 from .i18n import N_, _, _s, _sn
-from .config import (ADMIN_PASSWORD, CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, STATE_DIR,
+from .config import (CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, STATE_DIR,
                      WEB_DIR, ConfigDamaged, admin_password, env_var, environment, load_config, load_env, pass_key, paths, paths_info,
                      rating_users, read_bytes, read_text, save_env, save_from_ui, update_config, user_password,
                      weak_password, write_atomic)
@@ -286,7 +286,8 @@ def _status_full():
             # ok: a password is stored; rejected: Navidrome no longer accepts it (auth.password_rejected)
             "users": [{"name": u, "ok": ok, "key": pass_key(u), "rejected": ok and auth.password_rejected(u)}
                       for u, ok in users_ok(env, cfg).items()],
-            "auth": bool(admin_password(env)),
+            "auth": localadmin.configured(env),
+            "adminPassword": localadmin.source(env),   # env (docker-compose) · stored (set in the browser) · "" (none)
             "publicUrl": env.get("NAV_PUBLIC_URL") or "",
             "lastfm": bool(env.get("LASTFM_API_KEY")),
             "ntfyToken": bool(env.get("NTFY_TOKEN")),
@@ -1203,12 +1204,14 @@ def api_accounts_save(body):
     return {"ok": True}
 
 
-def api_login_info():
-    """For the sign-in page, without signing in: can people sign in with their Navidrome account yet? Only once the
-    address and the admin access are there – before that only the local administrator gets in (and the setup
-    assistant connects Navidrome)."""
+def api_login_info(setup=False):
+    """For the sign-in page, without signing in. setup: no administrator password yet – the page asks for the setup
+    code and a new password. navidrome: can people sign in with their Navidrome account yet? Only once the address and
+    the admin access are there – before that only the local administrator gets in (and the setup assistant connects
+    Navidrome)."""
     env = load_env()
-    return {"navidrome": bool(env.get("NAV_URL") and env.get("NAV_ADMIN_USER") and env.get("NAV_ADMIN_PASS"))}
+    return {"setup": bool(setup),
+            "navidrome": bool(env.get("NAV_URL") and env.get("NAV_ADMIN_USER") and env.get("NAV_ADMIN_PASS"))}
 
 
 def api_users():
@@ -1220,9 +1223,6 @@ def api_users():
 
 
 def api_env_save(body):
-    pw = body.get(ADMIN_PASSWORD, "")   # turns on sign-in – never delete or shorten it
-    if pw != "" and weak_password(pw):
-        raise ValueError(_("The administrator password needs at least 8 characters."))
     for key in ("NAV_URL", "NAV_PUBLIC_URL"):   # becomes a link in the interface: only http(s), never javascript: …
         if key in body and body[key] not in (None, "") and not re.match(r"^https?://[^\s/]+", str(body[key]), re.I):
             raise ValueError(_("Please enter the address with http:// or https://, e.g. http://192.168.1.10:4533"))
@@ -1648,6 +1648,7 @@ _login_fails = {}   # key (account or address) -> times of the failed attempts
 _login_pending = Counter()   # key -> attempts being checked with Navidrome right now (count like failed ones)
 _login_blocked_said = {}   # key -> time a block was reported in the server log (once per block)
 _login_lock = threading.Lock()
+_setup_lock = threading.Lock()
 LOOPBACK = ("127.0.0.1", "localhost", "::1")
 
 
@@ -1763,12 +1764,18 @@ class Handler(BaseHTTPRequestHandler):
         trusted = [x.strip() for x in (load_env().get("TUTTIPHON_TRUSTED_PROXIES") or "").split(",") if x.strip()]
         return client_of(self.client_address[0], self.headers, trusted)
 
-    def _password(self):
-        at, pw = Handler._pw_cache
-        if time.time() - at > 10:
-            pw = admin_password()
-            Handler._pw_cache = (time.time(), pw)
-        return pw
+    def _admin(self):
+        """(source, plain): where the password of the local administrator comes from (localadmin.source()) and the
+        plain one from docker-compose/.env, if any – checked at most every 10 s. On the network without any: the setup
+        code is made sure of (and announced in the server log)."""
+        at, state = Handler._pw_cache
+        if time.time() - at > 10 or state is None:
+            env = load_env()
+            state = (localadmin.source(env), admin_password(env))
+            Handler._pw_cache = (time.time(), state)
+            if self.network and not state[0]:
+                localadmin.setup_code()
+        return state
 
     _pw_cache = (0.0, None)
     network = False   # serve(): reachable on the network – then never without a proper password (see _handle)
@@ -1779,16 +1786,12 @@ class Handler(BaseHTTPRequestHandler):
     def _session_user(self):
         return auth.read_token(self._cookies().get("tuttiphon", ""))
 
-    def _login(self):
+    def _limited(self, keys, label, attempt, status=401):
+        """Lockout around a password or code check: per account and address (10 failed attempts in 10 min), per address
+        (30) and per account from everywhere together (50) – so a single stranger can neither guess nor lock an account
+        for everyone. attempt() returns the result or raises auth.LoginError. -> (True, result), or (False, None) once
+        the refusal has been answered."""
         now = time.time()
-        body = self._body()
-        ip, https = self._client()
-        # block per account and address (10 failed attempts in 10 min), per address (30) and per account from
-        # everywhere together (50) – so a single stranger can neither guess nor lock an account for everyone
-        name = str(body.get("username") or "").strip().lower()[:200]
-        if name in ("", "notfall", auth.NOTFALL):   # all spellings of the local administrator count together
-            name = auth.NOTFALL
-        keys = ((f"u:{name}|{ip}", 10), (f"ip:{ip}", 30), (f"u:{name}", 50))
         with _login_lock:
             for k in list(_login_fails):
                 _login_fails[k] = [t for t in _login_fails[k] if now - t < 600]
@@ -1801,9 +1804,10 @@ class Handler(BaseHTTPRequestHandler):
             if full:
                 if full[0] not in _login_blocked_said:   # the server log says it once per block, not per attempt
                     _login_blocked_said[full[0]] = now
-                    events.say(_s("Sign-in blocked (too many failed attempts): {who}", who=_who(name)))
-                return self._json({"error": _("Too many failed attempts – please try again in a few minutes.")}, 429)
-            for k, _limit in keys:   # reserve the attempt before asking Navidrome
+                    events.say(_s("Sign-in blocked (too many failed attempts): {who}", who=label))
+                self._json({"error": _("Too many failed attempts – please try again in a few minutes.")}, 429)
+                return False, None
+            for k, _limit in keys:   # reserve the attempt before checking
                 _login_pending[k] += 1
 
         def release(failed):
@@ -1815,22 +1819,94 @@ class Handler(BaseHTTPRequestHandler):
                     if failed:
                         _login_fails.setdefault(k, []).append(now)
         try:
-            user = auth.login(body.get("username", ""), body.get("password", ""), body.get("remember", True) is not False)
+            result = attempt()
         except auth.LoginError as e:
             release(e.counts)   # “Navidrome not reachable” or an empty field do not count
             if e.counts:
-                events.say(_s("Sign-in failed: {who}", who=_who(name)))
+                events.say(_s("Sign-in failed: {who}", who=label))
                 time.sleep(1)
-            return self._json({"error": str(e)}, 401)
+            self._json({"error": str(e)}, status)
+            return False, None
         except BaseException:
             release(False)
             raise
         release(False)
-        events.say(_s("Signed in: {who}", who=_who(user)))
+        return True, result
+
+    def _session_cookie(self, user, https):
         cookie = f"tuttiphon={auth.make_token(user)}; Path=/; Max-Age={auth.SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax"
         if https:   # reached via https through a trusted reverse proxy: never send the cookie unencrypted
             cookie += "; Secure"
-        return self._json({"ok": True, "user": user}, headers={"Set-Cookie": cookie})
+        return cookie
+
+    def _login(self):
+        body = self._body()
+        ip, https = self._client()
+        name = str(body.get("username") or "").strip().lower()[:200]
+        if name in ("", "notfall", auth.NOTFALL):   # all spellings of the local administrator count together
+            name = auth.NOTFALL
+        keys = ((f"u:{name}|{ip}", 10), (f"ip:{ip}", 30), (f"u:{name}", 50))
+        ok, user = self._limited(keys, _who(name), lambda: auth.login(
+            body.get("username", ""), body.get("password", ""), body.get("remember", True) is not False))
+        if not ok:
+            return None
+        events.say(_s("Signed in: {who}", who=_who(user)))
+        return self._json({"ok": True, "user": user}, headers={"Set-Cookie": self._session_cookie(user, https)})
+
+    def _setup(self, pending):
+        """First start without an administrator password: setup code + new password -> signed in as local administrator."""
+        if not pending:
+            return self._json({"error": _("Tuttiphon is already set up – sign in as local administrator.")}, 409)
+        body = self._body()
+        ip, https = self._client()
+
+        def attempt():
+            with _setup_lock:   # two at the same time: only the first sets the password
+                if localadmin.configured():
+                    raise auth.LoginError(_("Tuttiphon is already set up – sign in as local administrator."), counts=False)
+                if not localadmin.check_code(body.get("code")):
+                    raise auth.LoginError(_("The setup code is wrong – it is in the container log and in setup-code.txt "
+                                            "in the data folder."))
+                password = body.get("password")
+                if not isinstance(password, str) or weak_password(password):
+                    raise auth.LoginError(_("The administrator password needs at least 8 characters."), counts=False)
+                localadmin.set_password(password)
+                Handler._pw_cache = (0.0, None)
+                return auth.NOTFALL
+        ok, user = self._limited(((f"setup|{ip}", 10), ("setup", 50)), _s("setup code"), attempt)
+        if not ok:
+            return None
+        events.say(_s("Setup: the password of the local administrator is set."))
+        return self._json({"ok": True, "user": user}, headers={"Set-Cookie": self._session_cookie(user, https)})
+
+    def _admin_password(self):
+        """Settings → Users & permissions: set or change the password of the local administrator (kept as a hash)."""
+        body = self._body()
+        ip, https = self._client()
+        src = localadmin.source()
+        if src == "env":
+            raise ValueError(_("The password of the local administrator is set in docker-compose.yaml – change it there."))
+        password = body.get("password")
+        if not isinstance(password, str) or weak_password(password):
+            raise ValueError(_("The administrator password needs at least 8 characters."))
+        if src == "stored":   # changing it needs the current one – a forgotten one: see docs (delete the file)
+            def attempt():
+                if not localadmin.check(body.get("current")):
+                    raise auth.LoginError(_("The current password is wrong."))
+                return True
+            name = auth.NOTFALL
+            ok, _done = self._limited(((f"u:{name}|{ip}", 10), (f"ip:{ip}", 30), (f"u:{name}", 50)),
+                                      _who(name), attempt, status=400)
+            if not ok:
+                return None
+        localadmin.set_password(password)
+        Handler._pw_cache = (0.0, None)
+        events.say(_s("The password of the local administrator was changed."))
+        me = auth.current()
+        # the local administrator's sessions end with the old password – this browser stays signed in (also on the
+        # PC, where sign-in starts right now)
+        headers = {"Set-Cookie": self._session_cookie(auth.NOTFALL, https)} if me.get("user") in (None, auth.NOTFALL) else None
+        return self._json({"ok": True}, headers=headers)
 
     def _static(self, path):
         name = "index.html" if path in ("", "/") else path.lstrip("/")
@@ -1951,7 +2027,7 @@ class Handler(BaseHTTPRequestHandler):
     ADMIN_ONLY = {"/api/history", "/api/log", "/api/users", "/api/deezer/ranks", "/api/lyrics/stats", "/api/opus/info", "/api/intel",
                   "/api/accounts", "/api/takeover/preview", "/api/takeover", "/api/mapping", "/api/env/test", "/api/paths/check",
                   "/api/lastfm/test", "/api/task/cancel", "/api/env", "/api/backups", "/api/backups/now", "/api/backups/file",
-                  "/api/kinderschutz", "/api/pflege", "/api/liedtexte/update", "/api/welt/neu"}   # i18n-ignore – routes; /api/task: status for everyone, api_task_start checks starting
+                  "/api/kinderschutz", "/api/pflege", "/api/liedtexte/update", "/api/welt/neu", "/api/admin-password"}   # i18n-ignore – routes; /api/task: status for everyone, api_task_start checks starting
 
     def _handle(self, method):
         url = urllib.parse.urlparse(self.path)
@@ -1959,22 +2035,28 @@ class Handler(BaseHTTPRequestHandler):
         path = url.path
         i18n.use(self.headers.get("X-Lang"))   # messages in the language of the interface (otherwise the server's)
         try:
-            pw = self._password()
-            needs_login = bool(pw)
-            if self.network and weak_password(pw):
-                # reachable on the network, but the password is gone or weak (e.g. .env edited while running):
-                # stay locked instead of letting everyone in as administrator
-                return self._json({"error": _("Tuttiphon is locked: the administrator password is missing or too short – "
-                                              "please set TUTTIPHON_ADMIN_PASSWORD (at least 8 characters).")}, 503)
+            src, plain = self._admin()
+            if self.network and plain and weak_password(plain):
+                # reachable on the network, but the password from docker-compose/.env is weak (e.g. edited while
+                # running): stay locked instead of letting anyone in with it
+                return self._json({"error": _("Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the "
+                                              "placeholder – please set at least 8 characters.")}, 503)
+            setup = self.network and not src   # on the network without a password: only the setup with the code
+            needs_login = bool(src) or setup
             if not self._host_ok(needs_login):
-                return self._json({"error": _("Access only via 127.0.0.1 – or set TUTTIPHON_ADMIN_PASSWORD")}, 421)
+                return self._json({"error": _("Access only via 127.0.0.1 – or set an administrator password "
+                                              "(Settings → Users & permissions).")}, 421)
             auth.set_current({"user": None, "role": "none", "own": [], "persons": [], "local": False})
             if path == "/api/login" and method == "POST":
                 if self.headers.get("X-Tuttiphon") != "1":
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – sign-in only from the interface
                 return self._login()
             if path == "/api/login" and method == "GET":   # public: which sign-in the page offers
-                return self._json(api_login_info())
+                return self._json(api_login_info(setup))
+            if path == "/api/setup" and method == "POST":
+                if self.headers.get("X-Tuttiphon") != "1":
+                    return self._json({"error": "forbidden"}, 403)   # i18n-ignore – only from the interface
+                return self._setup(setup)
             clean = posixpath.normpath(urllib.parse.unquote(path))   # “/assets/../help/…” is not public
             public = clean in ("/login.html", "/favicon.svg", "/manifest.webmanifest", "/sw.js") or clean.startswith(("/icons/", "/assets/"))
             if path == "/api/logout" and method == "POST":
@@ -2021,6 +2103,8 @@ class Handler(BaseHTTPRequestHandler):
             # protection against foreign pages posting to localhost
             if self.headers.get("X-Tuttiphon") != "1":
                 return self._json({"error": "forbidden"}, 403)   # i18n-ignore – technical code
+            if method == "POST" and path == "/api/admin-password":   # answers with a new session cookie
+                return self._admin_password()
             if method == "POST" and path == "/api/cover/upload":   # raw data instead of JSON
                 data = self.rfile.read(self._length(10 * 1024 * 1024))
                 return self._json(api_cover_upload(query.get("id", ""), data, self.headers.get("Content-Type", "")))

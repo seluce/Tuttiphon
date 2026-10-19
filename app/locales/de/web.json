@@ -65,7 +65,6 @@
  "Sign-in failed: {who}": "Anmeldung fehlgeschlagen: {who}",
  "Signed in: {who}": "Angemeldet: {who}",
  "Tuttiphon: the interface has not been built yet – please run “npm run build” or start ./tuttiphon.sh.": "Tuttiphon: Die Oberfläche ist noch nicht gebaut – bitte „npm run build“ ausführen oder ./tuttiphon.sh starten.",
- "Access only via 127.0.0.1 – or set TUTTIPHON_ADMIN_PASSWORD": "Zugriff nur über 127.0.0.1 – oder TUTTIPHON_ADMIN_PASSWORD setzen",
  "Only administrators may do this.": "Das dürfen nur Administrator:innen.",
  "Unknown cover style": "Unbekannter Cover-Stil",
  "A file was not accessible just now – please try again in a moment.": "Eine Datei war gerade nicht zugreifbar – bitte gleich nochmal versuchen.",
@@ -102,6 +101,15 @@
  "  Daily at {time}: {what}": "  Täglich um {time}: {what}",
  "night analysis {start}–{end}": "Nachtanalyse {start}–{end}",
  "folder watch on": "Ordner-Überwachung an",
- "Tuttiphon is locked: the administrator password is missing or too short – please set TUTTIPHON_ADMIN_PASSWORD (at least 8 characters).": "Tuttiphon ist gesperrt: Das Administrator-Passwort fehlt oder ist zu kurz – bitte TUTTIPHON_ADMIN_PASSWORD setzen (mindestens 8 Zeichen).",
- "Backup failed: {error}": "Sicherung fehlgeschlagen: {error}"
+ "Backup failed: {error}": "Sicherung fehlgeschlagen: {error}",
+ "Access only via 127.0.0.1 – or set an administrator password (Settings → Users & permissions).": "Zugriff nur über 127.0.0.1 – oder ein Administrator-Passwort festlegen (Einstellungen → Benutzer & Rechte).",
+ "Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the placeholder – please set at least 8 characters.": "Tuttiphon ist gesperrt: TUTTIPHON_ADMIN_PASSWORD ist zu kurz oder noch der Platzhalter – bitte mindestens 8 Zeichen setzen.",
+ "Tuttiphon is already set up – sign in as local administrator.": "Tuttiphon ist schon eingerichtet – melde dich als lokaler Administrator an.",
+ "The setup code is wrong – it is in the container log and in setup-code.txt in the data folder.": "Der Einrichtungscode stimmt nicht – er steht im Container-Protokoll und in setup-code.txt im Datenordner.",
+ "setup code": "Einrichtungscode",
+ "Setup: the password of the local administrator is set.": "Einrichtung: Das Passwort des lokalen Administrators ist festgelegt.",
+ "The password of the local administrator was changed.": "Das Passwort des lokalen Administrators wurde geändert.",
+ "The password of the local administrator is set in docker-compose.yaml – change it there.": "Das Passwort des lokalen Administrators steht in docker-compose.yaml – ändere es dort.",
+ "The current password is wrong.": "Das bisherige Passwort stimmt nicht.",
+ "No administrator password yet – open Tuttiphon in the browser and enter the setup code {code} (also in setup-code.txt in the data folder).": "Noch kein Administrator-Passwort – öffne Tuttiphon im Browser und gib den Einrichtungscode {code} ein (steht auch in setup-code.txt im Datenordner)."
 }

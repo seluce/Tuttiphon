@@ -28,8 +28,9 @@ Tuttiphon does: [Features](features.md). Operation in depth (Docker image, updat
 2. Adjust the lines marked `CHANGE`:
    - `user` – user and group ID that own your music files (`ls -n` in the music folder),
    - the music folder Navidrome reads → `/music`, an archive folder for the originals → `/archive`,
-   - `TUTTIPHON_ADMIN_PASSWORD` – at least 8 characters (with the placeholder the container does not start),
    - `NAV_URL` – the address of Navidrome as seen from the container, and `TZ`.
+
+   There is no password in the file: you set it in the browser at the first start (step 5).
 3. Create the folders before the first start and give them to the user from `user`. Otherwise Docker creates them
    for root, Tuttiphon cannot write there and the container keeps restarting. In the folder from step 1 (with your
    numbers and archive path; `sudo` if needed):
@@ -38,7 +39,11 @@ Tuttiphon does: [Features](features.md). Operation in depth (Docker image, updat
    chown 1000:1000 config backups /path/to/music-archive
    ```
 4. `docker compose up -d` – or create a project in the Docker app of your NAS.
-5. Open `http://<server>:8765`, choose **Local administrator** and sign in with your password.
+5. Open `http://<server>:8765`. Tuttiphon asks for the **setup code** and the password of the **local
+   administrator** – Tuttiphon's own administrator, the way in when Navidrome cannot be reached. The code is in the
+   container log (`docker logs tuttiphon`, or the log of the container in the Docker app of your NAS) and in
+   `config/setup-code.txt`; it proves that whoever sets the password has access to the server. Only a hash of the
+   password is kept (`config/state/admin_password.json`). Keep the password in a password manager.
 6. The **setup assistant** opens: it connects to Navidrome (enter the admin account if it is not in
    `docker-compose.yaml`) and asks what Tuttiphon should do – convert lossless files or not, lyrics, sound analysis,
    Deezer stars, what runs by itself –, each with a short explanation and a sensible default. You can skip it and
@@ -46,6 +51,10 @@ Tuttiphon does: [Features](features.md). Operation in depth (Docker image, updat
    folders, **Settings → Users & permissions** to check the roles.
 
 From then on everyone signs in with their own Navidrome account. New users get a short welcome assistant and a tour.
+The password of the local administrator can be changed under **Settings → Users & permissions**.
+
+**Password forgotten?** Delete `config/state/admin_password.json`. Within a few seconds Tuttiphon waits for the setup
+again and writes a new setup code to the container log.
 
 ## Updating
 
@@ -64,7 +73,7 @@ Almost everything is set in the interface. Environment variables in `docker-comp
 
 | Variable | Meaning |
 |---|---|
-| `TUTTIPHON_ADMIN_PASSWORD` | password of the local administrator; turns on sign-in. Required – the container does not start without it (only on a PC Tuttiphon also runs without one, and then answers on `localhost` only) |
+| `TUTTIPHON_ADMIN_PASSWORD` | optional: the password of the local administrator in plain text instead of setting it in the browser – then it can only be changed here (at least 8 characters, `$` written as `$$`). Without it and without a password set in the browser, the container waits for the setup with the code |
 | `NAV_URL` | Navidrome as seen from the container |
 | `NAV_PUBLIC_URL` | Navidrome address for "Open in Navidrome" links, if different |
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | Navidrome admin – better entered in the interface (stored in `config/.env`) |

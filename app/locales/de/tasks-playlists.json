@@ -116,18 +116,17 @@
  "Self-check: {checked} playlists checked – all as expected.": "Selbstkontrolle: {checked} Playlists geprüft – alles wie erwartet.",
  "from docker-compose.yaml/environment": "aus docker-compose.yaml/Umgebung",
  "from the .env in the data folder": "aus der .env im Datenordner",
- "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is missing – neither in the environment (docker-compose.yaml) nor in the .env in the data folder.": "Tuttiphon soll im Netzwerk erreichbar sein, aber TUTTIPHON_ADMIN_PASSWORD fehlt – weder in der Umgebung (docker-compose.yaml) noch in der .env im Datenordner.",
  "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is still the placeholder “{placeholder}” ({source}).": "Tuttiphon soll im Netzwerk erreichbar sein, aber TUTTIPHON_ADMIN_PASSWORD ist noch der Platzhalter „{placeholder}“ ({source}).",
  "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} character ({source}).": "Tuttiphon soll im Netzwerk erreichbar sein, aber TUTTIPHON_ADMIN_PASSWORD hat nur {n} Zeichen ({source}).",
  "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} characters ({source}).": "Tuttiphon soll im Netzwerk erreichbar sein, aber TUTTIPHON_ADMIN_PASSWORD hat nur {n} Zeichen ({source}).",
- "Please enter your own password with at least 8 characters in docker-compose.yaml (or in the .env in the data folder) and restart.": "Bitte in docker-compose.yaml (bzw. in der .env im Datenordner) ein eigenes Passwort mit mindestens 8 Zeichen eintragen und neu starten.",
  "⚠ Tuttiphon is reachable on the network, but the administrator password is too short or still the placeholder!": "⚠ Tuttiphon ist im Netzwerk erreichbar, das Administrator-Passwort ist aber zu kurz oder noch der Platzhalter!",
- "⚠ Without TUTTIPHON_ADMIN_PASSWORD there is no login – Tuttiphon then only answers requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.": "⚠ Ohne TUTTIPHON_ADMIN_PASSWORD gibt es keine Anmeldung – Tuttiphon beantwortet dann nur Aufrufe über 127.0.0.1/localhost und die Namen in TUTTIPHON_HOSTS.",
  "(Startup overview not possible: {error})": "(Übersicht beim Start nicht möglich: {error})",
  "Ready – port {port}": "Bereit – Port {port}",
  "Tuttiphon is running at {url}  (Ctrl+C quits)": "Tuttiphon läuft auf {url}  (Strg+C beendet)",
  "Canceling the running task “{name}”, saving its progress …": "Laufende Aufgabe „{name}“ wird abgebrochen, der Stand gesichert …",
  "Shut down.": "Beendet.",
  "Only the new music: {n} song.": "Nur die neue Musik: {n} Song.",
- "Only the new music: {n} songs.": "Nur die neue Musik: {n} Songs."
+ "Only the new music: {n} songs.": "Nur die neue Musik: {n} Songs.",
+ "Please enter your own password with at least 8 characters in docker-compose.yaml (or remove the line and set the password in the browser) and restart.": "Bitte in docker-compose.yaml ein eigenes Passwort mit mindestens 8 Zeichen eintragen (oder die Zeile entfernen und das Passwort im Browser festlegen) und neu starten.",
+ "⚠ Without an administrator password there is no login – Tuttiphon then only answers requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.": "⚠ Ohne Administrator-Passwort gibt es keine Anmeldung – Tuttiphon beantwortet dann nur Aufrufe über 127.0.0.1/localhost und die Namen in TUTTIPHON_HOSTS."
 }

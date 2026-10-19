@@ -86,8 +86,6 @@ export default {
   'You cannot change your own role': 'Die eigene Rolle lässt sich nicht selbst ändern',
   '“Default” means: whoever is an admin in Navidrome is one here too. Changes apply on the next page the person opens.': '„Standard“ heißt: Wer in Navidrome Admin ist, ist es auch hier. Änderungen gelten bei der nächsten Seite, die die Person öffnet.',
   'Local administrator': 'Lokaler Administrator',
-  'Besides the Navidrome accounts there is Tuttiphon’s own administrator: choose “Local administrator” on the sign-in page and enter TUTTIPHON_ADMIN_PASSWORD from docker-compose.yaml. It has all rights and works even when Navidrome cannot be reached.': 'Neben den Navidrome-Konten gibt es den eigenen Administrator von Tuttiphon: auf der Anmeldeseite „Lokaler Administrator“ wählen und TUTTIPHON_ADMIN_PASSWORD aus docker-compose.yaml eingeben. Er hat alle Rechte und funktioniert auch, wenn Navidrome nicht erreichbar ist.',
-  'Not set up yet: Tuttiphon only asks for a sign-in once an administrator password is set as TUTTIPHON_ADMIN_PASSWORD in docker-compose.yaml. Without it, Tuttiphon can only be reached from its own computer.': 'Noch nicht eingerichtet: Erst wenn in docker-compose.yaml ein Administrator-Passwort als TUTTIPHON_ADMIN_PASSWORD gesetzt ist, verlangt Tuttiphon eine Anmeldung. Ohne ist Tuttiphon nur vom eigenen Computer aus erreichbar.',
 
   // settings/Startseite.svelte
   'Home page sections': 'Bereiche der Startseite',
@@ -269,4 +267,16 @@ export default {
   'Turned on for this device': 'Auf diesem Gerät eingeschaltet',
   'Turn on for this device': 'Auf diesem Gerät einschalten',
   'Turn on notifications above first.': 'Erst oben die Benachrichtigungen einschalten.',
+  'Besides the Navidrome accounts there is Tuttiphon’s own administrator: choose “Local administrator” on the sign-in page and enter its password. It has all rights and works even when Navidrome cannot be reached.': 'Neben den Navidrome-Konten gibt es den eigenen Administrator von Tuttiphon: auf der Anmeldeseite „Lokaler Administrator“ wählen und sein Passwort eingeben. Er hat alle Rechte und funktioniert auch, wenn Navidrome nicht erreichbar ist.',
+  'Not set up yet: Tuttiphon only asks for a sign-in once the local administrator has a password. Without it, Tuttiphon can only be reached from its own computer.': 'Noch nicht eingerichtet: Erst wenn der lokale Administrator ein Passwort hat, verlangt Tuttiphon eine Anmeldung. Ohne ist Tuttiphon nur vom eigenen Computer aus erreichbar.',
+  'Its password is set in docker-compose.yaml as TUTTIPHON_ADMIN_PASSWORD and can only be changed there.': 'Sein Passwort steht in docker-compose.yaml als TUTTIPHON_ADMIN_PASSWORD und lässt sich nur dort ändern.',
+  'Current password': 'Bisheriges Passwort',
+  'New password': 'Neues Passwort',
+  'Password of the local administrator': 'Passwort des lokalen Administrators',
+  'Change password': 'Passwort ändern',
+  'Set password': 'Passwort festlegen',
+  'Tuttiphon keeps only a fingerprint of the password, not the password itself. Forgotten? Delete the file admin_password.json in the folder state of the data folder – Tuttiphon then asks for a new one with a setup code from the container log.': 'Tuttiphon speichert nur einen Fingerabdruck des Passworts, nicht das Passwort selbst. Vergessen? Lösche die Datei admin_password.json im Ordner state des Datenordners – Tuttiphon fragt dann mit einem Einrichtungscode aus dem Container-Protokoll nach einem neuen.',
+  'With a password, Tuttiphon asks everyone to sign in – with their Navidrome account or as local administrator.': 'Mit einem Passwort verlangt Tuttiphon von allen eine Anmeldung – mit dem Navidrome-Konto oder als lokaler Administrator.',
+  'Please enter the current password.': 'Bitte das bisherige Passwort eingeben.',
+  'Password changed ✓': 'Passwort geändert ✓',
 }

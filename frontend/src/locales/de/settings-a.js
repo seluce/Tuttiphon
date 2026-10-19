@@ -117,7 +117,6 @@ export default {
   'Everything visible again': 'Wieder alles sichtbar',
   'Sign-in': 'Anmeldung',
   'Sign-in is currently turned off – anyone who can open Tuttiphon is automatically an administrator. This only makes sense as long as Tuttiphon runs on this computer alone.': 'Gerade ist keine Anmeldung eingeschaltet – wer Tuttiphon öffnen kann, ist automatisch Administrator. Das ist nur sinnvoll, solange Tuttiphon allein auf diesem Computer läuft.',
-  'If an administrator password is set in docker-compose.yaml as TUTTIPHON_ADMIN_PASSWORD, everyone signs in with their own Navidrome account and gets their own view. <a class="link" href="#/hilfe/konten">How it works →</a>': 'Ist in docker-compose.yaml ein Administrator-Passwort als TUTTIPHON_ADMIN_PASSWORD gesetzt, meldet sich jede:r mit dem eigenen Navidrome-Konto an und sieht eine eigene Ansicht. <a class="link" href="#/hilfe/konten">So geht’s →</a>',
   'Signed in': 'Angemeldet',
   'Navidrome account “{user}” · {role}': 'Navidrome-Konto „{user}“ · {role}',
   'Sign out': 'Abmelden',
@@ -315,4 +314,6 @@ export default {
   'Protected topics on your own server: enter an access token as NTFY_TOKEN in the .env or in docker-compose.': 'Geschützte Themen auf einem eigenen Server: Zugangstoken als NTFY_TOKEN in der .env oder in docker-compose eintragen.',
   ' A token is stored.': ' Ein Token ist hinterlegt.',
   'What to notify about?': 'Worüber benachrichtigen?',
+  'Once the local administrator has a password (<a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a>), everyone signs in with their own Navidrome account and gets their own view. <a class="link" href="#/hilfe/konten">How it works →</a>': 'Hat der lokale Administrator ein Passwort (<a class="link" href="#/einstellungen/benutzer">Einstellungen → Benutzer & Rechte</a>), meldet sich jede:r mit dem eigenen Navidrome-Konto an und sieht eine eigene Ansicht. <a class="link" href="#/hilfe/konten">So geht’s →</a>',
+  'You change the password of the local administrator under Settings → Users & permissions.': 'Das Passwort des lokalen Administrators änderst du unter Einstellungen → Benutzer & Rechte.',
 }

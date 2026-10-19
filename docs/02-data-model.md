@@ -32,10 +32,16 @@ message.
 data/                      (in the container: /config)
 ├── config.json            configuration: settings, people, music worlds, vibes, playlists, accounts
 ├── .env                   credentials (permissions 600 – on every write and at every start; every other file 640)
+├── setup-code.txt         one-time setup code, only while there is no administrator password (600, not in backups)
 ├── state/                 state, tracking files and caches
 ├── logs/                  one log per run
 └── backup/                originals of overwritten playlist files, backups before a migration
 ```
+
+`setup-code.txt` (`localadmin.CODE_FILE`) exists only while a server on the network waits for its setup – no
+`TUTTIPHON_ADMIN_PASSWORD` and no `state/admin_password.json` ([Security](07-security.md#setup-mode)): the code as
+`XXXX-XXXX`, the same until the password is set, then deleted. It lies outside `state/` and is therefore never part of
+a backup.
 
 In addition, there is a folder outside the data folder that all instances share: `<playlist folder>/.tuttiphon/`
 (see [Shared folder .tuttiphon/](#shared-folder-tuttiphon)).
@@ -625,7 +631,7 @@ locks these fields. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) ar
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | admin access: song list, scan, playlist sync, accounts, covers | Settings → Navidrome, environment |
 | `NAV_PASS_<ACCOUNT>` | password of a Navidrome account (for stars, personal statistics, mixes from the person's perspective, exact preview) | administrators: password dialog (e.g. Settings → Navidrome), “New person” assistant; users: Settings → My account (`/api/me/password`); sign-in with “Turn on statistics & stars” (not for the admin account) |
 | `RATING_USERS` | accounts for Deezer stars, comma-separated; applies only if `settings.deezer.users` is not set | by hand, environment |
-| `TUTTIPHON_ADMIN_PASSWORD` | password of the [local administrator](07-security.md#local-administrator); if it is set, Tuttiphon requires sign-in. On the network it must not be weak (`config.weak_password()`): at least 8 characters and not the placeholder (`config.PASSWORD_PLACEHOLDERS`: `change-me`), compared without surrounding spaces and in lowercase; otherwise the start fails and a running server stays locked ([Security](07-security.md#running-without-a-password)). Read via `config.admin_password()` | environment (docker-compose), by hand; via `PUT /api/env` only with at least 8 characters, and it can't be deleted |
+| `TUTTIPHON_ADMIN_PASSWORD` | optional: password of the [local administrator](07-security.md#local-administrator) in plain text; if it is set, Tuttiphon requires sign-in, and it wins over a password set in the browser (`state/admin_password.json`, see [admin_password.json](#admin_passwordjson)). On the network it must not be weak (`config.weak_password()`): at least 8 characters and not the placeholder (`config.PASSWORD_PLACEHOLDERS`: `change-me`), compared without surrounding spaces and in lowercase; otherwise the start fails and a running server stays locked ([Security](07-security.md#running-without-a-password)). Read via `config.admin_password()` | environment (docker-compose), by hand – not via `PUT /api/env` (“Unknown key”) |
 | `NTFY_TOKEN` | access token for protected topics on your own ntfy server; `/api/status` only reports whether one exists (`env.ntfyToken`) | by hand, environment |
 | `TUTTIPHON_HOSTS` | additional host names, comma-separated, through which Tuttiphon is reachable without a password (otherwise only `127.0.0.1`, `localhost`, `::1`) | by hand, environment |
 | `TUTTIPHON_TRUSTED_PROXIES` | reverse proxies whose `X-Forwarded-For` and `X-Forwarded-Proto` count: addresses or networks, comma-separated (e.g. `172.16.0.0/12`). Then the sign-in lockout counts each person's own address, and sign-ins via https get the `Secure` cookie ([Security](07-security.md#client-address)) | by hand, environment |
@@ -645,7 +651,8 @@ the `deezer` step, the notice “Passwords missing” under “To review” and 
 ### Writing – `save_env()`
 
 - allowed keys (`config.EDITABLE_ENV`): `NAV_URL`, `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_…`,
-  `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`, `LASTFM_API_KEY`, `NTFY_TOKEN` – the server rejects others;
+  `RATING_USERS`, `LASTFM_API_KEY`, `NTFY_TOKEN` – the server rejects others (also `TUTTIPHON_ADMIN_PASSWORD`: a
+  password set in the browser goes to `state/admin_password.json` as a hash, a hand-written line stays untouched);
 - empty string: skipped – the value stays unchanged; otherwise only printable text without line breaks;
 - `null` deletes only a real line `KEY=…`; a commented-out template `# KEY=…` stays;
 - setting replaces the real line; if there is none, a commented-out template is replaced, otherwise the line is appended;
@@ -654,8 +661,8 @@ the `deezer` step, the notice “Passwords missing” under “To review” and 
 - written with `write_atomic(…, mode=0o600)`; `ensure_dirs()` sets a hand-made `.env` to
   `0600` at startup (errors, e.g. with a different owner, are ignored).
 
-Before `save_env()`, `PUT /api/env` (`api_env_save()`) checks: `TUTTIPHON_ADMIN_PASSWORD` only if it isn't weak (`config.weak_password()`), `null` (delete) is rejected (“The
-administrator password needs at least 8 characters.”); `NAV_URL` must start with `http://` or `https://`.
+Before `save_env()`, `PUT /api/env` (`api_env_save()`) checks: `NAV_URL` and `NAV_PUBLIC_URL` must start with
+`http://` or `https://`.
 
 The server never outputs passwords and keys; `/api/status` only reports whether they are present (administrators see the
 server address and the name of the admin account there in plain text).
@@ -686,6 +693,7 @@ environment and in `.env` ([Keys](#keys)).
 |---|---|---|---|
 | `secret` | key for the session cookies | `auth._secret()` | important, secret |
 | `sessions.json` | valid sessions (sign-ins) | `auth.make_token()`, `auth.end_session()` | secret; deleting it signs everyone out |
+| `admin_password.json` | hash of the administrator password set in the browser ([below](#admin_passwordjson)) | `localadmin.set_password()` (`POST /api/setup`, `POST /api/admin-password`) | secret, permissions 0600, in the backup; deleting it = password forgotten: on the network setup mode with a new code, on the PC no sign-in |
 | `navidrome_users.json` | last known Navidrome accounts | `auth.navidrome_users()` | fallback, deletable |
 | `install_id` | random ID of this installation (16 hex characters) – tells announcements of the own installation in `.tuttiphon/` apart from those of another one ([Shared folder .tuttiphon/](#shared-folder-tuttiphon)) | `instances.install_id()` on first need – a new one only if the file is missing or doesn't contain a valid ID; if it is briefly unreadable, no new one (that would look like another installation), it is read again later | state, deletable (a new one is created at the next start); not in the backup (`backup.SKIP_STATE`) – a copy elsewhere is another installation |
 | `deezer.json` | Deezer rank and stars set per song | `deezer` step, `/api/deezer/ranks` | important |
@@ -761,11 +769,29 @@ password in `sessions.json`. Deleting the file signs everyone out. See [Security
 
 One entry per sign-in: the key is the random session ID from the token (`secrets.token_urlsafe(12)`),
 `u` the account (`@notfall` for the local administrator), `e` the expiry in Unix seconds; sessions of the local
-administrator additionally carry `p`, a marker of the administrator password (`auth._notfall_mark()`) – if
-`TUTTIPHON_ADMIN_PASSWORD` changes, they are no longer valid. Permissions `600` (`ensure_dirs()` sets them again at startup). Expired entries are dropped on every write
+administrator additionally carry `p`, a marker of the administrator password (`auth._notfall_mark()`, derived from
+`localadmin.identity()`) – if `TUTTIPHON_ADMIN_PASSWORD` or the hash in `admin_password.json` changes, they are no
+longer valid. Permissions `600` (`ensure_dirs()` sets them again at startup). Expired entries are dropped on every write
 (sign-in, sign-out, role `none` – which removes all entries of the account). A token is valid only as long as its ID is listed here with the same
 account; deleting the file signs everyone out. The server keeps the content in memory until modification time or
 size change; if the file is briefly unreadable, the last state applies. See [Security](07-security.md#sessions).
+
+### admin_password.json
+
+```json
+{ "hash": "scrypt:16384:8:1:<salt>:<hash>", "at": 1767950000 }
+```
+
+The password of the local administrator when it was set in the browser – at the first start with the setup code
+(`POST /api/setup`) or under Settings → Users & permissions (`POST /api/admin-password`); `at` is the time in Unix
+seconds. Only the hash is stored (`localadmin.make_hash()`): scrypt with `n = 16384`, `r = 8`, `p = 1`, a random
+16-byte salt and 32 bytes of result, salt and hash in base64url without `=`; where Python has no scrypt
+`pbkdf2:600000:<salt>:<hash>` (PBKDF2-SHA256, 600,000 rounds). Every new password gets a new salt. Permissions `600`,
+written with `write_atomic()`; the server reads the file again only when modification time or size change (briefly
+unreadable: the last state). It counts only as long as `TUTTIPHON_ADMIN_PASSWORD` is not set – the environment wins
+(`localadmin.source()`), and while it is set, no new hash can be stored. Deleting the file resets a forgotten password:
+on the network the server is in setup mode again within about 10 s and writes a new setup code to the log, on the PC
+without network binding sign-in is off again ([Security](07-security.md#local-administrator)).
 
 ### navidrome_users.json
 

@@ -11,38 +11,47 @@ filtered and every save is merged on the server side.
 
 ## Two operating modes
 
-Which one applies is decided solely by `TUTTIPHON_ADMIN_PASSWORD`, the password of the
-[local administrator](#local-administrator) (from the environment or `.env`, re-read by the server every 10 s;
-`config.admin_password()`).
+Which one applies is decided solely by whether the [local administrator](#local-administrator) has a password
+(`localadmin.source()`, re-read by the server at most every 10 s, `Handler._admin()`): `"env"` –
+`TUTTIPHON_ADMIN_PASSWORD` from the environment or `.env` (`config.admin_password()`), `"stored"` – set in the browser,
+a hash in `state/admin_password.json`, `""` – none.
 
-| | without `TUTTIPHON_ADMIN_PASSWORD` | with `TUTTIPHON_ADMIN_PASSWORD` |
+| | without an administrator password | with an administrator password |
 |---|---|---|
 | Sign-in | none | Navidrome account or local administrator |
 | Who am I? | always “local admin” (`auth.me(None)`: `role = admin`, `local = true`, all people) | the signed-in account with its role |
 | Reachable via | only the host names `127.0.0.1`, `localhost`, `::1` and those from `TUTTIPHON_HOSTS` – otherwise `421` | any host name |
-| Typical use | `./tuttiphon.sh` on the PC | Docker container (`docker-compose.yaml` requires the password) |
+| Typical use | `./tuttiphon.sh` on the PC | Docker container (password set in the browser at the first start, or `TUTTIPHON_ADMIN_PASSWORD` in `docker-compose.yaml`) |
 
 Bound to a network address, the mode without a password doesn't exist (unless forced with `--unsafe-no-password`):
-there the server stays [locked](#running-without-a-password) as long as the administrator password is missing or
-weak, instead of letting everyone in as administrator.
+as long as there is no administrator password at all, the server is in [setup mode](#setup-mode) – sign-in is
+required, and the password is set through the setup with a one-time code from the server log. A weak
+`TUTTIPHON_ADMIN_PASSWORD` keeps it [locked](#running-without-a-password) instead of letting anyone in with it.
 
 ## Order of checks for a request
 
 ```mermaid
 flowchart TD
-    R["Request"] --> N{"bound to a network address<br/>and password missing or weak?"}
+    R["Request"] --> N{"bound to a network address<br/>and TUTTIPHON_ADMIN_PASSWORD weak?"}
     N -- yes --> E503["503 locked"]
-    N -- no --> P{"TUTTIPHON_ADMIN_PASSWORD set?"}
-    P -- no --> H{"Host header localhost<br/>or in TUTTIPHON_HOSTS?"}
+    N -- no --> P{"administrator password?<br/>(environment or set in the browser)"}
+    P -- no --> SM{"bound to a network address?"}
+    SM -- "yes: setup mode" --> L
+    SM -- no --> H{"Host header localhost<br/>or in TUTTIPHON_HOSTS?"}
     H -- no --> E421["421"]
     H -- yes --> L
-    P -- yes --> L{"/api/login<br/>or POST /api/logout?"}
-    L -- "GET login" --> LI["{navidrome: bool}"]
+    P -- yes --> L{"/api/login, /api/setup<br/>or POST /api/logout?"}
+    L -- "GET login" --> LI["{setup: bool, navidrome: bool}"]
     L -- "POST login" --> XL{"Header X-Tuttiphon: 1?"}
     XL -- no --> F403
     XL -- yes --> LX["sign in"]
+    L -- "POST setup" --> XS{"Header X-Tuttiphon: 1?"}
+    XS -- no --> F403
+    XS -- yes --> SU{"setup mode?"}
+    SU -- no --> E409["409"]
+    SU -- yes --> SC["check setup code, store hash,<br/>sign in as local administrator"]
     L -- logout --> LO["sign out"]
-    L -- no --> M{"Password set?"}
+    L -- no --> M{"Sign-in needed?<br/>(password or setup mode)"}
     M -- no --> LOC["local admin"]
     M -- yes --> T{"Cookie tuttiphon valid<br/>(signature, expiry, session known)<br/>and role not none?"}
     T -- no --> PUB{"public file?<br/>(normalized path)"}
@@ -115,30 +124,88 @@ asks for the password again.
 ### Local administrator
 
 Tuttiphon's own administrator account, without a Navidrome account – for the first setup and for when Navidrome is
-unreachable: user name empty (sign-in page → “Local administrator”, field “Administrator password”) and the password
-from `TUTTIPHON_ADMIN_PASSWORD`. As long as Navidrome is not connected (address or admin access missing), the sign-in
-page offers only this access: it asks the public `GET /api/login`, which answers nothing but `{"navidrome": bool}` –
-a Navidrome account could not sign in yet, and without the admin access every account would count as a user. The comparison runs in
-constant time (`hmac.compare_digest`); a wrong password → “The administrator password is wrong.” The session belongs to
-the internal user `@notfall` (`auth.NOTFALL`):
+unreachable: user name empty (sign-in page → “Local administrator”, field “Administrator password”) and its password.
+`app/localadmin.py` knows two sources; the environment wins (`localadmin.source()`):
+
+| Source | `source()` | Where | Changed |
+|---|---|---|---|
+| `TUTTIPHON_ADMIN_PASSWORD` | `"env"` | environment (`docker-compose.yaml`) or `.env`, plain text, optional | only there – `PUT /api/env` refuses the key, `POST /api/admin-password` answers `400`; the interface shows a note |
+| set in the browser | `"stored"` | `state/admin_password.json`, only a hash ([02](02-data-model.md#admin_passwordjson)) | Settings → Users & permissions with the current password (`POST /api/admin-password`) |
+| none | `""` | – | on the PC no sign-in (set it under Settings → Users & permissions, no current password needed); on the network [setup mode](#setup-mode) |
+
+The hash (`localadmin.make_hash()`) is scrypt (`n = 16384`, `r = 8`, `p = 1`: about 16 MB and 50 ms per check) with a
+random 16-byte salt, stored as `scrypt:16384:8:1:<salt>:<hash>`; where Python has no scrypt, PBKDF2-SHA256 with
+600,000 rounds. `verify_hash()` accepts only parameters within limits (scrypt `n` up to 2^20, `r` up to 32, `p` up
+to 16; PBKDF2 up to 10,000,000 rounds), so an edited file can't make a check run for minutes. The file has permissions
+`0600` and is part of the built-in backup. `localadmin.check()` compares a password from the environment in constant
+time (`hmac.compare_digest`), a stored one via `verify_hash()`; a wrong password → “The administrator password is
+wrong.”
+
+As long as Navidrome is not connected (address or admin access missing), the sign-in page offers only this access: it
+asks the public `GET /api/login`, which answers nothing but `{"setup": bool, "navidrome": bool}` – a Navidrome account
+could not sign in yet, and without the admin access every account would count as a user. The session belongs to the
+internal user `@notfall` (`auth.NOTFALL`):
 
 - Role always `admin`, regardless of settings; display name “Administrator” (`/api/me` → `name`), in the server log
   “Local administrator” (`web._who()`).
 - Sees all people but owns none (`own` is empty) – admin rights still apply to all playlists.
 - Can't store a Navidrome password (`/api/me/password` → `400`); `remember` is ignored. Settings → My account shows a
-  hint instead of the password field, and that its password is set in `docker-compose.yaml`.
+  hint instead of the password field: its password is changed under Settings → Users & permissions, or in
+  `docker-compose.yaml` when it comes from there.
 - Never asks Navidrome: `role_of()` and `me()` don't look up `@notfall` in the account list – so the access
   works precisely when Navidrome is unreachable.
-- The session carries an identifier of the administrator password in `state/sessions.json` (`p` = `_notfall_mark()`: the first
-  16 characters of HMAC-SHA256(`notfall:<password>`) with the key from `state/secret`). `read_token()` compares
-  it on every request; when `TUTTIPHON_ADMIN_PASSWORD` is changed, all sessions of the local administrator end.
+- The session carries an identifier of the administrator password in `state/sessions.json` (`p` = `_notfall_mark()`:
+  the first 16 characters of HMAC-SHA256(`notfall:<identity>`) with the key from `state/secret`; `localadmin.identity()`
+  is `env:<password>` or `hash:<stored hash>`). `read_token()` compares it on every request; when the password changes –
+  `TUTTIPHON_ADMIN_PASSWORD` edited, or a new hash via `POST /api/admin-password` (new salt, so even the same password
+  again) – all sessions of the local administrator end. If the local administrator changed it itself via
+  `POST /api/admin-password`, its browser gets a new session right away.
+
+**Forgotten password:** with source `stored`, delete `state/admin_password.json` in the data folder. Within about 10 s
+(`Handler._admin()`) a server on the network is in setup mode again and writes a new setup code to the log; on the PC
+without network binding, sign-in is simply off again. Sessions of Navidrome accounts stay valid. With source `env`,
+set a new value in `docker-compose.yaml` and recreate the container (in `.env` it takes effect within 10 s).
 
 If no administrator password is set, signing in as local administrator always fails. A Navidrome account named
 `notfall` therefore can't sign in normally.
 
+### Setup mode
+
+A server bound to a network address (`Handler.network`) without any administrator password (`localadmin.source()`
+is `""`) doesn't run without sign-in, but waits for its setup (`setup` in `_handle()`):
+
+- The host check doesn't apply; every protected request needs a session – `401 {"error": "login"}` for the API and
+  images, `302` → `/login.html` for pages. `GET /api/login` answers `{"setup": true, …}`, and the sign-in page shows
+  the setup form instead of the sign-in ([Interface](09-interface.md#state-and-saving)).
+- **Setup code:** `localadmin.setup_code()` draws 8 characters from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (without
+  `0`/`O` and `1`/`I`, `secrets.choice()`) and keeps them as `XXXX-XXXX` in `<data>/setup-code.txt` (permissions
+  `0600`, outside `state/` and therefore never in a backup). The code stays the same until it is used, also across
+  restarts; a missing or damaged file gets a new one. The server log (always English) shows it: “No administrator
+  password yet – open Tuttiphon in the browser and enter the setup code XXXX-XXXX (also in setup-code.txt in the data
+  folder).” – `tuttiphon.py` at every start while the setup is pending, `Handler._admin()` (at most every 10 s) as soon
+  as setup mode begins while the server runs, e.g. after `admin_password.json` was deleted.
+- **`POST /api/setup`** (`Handler._setup()`, public, only with `X-Tuttiphon: 1`) with `{"code", "password"}`: outside
+  setup mode `409` “Tuttiphon is already set up – sign in as local administrator.” The code is compared without case
+  and separators in constant time (`localadmin.check_code()`); a wrong one → `401` and counts toward the
+  [lockout](#sign-in-lockout) under `setup|<address>` (10 in 10 minutes) and `setup` (50 from all addresses), then
+  `429` – with 32^8 (about 10^12) possible codes guessing is hopeless. A weak password (`config.weak_password()`) →
+  `401` “The administrator password needs at least 8 characters.”, not counted. Under `_setup_lock` the server checks
+  once more that there is still no password – of two requests at the same moment only the first sets it.
+- **Success:** `localadmin.set_password()` stores the hash and deletes `setup-code.txt`; the answer signs the browser
+  in as `@notfall` (`Set-Cookie`, `Secure` via https through a trusted proxy), the log says “Setup: the password of
+  the local administrator is set.” Then the setup assistant follows as with every new installation.
+
+Why the code: without it, the first person to open the page would set the password and become administrator – on a
+port that is reachable from outside, or behind a reverse proxy that already forwards from the internet before the
+setup is done, that can be a stranger. The code proves access to the server: it is only in the container log and in
+the data folder. Sign-ins with a Navidrome account keep working in setup mode (`POST /api/login`), although the
+sign-in page doesn't offer them; an administrator signed in that way can set the password under Settings → Users &
+permissions without the code – a Navidrome administrator has all rights anyway.
+
 ### Sign-in lockout
 
-`Handler._login()` remembers failed attempts in memory (`_login_fails`: key → timestamps) under three keys
+`Handler._limited(keys, label, attempt, status=401)` – used by `_login()`, `_setup()` and `_admin_password()` –
+remembers failed attempts in memory (`_login_fails`: key → timestamps). A sign-in counts under three keys
 at once. `<name>` is the name entered, without surrounding spaces, in lowercase; empty, `notfall` and `@notfall`
 count together as `@notfall`. `<address>` is the address of the person ([below](#client-address)).
 
@@ -148,13 +215,18 @@ count together as `@notfall`. `<address>` is the address of the person ([below](
 | `ip:<address>` – all accounts from this address | 30 failed attempts |
 | `u:<name>` – this account from all addresses together | 50 failed attempts |
 
-Once one of the limits is reached, `/api/login` responds with `429` (“Too many failed attempts …”) until the oldest
+A wrong current password at `POST /api/admin-password` counts under the same three keys of `@notfall` (answered with
+`400` instead of `401`, so the interface doesn't jump to the sign-in). The setup code of the
+[setup mode](#setup-mode) has keys of its own: `setup|<address>` (10) and `setup` (50 from all addresses).
+
+Once one of the limits is reached, the request is answered with `429` (“Too many failed attempts …”) until the oldest
 attempt of that key drops out – even for the correct password; a blocked attempt doesn't count again. Only
-`LoginError` with `counts` counts: wrong password, wrong administrator password and “not enabled”; an empty
-password and “Navidrome is not reachable right now” don't count. Each counting failed attempt also waits 1 s.
+`LoginError` with `counts` counts: wrong password, wrong administrator password, “not enabled”, a wrong setup code and
+a wrong current password; an empty password, “Navidrome is not reachable right now” and a weak new password don't
+count. Each counting failed attempt also waits 1 s.
 
 Attempts that are still being checked with Navidrome count as well: before `auth.login()` the attempt is reserved
-under the lock for all three keys (`_login_pending`), afterwards it becomes a failed attempt or is released (success,
+under the lock for all its keys (`_login_pending`), afterwards it becomes a failed attempt or is released (success,
 not counting). So 200 attempts sent at the same moment don't all reach Navidrome – only as many as the limit allows.
 The server log says “Sign-in blocked” once per block and key, not for every blocked attempt; the name in the log is
 cut to 64 characters and without control characters (`web._who()`, `events.clean()`), so it can't fake log lines.
@@ -246,7 +318,7 @@ signature = HMAC-SHA256(payload, key from state/secret), hexadecimal
 
 | Attribute | Value |
 |---|---|
-| Name | `nt` |
+| Name | `tuttiphon` |
 | `Path` | `/` |
 | `Max-Age` | 7,776,000 (90 days) |
 | `HttpOnly` | yes – invisible to JavaScript |
@@ -269,33 +341,40 @@ doesn't bring them back. The entry contains only the account name.
 
 ## Running without a password
 
-Without `TUTTIPHON_ADMIN_PASSWORD` there is no sign-in; whoever reaches the server is an
-administrator. Three safeguards keep this restricted to your own computer:
+Without an administrator password – neither `TUTTIPHON_ADMIN_PASSWORD` nor one set in the browser – there is no
+sign-in; whoever reaches the server is an administrator. Three safeguards keep this restricted to your own computer:
 
-- **Start:** `tuttiphon.py serve` aborts if `--host` is not `127.0.0.1`, `localhost` or `::1` and the administrator
-  password is weak (`config.weak_password()`): missing, shorter than 8 characters or the placeholder
-  (`config.PASSWORD_PLACEHOLDERS`: `change-me` from the template) in any spelling –
-  compared without surrounding spaces and in lowercase, so `Change-Me` counts too. The message names what is wrong.
-  This can only be forced with `--unsafe-no-password`.
+- **Start:** if `--host` is not `127.0.0.1`, `localhost` or `::1`, `tuttiphon.py serve` aborts with code 2 when
+  `TUTTIPHON_ADMIN_PASSWORD` is set but weak (`config.weak_password()`): shorter than 8 characters or the placeholder
+  (`config.PASSWORD_PLACEHOLDERS`: `change-me`) in any spelling – compared without surrounding spaces and in
+  lowercase, so `Change-Me` counts too. The message names the placeholder or the number of characters and where the
+  value comes from (`docker-compose.yaml`/environment or the `.env` in the data folder), and asks for a
+  password with at least 8 characters – or for removing the line and setting the password in the browser. Without any
+  administrator password the server starts in [setup mode](#setup-mode) and announces the setup code.
+  `--unsafe-no-password` forces a start with a weak password (warning) or without sign-in on the network.
 - **Network lock while running:** `web.serve(host, port, strict=True)` sets `Handler.network` if the server is bound
   to an address other than `127.0.0.1`, `localhost`, `::1` (`--unsafe-no-password` passes `strict=False` and turns this
   off). Then `_handle()` answers **every** request – the interface, static files and `/api/login` included – with
-  `503 {"error": "Tuttiphon is locked: the administrator password is missing or too short – please set
-  TUTTIPHON_ADMIN_PASSWORD (at least 8 characters)."}` as long as the password is weak, e.g. because the `.env` was
-  edited while the server is running. Without this lock, a password that goes missing would turn a container on the
-  network into the mode without sign-in. The server re-reads the password every 10 s; once a proper one is back, it
-  answers normally again, without a restart. Bound to loopback only (the PC on `127.0.0.1`), nothing changes: there,
-  a missing password still means the mode without sign-in.
-- **Host check** (`Handler._host_ok()`, against DNS rebinding): without a password, the `Host` header (without port) must be one
-  of `127.0.0.1`, `localhost`, `::1` or be listed in `TUTTIPHON_HOSTS` (comma-separated list, case-insensitive).
-  Otherwise `421` (“Access only via 127.0.0.1 – or set TUTTIPHON_ADMIN_PASSWORD”) for every request, including
-  static files. A third-party website whose name points to `127.0.0.1` thus fails on its own host name.
+  `503 {"error": "Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the placeholder – please set at
+  least 8 characters."}` as long as the password from the environment or `.env` is weak, e.g. because the `.env` was
+  edited while the server is running. A password that goes missing entirely – the line removed,
+  `state/admin_password.json` deleted – switches to setup mode instead: sign-in stays required, never the mode without
+  sign-in. The server re-reads the password every 10 s; once a proper one is back, it answers normally again, without
+  a restart. Bound to loopback only (the PC on `127.0.0.1`), nothing changes: there, a missing password still means the
+  mode without sign-in.
+- **Host check** (`Handler._host_ok()`, against DNS rebinding): without a password and outside setup mode, the `Host`
+  header (without port) must be one of `127.0.0.1`, `localhost`, `::1` or be listed in `TUTTIPHON_HOSTS`
+  (comma-separated list, case-insensitive). Otherwise `421` (“Access only via 127.0.0.1 – or set an administrator
+  password (Settings → Users & permissions).”) for every request, including static files. A third-party website whose
+  name points to `127.0.0.1` thus fails on its own host name.
 
 `TUTTIPHON_HOSTS` can only be set in `.env` or the environment; the interface can't set it. The host check
 only protects against browsers (DNS rebinding): a program on the network can set the `Host` header freely. Without
-`TUTTIPHON_ADMIN_PASSWORD`, Tuttiphon therefore never belongs on a network address (`--host 0.0.0.0` then doesn't start
-and, while running, stays locked; `--unsafe-no-password` deliberately overrides both). Via the interface, the
-administrator password can only be replaced by one that isn't weak, not deleted.
+an administrator password, Tuttiphon therefore never runs on a network address without sign-in (`--host 0.0.0.0`
+then starts in setup mode; `--unsafe-no-password` deliberately overrides this). On the PC, sign-in is turned on under
+Settings → Users & permissions: with source `""`, `POST /api/admin-password` needs no current password and signs
+this browser in as local administrator. Via the interface the administrator password can only be replaced by one
+that isn't weak, never deleted; `PUT /api/env` doesn't accept `TUTTIPHON_ADMIN_PASSWORD` at all.
 
 ## Behind a reverse proxy
 
@@ -322,8 +401,8 @@ website can't send this header: a custom header forces a CORS preflight request 
 mode without a password, where there is no cookie; with sign-in, `SameSite=Lax` adds to it. The interface sets the
 header centrally in `frontend/src/lib/api.js`.
 
-This includes `POST /api/login` (checked before the sign-in itself, so a refused request doesn't count toward the
-[sign-in lockout](#sign-in-lockout)): a plain HTML form on a third-party site could otherwise send sign-in attempts
+This includes `POST /api/login` and `POST /api/setup` (checked before the sign-in itself, so a refused request
+doesn't count toward the [sign-in lockout](#sign-in-lockout)): a plain HTML form on a third-party site could otherwise send sign-in attempts
 through a visitor's browser (a form needs no preflight), e.g. to guess passwords from inside the home network. The
 sign-in page sends the header like the rest of the interface.
 
@@ -422,10 +501,12 @@ All passwords and keys are in `.env` in the data folder (`data/.env` on the PC, 
 environment variables. Format, keys and precedence: [02 – Data model](02-data-model.md#env--credentials).
 
 - `save_env()` writes only the keys the interface may set (`config.EDITABLE_ENV`: `NAV_URL`, `NAV_PUBLIC_URL`,
-  `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `TUTTIPHON_ADMIN_PASSWORD`, `LASTFM_API_KEY`,
-  `NTFY_TOKEN`), only printable values without line breaks, and always sets the file to permissions
-  **`0600`** (`write_atomic(…, mode=0o600)`). An empty value is skipped – so `{"TUTTIPHON_ADMIN_PASSWORD": ""}`
-  can't remove the password. `write_atomic()` creates the temporary file with the target permissions right away
+  `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `LASTFM_API_KEY`, `NTFY_TOKEN`), only printable
+  values without line breaks, and always sets the file to permissions **`0600`** (`write_atomic(…, mode=0o600)`). An
+  empty value is skipped. `TUTTIPHON_ADMIN_PASSWORD` is not among them (“Unknown key”): a hand-written line still
+  counts, but the interface can neither set nor delete it. A password set in the browser never lands in `.env` –
+  `state/admin_password.json` holds only its hash (permissions `0600`, [Local administrator](#local-administrator)).
+  `write_atomic()` creates the temporary file with the target permissions right away
   (`os.open(…, mode)`), so it is never readable by others, not even briefly. `config.ensure_dirs()` sets a
   hand-made `.env` to `0600` at startup, as well as `state/secret` and
   `state/sessions.json` (if the file belongs to another user and that fails, Tuttiphon runs anyway).
@@ -437,7 +518,7 @@ environment variables. Format, keys and precedence: [02 – Data model](02-data-
   with credentials can't end up in Git ([02 – Data folder](02-data-model.md#the-data-folder)).
 - Environment variables (`NAV_*`, `TUTTIPHON_*`, `RATING_USERS`, `LASTFM_API_KEY`) take precedence over the file.
 - **No response contains a password or a key**: the server only reports whether something is stored
-  (`adminOk`, `users[].ok`, `passwordStored`, `lastfm`, `auth`).
+  (`adminOk`, `users[].ok`, `passwordStored`, `lastfm`, `auth`, `adminPassword` – only the source).
 
 ### Navidrome access and images stay on the server
 
@@ -467,12 +548,15 @@ travels over HTTP within the home network to Tuttiphon (with one, only from the 
 | `Handler.timeout` | 30 s per connection |
 | `_static()`, `api_log()` | the resolved path must lie inside the build or log folder |
 | `validate_config()` | every stored configuration is fully checked, including the field types of people and playlists (`_validate_types()`) – a wrong type would otherwise make writing all playlists, or whole pages, fail. Every number that ends up in `int()` has a range (`minDuration` 0–3600 or `null`, `radio.bands` 1–100, `limit`, `minRating` …), the name pattern only knows `{welt}` and `{stil}` (no format details), a person's `color` only `#rgb`, `#rrggbb` or `hsl(…)` (it goes into the page's styles – never `url(…)`). A wrong type the single checks don't foresee is a `ValueError` (`400`), never a crash |
-| `auth.login()`, `Handler._login()` | constant-time comparison for the administrator password; only with `X-Tuttiphon: 1`; sign-in lockout per account and address, per address and per account ([Sign-in lockout](#sign-in-lockout)), 1 s delay per counting failed attempt; sign-ins, counting failed attempts and lockouts are in the server log with the account name (without password, without address) ([08](08-operations.md#server-log)) |
-| `Handler.network` | bound to a network address: `503` for every request while the administrator password is weak ([Running without a password](#running-without-a-password)) |
+| `auth.login()`, `Handler._login()` | constant-time comparison for the administrator password (`localadmin.check()`); only with `X-Tuttiphon: 1`; sign-in lockout per account and address, per address and per account ([Sign-in lockout](#sign-in-lockout)), 1 s delay per counting failed attempt; sign-ins, counting failed attempts and lockouts are in the server log with the account name (without password, without address) ([08](08-operations.md#server-log)) |
+| `Handler.network` | bound to a network address: `503` for every request while `TUTTIPHON_ADMIN_PASSWORD` is weak ([Running without a password](#running-without-a-password)); without any administrator password setup mode – sign-in required, the password only via the setup code ([Setup mode](#setup-mode)) |
+| `Handler._setup()` | only in setup mode (otherwise `409`) and only with `X-Tuttiphon: 1`; setup code compared in constant time, lockout `setup\|<address>` 10 and `setup` 50 in 10 minutes; `_setup_lock` – of two simultaneous requests only the first sets the password; `setup-code.txt` deleted on success, never in a backup |
+| `Handler._admin_password()` | admin only (`ADMIN_ONLY`), only with `X-Tuttiphon: 1`; refused with source `env`; the new password must not be weak; with source `stored` only with the current password – a wrong one counts under the lockout keys of the local administrator (status `400`); all sessions of the local administrator end, the browser of the local administrator gets a new one |
+| `localadmin.py` | only a hash of a password set in the browser (scrypt, PBKDF2 as fallback), permissions `0600`; parameters outside sensible limits are refused when checking ([Local administrator](#local-administrator)) |
 | `POST /api/seen`, `POST /api/tour/seen` | record “tour/welcome done” only for the signed-in account (`auth.current()["user"]`), never for one sent along; only the values `tour` and `welcome` |
 | `api_env_test()` | a stored password is only sent to the stored `NAV_URL`; for a new address the password must be sent along – so “Test connection” can't be used to send a stored password to a foreign server |
 | `api_accounts_save()` | self-protection: one's own account can't take away its own admin role (see [Roles](#roles)); role `none` ends all sessions of the account |
-| `api_env_save()` | `TUTTIPHON_ADMIN_PASSWORD` only if `config.weak_password()` doesn't object (at least 8 characters, not the placeholder `change-me` in any spelling), can't be deleted; `NAV_URL` and `NAV_PUBLIC_URL` only with `http://` or `https://` – the link address of the interface (`nav_web_url()`) also ignores any other value from the environment (no `javascript:` links) |
+| `api_env_save()` | `NAV_URL` and `NAV_PUBLIC_URL` only with `http://` or `https://` – the link address of the interface (`nav_web_url()`) also ignores any other value from the environment (no `javascript:` links); `TUTTIPHON_ADMIN_PASSWORD` can't be set or deleted this way (`save_env()`: “Unknown key”) |
 | `POST /api/notify/test` | at most one test message per 30 seconds and account, topic only from letters, digits, `-`, `_`; users only with one of their own people and only to that person's topic (also the one just being entered) – never to the administrator's topic or one another person uses, and without a topic there is no fallback to the administrator's (`notify.test(fallback=False)`); without a person only administrators. `view_config()` gives users only `enabled` and `server` of `settings.notify` – never the administrator's topic; other people's ntfy topics stay private, like all person fields except name, icon, color, prefix |
 | `POST /api/push/*` | devices always apply to the signed-in account; “administrator device” only with role `admin`. Only push addresses via `https` at the known push services are accepted (`webpush.PUSH_HOSTS`: Google, Mozilla, Apple, Microsoft) – so no subscription can make Tuttiphon request addresses in the local network; the subscription's keys are checked for length and form; at most 10 devices per account; test message at most every 30 seconds |
 | Notifications through the app | content end-to-end encrypted (RFC 8291) – the push service only sees size and time; sender key `state/push_keys.json` with permissions 0600, never in a response (only the public part via `GET /api/push/key`) |
@@ -532,7 +616,7 @@ What the code deliberately doesn't cover today, or doesn't cover yet:
 |---|---|
 | Images without a visibility check | `/img/<id>` and `/live/<id>` check only the sign-in. Anyone who knows an image ID (`al-…`, `ar-…`, `pl-…`) gets the image – including the cover of someone else's private playlist. |
 | Same `.env` key for similar names | `pass_key()` turns all non-word characters into `_` and uppercases the name: `anna.b`, `anna-b` and `Anna_B` share `NAV_PASS_ANNA_B`. If one of these accounts signs in with “Turn on statistics & stars”, it overwrites the stored password of the other. |
-| Locking out individual accounts from outside | The [sign-in lockout](#sign-in-lockout) for a name from all addresses together needs 50 wrong attempts – whoever has at least five addresses can block sign-in for a name, including the local administrator with an empty name, for 10 minutes. |
+| Locking out individual accounts from outside | The [sign-in lockout](#sign-in-lockout) for a name from all addresses together needs 50 wrong attempts – whoever has at least five addresses can block sign-in for a name, including the local administrator with an empty name, for 10 minutes – in setup mode likewise the setup code (key `setup`). |
 | Address behind a reverse proxy | Without `TUTTIPHON_TRUSTED_PROXIES`, every request seems to come from the proxy: the per-address limits of the lockout then apply to everyone together ([Behind a reverse proxy](#behind-a-reverse-proxy)). |
 | No session overview | Individual sessions of an account can only be signed out with the respective token; otherwise the options are the role `none` (ends all sessions of this account) or deleting `state/sessions.json` (all sessions). |
 | No HTTPS of its own | Tuttiphon only speaks HTTP; https only via a reverse proxy. The cookie gets the `Secure` flag only via a trusted proxy that reports https (see [Cookie](#cookie)). |

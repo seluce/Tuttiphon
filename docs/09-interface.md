@@ -175,9 +175,14 @@ reverse proxy answers 502–504 – `api()` marks such errors with `offline`), t
 at the top of the page, the status is asked again every 5 s, and as soon as the server answers the change is saved.
 `api()` errors carry `status`; without an error text from the server they say “The server reported an error (status)”.
 A 401 leads to the sign-in page with the address within the app (`/login.html#/…`), and after signing in back there.
-The sign-in page asks `GET /api/login` first: as long as Navidrome is not connected (`{"navidrome": false}`, e.g. a new
-installation), it opens straight as the local administrator with a hint and without the switch to the normal sign-in;
-after signing in, the setup assistant takes over.
+The sign-in page (`Login.svelte`) asks `GET /api/login` first. In setup mode (`{"setup": true}`: a new installation on
+the network without an administrator password, [Security](07-security.md#setup-mode)) it shows only the setup form:
+“Setup code” (`XXXX-XXXX`, with a hint that it is in the container log and in `setup-code.txt`), “New administrator
+password” and “Repeat password”, button “Set password and sign in” (`POST /api/setup`); it checks beforehand that the
+code isn't empty, the password has at least 8 characters and both are the same; there is no switch to the normal
+sign-in. As long as Navidrome is not connected (`{"navidrome": false}`), it opens straight as the local administrator
+with a hint and without the switch to the normal sign-in. In both cases the setup assistant takes over after signing
+in.
 
 **Undo.** Before a change `snapshot()`, afterwards `toast('…', { undo: true })`. The button restores the previous state,
 closes open overlays (which would otherwise keep working on old objects) and saves. The toast disappears by
@@ -555,13 +560,32 @@ Every entry has an icon and a short description (Conversion: “FLAC → Opus”
 
 - **Signed in**: picture, name, “Navidrome account “<user>” · <role>” and “Sign out” with the logout icon; below it a
   hint that the password is changed in Navidrome. For the local administrator the role line reads “Local administrator
-  with all rights” and the hint says that its password is set in `docker-compose.yaml` (`TUTTIPHON_ADMIN_PASSWORD`).
-  With sign-in turned off, a card “Sign-in” explains how to turn it on instead.
+  with all rights” and the hint says that its password is changed under Settings → Users & permissions – or, with
+  `env.adminPassword` `"env"`, that it is set in `docker-compose.yaml` (`TUTTIPHON_ADMIN_PASSWORD`).
+  With sign-in turned off, a card “Sign-in” explains instead that it turns on once the local administrator has a
+  password, with a link to Settings → Users & permissions.
 - **Statistics & stars**: without a stored password, a password field and “Turn on” (`POST /api/me/password`, verified
   with Navidrome); with one, “Turned on” and “Turn off” – after the question “Forget password?” the same call with
   `password: null`. For the local administrator only the hint that it has no Navidrome account of its own.
 - **Your profiles** (not for the local administrator): the own people, or “Create profile” (`#/willkommen`).
 - **Introduction**: “Start tour” and “show again” for hidden suggestions and tips.
+
+### Settings → Users & permissions
+
+`pages/settings/Benutzer.svelte`: the card “Who may do what?” with the roles of the accounts (`PUT /api/accounts`)
+and the card “Local administrator” – with sign-in on, how to sign in as local administrator; without, that sign-in
+starts once it has a password. Below it `pages/settings/AdminPassword.svelte`, by `env.adminPassword`:
+
+| Source | Shows |
+|---|---|
+| `"env"` | only a note that the password is set in `docker-compose.yaml` as `TUTTIPHON_ADMIN_PASSWORD` and can only be changed there |
+| `"stored"` | “Current password”, “New password”, “Repeat password”, button “Change password”; a hint that only a fingerprint is kept and how to reset a forgotten one (delete `admin_password.json`, then the setup code) |
+| `""` (none yet, e.g. the PC without sign-in) | “Password of the local administrator”, “Repeat password”, button “Set password”; the hint that everyone then signs in |
+
+The form checks beforehand (current password entered, at least 8 characters, both the same), then sends
+`POST /api/admin-password`. After a change a toast “Password changed ✓” appears and the status is reloaded; after
+setting the first password the page reloads – sign-in is on from then on, and the answer has already signed this
+browser in as local administrator.
 
 ### Settings → Deezer stars
 
@@ -742,7 +766,7 @@ and in the Favorite bands step the up to 12 most-played bands come first. In the
 |---|---|
 | `npm run test:py` | Python tests for `app/` (`tests/python/`, `unittest` from the standard library): rules and local evaluation, mixes, configuration and `.env`, sign-in and permissions, backup, run lock and instances, lyrics/folder watch, conversion to Opus and AAC with real files generated in the test, mix learning, self-check, AI sound analysis (without Essentia, with a simulated analysis process). They run in a fresh temp folder (`tests/python/env.py`, import it before any `app.*`), without network and without the NAS; tests marked with `@unittest.expectedFailure` describe known deviations |
 | `npm run build` | must complete without warnings (Svelte reports, among other things, accessibility issues and misused runes) |
-| `tools/testserver.sh <port> <folder> [--auth] [--web <build>]` | test server with a **copy** of `data/`, auto-apply and folder watch off, no schedules. `--auth` turns on sign-in (sets `TUTTIPHON_ADMIN_PASSWORD` in the copy if it has no administrator password) and prints session cookies for the local administrator and a user account (`--user <account>`) |
+| `tools/testserver.sh <port> <folder> [--auth] [--web <build>]` | test server with a **copy** of `data/`, auto-apply and folder watch off, no schedules. `--auth` turns on sign-in (adds a random `TUTTIPHON_ADMIN_PASSWORD` to the copy's `.env` if that line is missing – it only checks this name) and prints session cookies for the local administrator and a user account (`--user <account>`) |
 | `node tools/screens.mjs --base … --out … [--cookie tuttiphon=…] [--mobile \| --mobile-small] [--light] [--text] [--fresh] [--lang en] '#/…'` | screenshots and console errors per page (`--mobile-small`: a small phone, 360 × 740 – narrow layouts break there first). Without `--fresh` the script sets the browser markers `tuttiphon-tour:<account>`/`tuttiphon-welcome:<account>` so that tour and welcome don't get in the way; with `--fresh` it leaves them out – but both only appear if the account is also not listed in `state/seen.json` of the data copy |
 | `npm run test:e2e` | Playwright: every page as administrator and as a user, computer and phone (Pixel 7), without JavaScript or console errors; sign-in page; redirect without a session (`pages.spec.js`); help: guides with page changes, Esc, the sheet behind the (?), search, jumping to a topic (`help.spec.js`); what the AI sound analysis adds – key, tempo source, instruments and themes in the song window, bands that sound alike, instruments and themes in the search, the assistant and the sound editor, a vibe that stands for a theme, smooth transitions, fingerprints and “Same recording twice” – with the server's answers extended in the browser (`page.route`), because the test copy usually has no AI results (`ai-sound.spec.js`); the setup assistant – redirect of a new installation only for administrators and once per session, all steps without saving before “Finish”, “Skip setup”, locked without a connection, the entry under Settings → General – with a new installation played in the browser and every write answered there (`setup-assistant.spec.js`) |
 

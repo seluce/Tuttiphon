@@ -270,7 +270,7 @@ def rating_users(env, cfg=None):
 
 # keys of the .env the interface may set (everything else only through docker-compose/the environment)
 EDITABLE_ENV = re.compile(r"^(NAV_URL|NAV_PUBLIC_URL|NAV_ADMIN_USER|NAV_ADMIN_PASS|NAV_PASS_\w+|RATING_USERS|"
-                          r"TUTTIPHON_ADMIN_PASSWORD|LASTFM_API_KEY|NTFY_TOKEN)$")
+                          r"LASTFM_API_KEY|NTFY_TOKEN)$")
 
 
 def save_env(updates):

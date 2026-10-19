@@ -60,7 +60,7 @@
 {#if !me.user}
   <Card title={t('Sign-in')} icon="key">
     <p class="muted small">{t('Sign-in is currently turned off – anyone who can open Tuttiphon is automatically an administrator. This only makes sense as long as Tuttiphon runs on this computer alone.')}</p>
-    <p class="muted small">{@html t('If an administrator password is set in docker-compose.yaml as TUTTIPHON_ADMIN_PASSWORD, everyone signs in with their own Navidrome account and gets their own view. <a class="link" href="#/hilfe/konten">How it works →</a>')}</p>
+    <p class="muted small">{@html t('Once the local administrator has a password (<a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a>), everyone signs in with their own Navidrome account and gets their own view. <a class="link" href="#/hilfe/konten">How it works →</a>')}</p>
   </Card>
 {:else}
   <Card title={t('Signed in')} icon="user">
@@ -72,7 +72,8 @@
       </div>
       <button class="btn" onclick={logout}><Icon name="logout" size={16} />{t('Sign out')}</button>
     </div>
-    <div class="hint">{me.notfall ? t('The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).')
+    <div class="hint">{me.notfall ? (S.status?.env?.adminPassword === 'env' ? t('The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).')
+        : t('You change the password of the local administrator under Settings → Users & permissions.'))
       : me.passwordStored ? t('You change your password in Navidrome, in the profile at the top right. Then enter the new one here under “Statistics & stars” as well.')
       : t('You change your password in Navidrome, in the profile at the top right.')}</div>
   </Card>

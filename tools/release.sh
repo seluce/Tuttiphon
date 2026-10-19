@@ -122,8 +122,7 @@ FIRST SETUP
  1. Copy everything from this folder EXCEPT first-install/ into the project folder.
     Include the hidden file: .dockerignore
  2. Rename docker-compose.example.yaml to docker-compose.yaml and adjust the lines marked CHANGE: user: (owner of the music files – "ls -n" in the music
-    folder shows the numbers), music folder, archive, TZ (time zone), administrator password (at least 8 characters,
-    write a "\$" twice), Navidrome address.
+    folder shows the numbers), music folder, archive, TZ (time zone), Navidrome address.
  3. Create the folders before the first start and give them to the user from "user:" – otherwise Docker creates
     them for root, Tuttiphon cannot write there and the container keeps restarting. In the project folder, e.g.:
       mkdir -p config backups /path/to/music-archive
@@ -134,14 +133,14 @@ FIRST SETUP
     passwords are in there). (first-install/ comes from "npm run release:with-data" on the PC.)
  5. Create and start the project in the Docker app of the NAS (or "docker compose up -d --build") – 10–15 minutes
     the first time.
- 6. Open http://<NAS address>:8765, sign in as "Local administrator", enter the Navidrome admin under
-    Settings → Navidrome and check Settings → Storage locations. In detail: README.md on GitHub
-    (https://github.com/seluce/tuttiphon).
+ 6. Open http://<NAS address>:8765 and set the password of the local administrator – with the setup code from
+    the container log (also in config/setup-code.txt). The setup assistant then connects Navidrome; afterwards check
+    Settings → Storage locations. In detail: README.md on GitHub (https://github.com/seluce/tuttiphon).
 
 UPDATE (later versions)
  1. Copy everything from this folder EXCEPT first-install/ into the project folder and replace the existing files.
-    Do NOT touch config/. Your own docker-compose.yaml (or .yml) stays as it is – it contains your administrator
-    password; docker-compose.example.yaml is only the template for comparing, if "NEW IN THIS VERSION" says so.
+    Do NOT touch config/. Your own docker-compose.yaml (or .yml) stays as it is; docker-compose.example.yaml is
+    only the template for comparing, if "NEW IN THIS VERSION" says so.
  2. Rebuild/recreate the project in the Docker app (or "docker compose up -d --build"). The data stays in config/.
 
 NEW IN THIS VERSION

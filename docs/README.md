@@ -18,7 +18,7 @@ The handbook describes the current state of the code. Whoever changes something 
 | 4 | [Playlists](04-playlists.md) | music world × vibe × person, rules, writing and syncing, takeover, mixes and how they learn from listening, suggestions, combined search, covers |
 | 5 | [Maintenance](05-maintenance.md) | runs and steps, short pause while applying, “Update everything”, Opus, lyrics, Deezer, scan with self-check, daily refresh, night analysis, folder watch |
 | 6 | [Intelligence](06-intelligence.md) | sound analysis, AI sound analysis (Essentia), moods, Last.fm, classification of new bands, taste per account, statistics and recap |
-| 7 | [Security](07-security.md) | sign-in and lockout, roles, sessions, local administrator, network lock, reverse proxy, what the server filters |
+| 7 | [Security](07-security.md) | sign-in and lockout, roles, sessions, local administrator and setup mode, network lock, reverse proxy, what the server filters |
 | 8 | [Operations](08-operations.md) | PC and Docker, publishing the image, memory and CPU, storage locations, updates, versions and going back, backup, multiple instances, troubleshooting, server log |
 | 9 | [Interface](09-interface.md) | Svelte structure, state and saving, windows, “For you”, search, music world, tour and welcome, design, tests, extending |
 
@@ -52,4 +52,5 @@ The handbook describes the current state of the code. Whoever changes something 
 | Self-check | `app/selfcheck.py` | after every scan: does Navidrome show as many songs per playlist as Tuttiphon expects? Deviations → “To review” |
 | Instance | `<playlist folder>/.tuttiphon/` | a running Tuttiphon – on the PC or in the Docker container; registration and run lock live in the shared playlist folder |
 | Administrator / user | `role: admin \| user` | role in Tuttiphon; users only see their own and shared items |
-| Local administrator | `@notfall` | Tuttiphon's own administrator account: sign-in with `TUTTIPHON_ADMIN_PASSWORD`, even when Navidrome is not running |
+| Local administrator | `@notfall`, `app/localadmin.py` | Tuttiphon's own administrator account, also when Navidrome is not running: its password is set in the browser at the first start with a setup code from the server log (only a hash in `state/admin_password.json`) – or as `TUTTIPHON_ADMIN_PASSWORD` |
+| Setup mode | `Handler.network`, `POST /api/setup` | a server on the network without an administrator password: sign-in required, the password is set with the one-time setup code from the server log and `setup-code.txt` |
