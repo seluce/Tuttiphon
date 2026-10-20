@@ -216,6 +216,7 @@ export default {
   'Another own image': 'Anderes eigenes Bild',
   'Upload own image': 'Eigenes Bild hochladen',
   'Navidrome default': 'Navidrome-Standard',
+  'The image was set in Navidrome – Tuttiphon leaves it as it is.': 'Das Bild wurde in Navidrome gesetzt – Tuttiphon lässt es so.',
   // components/sheets/SongSheet.svelte
   'More like this · {title}': 'Mehr davon · {title}',
   'Pause': 'Pause',

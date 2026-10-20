@@ -46,6 +46,9 @@ export const S = new Store()
 export const findWelt = (id) => S.config.welten.find((w) => w.id === id)
 export const findStil = (id) => S.config.stile.find((s) => s.id === id)
 export const findPerson = (id) => S.config.personen.find((p) => p.id === id)
+/** Separate music worlds that “All” leaves out for this person – on a child profile the children's music belongs to it
+ *  (audio plays & audiobooks stay out), as in rules.child_worlds() on the server. */
+export const outOfAll = (person) => S.config.welten.filter((w) => w.separate && !(person?.child && w.scene !== 'hoerspiel'))
 export const findPl = (id) => S.config.playlists.find((p) => p.id === id)
 /** Status of a playlist from /api/playlists (count, cover, state in Navidrome). */
 export const plStatus = (id) => S.pl?.playlists.find((x) => x.id === id)

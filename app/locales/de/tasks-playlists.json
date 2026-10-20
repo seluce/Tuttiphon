@@ -139,14 +139,14 @@
  "Album of the week for {name}": "Album der Woche für {name}",
  "One whole album a week that this account has never played – by a favorite band or in its sound, in album order.": "Jede Woche ein ganzes Album, das auf diesem Konto noch nie lief – von einer Lieblingsband oder in seinem Klang, in Albumreihenfolge.",
  "“{world}” counts for {name}’s taste": "„{world}“ zählt zum Geschmack von {name}",
- "{pct} % of what this account plays is from “{world}”. If that plays for someone else, keep it out of the taste – then discoveries, album of the week and own sound follow the own music. The family playlists keep it.": "{pct} % dessen, was dieses Konto hört, kommt aus „{world}“. Läuft das für jemand anderen, nimm es aus dem Geschmack – dann richten sich Entdeckungen, Album der Woche und eigener Sound nach der eigenen Musik. Die Familien-Playlists behalten es.",
+ "{pct} % of what this account plays is from “{world}”. If that plays for someone else, keep it out of the taste – then discoveries, album of the week and own sound follow the person’s own music. The family playlists keep it.": "{pct} % dessen, was dieses Konto hört, kommt aus „{world}“. Läuft das für jemand anderen, nimm es aus dem Geschmack – dann richten sich Entdeckungen, Album der Woche und eigener Sound nach der eigenen Musik. Die Familien-Playlists behalten es.",
  "Set it": "Einstellen",
  "Is {name} a child?": "Ist {name} ein Kind?",
  "{pct} % of what this account plays is from separate music worlds such as “{world}”. For a child, make it a child profile: then discoveries, album of the week and own sound include children’s music, and kid-safe mode is on. If the account belongs to a parent, keep it out of the taste instead.": "{pct} % dessen, was dieses Konto hört, kommt aus abgetrennten Musikwelten wie „{world}“. Bei einem Kind mach ein Kinderprofil daraus: Dann schließen Entdeckungen, Album der Woche und eigener Sound Kindermusik ein, und der Kinderschutz ist an. Gehört das Konto einem Elternteil, nimm sie stattdessen aus dem Geschmack.",
  "Child profile": "Kinderprofil",
  "Keep it out": "Herausnehmen",
  "New for you this week": "Neu für dich diese Woche",
- "Album of the week: {artist} – {album}": "Album der Woche: {artist} – {album}",
+ "{name}: {artist} – {album}": "{name}: {artist} – {album}",
  "{name}: {n} song you have never heard": "{name}: {n} Song, den du noch nie gehört hast",
  "{name}: {n} songs you have never heard": "{name}: {n} Songs, die du noch nie gehört hast"
 }

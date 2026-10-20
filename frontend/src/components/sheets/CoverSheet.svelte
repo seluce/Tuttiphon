@@ -125,11 +125,12 @@
       <button class="btn" class:primary={current === 'eigenes'} disabled={busy} onclick={() => file.click()}>
         <Icon name="upload" size={17} />{current === 'eigenes' ? t('Another own image') : t('Upload own image')}
       </button>
-      {#if current}
+      {#if current || ('format' in (styles || {}) && !p.cover)}<!-- a format: decline its cover before it first comes -->
         <button class="btn ghost" disabled={busy} onclick={remove}><Icon name="undo" size={17} />{t('Navidrome default')}</button>
       {/if}
       <input bind:this={file} type="file" accept="image/jpeg,image/png,image/webp" hidden onchange={() => upload(file.files[0])} />
     </div>
+    {#if current === 'navidrome'}<div class="hint">{t('The image was set in Navidrome – Tuttiphon leaves it as it is.')}</div>{/if}
     <div class="small muted">{status}</div>
   </div>
 {/if}

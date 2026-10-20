@@ -651,28 +651,46 @@ class TaskRunner:
             playlists.sync_navidrome(load_config(), env, bctx, log=self.log)
 
     def _refresh_covers(self, env, bctx):
-        """Renew designed covers when their material has changed (e.g. a new Daily Mix)."""
+        """Renew designed covers when their material has changed (e.g. a new Daily Mix); formats get theirs."""
+        import copy
         from . import covers
         cfg = load_config()
         if not any((p.get("cover") or {}).get("style") or covers.default_style(p) for p in cfg["playlists"]):
             return
+        before = {p["id"]: copy.deepcopy(p.get("cover")) for p in cfg["playlists"]}
+        dropped = set()
         try:
             native = playlists.native_api(env)
-            n = covers.refresh_auto(cfg, bctx.lib, native, playlists.navidrome_index(native, cfg), log=self.log)
+            n = covers.refresh_auto(cfg, bctx.lib, native, playlists.navidrome_index(native, cfg), log=self.log,
+                                    dropped=dropped)
         except Exception as e:
             self.log(_s("⚠ Covers: {error}", error=e))
             return
-        if n:
-            done = {p["id"]: p["cover"] for p in cfg["playlists"] if isinstance(p.get("cover"), dict)}
+        if not n:
+            return
+        done = {p["id"]: p.get("cover") for p in cfg["playlists"] if p.get("cover") != before[p["id"]] or p["id"] in dropped}
+        undo = []
 
-            def apply(fresh):
-                for p in fresh["playlists"]:
-                    cv, new = p.get("cover"), done.get(p["id"])
-                    if isinstance(cv, dict) and new and cv.get("style") == new.get("style"):   # not over a cover that is new by now
-                        cv.update({k: new[k] for k in ("sig", "nid") if k in new})
-                    elif not cv and new and new.get("auto"):   # a format's own cover, set for the first time
-                        p["cover"] = dict(new)
-            update_config(apply)
+        def apply(fresh):
+            for p in fresh["playlists"]:
+                if p["id"] not in done:
+                    continue
+                new = done[p["id"]]
+                if p.get("cover") != before[p["id"]]:   # another cover was chosen in the meantime – that wins
+                    if (p.get("cover") or {}).get("style") == "none" and isinstance(new, dict) \
+                            and new.get("style") in covers.STYLES and new.get("nid"):
+                        undo.append(new["nid"])   # removed while its cover was being uploaded: take it away again
+                    continue
+                if p["id"] in dropped or not isinstance(new, dict):
+                    p.pop("cover", None)
+                else:
+                    p["cover"] = dict(new)
+        update_config(apply)
+        for nid in undo:
+            try:
+                native.delete_playlist_image(nid)
+            except Exception:   # noqa: BLE001 – a cover must not stop the run
+                pass
 
     def _step_deezer(self, ctx, deezer_mode=None, dry_run=False, overwrite_manual=None, **_):
         cfg = load_config()

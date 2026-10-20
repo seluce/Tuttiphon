@@ -952,6 +952,8 @@ music worlds (filter in `web.api_suggestions()`).
 | playlist has only n songs | active playlist with < 15 songs | “Edit” |
 | bands no longer there | manual bands of a world that no longer exist in the library | “Remove from the list” |
 | bands without genre tags | `untagged_artists()` that are not assigned to any vibe | “Assign” (vibes) |
+| “<world>” counts for <name>’s taste (`taste-world\|<person>\|<world>`) | `taste_hints()`: a separate world makes up at least 20 % of what the person's account plays and the person keeps it in their taste ([Intelligence](06-intelligence.md#taste-per-person)) | “Set it” (profile); for children's music also “Child profile” |
+| Is <name> a child? (`child\|<person>`) | children's music makes up at least half of what the account plays (each song once, without audio plays) | “Child profile” (`childProfile`: sets `child` and `clean`, with “Undo”), “Keep it out” (profile) |
 
 Classification comes from `classify.suggestions()` (Last.fm tags, similar bands, genres, scenes; per band the world with
 the highest match rate, from 0.3). If `settings.analysis.classify` is `off`, it is skipped: no
@@ -960,7 +962,7 @@ is in a world and therefore no longer appears as “New”. Because a band that 
 stays in `state/auto_assigned.json`, classification never assigns it by itself again. Titles and texts name music worlds and scenes only by name, without
 an icon. Entries whose key is in `cfg.ignored` are dropped. `web.api_inbox()` prepends a warning
 if an instance of another installation reports in ([Operations](08-operations.md#multiple-instances)). Users get `web.user_inbox()` instead (profile, preferences, first
-playlist, password). How classification calculates is described in [Intelligence](06-intelligence.md).
+playlist, password, tidying up and the taste hints of their own people – never the child question). How classification calculates is described in [Intelligence](06-intelligence.md).
 
 ### Combined search
 
@@ -1076,15 +1078,18 @@ DejaVu Sans Bold, otherwise Pillow's default font; emojis are removed. Without P
 `album`; `available_styles(playlist)` (`/api/cover/styles?id=`) offers `format` only for a format.
 
 **Formats.** `format_kind()`: `album` (album of the week), `unheard` (discovered), `daytime: "morning"`, `review`,
-`together`, `fav`, mixes with `flavor: "geschmack"` (own sound) and the vibe `wiederentdecken` over the whole library
-(per world it keeps the ordinary styles, so several of them stay apart) – every other playlist is none. They look the same every week, so they are recognizable in the app; the format cover is their default
+`together`, `fav`, mixes with `flavor: "geschmack"` (own sound) and the vibe `wiederentdecken` – `together`, `fav` and
+`wiederentdecken` only over the whole library (per world, e.g. the car ride, they keep the ordinary styles, so several
+of them stay apart) – every other playlist is none. They look the same every week, so they are recognizable in the app; the format cover is their default
 (`default_style()`).
 
 **Flow.** `/cover?id=&style=` returns a preview. Apply (`/api/cover/apply`): render, upload
 (`POST /api/playlist/{id}/image`), save `cover = {style, sig, nid, at, rev}` in the configuration. Own image
 (`/api/cover/upload`): `cover = {style: "eigenes", at, rev}`. Remove (`/api/cover/remove`): delete the image in Navidrome,
 remove `cover` – for a format `cover = {style: "none"}` instead, so that it does not get its format cover again
-(`status()` treats `none` like no cover). All of them require the playlist to be in Navidrome already.
+(`status()` treats `none` like no cover; the sheet offers “Navidrome default” for a format even before its cover first
+came). All of them require the playlist to be in Navidrome already. After applying, the image name Navidrome reports
+for the playlist (`uploadedImage`, `covers.image_name()`) is kept as `cover.img`.
 
 **Automatic renewal.** `refresh_auto()` runs after every sync: for every active playlist with a designed
 style (not `eigenes`) that is in Navidrome, the signature (`signature()`: hash of covers, the four largest
@@ -1095,9 +1100,21 @@ do not stop the run.
 
 **Formats get their cover by themselves.** A format without `cover` gets the style of `default_style()` in the same
 pass – but only if Navidrome reports no image of its own for it (`uploadedImage` empty, so an image set in Navidrome
-stays) and not after it was removed (`none`). It is noted as `cover = {style: "format", auto: true, at, sig, nid}`;
-`tasks._refresh_covers()` writes it into the fresh configuration only where there is still no `cover`. The checklist
-(“Give a playlist a cover”) does not count `auto` covers.
+stays) and not after it was removed (`none`). It is noted as `cover = {style: "format", auto: true, at, sig, nid, img}`.
+For the format style the signature also covers its texts (format, title, the person's name, default person, minutes,
+rhythm, server language), so a renamed person or another language gets a new cover. A playlist that is no longer a
+format (e.g. rediscover moved to one world) loses its format cover again: the image in Navidrome is deleted and
+`cover` removed. The checklist (“Give a playlist a cover”) does not count `auto` covers.
+
+**Images set in Navidrome itself stay.** After every upload `refresh_auto()` reads once which image Navidrome now
+reports (`uploadedImage`) and keeps it as `cover.img`. If Navidrome later reports another one for the same playlist
+(`nid` unchanged), it was set there by hand: `cover = {style: "navidrome", at, rev, nid}` – never renewed, shown as the
+playlist's image in Tuttiphon, the sheet says so. If it reports none any more, it was removed there: `none`.
+Without the field (older Navidrome) nothing is compared – then a designed cover is renewed as before.
+
+**Writing back.** `tasks._refresh_covers()` keeps a copy of every `cover` before the pass and writes its results into
+the fresh configuration only where `cover` is still exactly as before – a choice made during the run wins. If a cover
+was removed (`none`) while it was being uploaded, the image is deleted in Navidrome again.
 
 **Own images stay.** `/api/cover/upload` stores a copy under `state/eigene-cover/<playlist-id>.img` and
 remembers the Navidrome ID in `cover.nid`. If Navidrome has created the playlist anew (season over and back again, pause,

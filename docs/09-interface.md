@@ -470,7 +470,7 @@ only the ntfy topic, because everyone registers their devices themselves. Admini
 the kid-safe card of every person except the default person: **Child profile** (`person.child`, [Playlists](04-playlists.md#music-world-welt));
 turning it on also turns on kid-safe mode, which then cannot be switched off while it is a child profile. The header
 of a child profile shows the pill “Child profile”. “To review” can set it too (action `childProfile` in
-`pages/start/TodoList.svelte`, with undo). Both always set the value
+`pages/start/TodoList.svelte`, with undo; if the person no longer exists: an error notice, the entry goes). Both always set the value
 (`false` or `""`) instead of deleting the field – `merge_user_changes()` only takes over fields that are sent along.
 
 ### Playlist page and playlist cards
@@ -494,7 +494,13 @@ edition heard, or – highlighted – “Nothing played from the last 12 edition
 **Cover** (`components/sheets/CoverSheet.svelte`, from the “…” sheet or by tapping the picture): previews of the
 styles from `GET /api/cover/styles?id=` – for formats (discovered, album of the week, good morning …) “Cover of the
 format” first, which they get by themselves ([Covers](04-playlists.md#covers-appcoverspy)) –, own image, “Navidrome
-default”. The latter also stops the format cover from coming back; the sheet treats `cover.style: "none"` as no cover.
+default”. The latter also stops the format cover from coming back – for a format it is offered even before its cover
+first came; the sheet treats `cover.style: "none"` as no cover. With `navidrome` (an image set in Navidrome itself) a
+note says that Tuttiphon leaves it as it is.
+
+For a child profile, “All” includes the children's music: the editor's hint (“All” = the whole library without …) and
+the assistant's “The whole library” name only the worlds still left out (`outOfAll()` in `lib/state.svelte.js`, as
+`rules.child_worlds()`).
 
 Playlist cards (`PlaylistCard`) show a **state dot** (`StateDot`) only for administrators and only for states other
 than `aktuell` (“in Navidrome”) – new, changed, scan, error …; users see none (a dot with a tooltip says nothing on a

@@ -77,13 +77,13 @@
     }
     if (a.do === 'childProfile') {   // children's music belongs to "all" for this person, kid-safe mode on
       const p = findPerson(a.person)
-      if (!p) return
+      cache.inbox = (cache.inbox || []).filter((x) => !(x.actions || []).includes(a))
+      if (!p) { toast(t('This person does not exist'), { error: true }); return }
       snapshot()
       p.child = true
       p.clean = true
       changed()
       toast(t('{name} is a child profile now', { name: p.name }), { undo: true })
-      cache.inbox = (cache.inbox || []).filter((x) => !(x.actions || []).includes(a))
     }
     if (a.do === 'removeGone') {
       const w = findWelt(a.welt)

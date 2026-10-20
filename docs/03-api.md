@@ -179,7 +179,7 @@ The “Users” column in the tables below lists what the server leaves out for 
 | GET | `/img/<id>` | signed in | [Images & covers](#images--covers) |
 | GET | `/live/<id>` | signed in | [Images & covers](#images--covers) |
 | GET | `/cover` | own | [Images & covers](#images--covers) |
-| GET | `/api/cover/styles` | signed in | [Images & covers](#images--covers) |
+| GET | `/api/cover/styles` | signed in (with `id`: own) | [Images & covers](#images--covers) |
 | POST | `/api/cover/apply` | own | [Images & covers](#images--covers) |
 | POST | `/api/cover/remove` | own | [Images & covers](#images--covers) |
 | POST | `/api/cover/upload` | own | [Images & covers](#images--covers) |
@@ -544,7 +544,7 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
 | `GET /img/<id>` | signed in | `<id>` = cover ID from Navidrome (album, `ar-…` for artists, `pl-…`), `s` = size | image (`image/webp`, `image/jpeg` or `image/png`), `Cache-Control: max-age=604800` |
 | `GET /live/<id>` | signed in | `<id>` must start with `pl-`, `s` = size, `v` = version | playlist image, `Cache-Control: max-age=86400` |
 | `GET /cover` | own | `id` (playlist), `style` (default `mosaik`) | designed cover as `image/jpeg`, `Cache-Control: no-store` |
-| `GET /api/cover/styles` | signed in | – | `{"<style>": "<label>"}` – without Pillow only `album` |
+| `GET /api/cover/styles` | signed in; with `id` own | `id` (playlist, optional) | `{"<style>": "<label>"}` – without Pillow only `album`; with `id` the styles for this playlist (`format` only for a format, [Covers](04-playlists.md#covers-appcoverspy)), someone else's playlist → `403` |
 | `POST /api/cover/apply` | own | Body `{"id", "style"}` | `{"ok": true}` |
 | `POST /api/cover/remove` | own | Body `{"id"}` | `{"ok": true}` |
 | `POST /api/cover/upload` | own | Query `id`; body = raw image data (not JSON), at most 10 MiB | `{"ok": true}` |
@@ -556,8 +556,8 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
   `^[A-Za-z0-9_:.\-]{3,120}$`, otherwise `400 "invalid image ID"`. No image → `404` with an empty body.
   Both check only the sign-in, not whether the playlist or the album is visible to the account.
 - `/cover` and `/api/cover/apply` render the image with `covers.render()`. `apply` uploads it via Navidrome's own API
-  and records `cover = {style, sig, nid, at, rev}` in the playlist; `remove` deletes the image in Navidrome and
-  the entry. `upload` detects the format from the first bytes (`covers.sniff()`: only JPEG, PNG, WebP; the
+  and records `cover = {style, sig, nid, at, rev, img}` in the playlist (`format` only for a format); `remove` deletes
+  the image in Navidrome and the entry – for a format it leaves `{style: "none"}`, so its cover does not come back. `upload` detects the format from the first bytes (`covers.sniff()`: only JPEG, PNG, WebP; the
   `Content-Type` sent doesn't count) and stores `cover = {style: "eigenes", at, rev}`.
 - Errors: unknown style → `400` (`/cover`: “Unknown cover style”, `/api/cover/apply`: “This style is not available
   here”; allowed are the styles from `covers.available_styles()`); playlist not in Navidrome yet → `400` “The

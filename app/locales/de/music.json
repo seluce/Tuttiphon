@@ -6,6 +6,7 @@
  "This playlist has no album cover that can be used.": "Diese Playlist hat kein Album-Cover, das sich verwenden lässt.",
  "This is not a JPG, PNG or WebP image.": "Das ist kein JPG-, PNG- oder WebP-Bild.",
  "  🖼 Cover renewed: {name}": "  🖼 Cover erneuert: {name}",
+ "  🖼 Cover changed in Navidrome – it stays: {name}": "  🖼 Cover in Navidrome geändert – es bleibt: {name}",
  "  ⚠ Cover for {name}: {error}": "  ⚠ Cover für {name}: {error}",
  "  ⚠ Custom cover for {name}: {error}": "  ⚠ Eigenes Cover für {name}: {error}",
  "  🖼 Custom cover uploaded again: {name}": "  🖼 Eigenes Cover wieder hochgeladen: {name}",

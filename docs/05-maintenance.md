@@ -624,7 +624,7 @@ between smart playlist and mix. The history lists the counts `written`, `unchang
    Navidrome read them in briefly and syncs
    ([Intelligence](06-intelligence.md#lyrics-search-and-kid-safe-mode)).
 8. **Notifications** to the people (`notify.for_persons()`), to the devices of their account and to their ntfy topic:
-   news from their favorite bands and the monthly recap ([Operations](08-operations.md#notifications)). An error is only logged.
+   news from their favorite bands, new for you this week and the monthly recap ([Operations](08-operations.md#notifications)). An error is only logged.
 9. If the run was not canceled, the [self-check](#self-check) follows. An error in it is only logged
    (“⚠ Self-check: …”) and does not change the step's result.
 

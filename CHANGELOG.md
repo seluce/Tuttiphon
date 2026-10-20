@@ -16,14 +16,15 @@ released.
   child profile (in the kid-safe card). Then children’s music belongs to the child’s whole library – discoveries, album
   of the week, own sound and good morning include it, audio plays stay out of the mixes –, and kid-safe mode is always
   on. When an account plays mostly children’s music, “To review” asks the administrator “Is … a child?” with one click
-  to set it; the child itself is never told to keep its music out.
+  to set it – and such an account is never told to keep its music out.
 - **“New for you this week”** – on Mondays a short notification to each person with “Discovered for you” or “Album of
-  the week”: how many never played songs are waiting and which album it is. It can be turned off under Settings →
-  Notifications.
+  the week”: how many never played songs are waiting and which album it is – on a phone shared by several people once.
+  It can be turned off under Settings → Notifications.
 - **Covers for the formats.** Discovered, album of the week, good morning, own sound, new from favorite bands, what
   everyone likes, rediscover and your month get a cover of their own by themselves – the same look every week, with
-  the album itself on the album of the week – so they are easy to spot in Symfonium. An image set in Navidrome stays;
-  after “Navidrome default” the cover does not come back.
+  the album itself on the album of the week – so they are easy to spot in Symfonium. An image set in Navidrome itself
+  stays; after “Navidrome default” the format cover does not come back. A format whose designed cover was removed
+  before this version gets the format cover once more on the first run – “Navidrome default” takes it away for good.
 - No changes to `docker-compose.yaml` needed.
 
 ## 1.2.0

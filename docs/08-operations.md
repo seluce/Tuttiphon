@@ -429,10 +429,13 @@ there.
 | `autoAssigned` | administrators' devices, the administrator's topic | bands were automatically assigned to a music world |
 | `favorites` | devices of the person's account, their topic (`person.push`) | an album by a favorite band was added in the last 3 days (after the scan, once per album) |
 | `review` | devices of the person's account, their topic | in the first three days of the month, if the person has a recap playlist “Your month” |
-| `weekly` | devices of the person's account, their topic | “New for you this week” on Monday (still on Tuesday if no run came on Monday), if the person has an active “Discovered for you” or “Album of the week” that was renewed this week: how many never played songs and which album – once per person and week, tapping opens the first of them |
+| `weekly` | devices of the person's account, their topic | “New for you this week” on Monday (still on Tuesday if no run came on Monday), if the person has an active “Discovered for you” or “Album of the week” that renews weekly and was renewed this week: how many never played songs and which album – to the topic once per person and week; the devices of an account once per week with what is new for all its people (own people first); tapping opens the first of them |
 
 Each event is sent only once (`state/notified.json`). If two people share the same Navidrome account (such as
-“Familie” and the administrator), each device still gets the message only once.
+“Familie” and the administrator), each device still gets the message only once: `favorites` once per album and
+account (`favpush|…`), `review` once per month and account (`reviewpush|…`, the first person's recap), `weekly` once
+per week and account (`weeklypush|…`, with what is new for all its people); every person's own ntfy topic gets its
+own message. A playlist without `person` counts for the default person.
 
 ### Via the app (web push)
 

@@ -178,8 +178,8 @@
       <div class="card grid gap-3 content-start min-w-0" data-guide="push">
         <h2 class="ih"><span class="hi"><Icon name="bell" size={18} /></span>{t('To your phone')}</h2>
         <p class="muted small">{self
-          ? t('You get news from your favorite bands and your monthly recap as a notification – on every device where you turn it on.')
-          : t('{name} gets news from their favorite bands and their monthly recap as a notification – on the devices they turn on in their profile.', { name: p.name })}</p>
+          ? t('You get news from your favorite bands, what is new for you each Monday and your monthly recap as a notification – on every device where you turn it on.')
+          : t('{name} gets news from their favorite bands, what is new for them each Monday and their monthly recap as a notification – on the devices they turn on in their profile.', { name: p.name })}</p>
         {#if self}<PushDevice />{/if}
         <details class="small" open={!!p.push}>
           <summary class="muted cursor-pointer">{self ? t('Or via the ntfy app') : t('Via the ntfy app')}</summary>

@@ -61,7 +61,7 @@
   <p>{@html t('<a class="link" href="#/profil">My profile</a> shows what Tuttiphon knows about your taste. All suggestions and mixes are based on it:')}</p>
   <Bullets>
     <li>{@render rich(t('<b>From your listening</b> – Tuttiphon learns which music worlds and bands you like from what you play in Symfonium, mark as a favorite and rate yourself. <Ui icon="plus">Remember</Ui> or <Ui icon="plus">Add all</Ui> turns it into a favorite.'))}</li>
-    <li>{@html t('<b>Not part of your taste</b> – music that plays on your account for someone else, such as children’s music. Switch it on there: it stays in the family playlists, but your discoveries and mixes follow your own music.')}</li>
+    <li>{@html t('<b>Not part of your taste</b> – music that plays on your account for someone else, such as children’s music. Switch it on in that card: it stays in the family playlists, but your discoveries and mixes follow your own music.')}</li>
     <li>{@html t('<b>Favorite music worlds</b> – you get playlist ideas for these.')}</li>
     <li>{@html t('<b>Favorite bands</b> – come up more often in your mixes.')}</li>
     <li>{@html t('<b>Favorite vibes</b> – kinds of music and decades you like, such as Rock & Punk or 80s – you get playlist ideas for these too.')}</li>
@@ -69,8 +69,8 @@
     <li>{@html t('<b>Who can see your playlists?</b> – “Only me” or “The whole family”. Either way, only you can change them.')}</li>
     <li>{@html t('<b>Prefix</b> – goes in front of every playlist name, such as “Mia · ”, so you spot your playlists in Symfonium right away.')}</li>
     <li>{@html t('<b>Kid-safe mode</b> – songs with explicit lyrics stay out of all your playlists and mixes. Tuttiphon detects them from the lyrics.')}</li>
-    <li>{@html t('<b>To your phone</b> – tap “Turn on for this device” on your phone to get news from your favorite bands and your monthly recap as notifications. If you’d rather use the ntfy app, enter a topic under “Or via the ntfy app”. This is available if the administrator has turned on notifications.')}</li>
-    <li>{@html t('<b>New for you this week</b> – on Mondays a short message when your discoveries and your album of the week are new.')}</li>
+    <li>{@html t('<b>To your phone</b> – tap “Turn on for this device” on your phone to get news from your favorite bands, what is new for you each Monday and your monthly recap as notifications. If you’d rather use the ntfy app, enter a topic under “Or via the ntfy app”. This is available if the administrator has turned on notifications.')}</li>
+    <li>{@html t('<b>New for you this week</b> – on Mondays a short message with what is new in your discoveries or your album of the week.')}</li>
   </Bullets>
   <p>{t('Changes apply right away – your playlists adjust by themselves. The more you listen, the better Tuttiphon knows your taste, even without you entering anything.')}</p>
 {/snippet}

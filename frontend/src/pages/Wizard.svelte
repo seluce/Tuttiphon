@@ -15,7 +15,7 @@
   import PersonAvatar from '../components/PersonAvatar.svelte'
   import StepFinish from './wizard/StepFinish.svelte'
   import { showChosen } from '../components/Seg.svelte'
-  import { S, findPerson, findWelt, findStil, defaultPerson, weltIds, soundOf, ownPersons, isAdmin, snapshot, changed, MOODS } from '../lib/state.svelte.js'
+  import { S, findPerson, findWelt, findStil, defaultPerson, outOfAll, weltIds, soundOf, ownPersons, isAdmin, snapshot, changed, MOODS } from '../lib/state.svelte.js'
   import { toast } from '../lib/overlay.svelte.js'
   import { go } from '../lib/router.svelte.js'
   import { api } from '../lib/api.js'
@@ -134,7 +134,8 @@
   // vibe
   const stilGroups = $derived([...new Set([...GROUPS, ...S.config.stile.map((s) => s.group || 'Sonstiges')])]   // i18n-ignore: group name
     .map((g) => [g, S.config.stile.filter((s) => (s.group || 'Sonstiges') === g)]).filter(([, st]) => st.length))   // i18n-ignore: group name
-  const separate = $derived(S.config.welten.filter((w) => w.separate).map((w) => w.name))
+  const separate = $derived(outOfAll(findPerson(d.person)).map((w) => w.name))
+  const child = $derived(!!findPerson(d.person)?.child)
 
   let created = false
   function create() {
@@ -201,7 +202,9 @@
           </div>
           <div class="pbody">
             <b>{t('The whole library')}</b>
-            <span class="muted small">{separate.length ? tn(separate.length, 'without the world “{list}”', 'without the worlds “{list}”', { list: separate.join(', ') }) : t('without separate worlds')}</span>
+            {#if separate.length || !child}
+              <span class="muted small">{separate.length ? tn(separate.length, 'without the world “{list}”', 'without the worlds “{list}”', { list: separate.join(', ') }) : t('without separate worlds')}</span>
+            {/if}
           </div>
         </button>
         {#each sorted as w (w.id)}

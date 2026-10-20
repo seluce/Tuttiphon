@@ -194,7 +194,7 @@ def _favorites(cfg, lib, ctx, person, topic, today):
 def _review(cfg, lib, person, topic, today):
     from . import rules
     from .mixer import mix_day
-    mine = [p for p in cfg["playlists"] if p.get("review") and p.get("person") == person["id"]
+    mine = [p for p in cfg["playlists"] if p.get("review") and _of(cfg, p) == person["id"]
             and p.get("status", "aktiv") == "aktiv" and (p["review"].get("period") or "month") == "month"]
     if not mine:
         return 0
@@ -203,41 +203,83 @@ def _review(cfg, lib, person, topic, today):
         return 0
     p = mine[0]
     name = rules.review_name(cfg, p, day)
-    return int(once(f"review|{person['id']}|{day:%Y-%m}", lambda: deliver(
-        _s("{name} is here", name=name), _s("Your most played songs of last month – now in Symfonium."), ("calendar",),
-        f"#/playlist/{p['id']}", cfg, topic=topic, accounts=[person.get("user")], tag=f"review-{p['id']}")))
+    title, text = _s("{name} is here", name=name), _s("Your most played songs of last month – now in Symfonium.")
+    return _to_person(f"review|{person['id']}|{day:%Y-%m}", f"reviewpush|{{account}}|{day:%Y-%m}", title, text,
+                      ("calendar",), f"#/playlist/{p['id']}", cfg, person, topic, tag=f"review-{p['id']}")
 
 
-def _weekly(cfg, lib, person, topic, today):
-    """Monday: what is new for the person this week – "Discovered for you" and the album of the week, as written for
-    this week (state/mixes.json). Once per person and week; not later in the week (e.g. when first set up)."""
+def _of(cfg, playlist):
+    """Id of the person a playlist is for (without "person": the default person)."""
+    return playlist.get("person") or cfg["settings"].get("defaultPerson")
+
+
+def _to_person(key, device_key, title, text, tags, path, cfg, person, topic, tag):
+    """A message to one person: their ntfy topic once per `key`, the devices of their account once per `device_key`
+    ("{account}" filled in) – so the devices get it once, even if several people share the account. -> 1/0"""
+    from . import webpush
+
+    def go():
+        ok = bool(topic) and send(topic, title, text, tags, path, cfg)
+        account = (person.get("user") or "").lower()
+        if account:
+            ok = once(device_key.format(account=account),
+                      lambda: webpush.send_to(title, text, path, accounts=[account], tag=tag)) or ok
+        return ok
+    return int(once(key, go))
+
+
+def _weekly_parts(cfg, lib, person, start, state, index):
+    """What is new for a person this week: [(playlist, text)] – "Discovered for you" first, then the album of the week,
+    each only if it renews weekly and was written for this week."""
     from . import mixer, rules
-    day = mixer.mix_day()
-    if day.weekday() > 1:   # Monday, Tuesday as a fallback if the Monday run did not happen
-        return 0
-    mine = [p for p in cfg["playlists"] if p.get("person") == person["id"] and p.get("status", "aktiv") == "aktiv"
-            and (p.get("unheard") or p.get("album"))]
-    if not mine:
-        return 0
-    start = mixer.period_start("week", day)
-    state = mixer._load_state()
-    index = lib.index_of()
-    parts, first = [], None
-    for p in sorted(mine, key=lambda p: not p.get("unheard")):   # discovered first, then the album
+    mine = [p for p in cfg["playlists"] if _of(cfg, p) == person["id"] and p.get("status", "aktiv") == "aktiv"
+            and (p.get("unheard") or p.get("album")) and mixer.options(p).get("every") == "week"]
+    out = []
+    for p in sorted(mine, key=lambda p: not p.get("unheard")):
         saved = state.get(p["id"]) or {}
         ids = [sid for sid in saved.get("ids") or [] if sid in index]
         if saved.get("day") != start.isoformat() or not ids:
             continue   # not written for this week (yet)
-        first = first or p
+        name = rules.playlist_name(cfg, p)
         if p.get("album"):
             s = lib.songs[index[ids[0]]]
-            parts.append(_s("Album of the week: {artist} – {album}", artist=lib._main_artist(s) or "?", album=s.get("album") or "?"))
+            out.append((p, _s("{name}: {artist} – {album}", name=name, artist=s.get("displayAlbumArtist") or lib._main_artist(s) or "?",
+                              album=s.get("album") or "?")))
         else:
-            parts.append(_sn(len(ids), "{name}: {n} song you have never heard", "{name}: {n} songs you have never heard",
-                             name=rules.playlist_name(cfg, p)))
+            out.append((p, _sn(len(ids), "{name}: {n} song you have never heard", "{name}: {n} songs you have never heard",
+                               name=name)))
+    return out
+
+
+def _weekly(cfg, lib, person, topic, today):
+    """Monday: what is new for the person this week – "Discovered for you" and the album of the week, as written for
+    this week (state/mixes.json). Once per person and week; the devices of an account once per week with what is new
+    for all its people. Not later in the week (e.g. when first set up)."""
+    from . import mixer, webpush
+    day = mixer.mix_day()
+    if day.weekday() > 1:   # Monday, Tuesday as a fallback if the Monday run did not happen
+        return 0
+    start = mixer.period_start("week", day)
+    state = mixer._load_state()
+    index = lib.index_of()
+    parts = _weekly_parts(cfg, lib, person, start, state, index)
     if not parts:
         return 0
     year, week, _wd = start.isocalendar()
-    return int(once(f"weekly|{person['id']}|{year}-{week}", lambda: deliver(
-        _s("New for you this week"), " · ".join(parts), ("sparkles",), f"#/playlist/{first['id']}", cfg, topic=topic,
-        accounts=[person.get("user")], tag=f"weekly-{person['id']}")))
+    title = _s("New for you this week")
+    account = (person.get("user") or "").lower()
+
+    def go():
+        ok = bool(topic) and send(topic, title, " · ".join(t for _p, t in parts), ("sparkles",),
+                                  f"#/playlist/{parts[0][0]['id']}", cfg)
+        if account:   # the devices of the account: once, with what is new for each of its people
+            default = cfg["settings"].get("defaultPerson")
+            same = sorted((x for x in cfg["personen"] if (x.get("user") or "").lower() == account),
+                          key=lambda x: x["id"] == default)
+            every = [pt for x in same for pt in (parts if x["id"] == person["id"]
+                                                  else _weekly_parts(cfg, lib, x, start, state, index))]
+            ok = once(f"weeklypush|{account}|{year}-{week}", lambda: webpush.send_to(
+                title, " · ".join(t for _p, t in every), f"#/playlist/{every[0][0]['id']}", accounts=[account],
+                tag=f"weekly-{account}")) or ok
+        return ok
+    return int(once(f"weekly|{person['id']}|{year}-{week}", go))

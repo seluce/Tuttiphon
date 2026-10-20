@@ -278,9 +278,9 @@ to show the field for their own topic.
 | `likes.welten` / `likes.stile` / `likes.artists` | lists | favorite worlds, vibes and bands: basis for suggestions, radio and “You’re still missing” |
 | `dislikes.artists` / `dislikes.genres` | lists | dislikes: left out of every playlist of this person |
 | `clean` | boolean | kid-safe mode: songs with explicit lyrics are left out of all playlists and mixes of the person (`rules.clean_rules()`, [Intelligence](06-intelligence.md#lyrics-search-and-kid-safe-mode)) |
-| `push` | string | own ntfy topic for notifications (`[A-Za-z0-9_-]{1,64}`): news from the favorite bands, monthly recap ([Operations](08-operations.md#notifications)); other accounts never see it. Notifications via the app need no topic – there the account's devices count (`state/push.json`) |
-| `child` | boolean | child profile – only the administrator sets it: the children's music belongs to the whole library for this person ([Playlists](04-playlists.md#music-world-welt)), kid-safe mode is always on (`config.normalize_persons()` sets `clean` when saving), no card or hint to keep children's music out of the taste. A further profile a user creates on the same account gets it too |
-| `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. Other people on the same account (the family) keep them ([Intelligence](06-intelligence.md#taste-per-person)). Users set it for their own people |
+| `push` | string | own ntfy topic for notifications (`[A-Za-z0-9_-]{1,64}`): news from the favorite bands, new for you this week, monthly recap ([Operations](08-operations.md#notifications)); other accounts never see it. Notifications via the app need no topic – there the account's devices count (`state/push.json`) |
+| `child` | boolean | child profile – only the administrator sets it: the children's music belongs to the whole library for this person ([Playlists](04-playlists.md#music-world-welt)), kid-safe mode is always on – for every profile of its account (`config.normalize_persons()` sets `clean` when loading and saving) –, `tasteExclude` has no effect, no card or hint to keep children's music out of the taste. A further profile a user creates on the same account gets it too |
+| `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. Other people on the same account (the family) keep them, and so do the family playlists ([Intelligence](06-intelligence.md#taste-per-person)). No effect on a child profile. Users set it for their own people; ids of worlds that no longer exist are removed when the configuration is loaded or saved |
 
 Several people may share the same account (e.g. a personal profile and the shared family).
 
@@ -467,7 +467,7 @@ recognized rules instead of the rule fields; if Tuttiphon recognizes nothing, th
 |---|---|
 | `file` | file name in the playlist folder (`.nsp` or `.m3u`). The `playlists` step assigns it (`settings.filePrefix` + name, with ` (2)` … if the name is taken) and enters it via `update_config()`. It stays the same when the playlist is renamed – that's how Navidrome recognizes the playlist. If the kind changes (smart ↔ mix), a new file is created |
 | `takeover` | `{original, date, backup}`: file and day of the takeover; `backup` is `null` until the `playlists` step has copied the original to `backup/` (then it holds the file name of the backup) – on the first overwrite or, if the playlist was paused or moved to the trash before that, before the step removes the file |
-| `cover` | designed or custom cover: `{style, sig, nid, at, rev}`. `style` = `format` (cover of the format), `mosaik` (mosaic), `band`, `farbe` (color), `album`, `eigenes` (custom) or `none` (a format whose cover was removed – it does not get it again); `auto: true` = the format cover was set by itself ([Covers](04-playlists.md#covers-appcoverspy)); `sig` = fingerprint of the image material (for automatic renewal), `nid` = Navidrome ID of the playlist at upload, `at` = date, `rev` = timestamp (seconds). With `eigenes`: `style`, `at`, `rev` and `nid` (the copy is in `state/eigene-cover/`) |
+| `cover` | designed or custom cover: `{style, sig, nid, at, rev}`. `style` = `format` (cover of the format), `mosaik` (mosaic), `band`, `farbe` (color), `album`, `eigenes` (custom), `navidrome` (an image set in Navidrome itself – left alone) or `none` (a format whose cover was removed – it does not get it again); `auto: true` = the format cover was set by itself, `img` = the image name Navidrome reported after the last upload ([Covers](04-playlists.md#covers-appcoverspy)); `sig` = fingerprint of the image material (for automatic renewal), `nid` = Navidrome ID of the playlist at upload, `at` = date, `rev` = timestamp (seconds). With `eigenes`: `style`, `at`, `rev` and `nid` (the copy is in `state/eigene-cover/`) |
 
 On save, the server takes these three fields from its own state (see
 [Saving from the interface](#saving-from-the-interface)). A new playlist may bring `file` along (e.g. after
@@ -609,7 +609,8 @@ flowchart TD
   own people (or the newly created own profile), the playlists of their own people (create, change, delete –
   without `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName`, which only the server and administrators set)
   and `dismissed`/`ignored` into `accounts.<account>`. `child` is never taken from a user (only the administrator
-  sets it); as with `clean`, a new own profile on the account of a child profile gets it. Settings, music worlds, vibes and other people's playlists
+  sets it); as with `clean`, a new own profile on the account of a child profile gets it. The song preview for users
+  (`web._preview_config()`) keeps `clean` from the server as well. Settings, music worlds, vibes and other people's playlists
   stay as they are. What `/api/config` delivers to users and why: [Security](07-security.md).
 
 ## .env – credentials

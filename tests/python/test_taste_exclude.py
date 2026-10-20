@@ -8,7 +8,7 @@ import datetime as dt
 import unittest
 from unittest import mock
 
-from app import auth, config, listenclock, suggest, taste
+from app import auth, config, listenclock, mixer, rules, suggest, taste
 from app.rules import Library
 from tests.python.factory import base_config, song
 
@@ -52,6 +52,42 @@ class ScoresTest(unittest.TestCase):
         self.assertFalse({a for a, _s in mine["artists"]} & {"Band A", "Band B"})
         self.assertEqual(taste.excluded(jonas), ("kinder",))
         self.assertEqual(taste.excluded({"tasteExclude": ["b", "a", "a", 5]}), ("a", "b"))
+
+
+    def test_child_share_counts_each_song_once_without_audio_plays(self):
+        self.cfg["welten"].append({"id": "hoerspiel", "name": "Hörspiele", "artists": ["Band A"], "separate": True,
+                                   "scene": "hoerspiel"})   # half of the children's songs are "audio plays" too
+        with mock.patch.object(taste, "_person_lib", lambda cfg, base, user: base):
+            prof = taste.profile(self.cfg, self.lib, "Jonas", TODAY)
+        shares = dict(prof["welten"])
+        self.assertGreater(shares["hoerspiel"], 0)
+        self.assertAlmostEqual(prof["childShare"], shares["kinder"], places=3)   # not kinder + hoerspiel
+
+    def test_family_mix_keeps_the_owners_exclusion(self):
+        self.cfg["personen"][1]["tasteExclude"] = ["kinder"]
+        self.cfg["personen"].append({"id": "jonas-fam", "name": "Familie Jonas", "user": "jonas", "public": True})
+        p = {"id": "fm", "person": "jonas", "welt": "*", "stil": "*", "type": "mix", "together": ["jonas-fam", "oma"],
+             "mix": {"every": "week"}}
+        seen = []
+        with mock.patch.object(taste, "for_person", lambda cfg, base, person, today=None: seen.append(person["id"])), \
+                mock.patch.object(mixer, "person_lib", lambda cfg, playlist, base: base):
+            mixer.pick(self.cfg, self.lib, p, rules.build_nsp(self.cfg, p, rules.BuildContext(self.lib, TODAY)), TODAY)
+        self.assertIn("jonas", seen)          # the playlist's own person – with its exclusion
+        self.assertNotIn("jonas-fam", seen)   # not the other profile of the same account
+
+    def test_family_suggestions_keep_the_children_music(self):
+        self.cfg["personen"][1]["tasteExclude"] = ["kinder"]
+        self.cfg["personen"][1]["likes"]["welten"] = []   # only from listening
+
+        def profile(cfg, base, user, today=None, exclude=()):
+            plays_kids = (user or "").lower() == "jonas" and "kinder" not in exclude   # only the parent's account
+            welten = [["metal", 0.4]] + ([["kinder", 0.4]] if plays_kids else [])
+            return {"enough": True, "welten": welten, "artists": [], "childShare": 0.0}
+        with mock.patch.object(taste, "profile", profile), mock.patch.object(taste, "_person_lib", lambda cfg, base, user: base), \
+                mock.patch("app.listenclock.morning_of", lambda *a, **k: None):
+            out = suggest.suggestions(self.cfg, self.lib, today=TODAY)
+        family = next(x for x in out if x["playlist"].get("together") and x["playlist"].get("name") != "Car ride")
+        self.assertIn("kinder", family["playlist"]["welt"])   # the parent's account plays it for the family
 
 
 class MorningTest(unittest.TestCase):

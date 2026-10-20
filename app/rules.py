@@ -294,12 +294,16 @@ def playlist_name(cfg, playlist):
 SPOKEN_SCENE = "hoerspiel"   # audio plays & audiobooks: never part of "all", not even on a child profile
 
 
+def child_candidates(cfg):
+    """The children's music: every separate music world except audio plays & audiobooks (they do not belong in a
+    music mix)."""
+    return {w["id"] for w in cfg["welten"] if w.get("separate") and w.get("scene") != SPOKEN_SCENE}
+
+
 def child_worlds(cfg, person):
     """Separate music worlds that belong to "all" for this person: on a child profile (person.child) the children's
-    music – every separate world except audio plays & audiobooks, which do not belong in a music mix –, otherwise none."""
-    if not (person or {}).get("child"):
-        return set()
-    return {w["id"] for w in cfg["welten"] if w.get("separate") and w.get("scene") != SPOKEN_SCENE}
+    music (child_candidates()), otherwise none."""
+    return child_candidates(cfg) if (person or {}).get("child") else set()
 
 
 def describe(cfg, playlist):

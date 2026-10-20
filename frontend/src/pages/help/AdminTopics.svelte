@@ -116,7 +116,7 @@
 {#snippet cover()}
   <p>{@html t('On the playlist page, tap “…” and then “Cover”. You can choose a <b>mosaic</b> of four album covers, a <b>band photo</b>, a <b>gradient</b> with round band photos or the <b>album cover</b> – each with a preview. Or upload <b>your own picture</b>; large phone photos are scaled down automatically.')}</p>
   <p>{t('Tuttiphon renews designed covers on its own when the playlist changes – for mixes, with every new selection. Your own pictures stay as they are. “Navidrome default” removes the cover again.')}</p>
-  <p>{@html t('<b>Formats bring their own cover:</b> discovered, album of the week, good morning, your sound and the other formats get a cover of their own by themselves – the same look every week, so they are easy to spot in Symfonium. A picture set in Navidrome stays; after “Navidrome default” it does not come back.')}</p>
+  <p>{@html t('<b>Formats bring their own cover:</b> discovered, album of the week, good morning, your sound and the other formats get a cover of their own by themselves – the same look every week, so they are easy to spot in Symfonium. A picture you set in Navidrome itself stays; after “Navidrome default” the format cover does not come back.')}</p>
 {/snippet}
 
 {#snippet entdecken()}
@@ -168,7 +168,7 @@
   <p>{@html t('<b>Not part of the taste:</b> if children’s music plays on a parent’s account, switch it on in their profile under “Not part of … taste”. Then their discoveries, album of the week and mixes follow their own music; the family person on the same account keeps it. “To review” points it out when a lot of it is played.')}</p>
   <p>{@html t('<b>Kid-safe mode:</b> in a person’s profile you can turn on “Leave out songs with explicit lyrics”. This applies to all their playlists and mixes – it leaves out songs detected from the lyrics and songs tagged as explicit in the file; songs found by their lyrics can be allowed under <a class="link" href="#/einstellungen/lyrics">Settings → Lyrics</a>, where the list of detected songs is.')}</p>
   <p>{@html t('<b>Child profile:</b> if a child has an account of their own, switch on “Child profile” in the kid-safe card of their profile. Then children’s music belongs to their whole library – discoveries, album of the week and their own sound include it –, and kid-safe mode stays on. Only you can change it; “To review” asks when an account plays mostly children’s music.')}</p>
-  <p>{@html t('<b>To your phone:</b> when notifications are on, each person turns on their devices in their profile and gets news from their favorite bands and the monthly recap, directly through the app. Alternatively, it works through their own ntfy topic.')}</p>
+  <p>{@html t('<b>To your phone:</b> when notifications are on, each person turns on their devices in their profile and gets news from their favorite bands, what is new for them each Monday and the monthly recap, directly through the app. Alternatively, it works through their own ntfy topic.')}</p>
   <p>{@html t('With their own sign-in, everyone maintains their own profile – more under <a class="link" href="#/hilfe/konten">Users & sign-in</a>.')}</p>
 {/snippet}
 
@@ -265,8 +265,7 @@
     <li><span>{@render withUi(t('Under “Via ntfy”, enter your own topic and {test}.'), { test: ['', t('Send test')] })}</span></li>
     <li><span>{t('Subscribe to the same topic in the ntfy app. With Tuttiphon’s address set, tapping the message opens the matching page right away.')}</span></li>
   </Steps>
-  <p>{t('On Mondays, “New for you this week” tells each person what is new in their discoveries and their album of the week.')}</p>
-  <p>{t('You get failed runs, processed new music and newly classified bands; which of them is set under “What to notify about?”. Each person gets news from their favorite bands and the monthly recap – on their devices or via their own ntfy topic from the profile. Anyone who knows an ntfy topic can read along – on your own server an access token protects it, as NTFY_TOKEN in the .env or in docker-compose.')}</p>
+  <p>{t('You get failed runs, processed new music and newly classified bands; which of them is set under “What to notify about?”. Each person gets news from their favorite bands, what is new for them each Monday and the monthly recap – on their devices or via their own ntfy topic from the profile. Anyone who knows an ntfy topic can read along – on your own server an access token protects it, as NTFY_TOKEN in the .env or in docker-compose.')}</p>
 {/snippet}
 
 {#snippet einstellungen()}

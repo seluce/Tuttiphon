@@ -147,6 +147,9 @@ def settings_key(cfg, playlist):
         parts.append(extra)
     if person.get("child"):   # a child profile: children's music belongs to "all" – pick anew right away
         parts.append({"child": True})
+    from .taste import excluded
+    if excluded(person):   # music worlds kept out of the taste: pick anew right away, not only next week
+        parts.append({"tasteExclude": list(excluded(person))})
     raw = json.dumps(parts, sort_keys=True, ensure_ascii=False, default=str)
     return hashlib.sha1(raw.encode()).hexdigest()[:16]
 
@@ -514,7 +517,11 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
         never = _never(base, plib, [u for u in dict.fromkeys([user] + [x.get("user") for x in members]) if u])   # protection: everyone
         together = rules.together_of(cfg, playlist)   # taste: only with consent
         person = rules.person_of(cfg, playlist) or {}
-        tasters = list({(x.get("user") or "").lower(): x for x in [person] + together if x.get("user")}.values())
+        tasters = {}   # one per account – the playlist's own person first (with its own exclusion)
+        for x in [person] + together:
+            if x.get("user"):
+                tasters.setdefault(x["user"].lower(), x)
+        tasters = list(tasters.values())
         if never:
             pool = frozenset(i for i in pool if plib.songs[i]["id"] not in never)
         adjust = dict(feedback.factors(user, today))

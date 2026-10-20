@@ -157,10 +157,10 @@ export const GUIDES = translated(() => [
     keys: t('ntfy push message phone notification app device'),
     steps: (c) => c.admin ? [
       { go: '#/einstellungen/benachrichtigungen', sel: ['[data-guide=notify]'], title: t('Turn on'), text: t('Turn on notifications and tap “Turn on for this device” on the phone. Alternatively it also works via ntfy.') },
-      { title: t('For everyone'), text: t('Each person turns on their devices in the profile under “To your phone” and gets news from their favorite bands and their monthly recap there.') },
+      { title: t('For everyone'), text: t('Each person turns on their devices in the profile under “To your phone” and gets news from their favorite bands, what is new for them each Monday and their monthly recap there.') },
     ] : !c.profile ? [noProfile()] : [
       { go: c.profile, sel: ['[data-guide=push]'], title: t('On this device'), text: t('Open Tuttiphon on the phone, tap “Turn on for this device” and allow notifications.') },
-      { title: t('Done'), text: t('Then news from your favorite bands and your monthly recap come to your phone. If you prefer the ntfy app, open “Or via the ntfy app” below and enter a topic.') },
+      { title: t('Done'), text: t('Then news from your favorite bands, what is new for you each Monday and your monthly recap come to your phone. If you prefer the ntfy app, open “Or via the ntfy app” below and enter a topic.') },
     ],
   },
   {

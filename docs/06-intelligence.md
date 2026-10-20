@@ -864,11 +864,21 @@ other world can be added from a list. **Hint** (`suggest.taste_hints()`): if a s
 yet, “To review” says so once per person and world (`taste-world|<person>|<world>`, “Set it” opens the profile).
 
 **A child's own account.** For a child, children's music *is* the own taste. A child profile (`person.child`, set only
-by the administrator, [Playlists](04-playlists.md#music-world-welt)) gets neither the card nor the hint. Before it is
-marked: if the separate worlds not yet excluded make up at least half of what the account plays together
-(`CHILD_HINT_SHARE`), it is probably a child – then only the administrator's “To review” asks “Is <name> a child?”
-(`child|<person>`) with “Child profile” (sets `child` and `clean`) and “Keep it out” (opens the profile, for a parent);
-users get no hint then, so a child is never told to keep its own music out.
+by the administrator, [Playlists](04-playlists.md#music-world-welt)) gets neither the card nor the hint, and
+`taste.excluded()` returns nothing for it – an exclusion from before has no effect. Before it is marked: `profile()`
+also returns `childShare`, the share of what the account plays that falls into the children's music
+(`rules.child_candidates()`: separate worlds except audio plays & audiobooks), each song once even if it is in several
+worlds. From half (`CHILD_HINT_SHARE`) it is probably a child – unless the person already keeps children's music out
+(then it is a parent) –: only the administrator's “To review” asks “Is <name> a child?” (`child|<person>`) with “Child
+profile” (sets `child` and `clean`) and “Keep it out” (opens the profile, for a parent); nobody gets a hint to keep
+music out then, so a child is never told to keep its own music out. Below half the hint per world stays; for
+children's music the administrator's hint also offers “Child profile”.
+
+**Family playlists keep it.** The exclusion is about one person's taste only. For the family suggestions (“What
+everyone likes”, car ride) the worlds come from everything an account plays (`suggest.played_worlds()`: the profile
+without exclusion), so the children's music on a parent's account stays in the family's music. In a family mix each
+account counts once – with the playlist's own person first (its exclusion), not another profile of the same account.
+`mixer.settings_key()` contains the exclusion (only when set), so a mix is picked anew right away when it changes.
 
 ### Sound taste (`app/soundtaste.py`)
 

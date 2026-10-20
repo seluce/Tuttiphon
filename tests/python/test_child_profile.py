@@ -55,28 +55,38 @@ class AllTest(unittest.TestCase):
 
 
 class HintTest(unittest.TestCase):
-    def hints(self, cfg, welten, **kw):
-        prof = {"enough": True, "welten": welten, "artists": []}
+    def hints(self, cfg, welten, child_share=0.0, **kw):
+        prof = {"enough": True, "welten": welten, "artists": [], "childShare": child_share}
         with mock.patch.object(taste, "profile", lambda *a, **k: prof):
             return suggest.taste_hints(cfg, Library([]), **kw)
 
     @env.german
-    def test_mostly_separate_worlds_ask_the_administrator(self):
+    def test_mostly_children_music_asks_the_administrator(self):
         cfg, _lib = setup()
-        mostly = [["kinder", 0.4], ["hoerspiel", 0.25], ["metal", 0.2]]
-        got = {x[0]: x for x in self.hints(cfg, mostly)}
+        mostly = [["kinder", 0.45], ["hoerspiel", 0.3], ["metal", 0.2]]
+        got = {x[0]: x for x in self.hints(cfg, mostly, 0.55)}
         hint = got["child|jonas"]
         self.assertEqual(hint[2], "Ist Jonas ein Kind?")
-        self.assertIn("65 %", hint[3])
+        self.assertIn("55 %", hint[3])   # each song once, without the audio plays
         self.assertIn("„Kinder“", hint[3])
         self.assertEqual([a["do"] for a in hint[4]], ["childProfile", "goto"])
         self.assertFalse(any(k.startswith("taste-world|jonas") for k in got))   # not both
-        self.assertEqual(self.hints(cfg, mostly, only_persons={"jonas"}), [])   # the child itself is never told
+        self.assertEqual(self.hints(cfg, mostly, 0.55, only_persons={"jonas"}), [])   # the account itself: no hint
         cfg["personen"][1]["child"] = True
-        self.assertFalse(any("jonas" in x[0] for x in self.hints(cfg, mostly)))  # a child profile: nothing at all
-        cfg["personen"][1]["child"] = False
-        part = self.hints(cfg, [["kinder", 0.3], ["metal", 0.5]], only_persons={"jonas"})
-        self.assertEqual([x[0] for x in part], ["taste-world|jonas|kinder"])   # a parent: as before
+        self.assertFalse(any("jonas" in x[0] for x in self.hints(cfg, mostly, 0.55)))  # a child profile: nothing at all
+
+    def test_a_parent_and_audiobooks(self):
+        cfg, _lib = setup()
+        part = self.hints(cfg, [["kinder", 0.3], ["metal", 0.5]], 0.3, only_persons={"jonas"})
+        self.assertEqual([x[0] for x in part], ["taste-world|jonas|kinder"])   # a parent: the taste hint
+        self.assertEqual([a["do"] for a in part[0][4]], ["goto"])
+        admin = {x[0]: x for x in self.hints(cfg, [["kinder", 0.3], ["metal", 0.5]], 0.3)}
+        self.assertEqual([a["do"] for a in admin["taste-world|jonas|kinder"][4]], ["goto", "childProfile"])   # or a child
+        books = {x[0]: x for x in self.hints(cfg, [["hoerspiel", 0.6], ["metal", 0.4]], 0.0)}
+        self.assertNotIn("child|jonas", books)                                    # audio books do not make a child
+        self.assertEqual([a["do"] for a in books["taste-world|jonas|hoerspiel"][4]], ["goto"])
+        cfg["personen"][1]["tasteExclude"] = ["kinder"]                           # decided: a parent
+        self.assertFalse(any(k == "child|jonas" for k, *_r in self.hints(cfg, [["kinder", 0.7]], 0.7)))
 
 
 class SettingTest(unittest.TestCase):
@@ -89,6 +99,27 @@ class SettingTest(unittest.TestCase):
         bad["personen"][1]["child"] = "ja"
         with self.assertRaises(ValueError):
             config.validate_config(bad)
+
+    def test_kid_safe_mode_for_the_whole_account_and_old_exclusions(self):
+        cfg = base_config()
+        cfg["personen"].append({"id": "jonas-2", "name": "Noch ich", "user": "jonas"})   # an older second profile
+        cfg["personen"][1].update(child=True, tasteExclude=["kinder", "weg"])
+        out = config.normalize_persons(copy.deepcopy(cfg))
+        self.assertTrue(out["personen"][-1]["clean"])                      # kid-safe mode for the whole account
+        self.assertNotIn("clean", out["personen"][3])                      # others stay as they are
+        self.assertEqual(out["personen"][1]["tasteExclude"], ["kinder"])   # worlds that no longer exist go
+        self.assertEqual(taste.excluded(cfg["personen"][1]), ())            # a child: children's music is its taste
+
+    def test_preview_keeps_kid_safe_mode(self):
+        from app import web
+        cfg = base_config()
+        cfg["personen"][1].update(child=True, clean=True)
+        sent = copy.deepcopy(cfg)
+        sent["personen"][1].update(child=False, clean=False)   # what a child's browser might send
+        with mock.patch.object(web.auth, "current", lambda: JONAS), mock.patch.object(web, "load_config", lambda: copy.deepcopy(cfg)):
+            out = web._preview_config(sent)
+        jonas = next(p for p in out["personen"] if p["id"] == "jonas")
+        self.assertEqual((jonas["clean"], jonas["child"]), (True, True))
 
     def test_only_the_administrator_sets_it(self):
         cfg = base_config()

@@ -182,7 +182,8 @@ def morning_taste(cfg, base, plib, user, today=None, exclude=()):
     if not info or stamp is None:
         return None
     today = today or dt.date.today()
-    key = ("taste", user.lower(), today, stamp, tuple(sorted(info["songs"].items()))[:50], len(plib.songs))
+    key = ("taste", user.lower(), today, stamp, tuple(sorted(set(exclude or ()))), tuple(sorted(info["songs"].items())),
+           len(plib.songs))
     with _lock:
         if key in _memo:
             return _memo[key]

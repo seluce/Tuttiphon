@@ -26,7 +26,7 @@
   import Switch from '../Switch.svelte'
   import SoundPicker from '../SoundPicker.svelte'
   import { narrowsLibrary } from '../../lib/sound.svelte.js'
-  import { S, findPerson, defaultPerson, weltIds, changed, snapshot, findStil, findWelt, soundOf, mixWording,
+  import { S, findPerson, defaultPerson, outOfAll, weltIds, changed, snapshot, findStil, findWelt, soundOf, mixWording,
     ownPersons, isAdmin } from '../../lib/state.svelte.js'
   import { toast, confirmDialog } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
@@ -319,8 +319,8 @@
           </button>
         {/each}
       </div>
-      {#if !ids.length}
-        <div class="hint">{t('“All” = the whole library without {worlds}.', { worlds: S.config.welten.filter((w) => w.separate).map((w) => w.name).join(', ') || t('separate worlds') })}</div>
+      {#if !ids.length && (outOfAll(person).length || !person?.child)}
+        <div class="hint">{t('“All” = the whole library without {worlds}.', { worlds: outOfAll(person).map((w) => w.name).join(', ') || t('separate worlds') })}</div>
       {/if}
     </Field>
     <label class="f">{t('Vibe – what plays?')}

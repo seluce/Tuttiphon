@@ -20,7 +20,7 @@ from . import audio, auth, autowelten, i18n, backup, localadmin, classify, event
 from .i18n import N_, _, _s, _sn
 from .config import (CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, STATE_DIR,
                      WEB_DIR, ConfigDamaged, admin_password, env_var, environment, load_config, load_env, pass_key, paths, paths_info,
-                     rating_users, read_bytes, read_text, save_env, save_from_ui, update_config, user_password,
+                     normalize_persons, rating_users, read_bytes, read_text, save_env, save_from_ui, update_config, user_password,
                      weak_password, write_atomic)
 from .library import CACHE
 from .navidrome import Navidrome, NavidromeError
@@ -470,9 +470,11 @@ def _preview_config(sent):
             server = next((x for x in cfg["personen"] if x["id"] == p["id"]), None)
             if server:
                 mine[p["id"]] = {**server, **{k: p[k] for k in auth.PERSON_FIELDS if k in p}}
+                if server.get("clean"):   # as when saving: only the administrator turns kid-safe mode off
+                    mine[p["id"]]["clean"] = True
     cfg["personen"] = [mine.get(p["id"], p) if p["id"] in m["own"]
                        else {k: v for k, v in p.items() if k not in ("likes", "dislikes", "push")} for p in cfg["personen"]]
-    return cfg
+    return normalize_persons(cfg)
 
 
 def _guard_preview(body, cfg):
@@ -1571,12 +1573,17 @@ def api_cover_apply(body):
     data = covers.render(cfg, lib, p, style)
     native, np = _navidrome_playlist(p)
     covers.upload(native, np["id"], data)
-    sig = covers.signature(cfg, lib, p)
+    sig = covers.signature(cfg, lib, p, style)
+    try:   # the image Navidrome reports now – a later one set there by hand then stays
+        img = covers.image_name(native, np["id"])
+    except NavidromeError:
+        img = None
 
     def apply(fresh):
         for x in fresh["playlists"]:
             if x["id"] == p["id"]:
-                x["cover"] = {"style": style, "sig": sig, "nid": np["id"], "at": dt.date.today().isoformat(), "rev": int(time.time())}
+                x["cover"] = {"style": style, "sig": sig, "nid": np["id"], "at": dt.date.today().isoformat(), "rev": int(time.time()),
+                              **({"img": img} if img else {})}
     update_config(apply)
     return {"ok": True}
 

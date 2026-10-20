@@ -213,12 +213,23 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                 offer(p, score, rules.review_name(cfg, p, mix_day()), why, pid, because=_("From listening"), min_songs=20,
                       core=period == "month")
 
+    def played_worlds(x):
+        """Worlds a family member's account plays – for the family playlists everything, also what the person keeps
+        out of their own taste (the children's music on a parent's account stays in the family's music)."""
+        prof = profiles.get(x["id"]) or {}
+        if taste.excluded(x):
+            try:
+                prof = taste.profile(cfg, lib, x.get("user"), today) or prof
+            except Exception:   # noqa: BLE001 – suggestions must never fail because of one profile
+                pass
+        return [w for w, share in prof.get("welten", []) if share >= 0.08 and w in welten]
+
     def car_mix(owner, members):
         """Car ride: an hour from the family's worlds – with kids' songs, without songs for falling asleep, new every day."""
         wl = []
         for x in [owner] + members:
             wl += [w for w in (x.get("likes") or {}).get("welten", []) if w in welten]
-            wl += [w for w, share in profiles.get(x["id"], {}).get("welten", []) if share >= 0.08 and w in welten]
+            wl += played_worlds(x)
         wl = list(dict.fromkeys(wl))
         if not wl:
             return
@@ -317,7 +328,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         wl = []
         for x in [owner] + members:
             wl += [w for w in (x.get("likes") or {}).get("welten", []) if w in welten]
-            wl += [w for w, share in profiles.get(x["id"], {}).get("welten", []) if share >= 0.08 and w in welten]
+            wl += played_worlds(x)
         names = [x["name"] for x in members]
         add({"person": owner["id"], "welt": list(dict.fromkeys(wl)) or ALL, "stil": ALL, "type": "mix",
              "name": _s("What everyone likes"), "together": [x["id"] for x in members],
@@ -603,18 +614,21 @@ def duplicate_playlists(cfg):
 
 
 TASTE_HINT_SHARE = 0.2   # a separate world (children, audio plays …) with this share of what an account plays: hint
-CHILD_HINT_SHARE = 0.5   # separate worlds together with this share: probably a child's account – ask the administrator
+CHILD_HINT_SHARE = 0.5   # children's music with this share: probably a child's own account – ask the administrator
 
 
 def taste_hints(cfg, lib, only_persons=None):
     """"To review": a person's own account plays a lot from a separate music world (e.g. children's music for the kids)
-    that still counts for their taste – offer to keep it out (person.tasteExclude). If separate worlds make up most of
-    it (CHILD_HINT_SHARE), it may be a child's own account: only the administrator (only_persons None) is asked whether
-    it is a child profile – a child is never told to keep its own music out. Not for the shared person, not for child
-    profiles. -> [(key, level, title, text, actions)]"""
+    that still counts for their taste – offer to keep it out (person.tasteExclude); the administrator can also make it
+    a child profile. If children's music (rules.child_candidates(), each song once) makes up most of it
+    (CHILD_HINT_SHARE), it is probably a child's own account: then only the administrator (only_persons None) is
+    asked whether it is a child profile, and nobody gets a hint to keep music out. Not for the shared person, not for
+    child profiles. -> [(key, level, title, text, actions)]"""
     from . import taste
     default = cfg["settings"].get("defaultPerson")
     separate = {w["id"]: w for w in cfg["welten"] if w.get("separate")}
+    candidates = rules.child_candidates(cfg)
+    admin = only_persons is None
     out = []
     for p in cfg["personen"]:
         if not separate or not p.get("user") or p["id"] == default or p.get("child") \
@@ -627,28 +641,29 @@ def taste_hints(cfg, lib, only_persons=None):
         if not prof or not prof.get("enough"):
             continue
         left_out = set(taste.excluded(p))
-        shares = [(wid, share) for wid, share in prof.get("welten", []) if wid in separate and wid not in left_out]
-        total = min(1.0, sum(share for _wid, share in shares))
-        if total >= CHILD_HINT_SHARE:   # mostly children's music (and audio plays): a child or a parent?
-            if only_persons is None:
-                top = max(shares, key=lambda x: x[1])[0]
+        child = {"label": _("Child profile"), "do": "childProfile", "person": p["id"]}
+        if not candidates & left_out and (prof.get("childShare") or 0) >= CHILD_HINT_SHARE:
+            if admin:   # mostly children's music: a child or a parent? Only the administrator decides
+                top = max(((wid, share) for wid, share in prof.get("welten", []) if wid in candidates),
+                          key=lambda x: x[1], default=(None, 0))[0]
                 out.append((f"child|{p['id']}", "info", _("Is {name} a child?", name=p["name"]),
                             _("{pct} % of what this account plays is from separate music worlds such as “{world}”. For "
                               "a child, make it a child profile: then discoveries, album of the week and own sound "
                               "include children’s music, and kid-safe mode is on. If the account belongs to a parent, "
-                              "keep it out of the taste instead.", pct=round(total * 100), world=separate[top]["name"]),
-                            [{"label": _("Child profile"), "do": "childProfile", "person": p["id"]},
-                             {"label": _("Keep it out"), "do": "goto", "href": f"#/person/{p['id']}"}]))
+                              "keep it out of the taste instead.", pct=round(prof["childShare"] * 100),
+                              world=separate[top]["name"] if top else ""),
+                            [child, {"label": _("Keep it out"), "do": "goto", "href": f"#/person/{p['id']}"}]))
             continue
-        for wid, share in shares:
-            if share >= TASTE_HINT_SHARE:
+        for wid, share in prof.get("welten", []):
+            if wid in separate and wid not in left_out and share >= TASTE_HINT_SHARE:
                 out.append((f"taste-world|{p['id']}|{wid}", "info",
                             _("“{world}” counts for {name}’s taste", world=separate[wid]["name"], name=p["name"],
                               owner=possessive(p["name"])),
                             _("{pct} % of what this account plays is from “{world}”. If that plays for someone else, keep it "
-                              "out of the taste – then discoveries, album of the week and own sound follow the own music. "
-                              "The family playlists keep it.", pct=round(share * 100), world=separate[wid]["name"]),
-                            [{"label": _("Set it"), "do": "goto", "href": f"#/person/{p['id']}"}]))
+                              "out of the taste – then discoveries, album of the week and own sound follow the person’s own "
+                              "music. The family playlists keep it.", pct=round(share * 100), world=separate[wid]["name"]),
+                            [{"label": _("Set it"), "do": "goto", "href": f"#/person/{p['id']}"}]
+                            + ([child] if admin and wid in candidates else [])))
     return out
 
 

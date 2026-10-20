@@ -422,6 +422,7 @@ def load_config():
             _fill(cfg.setdefault("settings", {}), default_config()["settings"])
             for k in ("welten", "stile", "playlists", "personen", "dismissed", "ignored"):
                 cfg.setdefault(k, [])
+            normalize_persons(cfg)   # also for a config.json edited by hand
             _cfg_cache.update(key=key, cfg=cfg, damaged=None)
         return copy.deepcopy(_cfg_cache["cfg"])
 
@@ -531,10 +532,19 @@ def save_from_ui(incoming, keep_accounts=False):
 
 
 def normalize_persons(cfg):
-    """A child profile always has kid-safe mode."""
-    for p in cfg.get("personen") or []:
-        if isinstance(p, dict) and p.get("child") is True:
+    """A child profile always has kid-safe mode – and so does every other profile of its account (otherwise a second
+    profile would be a way around it). Music worlds that no longer exist leave tasteExclude."""
+    persons = [p for p in cfg.get("personen") or [] if isinstance(p, dict)]
+    account = lambda p: p["user"].lower() if isinstance(p.get("user"), str) and p["user"] else None   # noqa: E731
+    children = {account(p) for p in persons if p.get("child") is True and account(p)}
+    for p in persons:
+        if p.get("child") is True or account(p) in children:
             p["clean"] = True
+    worlds = {w.get("id") for w in cfg.get("welten") or [] if isinstance(w, dict)}
+    for p in persons:
+        te = p.get("tasteExclude")
+        if worlds and isinstance(te, list) and any(isinstance(w, str) and w not in worlds for w in te):
+            p["tasteExclude"] = [w for w in te if not isinstance(w, str) or w in worlds]
     return cfg
 
 

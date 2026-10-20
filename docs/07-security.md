@@ -440,7 +440,7 @@ Users may **change** only their own (`auth.own_playlist()`): `/api/snapshot`, `/
 playlist without `person` belongs to the default person – its account and admins may see and change it.
 
 Not filtered (they concern the whole library or shared data): `/api/library`, `/api/home`,
-`/api/matrix`, `/api/cover/styles`, `/api/changelog`, `/img/…`, `/live/…`, and in `/api/config` the music worlds and vibes. `POST /api/apply/now` (apply playlists right away) may deliberately be triggered by everyone
+`/api/matrix`, `/api/cover/styles` without `id` (with `id` it is checked like `_own_playlist_id()`), `/api/changelog`, `/img/…`, `/live/…`, and in `/api/config` the music worlds and vibes. `POST /api/apply/now` (apply playlists right away) may deliberately be triggered by everyone
 who is signed in – this is how users bring their own changes to Navidrome.
 
 Cached results (`_memoized()`) always contain the admin view; `api_playlists()` and

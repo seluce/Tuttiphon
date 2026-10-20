@@ -12,6 +12,7 @@ import hashlib
 import io
 import os
 import re
+import time
 
 from . import images, rules
 from .config import STATE_DIR, load_config, write_atomic
@@ -254,9 +255,10 @@ def format_kind(playlist):
         return "morning"
     if playlist.get("review"):
         return "review"
-    if playlist.get("together"):
+    whole = playlist.get("welt", rules.ALL) == rules.ALL   # per world (car ride, a world's favorites) the name counts
+    if playlist.get("together") and whole:
         return "together"
-    if playlist.get("fav"):
+    if playlist.get("fav") and whole:
         return "fav"
     if playlist.get("type") == "mix" and (playlist.get("mix") or {}).get("flavor") == "geschmack":
         return "sound"
@@ -320,7 +322,7 @@ def _format_cover(cfg, lib, playlist, pv, title, kind):
     else:
         rhythm = ""
     if kind == "album" and who:
-        rhythm = f"{who} · {rhythm}"
+        rhythm = f"{who} · {rhythm}" if rhythm else who
     # name: as big as fits in at most two lines, bottom left; above it the details, below the rhythm
     title = _clean(title)
     for size in (84, 74, 64, 56, 48, 42):
@@ -368,11 +370,24 @@ def format_title(cfg, playlist, name):
     return name   # own sound, your month: the name says it already
 
 
-def signature(cfg, lib, playlist):
-    """Changes when the cover material changes (for automatic renewal)."""
+def signature(cfg, lib, playlist, style=None):
+    """Changes when the cover material changes (for automatic renewal) – for the format cover also its texts (language,
+    for whom, rhythm)."""
     pv = rules.preview(cfg, lib, playlist, sample=1)
-    raw = "|".join(pv["covers"] + [str(a[2]) for a in pv["topArtists"][:4]] + [pv["name"], str(pv.get("color"))])
-    return hashlib.sha1(raw.encode()).hexdigest()[:12]
+    parts = pv["covers"] + [str(a[2]) for a in pv["topArtists"][:4]] + [pv["name"], str(pv.get("color"))]
+    if style == "format":
+        from .mixer import options
+        o = options(playlist)
+        parts += [str(x) for x in (format_kind(playlist), format_title(cfg, playlist, pv["name"]),
+                                   (rules.person_of(cfg, playlist) or {}).get("name"), cfg["settings"].get("defaultPerson"),
+                                   o.get("minutes"), o.get("every"), _s("new every day"))]
+    return hashlib.sha1("|".join(parts).encode()).hexdigest()[:12]
+
+
+def image_name(native, navidrome_id):
+    """The image Navidrome reports for a playlist (uploadedImage) – None if it does not report the field."""
+    np = next((x for x in native.playlists() if x.get("id") == navidrome_id), None)
+    return np.get("uploadedImage") or "" if np is not None and "uploadedImage" in np else None
 
 
 def sniff(data):
@@ -412,37 +427,71 @@ def upload(native, navidrome_id, data, ctype=None):
     native.upload_playlist_image(navidrome_id, data, filename=f"cover.{ext}", ctype=ctype)
 
 
-def refresh_auto(cfg, lib, native, by_file, log=print):
+def refresh_auto(cfg, lib, native, by_file, log=print, dropped=None):
     """Renew designed covers whose material has changed (e.g. a Daily Mix with a new selection). A format without a
     cover (default_style) gets its format cover – unless it has an image in Navidrome already; it is then noted in the
-    playlist as {"style": "format", "auto": true}. Removing it leaves {"style": "none"}: it does not come back."""
+    playlist as {"style": "format", "auto": true}. Removing it leaves {"style": "none"}: it does not come back.
+    After an upload the image Navidrome reports is kept (cover.img): if Navidrome later reports another one, it was set
+    there by hand and stays ({"style": "navidrome"}); none at all: it was removed there ("none"). A format cover on a
+    playlist that is no longer a format goes again (its id into `dropped`)."""
     changed = 0
+    uploaded = []
+    today = dt.date.today().isoformat()
     for p in cfg["playlists"]:
         cv = p.get("cover") or {}
         np = by_file.get(p.get("file") or "")
-        if p.get("status", "aktiv") == "aktiv" and cv.get("style") == "eigenes":
+        if p.get("status", "aktiv") != "aktiv" or not np:
+            continue
+        if cv.get("style") == "eigenes":
             changed += _restore_own(p, cv, np, native, log)
             continue
-        style = cv.get("style") or (default_style(p) if np and not np.get("uploadedImage") else None)
-        if p.get("status", "aktiv") != "aktiv" or style not in available_styles() or not np:
+        if cv.get("style") in STYLES and cv.get("img") and cv.get("nid") == np["id"] \
+                and np.get("uploadedImage", cv["img"]) != cv["img"]:   # changed in Navidrome itself: it stays
+            p["cover"] = {"style": "navidrome" if np.get("uploadedImage") else "none", "at": today,
+                          "rev": int(time.time()), "nid": np["id"]}
+            changed += 1
+            log(_s("  🖼 Cover changed in Navidrome – it stays: {name}", name=np.get("name")))
+            continue
+        if cv.get("style") == "format" and not format_kind(p):   # no longer a format: its cover goes again
+            try:
+                native.delete_playlist_image(np["id"])
+            except Exception:   # noqa: BLE001 – a cover must not stop the run
+                pass
+            p.pop("cover", None)
+            if dropped is not None:
+                dropped.add(p["id"])
+            changed += 1
+            continue
+        style = cv.get("style") or (default_style(p) if not np.get("uploadedImage") else None)
+        if style not in available_styles():
             continue
         try:
-            sig = signature(cfg, lib, p)
+            sig = signature(cfg, lib, p, style)
             if sig == cv.get("sig") and cv.get("nid", np["id"]) == np["id"]:
                 continue   # unchanged (and Navidrome has not created the playlist anew)
-            fresh = next((x for x in load_config()["playlists"] if x["id"] == p["id"]), {})
-            if (fresh.get("cover") or {}).get("style") != cv.get("style"):
-                continue   # another cover was chosen in the meantime
+            fresh = next((x for x in load_config()["playlists"] if x["id"] == p["id"]), None)
+            if fresh is None or (fresh.get("cover") or {}).get("style") != cv.get("style"):
+                continue   # deleted, or another cover was chosen in the meantime
             upload(native, np["id"], render(cfg, lib, p, style))
             if not cv:   # the format's own cover, the first time
-                cv = p["cover"] = {"style": style, "auto": True, "at": dt.date.today().isoformat()}
+                cv = p["cover"] = {"style": style, "auto": True, "at": today}
             cv["sig"], cv["nid"] = sig, np["id"]
+            cv.pop("img", None)
+            uploaded.append(cv)
             changed += 1
             log(_s("  🖼 Cover renewed: {name}", name=np.get('name')))
         except Exception as e:   # a cover must not stop the run
             log(_s("  ⚠ Cover for {name}: {error}", name=np.get('name'), error=e))
+    if uploaded:   # what Navidrome reports now – to notice later when the image is changed there by hand
+        try:
+            now = {x.get("id"): x for x in native.playlists()}
+            for cv in uploaded:
+                img = (now.get(cv["nid"]) or {}).get("uploadedImage")
+                if img:
+                    cv["img"] = img
+        except Exception:   # noqa: BLE001 – without it the image is only not recognized as changed by hand
+            pass
     try:   # clear away images of deleted playlists (freshly loaded, nothing just uploaded)
-        import time
         keep = {p["id"] for p in load_config()["playlists"] if (p.get("cover") or {}).get("style") == "eigenes"}
         for f in OWN_DIR.glob("*.img"):
             if f.stem not in keep and time.time() - f.stat().st_mtime > 3600:

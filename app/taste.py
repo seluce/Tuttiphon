@@ -18,6 +18,7 @@ parent's account): their songs count neither as liked nor as disliked – profil
 thus have a taste with them (the family person) and one without (the parent's own person).
 """
 import datetime as dt
+import json
 import math
 import threading
 from collections import Counter, defaultdict
@@ -34,7 +35,10 @@ _memo = {}
 
 
 def excluded(person):
-    """Music worlds the person keeps out of their taste (person.tasteExclude) – as a sorted tuple, part of cache keys."""
+    """Music worlds the person keeps out of their taste (person.tasteExclude) – as a sorted tuple, part of cache keys.
+    None on a child profile: there children's music is the own taste (an exclusion from before stays without effect)."""
+    if (person or {}).get("child"):
+        return ()
     return tuple(sorted({w for w in (person or {}).get("tasteExclude") or [] if isinstance(w, str)}))
 
 
@@ -45,7 +49,8 @@ def excluded_ids(cfg, plib, exclude, today=None):
     """Song indices of plib in the music worlds `exclude` (frozenset) – cached per song list, worlds and their rules."""
     if not exclude:
         return frozenset()
-    key = (ml.lib_key(plib), tuple(exclude), cfg_key(cfg))
+    worlds = json.dumps([w for w in cfg["welten"] if w["id"] in exclude], sort_keys=True, default=str)
+    key = (ml.lib_key(plib), tuple(exclude), worlds)   # the excluded worlds with all their rules
     with _lock:
         hit = _excl_memo.get(key)
     if hit is not None:
@@ -175,15 +180,20 @@ def _compute(cfg, plib, user, today, exclude=()):
     # music worlds: share of what was played that falls into the world
     ctx = rules.BuildContext(plib, today)
     welten = []
+    kids, candidates = set(), rules.child_candidates(cfg)
     for w in cfg["welten"]:
         block = rules.welt_block(w, ctx)
         if not block:
             continue
         ids = plib.ids({"any": block})
+        if w["id"] in candidates:
+            kids |= ids
         share = sum(sc for i, sc in pos.items() if i in ids) / total
         if share > 0:
             welten.append((w["id"], round(share, 4)))
     welten.sort(key=lambda x: -x[1])
+    # children's music together (each song once – a song can be in several worlds): is it a child's account?
+    child_share = round(sum(sc for i, sc in pos.items() if i in kids) / total, 4)
 
     # sound and mood (measurement + AI + Last.fm, as in the sound filters)
     feats = song_features(plib)
@@ -212,7 +222,7 @@ def _compute(cfg, plib, user, today, exclude=()):
     ssum = sum(styles.values()) or 1
     style_share = {k: round(v / ssum, 4) for k, v in styles.most_common(12)}
 
-    return {"user": user, "enough": True, "basis": basis, "artists": artists, "welten": welten[:8],
+    return {"user": user, "enough": True, "basis": basis, "artists": artists, "welten": welten[:8], "childShare": child_share,
             "disliked": [a for a, _ in disliked.most_common(10)], "sound": sound, "moods": mood_share,
             "styles": style_share, "measured": sum(wsum.values()) > 0}
 
