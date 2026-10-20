@@ -5,6 +5,15 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **“Good morning” from your listening.** Tuttiphon now knows when each account listens (from the plays it already
+  sees in Navidrome, so it works right away) and suggests “Good morning” only to those who really listen in the
+  morning: as long as their usual morning round, starting calm and getting livelier, and sounding like what they play
+  in the morning. The card says why (“for the usual listening on weekdays around 6:45”).
+- Without listening data (no stored password) the suggestions stay as before; “Good night” and “Car ride” are
+  unchanged.
+
 ## 1.1.0
 
 - **No password in docker-compose.yaml any more.** At the first start Tuttiphon opens straight to its setup: you set

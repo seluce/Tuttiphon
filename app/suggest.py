@@ -10,12 +10,16 @@ from .rules import ALL, BuildContext, join_and
 MIN_SONGS = 25
 
 
+MORNING_SHARE = 0.2   # "Good morning": a world counts with this share of the morning plays
+
+
 def key_of(p):
     w = p.get("welt", ALL)
     w = "+".join(sorted(w)) if isinstance(w, list) else w
     radio = "|radio:" + "+".join(sorted((p.get("radio") or {}).get("seed", []))) if p.get("radio") else ""
     special = ("|fav" if p.get("fav") else "") + (f"|review:{p['review'].get('period', 'month')}" if p.get("review") else "") \
-        + ("|together" if p.get("together") else "") + ("|sound" if p.get("sound") else "")
+        + ("|together" if p.get("together") else "") + ("|sound" if p.get("sound") else "") \
+        + (f"|daytime:{p['daytime']}" if p.get("daytime") else "")
     return f"{p.get('person')}|{w}|{p.get('stil', ALL)}|{'hits' if p.get('hits') else ''}" + ("|mix" if p.get("type") == "mix" else "") + radio + special
 
 
@@ -220,6 +224,37 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                                       "to fall asleep to"),
             group=owner["id"], because=_("From listening") if members else None)
 
+    def morning_mix(person):
+        """"Good morning" from the listening clock (listenclock.py): only if the account really listens in the
+        morning – with its usual length, the worlds of its mornings and their sound (mixer.morning_sound)."""
+        from . import listenclock
+        info = listenclock.morning_of(cfg, lib, person["user"], today)
+        if not info:
+            return
+        pid = person["id"]
+        index = lib.index_of()
+        plays = {index[sid]: n for sid, n in info["songs"].items() if sid in index}
+        total = sum(plays.values()) or 1
+        shares = []
+        for w in cfg["welten"]:   # worlds that make up at least a fifth of the morning plays – otherwise everything
+            block = rules.welt_block(w, ctx)
+            if block:
+                ids = lib.ids({"any": block})
+                share = sum(n for i, n in plays.items() if i in ids) / total
+                if share >= MORNING_SHARE:
+                    shares.append((share, w["id"]))
+        wl = [wid for _share, wid in sorted(shares, reverse=True)[:3]]
+        own = pid == default
+        name = _s("Good morning") if own else _s("Good morning, {name}", name=person["name"])
+        title = _("Good morning") if own else _("Good morning, {name}", name=person["name"])
+        why = _("{minutes} minutes every morning, for the usual listening on weekdays around {time} – starts calm, gets "
+                "livelier and sounds like the mornings.", minutes=info["minutes"], time=info["at"]) if info["weekdays"] else \
+            _("{minutes} minutes every morning, for the usual listening around {time} – starts calm, gets livelier and "
+              "sounds like the mornings.", minutes=info["minutes"], time=info["at"])
+        add({"person": pid, "welt": wl or ALL, "stil": ALL, "type": "mix", "daytime": "morning", "name": name,
+             "mix": {"size": 40, "minutes": info["minutes"], "perArtist": 2, "every": "day", "avoidRecent": 3}},
+            2.3, title=title, why=why, group=pid, because=_("From listening"))
+
     def family_mix(owner):
         """What everyone likes: the taste of all accounts with enough listening counts the same."""
         if not owner:
@@ -244,6 +279,12 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             2.5, title=_("What everyone likes"),
             why=_("Songs that {names} all like – new every week, good for the car ride", names=join_and(names)),
             group=owner["id"], because=_("From listening"))
+
+    # daily routines from the listening clock: one person per account – its own profile before the shared one
+    routine = {}
+    for x in sorted(persons, key=lambda x: x["id"] == default):
+        if x.get("user") and x["id"] in profiles:
+            routine.setdefault(x["user"].lower(), x["id"])
 
     for person in persons:
         pid = person["id"]
@@ -368,7 +409,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                              ("klang-toben", _("fast, loud and danceable – recognized by the sound")),
                              ("klang-gute-laune", _("happy songs, recognized by the sound and the Last.fm mood"))):
                 st_ = next((x for x in cfg["stile"] if x["id"] == sid), None)
-                if not st_:
+                if not st_ or (sid == "klang-morgen" and prof):   # with listening data only from the clock (morning_mix)
                     continue
                 if sid in ("klang-schlaf", "klang-morgen"):   # daily routine: fixed length instead of a song count, new every day
                     title = _("Good night · {world}", world=welten[wid]["name"]) if sid == "klang-schlaf" else \
@@ -384,6 +425,8 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
 
         # new from the favorite bands, recap "Your October" – from what is played and liked
         special(person, prof)
+        if prof and routine.get((person.get("user") or "").lower()) == pid:
+            morning_mix(person)
 
         # personal smart playlist across all favorite worlds (“All Sorts” – not a mix: “Mix” is for real mixes)
         if len(liked_w) >= 2 and pid != default:

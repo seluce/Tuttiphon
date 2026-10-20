@@ -140,7 +140,7 @@ def settings_key(cfg, playlist):
              [st.get(k) for k in ("minDuration", "allMinRating", "excludeTitles", "hitsShare")]]
     # Radio bands, own sound filter and minimum length count too – only appended when set, so the fingerprint of
     # existing mixes without these fields does not change (otherwise all would be picked anew mid-period)
-    extra = {k: playlist[k] for k in ("radio", "sound", "minDuration", "notPlayedDays", "together", "review")
+    extra = {k: playlist[k] for k in ("radio", "sound", "minDuration", "notPlayedDays", "together", "review", "daytime")
              if playlist.get(k) is not None}
     if extra:
         parts.append(extra)
@@ -323,6 +323,26 @@ def radio_sound(lib, pool, seeds, adjust):
             adjust[sid] = adjust.get(sid, 1.0) * (0.6 + 0.8 * min(1.0, max(0.0, (max(near) + 0.1) / 0.7)))
 
 
+MORNING_POWER = 3   # like "Your sound": the sound of the mornings decides strongly
+
+
+def morning_sound(cfg, base, plib, pool, playlist, today, adjust):
+    """"Good morning" from the listening clock: weight factor by how much a song sounds like what the person's account
+    plays in the morning (listenclock.morning_taste(): sound prototypes of the morning plays) – multiplied into adjust.
+    Without the habit, sound vectors or enough morning songs with one: nothing changes."""
+    from . import listenclock, rules, taste
+    user = (rules.person_of(cfg, playlist) or {}).get("user")
+    st = listenclock.morning_taste(cfg, base, plib, user, today) if user else None
+    if st is None:
+        return
+    by = st.for_lib(plib)
+    for i in pool:
+        v = by[i]
+        if v is not None:
+            sid = plib.songs[i]["id"]
+            adjust[sid] = adjust.get(sid, 1.0) * taste.factor(v) ** MORNING_POWER
+
+
 def calm_down(lib, order, feats, quiet_end=0, rise=False):
     """By arousal, descending (rise: ascending, "Good morning") – still never the same band twice in a row.
     quiet_end: this many songs without vocals (AI sound analysis) at the end, so it fades out without a voice."""
@@ -437,9 +457,11 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
                 adjust[sid] = adjust.get(sid, 1.0) * f ** power
     if playlist.get("radio"):   # radio: songs that sound like the seed bands come more often
         radio_sound(plib, pool, playlist["radio"].get("seed", []), adjust)
+    if playlist.get("daytime") == "morning":   # Good morning: what sounds like the person's mornings comes much more often
+        morning_sound(cfg, base, plib, pool, playlist, today, adjust)
     snd = rules.sound_of(cfg, playlist) or {}
     stil = next((s for s in cfg["stile"] if s["id"] == playlist.get("stil")), None) or {}
-    rise = stil.get("arc") == "rise"
+    rise = stil.get("arc") == "rise" or playlist.get("daytime") == "morning"
     calm = set(snd.get("moods", [])) & {"schlaf", "ruhig"}
     # smooth transitions – not where an arc sets the order (falling asleep, good morning)
     smoothly = cfg["settings"].get("smoothTransitions", True) and not rise and not calm

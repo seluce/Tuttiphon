@@ -509,6 +509,7 @@ background · relaxed”).
 ### Listening-based playlist types in the editor
 
 `EditorSheet` recognizes `fav`, `review` and `together` (`special`) and then allows “All × Everything” (also with
+`daytime: "morning"`, where a note explains “Good morning” from the listening clock, and with
 `mix.flavor: "geschmack"` and with an own sound filter that requires instruments or themes, `sound.instruments`,
 `sound.themes`): for `review` only period and song count, for `fav` only “How long does something count as
 new?” instead of music world and vibe, for `together` instead of the type the choice of whose taste counts (own people

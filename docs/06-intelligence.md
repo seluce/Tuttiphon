@@ -873,6 +873,24 @@ Time, measured on the development PC (Ryzen 5 5600H) with 25,000 songs with a ve
 rated 1 star: 4 + 2 prototypes in about 0.08 s, the scores of all songs in about 0.1 s, a song list by index 7 ms –
 about 0.2 s per account and day; an Intel N100 needs about twice as long.
 
+## Listening clock (`app/listenclock.py`)
+
+When someone listens – time of day, weekday, how long at a stretch – so that suggestions for a daily routine only
+come when the habit is there. So far it decides **“Good morning”**: only for accounts that listen in the morning, with
+the length of their usual morning round and the sound of their mornings
+([04](04-playlists.md#playlists-from-listening)).
+
+| Step | How |
+|---|---|
+| Moments | Navidrome keeps per account and song only the last play (`played`, UTC). Two sources together, each moment once (song + minute): the account's song list right now (the last play of every song – the clock works from the first day on) and `state/plays/<account>/moments.json`, which every recap snapshot extends with the last play of the songs with new plays (`listenclock.record()`), so a song played again later doesn't erase its earlier moment. Local time (TZ of the container), the last 42 days (`DAYS`) |
+| Sessions (`sessions()`) | moments less than 20 minutes apart belong together; a session lasts from its first to its last play plus 3.5 minutes |
+| Morning (`morning()`) | a session of at least two songs starting from 05:00 to 09:59; the habit is there with at least 6 such mornings spread over at least 3 calendar weeks. Usual time = median of the first morning session per day (rounded to 5 minutes), usual length = median of the longest morning session per day (15–60 minutes), “weekdays” when at least 80 % of the mornings are Monday to Friday |
+| Sound of the mornings (`morning_taste()`) | the morning songs (weight 1 + ln(1 + plays)) as liked songs for `soundtaste.compute()` – prototypes of the morning sound, scores 0–1 per song; None without sound vectors or with too few morning songs with one |
+
+Only for accounts with a stored password (the song list of the account is needed). Cached per account, day, song
+list and state of `moments.json` (`morning_of()`), the sound per account, day and sound vectors – in memory. On the
+reference data (two family accounts, 25,000 songs) the habit shows from the plays of the past weeks right away.
+
 ## Lyrics search and kid-safe mode
 
 `app/liedtext.py` reads all lyrics of the library into a full-text index (SQLite FTS5 with
@@ -1040,6 +1058,7 @@ snapshot to the Docker container if one is running ([05-maintenance.md](05-maint
 state/plays/<account>/baseline.json     {"since": …, "at": …, "counts": {song ID: count}}
 state/plays/<account>/<YYYY-MM-DD>.json {song ID: plays on this listening day}
 state/plays/<account>/first.json        {song ID: day of the first play}
+state/plays/<account>/moments.json      {"v": 1, "moments": [[song ID, last play], …]}  (listening clock)
 ```
 
 `<account>` is the account name as a slug (`config.slug()`). More in [02-data-model.md](02-data-model.md). “Mixes

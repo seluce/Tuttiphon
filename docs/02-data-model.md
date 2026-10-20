@@ -438,6 +438,7 @@ mix: `type: "mix"` and, if `mix` is missing, `{"size": 40, "perArtist": 3, "ever
 |---|---|---|---|
 | `fav` | object | “New from your favorite bands”: `{days}` – what the person's favorite bands added in the last `days` days; `rules.favorite_artists()` determines the bands | `days` 7–365, default 60 |
 | `together` | list | family mix “What everyone likes”: people whose taste counts equally; everyone's dislikes and 1-star songs apply | at least two known people; users only their own and those visible to everyone (`auth.merge_user_changes()`) |
+| `daytime` | string | `"morning"`: “Good morning” from the listening clock – starts calm and gets livelier (`mixer.calm_down(rise=True)`), songs that sound like the mornings of the person's account come more often (`mixer.morning_sound()`); “All × Everything” is allowed | only `"morning"`, mix only |
 | `review` | object | recap playlist: `{period}` = `month` (last full month) or `year` (year up to the end of last month, in January the previous year); the most played songs, the name moves along (“Your October 2026”) | mix only |
 
 **Playlist taken over unchanged** (`rules` set; then `validate_config()` doesn't check music world and vibe)
@@ -832,6 +833,7 @@ One folder `plays/<account>/` per Navidrome account (name via `slug()`, i.e. low
 | `baseline.json` | `{since, at, counts}`: start of recording, last counter snapshot, play counter per song ID |
 | `<YYYY-MM-DD>.json` | `{song-id: n}`: new plays of this listening day – the day midway between the previous and this measurement (measurement at 05:30 or 07:00: the previous day; a second one in the afternoon: today); without an earlier measurement, the time minus 6 hours |
 | `first.json` | `{song-id: day}`: when a song was counted for the first time |
+| `moments.json` | `{"v": 1, "moments": [[song-id, played], …]}`: listening clock – for every song with new plays its last play (`played` from Navidrome, UTC) at the time of the snapshot, so a later play doesn't erase it; kept 120 days, at most 30,000 (`listenclock.record()`, [06](06-intelligence.md#listening-clock-applistenclockpy)) |
 
 Navidrome only knows counters, not a history – what is missing here can't be recovered. Counter snapshots are taken at
 server start, once a day from `settings.dailyAt` on and when the recap is fetched (at most every 30 minutes); only for

@@ -88,6 +88,11 @@ def snapshot(user, songs, now=None):
             if new:
                 first.update(new)
                 write_atomic(folder / "first.json", json.dumps(first))
+            from . import listenclock
+            try:   # listening clock: when these plays happened (the last one of each song) – never at the cost of the recap
+                listenclock.record(user, songs, set(delta), now)
+            except (OSError, ValueError):
+                pass
         base.update(at=now.isoformat(timespec="seconds"), counts=counts)
         write_atomic(folder / "baseline.json", json.dumps(base))
         return sum(delta.values())

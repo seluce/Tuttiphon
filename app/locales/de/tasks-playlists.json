@@ -128,5 +128,8 @@
  "Only the new music: {n} song.": "Nur die neue Musik: {n} Song.",
  "Only the new music: {n} songs.": "Nur die neue Musik: {n} Songs.",
  "Please enter your own password with at least 8 characters in docker-compose.yaml (or remove the line and set the password in the browser) and restart.": "Bitte in docker-compose.yaml ein eigenes Passwort mit mindestens 8 Zeichen eintragen (oder die Zeile entfernen und das Passwort im Browser festlegen) und neu starten.",
- "⚠ Without an administrator password there is no login – Tuttiphon then only answers requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.": "⚠ Ohne Administrator-Passwort gibt es keine Anmeldung – Tuttiphon beantwortet dann nur Aufrufe über 127.0.0.1/localhost und die Namen in TUTTIPHON_HOSTS."
+ "⚠ Without an administrator password there is no login – Tuttiphon then only answers requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.": "⚠ Ohne Administrator-Passwort gibt es keine Anmeldung – Tuttiphon beantwortet dann nur Aufrufe über 127.0.0.1/localhost und die Namen in TUTTIPHON_HOSTS.",
+ "Good morning, {name}": "Guten Morgen, {name}",
+ "{minutes} minutes every morning, for the usual listening on weekdays around {time} – starts calm, gets livelier and sounds like the mornings.": "{minutes} Minuten jeden Morgen, passend zum Hören werktags gegen {time} Uhr – beginnt ruhig, wird lebhafter und klingt wie die Morgenstunden.",
+ "{minutes} minutes every morning, for the usual listening around {time} – starts calm, gets livelier and sounds like the mornings.": "{minutes} Minuten jeden Morgen, passend zum Hören gegen {time} Uhr – beginnt ruhig, wird lebhafter und klingt wie die Morgenstunden."
 }

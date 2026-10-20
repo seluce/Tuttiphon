@@ -304,6 +304,8 @@ def describe(cfg, playlist):
         text = _s("New from the favorite bands, last {days} days", days=int(playlist["fav"].get("days") or 60))
     if playlist.get("together"):
         text = _s("What everyone likes: {text}", text=text)
+    if playlist.get("daytime") == "morning":
+        text = _s("Good morning in the sound of the mornings: {text}", text=text)
     if playlist.get("review"):
         if playlist["review"].get("period") == "year":
             return _s("Recap – the most played songs of the year")
@@ -1026,6 +1028,9 @@ def summary(cfg, playlist, ctx=None):
     together = [x["name"] for x in together_of(cfg, playlist)]
     if together:
         lines.append(_("Prefers what {names} like to hear – everyone’s dislikes count", names=join_and(together)))
+    if playlist.get("daytime") == "morning":
+        lines.append(_("Good morning: starts calm and gets livelier – songs that sound like what is played in the "
+                       "morning come more often"))
     snd = sound_of(cfg, playlist)
     if snd:
         from .audio import MOODS

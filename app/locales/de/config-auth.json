@@ -110,5 +110,6 @@
  "Long-term maintenance: {items}.": "Langzeitpflege: {items}.",
  "Settings: unknown language": "Einstellungen: Sprache unbekannt",
  "config: {where}: unknown instrument": "config: {where}: unbekanntes Instrument",
- "config: {where}: unknown theme": "config: {where}: unbekanntes Thema"
+ "config: {where}: unknown theme": "config: {where}: unbekanntes Thema",
+ "config: playlist '{id}': time of day invalid": "config: Playlist '{id}': Tageszeit ungültig"
 }

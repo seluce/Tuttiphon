@@ -801,7 +801,9 @@ vocals (AI feature `inst` ≥ 0.8) are additionally placed at the end (`quiet_en
 
 The sound vibe `klang-morgen` (“Good morning”, mood cheerful, liveliness 0.25–0.7) has `arc: "rise"`:
 `calm_down(rise=True)` orders ascending – start calm, then livelier, never the same band twice in a row.
-Suggestion “Good morning · <world>”: 30 minutes, new every day. The **Car ride** suggestion for the shared person
+Suggestion “Good morning · <world>”: 30 minutes, new every day – only for people without listening data (no stored
+password); for the others “Good morning” comes from the listening clock (`daytime: "morning"`, see
+[Playlists from listening](#playlists-from-listening)). The **Car ride** suggestion for the shared person
 takes the family's favorite and played worlds (with children's songs), the sound filter liveliness ≥ 0.35
 (nothing for falling asleep), 60 minutes, new every day – and with `together` as soon as two accounts have listened enough.
 
@@ -818,7 +820,7 @@ weekly mix (`size` 50, `perArtist` 3, `every` week).
 
 ## Playlists from listening
 
-Four kinds pick their songs from what is listened to and liked – without music world and vibe (“All × Everything” is
+These kinds pick their songs from what is listened to and liked – without music world and vibe (“All × Everything” is
 allowed for them). They are offered as suggestions (`suggest.suggestions()`); with “Customize” they can be adjusted in the
 editor.
 
@@ -827,6 +829,7 @@ editor.
 | New from the favorite bands | `fav: {days}` | smart playlist: `build_nsp()` replaces the world block with the person's favorite bands (`rules.favorite_artists()`: those chosen by hand, plus the most played from `taste.profile()` with at least a 1 % share, without dislikes, at most 30) and requires `inTheLast dateadded days`. Without favorite bands it stays empty. Newest first, `minRating` 0 (new songs have no stars yet) | “New from our favorite bands” or “New from Mia’s favorite bands”, from 5 songs |
 | What everyone likes | `together: [people]` | mix of the shared person: dislikes and kid-safe mode of everyone involved in the rules, 1-star songs of all accounts drop out (`mixer._never()`) – also from people who are private by now (protection comes first). Taste counts only with consent (`rules.together_of()`: visible to everyone, the same account, or a mix of the default person), then every account counts equally – weight × (product of the `taste.factor()`)^(3/count) | for the default person, as soon as two accounts have listened enough; worlds = favorite worlds and played worlds of everyone; weekly, 50 songs, 2 per band |
 | Good night | `mix.minutes` | see [Falling asleep](#falling-asleep-and-good-night) | per favorite world (children's worlds preferred) |
+| Good morning | `daytime: "morning"` | mix in the order calm → livelier (`calm_down(rise=True)`, without a sound vibe); `mixer.morning_sound()` multiplies the weight of every song with a sound vector by `taste.factor()` of its closeness to the **sound of the mornings** (`listenclock.morning_taste()`: sound prototypes of the account's morning plays, `soundtaste.compute()`) to the power of 3 – without sound vectors only the order | only from the [listening clock](06-intelligence.md#listening-clock-applistenclockpy): one per account (its own person before the shared one) when it listens in the morning; length = its usual morning round, worlds = those with ≥ 20 % of the morning plays (at most three, otherwise the whole library), daily, 2 per band, recently played (3 days) rarely; name “Good morning” (shared person) or “Good morning, <name>” |
 | Recap | `review: {period}` | mix without randomness: `mixer.review_order()` takes the most played songs of the period from `rueckblick.plays_between()` (most first, `size` songs) – without dislike bands and genres, without songs rated 1 star and, with kid-safe mode, without explicit songs. `month` = last full month, `year` = year up to the end of last month (in January the whole previous year), each counted from the mix day (`rules.review_period()`). Name “<prefix>Your October 2026” or “Our …” for the default person (`rules.review_name()`) – it moves along, Navidrome keeps the playlist | “Your October 2026” from 20 played songs, “Your year 2026” |
 
 A **recap playlist** changes by itself on the first of the month; there is always just one. Anyone who wants to keep a

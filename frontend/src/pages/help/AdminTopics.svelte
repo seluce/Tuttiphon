@@ -87,7 +87,7 @@
     <li>{@html t('<b>New from your favorite bands</b> – a smart playlist with what was added in the last two months by the bands someone likes or listens to most. Newest first.')}</li>
     <li>{@html t('<b>What everyone likes</b> – a mix for the shared person: the taste of every account with enough listening counts equally; everyone’s dislikes and 1-star songs stay out.')}</li>
     <li>{@html t('<b>Good night</b> – a fixed length instead of a number of songs, about 30 minutes. Gets calmer and calmer and ends without vocals where possible. The length can be set for any mix under “Length”.')}</li>
-    <li>{@html t('<b>Good morning</b> – half an hour that starts friendly and calm and gets livelier. <b>Car ride</b> – an hour every day from the family’s worlds, with kids’ songs, without sleepy songs.')}</li>
+    <li>{@html t('<b>Good morning</b> – only for accounts that listen in the morning on at least 6 days in 6 weeks: as long as their usual morning round, starts calm, gets livelier and sounds like their mornings. Profiles without a stored password get “Good morning · world” as before. <b>Car ride</b> – an hour every day from the family’s worlds, with kids’ songs, without sleepy songs.')}</li>
     <li>{@html t('<b>Your October</b> and <b>Your year</b> – the most-played songs. Changes on the first of the month; it always stays one playlist.')}</li>
   </Bullets>
   <p>{@html t('The change happens at the time set under <a class="link" href="#/einstellungen/ablaeufe">Settings → Automation → Daily refresh</a> – every day, on Mondays or on the 1st, depending on the mix. If Tuttiphon isn’t running at that time, it catches up at the next start – in the Docker container on the NAS it always runs.')}</p>

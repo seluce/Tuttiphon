@@ -132,7 +132,7 @@
  "New music world: {name}": "Neue Musikwelt: {name}",
  "Played often: {bands}": "Oft gehört: {bands}",
  "Nobody listens to {n} playlists": "{n} Playlists hört niemand",
- "Not a single song from them has played for three months: {names}. Pausing takes them out of Symfonium, they stay saved here.":"Seit drei Monaten lief aus ihnen kein Song: {names}. Pausieren nimmt sie aus Symfonium, hier bleiben sie aufgehoben.",
+ "Not a single song from them has played for three months: {names}. Pausing takes them out of Symfonium, they stay saved here.": "Seit drei Monaten lief aus ihnen kein Song: {names}. Pausieren nimmt sie aus Symfonium, hier bleiben sie aufgehoben.",
  "View": "Ansehen",
  "Pause all": "Alle pausieren",
  "Nobody listens to “{name}”": "„{name}“ hört niemand",
@@ -193,5 +193,7 @@
  "weekly": "wöchentlich",
  "monthly": "monatlich",
  "{kind} – created automatically, please make changes in Tuttiphon": "{kind} – automatisch erzeugt, Änderungen bitte in Tuttiphon",
- "No file paths were found for the mix (Navidrome not reachable?) – nothing written.": "Für den Mix wurden keine Dateipfade gefunden (Navidrome nicht erreichbar?) – nichts geschrieben."
+ "No file paths were found for the mix (Navidrome not reachable?) – nothing written.": "Für den Mix wurden keine Dateipfade gefunden (Navidrome nicht erreichbar?) – nichts geschrieben.",
+ "Good morning in the sound of the mornings: {text}": "Guten Morgen im Klang der Morgenstunden: {text}",
+ "Good morning: starts calm and gets livelier – songs that sound like what is played in the morning come more often": "Guten Morgen: beginnt ruhig und wird lebhafter – Songs, die so klingen wie das, was morgens gehört wird, kommen öfter"
 }
