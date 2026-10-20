@@ -84,6 +84,7 @@
   <Bullets>
     <li>{@render rich(t('<b>New from your favorite bands</b> – what has been added in the last two months by the bands you like or listen to most. Newest first. On “For you”, such albums carry the badge <Ui icon="heart">Favorite band</Ui>.'))}</li>
     <li>{@html t('<b>Your October</b> – your most played songs of the last month. On the first of the month it turns into the new month; it always stays one playlist.')}</li>
+    <li>{@html t('<b>Discovered for you</b> – every Monday 30 songs from the library that you have never played, picked to fit your taste. With more than 90 % of a typical library never played, there is a lot to find.')}</li>
     <li>{@html t('<b>Good night</b> – half an hour every evening that gets calmer and calmer and fades out, ideally without vocals.')}</li>
     <li>{@html t('<b>Good morning</b> – comes up when you often listen in the morning: as long as your usual morning round, starts calm, gets livelier and sounds like what you play in the morning.')}</li>
     <li>{@html t('<b>Car ride</b> – an hour every day for the road that the whole family likes, with children’s songs and no songs to fall asleep to.')}</li>

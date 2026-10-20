@@ -195,5 +195,9 @@
  "{kind} – created automatically, please make changes in Tuttiphon": "{kind} – automatisch erzeugt, Änderungen bitte in Tuttiphon",
  "No file paths were found for the mix (Navidrome not reachable?) – nothing written.": "Für den Mix wurden keine Dateipfade gefunden (Navidrome nicht erreichbar?) – nichts geschrieben.",
  "Good morning in the sound of the mornings: {text}": "Guten Morgen im Klang der Morgenstunden: {text}",
- "Good morning: starts calm and gets livelier – songs that sound like what is played in the morning come more often": "Guten Morgen: beginnt ruhig und wird lebhafter – Songs, die so klingen wie das, was morgens gehört wird, kommen öfter"
+ "Good morning: starts calm and gets livelier – songs that sound like what is played in the morning come more often": "Guten Morgen: beginnt ruhig und wird lebhafter – Songs, die so klingen wie das, was morgens gehört wird, kommen öfter",
+ "Not a single song of its last edition was played. Pausing takes it out of Symfonium, here it stays kept.": "Aus der letzten Ausgabe lief kein einziger Song. Pausieren nimmt sie aus Symfonium, hier bleibt sie aufgehoben.",
+ "Not a single song of its last {n} editions was played. Pausing takes it out of Symfonium, here it stays kept.": "Aus den letzten {n} Ausgaben lief kein einziger Song. Pausieren nimmt sie aus Symfonium, hier bleibt sie aufgehoben.",
+ "Never played yet, picked by taste: {text}": "Noch nie gehört, nach Geschmack ausgewählt: {text}",
+ "Only songs this account has never played – what sounds like its taste comes much more often": "Nur Songs, die dieses Konto noch nie gespielt hat – was nach seinem Geschmack klingt, kommt deutlich öfter"
 }

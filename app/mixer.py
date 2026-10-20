@@ -140,7 +140,8 @@ def settings_key(cfg, playlist):
              [st.get(k) for k in ("minDuration", "allMinRating", "excludeTitles", "hitsShare")]]
     # Radio bands, own sound filter and minimum length count too – only appended when set, so the fingerprint of
     # existing mixes without these fields does not change (otherwise all would be picked anew mid-period)
-    extra = {k: playlist[k] for k in ("radio", "sound", "minDuration", "notPlayedDays", "together", "review", "daytime")
+    extra = {k: playlist[k] for k in ("radio", "sound", "minDuration", "notPlayedDays", "together", "review", "daytime",
+                                      "unheard")
              if playlist.get(k) is not None}
     if extra:
         parts.append(extra)
@@ -361,6 +362,12 @@ def calm_down(lib, order, feats, quiet_end=0, rise=False):
     return out + tail
 
 
+def unheard(lib, ids):
+    """The songs among ids that the account of this song list has never played (playCount 0)."""
+    songs = lib.songs
+    return [i for i in ids if not songs[i].get("playCount")]
+
+
 def person_lib(cfg, playlist, base):
     """Song list as seen by the person the mix is for (their stars, favorites, plays).
     Without a password for their account: the default library."""
@@ -428,6 +435,8 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
     plib = person_lib(cfg, playlist, base)
     from . import feedback, rules
     pool = rules.apply_sound(cfg, plib, playlist, plib.match(nsp))   # sound vibes: only matching songs
+    if playlist.get("unheard"):   # "Discovered for you": only what this account has never played
+        pool = frozenset(unheard(plib, pool))
     adjust = {}
     if cfg["settings"].get("mixLearn", True):   # learn from listening: skipped -> less often, 1 star by hand -> never
         user = (rules.person_of(cfg, playlist) or {}).get("user")
@@ -445,7 +454,7 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
             sims = [m for m in (taste.matcher(taste.profile(cfg, base, u, today), plib) for u in users) if m]
             power = 3 / len(sims) if sims else 0
         else:   # "Your sound": the sound taste (soundtaste.py) counts more too
-            own_sound = options(playlist).get("flavor") == "geschmack"
+            own_sound = options(playlist).get("flavor") == "geschmack" or bool(playlist.get("unheard"))
             sim = taste.matcher(taste.profile(cfg, base, user, today), plib, sound=taste.FLAVOR_SOUND if own_sound else 1.0)
             sims, power = ([sim] if sim else []), (3 if own_sound else 1)
         if sims:

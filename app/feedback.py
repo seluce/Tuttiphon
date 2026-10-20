@@ -124,6 +124,53 @@ def forget_removed(playlist_ids):
                 pass
 
 
+# ---------------------------------------------------------------------------- Usage
+
+def usage(playlist_ids=None, today=None):
+    """How much of the past editions of each mix was played – from the mix history and the recap counters, read only.
+    -> {playlist id: {"every", "periods": finished editions the counters cover, "heard": editions with at least
+    MIN_HEARD of their songs played in their period, "songs", "played": songs in them / of those played, "days": days
+    covered, "last": first day of the last heard edition (ISO) or None}} – mixes without such an edition are missing.
+    Songs played elsewhere in the period (album, artist) count too."""
+    from . import rueckblick
+    today = today or dt.date.today()
+    data = _cached(HISTORY, {}, extra=today)
+    snaps, plays_memo, out = {}, {}, {}
+    for pid, entries in data.items():
+        if playlist_ids is not None and pid not in playlist_ids:
+            continue
+        res = {"every": None, "periods": 0, "heard": 0, "songs": 0, "played": 0, "days": 0, "last": None}
+        for e in entries if isinstance(entries, list) else []:
+            try:
+                start = dt.date.fromisoformat(e["day"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            every, user = e.get("every", "day"), e.get("user")
+            end = period_end(every, start)
+            if end >= today or not user:
+                continue   # still running
+            if user not in snaps:
+                snaps[user] = rueckblick.last_snapshot(user)
+            snap = snaps[user]
+            # counted from the start, and the plays of the last day are known (as in learn())
+            if not snap or (snap.get("since") or "") > start.isoformat() or \
+                    (snap.get("at") or "") < f"{end + dt.timedelta(days=1)}T04:00":
+                continue
+            key = (user, start, end)
+            if key not in plays_memo:
+                plays_memo[key] = rueckblick.plays_between(user, start, end)[0]
+            ids = e.get("ids") or []
+            n = sum(1 for sid in ids if plays_memo[key].get(sid))
+            res.update(every=every, periods=res["periods"] + 1, songs=res["songs"] + len(ids),
+                       played=res["played"] + n, days=res["days"] + (end - start).days + 1)
+            if n >= MIN_HEARD:
+                res["heard"] += 1
+                res["last"] = max(res["last"] or "", e["day"])
+        if res["periods"]:
+            out[pid] = res
+    return out
+
+
 # ---------------------------------------------------------------------------- Learning
 
 def learn(today=None, log=lambda *_: None):

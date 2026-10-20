@@ -306,6 +306,8 @@ def describe(cfg, playlist):
         text = _s("What everyone likes: {text}", text=text)
     if playlist.get("daytime") == "morning":
         text = _s("Good morning in the sound of the mornings: {text}", text=text)
+    if playlist.get("unheard"):
+        text = _s("Never played yet, picked by taste: {text}", text=text)
     if playlist.get("review"):
         if playlist["review"].get("period") == "year":
             return _s("Recap – the most played songs of the year")
@@ -1031,6 +1033,8 @@ def summary(cfg, playlist, ctx=None):
     if playlist.get("daytime") == "morning":
         lines.append(_("Good morning: starts calm and gets livelier – songs that sound like what is played in the "
                        "morning come more often"))
+    if playlist.get("unheard"):
+        lines.append(_("Only songs this account has never played – what sounds like its taste comes much more often"))
     snd = sound_of(cfg, playlist)
     if snd:
         from .audio import MOODS

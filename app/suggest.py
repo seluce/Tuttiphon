@@ -3,7 +3,7 @@ import datetime as dt
 import json
 import math
 
-from . import rules, scenes
+from . import mixer, rules, scenes
 from .i18n import _, _n, _s
 from .rules import ALL, BuildContext, join_and
 
@@ -11,6 +11,7 @@ MIN_SONGS = 25
 
 
 MORNING_SHARE = 0.2   # "Good morning": a world counts with this share of the morning plays
+MIN_UNHEARD = 60      # "Discovered for you": at least this many never played songs to choose from
 
 
 def key_of(p):
@@ -19,7 +20,7 @@ def key_of(p):
     radio = "|radio:" + "+".join(sorted((p.get("radio") or {}).get("seed", []))) if p.get("radio") else ""
     special = ("|fav" if p.get("fav") else "") + (f"|review:{p['review'].get('period', 'month')}" if p.get("review") else "") \
         + ("|together" if p.get("together") else "") + ("|sound" if p.get("sound") else "") \
-        + (f"|daytime:{p['daytime']}" if p.get("daytime") else "")
+        + (f"|daytime:{p['daytime']}" if p.get("daytime") else "") + ("|unheard" if p.get("unheard") else "")
     return f"{p.get('person')}|{w}|{p.get('stil', ALL)}|{'hits' if p.get('hits') else ''}" + ("|mix" if p.get("type") == "mix" else "") + radio + special
 
 
@@ -129,7 +130,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             if prof and prof.get("enough"):
                 profiles[person["id"]] = prof
 
-    def add(p, score, title=None, why=None, group=None, because=None):
+    def add(p, score, title=None, why=None, group=None, because=None, only=None):
         if rules.sound_of(cfg, p) and p.get("type") != "mix":   # sound vibes only exist as mixes
             p = {**p, "type": "mix", "mix": p.get("mix") or {"size": 50, "perArtist": 3, "every": "week"}}
         k = key_of(p)
@@ -142,8 +143,10 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             return   # already exists visible to everyone (or as a handmade playlist)
         nsp = rules.build_nsp(cfg, p, ctx)
         ids = rules.apply_sound(cfg, lib, p, lib.match(nsp))
+        if only is not None:   # e.g. only what the person's account has never played
+            ids = frozenset(i for i in ids if lib.songs[i]["id"] in only)
         n = len(ids)
-        if n < MIN_SONGS:
+        if n < (MIN_UNHEARD if p.get("unheard") else MIN_SONGS):
             return
         top = lib.top_artists(ids, 6)
         distinct = len(top)
@@ -254,6 +257,23 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         add({"person": pid, "welt": wl or ALL, "stil": ALL, "type": "mix", "daytime": "morning", "name": name,
              "mix": {"size": 40, "minutes": info["minutes"], "perArtist": 2, "every": "day", "avoidRecent": 3}},
             2.3, title=title, why=why, group=pid, because=_("From listening"))
+
+    def discover_mix(person):
+        """"Discovered for you" (like Spotify's Discover Weekly, inside the own library): 30 songs the account has
+        never played, picked by its taste (mixer: taste counts like "Your sound"), new every Monday."""
+        from . import taste
+        plib = taste._person_lib(cfg, lib, person["user"])
+        if plib is None:
+            return
+        never = {plib.songs[i]["id"] for i in mixer.unheard(plib, range(len(plib.songs)))}
+        pid = person["id"]
+        own = pid == default
+        name = _s("Discovered for us") if own else _s("Discovered for {name}", name=person["name"])
+        title = _("Discovered for us") if own else _("Discovered for {name}", name=person["name"])
+        add({"person": pid, "welt": ALL, "stil": ALL, "type": "mix", "unheard": True, "name": name,
+             "mix": {"size": 30, "perArtist": 2, "perAlbum": 1, "every": "week"}},
+            2.6, title=title, why=_("30 songs from the library that this account has never played, picked to fit the "
+                                    "taste – new every Monday."), group=pid, because=_("From listening"), only=never)
 
     def family_mix(owner):
         """What everyone likes: the taste of all accounts with enough listening counts the same."""
@@ -426,6 +446,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         # new from the favorite bands, recap "Your October" – from what is played and liked
         special(person, prof)
         if prof and routine.get((person.get("user") or "").lower()) == pid:
+            discover_mix(person)
             morning_mix(person)
 
         # personal smart playlist across all favorite worlds (“All Sorts” – not a mix: “Mix” is for real mixes)
@@ -487,6 +508,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
 
 
 UNUSED_DAYS = 90
+UNHEARD_MIX_DAYS = 12   # a mix whose finished editions cover this many days without a single play: hint to pause it
 
 
 def unused_playlists(cfg, lib, only_persons=None, today=None):
@@ -524,9 +546,9 @@ def unused_playlists(cfg, lib, only_persons=None, today=None):
 
 
 # What a playlist selects and orders – everything else (name, file, cover, visibility …) does not count when comparing
-CONTENT_FIELDS = ("welt", "stil", "type", "hits", "radio", "fav", "review", "together", "minRating", "minDuration",
-                  "notPlayedDays", "addArtists", "excludeArtists", "sound", "mix", "sort", "sortRaw", "limit",
-                  "rulesExtra", "rulesOp", "yearRound")
+CONTENT_FIELDS = ("welt", "stil", "type", "hits", "radio", "fav", "review", "together", "daytime", "unheard",
+                  "minRating", "minDuration", "notPlayedDays", "addArtists", "excludeArtists", "sound", "mix", "sort",
+                  "sortRaw", "limit", "rulesExtra", "rulesOp", "yearRound")
 
 
 def duplicate_playlists(cfg):
@@ -569,6 +591,25 @@ def playlist_tidy_items(cfg, lib, only_persons=None, user=False):
                         [{"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}] if user else
                         [{"label": _("Pause"), "do": "pause", "id": p["id"]},
                          {"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}]))
+    # mixes whose last editions nobody touched – sooner than the 90 days above, from the mix history
+    from . import feedback
+    listed = {p["id"] for p in unused}
+    use = feedback.usage({p["id"] for p in cfg["playlists"] if p.get("type") == "mix"})
+    seasonal = {x["id"] for x in cfg["stile"] if x.get("season")}   # seasonal playlists rest part of the year
+    for p in cfg["playlists"]:
+        u = use.get(p["id"])
+        if (not u or p["id"] in listed or p.get("status", "aktiv") != "aktiv" or u["played"] or u["days"] < UNHEARD_MIX_DAYS
+                or p.get("stil") in seasonal):   # i18n-ignore: stored value
+            continue
+        if only_persons is not None and (p.get("person") or cfg["settings"].get("defaultPerson")) not in only_persons:
+            continue
+        out.append((f"unheard-mix|{p['id']}", "info", _("Nobody listens to “{name}”", name=playlist_name(cfg, p)),
+                    _n(u["periods"], "Not a single song of its last edition was played. Pausing takes it out of "
+                       "Symfonium, here it stays kept.", "Not a single song of its last {n} editions was played. Pausing "
+                       "takes it out of Symfonium, here it stays kept."),
+                    [{"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}] if user else
+                    [{"label": _("Pause"), "do": "pause", "id": p["id"]},
+                     {"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}]))
     for group in duplicate_playlists(cfg):
         if only_persons is not None and (group[0].get("person") or cfg["settings"].get("defaultPerson")) not in only_persons:
             continue

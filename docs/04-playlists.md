@@ -719,6 +719,16 @@ takes every period not yet evaluated whose last day is before today:
 The result is stored per account in `state/feedback/<account>.json`; the log reports “Mixes learn: n periods
 evaluated – k× skipped, m× played.”
 
+**How much a mix is listened to** (`feedback.usage()`, read only, also with `mixLearn` off): the same finished and
+counted periods of the mix history (rules 1–2 above, without waiting or discarding) – per mix the number of editions
+(`periods`), those with at least `MIN_HEARD` = 3 of their songs played in their period (`heard`), songs and played
+songs over all of them (`songs`, `played`), the days covered and the first day of the last edition heard (`last`).
+Songs played elsewhere in the period count too. Shown on the playlist page (“Is it listened to?”, `GET /api/playlist` →
+`usage`, only for own playlists and administrators); a mix whose finished editions cover at least 12 days
+(`UNHEARD_MIX_DAYS`) without a single played song gets the hint “Nobody listens to …” with “Pause” under “To review”
+(`suggest.playlist_tidy_items()`, key `unheard-mix|<id>`, not for seasonal vibes and not if the 90-day hint already
+names it).
+
 **Applying.** `factors(account)` computes per song (cached until the file or the day changes):
 
 ```text
@@ -829,6 +839,7 @@ editor.
 | New from the favorite bands | `fav: {days}` | smart playlist: `build_nsp()` replaces the world block with the person's favorite bands (`rules.favorite_artists()`: those chosen by hand, plus the most played from `taste.profile()` with at least a 1 % share, without dislikes, at most 30) and requires `inTheLast dateadded days`. Without favorite bands it stays empty. Newest first, `minRating` 0 (new songs have no stars yet) | “New from our favorite bands” or “New from Mia’s favorite bands”, from 5 songs |
 | What everyone likes | `together: [people]` | mix of the shared person: dislikes and kid-safe mode of everyone involved in the rules, 1-star songs of all accounts drop out (`mixer._never()`) – also from people who are private by now (protection comes first). Taste counts only with consent (`rules.together_of()`: visible to everyone, the same account, or a mix of the default person), then every account counts equally – weight × (product of the `taste.factor()`)^(3/count) | for the default person, as soon as two accounts have listened enough; worlds = favorite worlds and played worlds of everyone; weekly, 50 songs, 2 per band |
 | Good night | `mix.minutes` | see [Falling asleep](#falling-asleep-and-good-night) | per favorite world (children's worlds preferred) |
+| Discovered for you | `unheard: true` | mix of the whole library (`allMinRating` applies) restricted to the songs the person's account has **never played** (`mixer.unheard()`: `playCount` 0 in its song list); the taste counts as with “Your sound” (sound share `FLAVOR_SOUND`, power 3) – like Spotify's Discover Weekly, but inside the own library | one per account (its own person before the shared one) with a listening profile and at least 60 such songs (`MIN_UNHEARD`); 30 songs, 2 per band, 1 per album, weekly (new on Monday); name “Discovered for us” (shared person) or “Discovered for <name>”, score 2.6 |
 | Good morning | `daytime: "morning"` | mix in the order calm → livelier (`calm_down(rise=True)`, without a sound vibe); `mixer.morning_sound()` multiplies the weight of every song with a sound vector by `taste.factor()` of its closeness to the **sound of the mornings** (`listenclock.morning_taste()`: sound prototypes of the account's morning plays, `soundtaste.compute()`) to the power of 3 – without sound vectors only the order | only from the [listening clock](06-intelligence.md#listening-clock-applistenclockpy): one per account (its own person before the shared one) when it listens in the morning; length = its usual morning round, worlds = those with ≥ 20 % of the morning plays (at most three, otherwise the whole library), daily, 2 per band, recently played (3 days) rarely; name “Good morning” (shared person) or “Good morning, <name>” |
 | Recap | `review: {period}` | mix without randomness: `mixer.review_order()` takes the most played songs of the period from `rueckblick.plays_between()` (most first, `size` songs) – without dislike bands and genres, without songs rated 1 star and, with kid-safe mode, without explicit songs. `month` = last full month, `year` = year up to the end of last month (in January the whole previous year), each counted from the mix day (`rules.review_period()`). Name “<prefix>Your October 2026” or “Our …” for the default person (`rules.review_name()`) – it moves along, Navidrome keeps the playlist | “Your October 2026” from 20 played songs, “Your year 2026” |
 

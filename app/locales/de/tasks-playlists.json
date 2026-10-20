@@ -131,5 +131,8 @@
  "⚠ Without an administrator password there is no login – Tuttiphon then only answers requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.": "⚠ Ohne Administrator-Passwort gibt es keine Anmeldung – Tuttiphon beantwortet dann nur Aufrufe über 127.0.0.1/localhost und die Namen in TUTTIPHON_HOSTS.",
  "Good morning, {name}": "Guten Morgen, {name}",
  "{minutes} minutes every morning, for the usual listening on weekdays around {time} – starts calm, gets livelier and sounds like the mornings.": "{minutes} Minuten jeden Morgen, passend zum Hören werktags gegen {time} Uhr – beginnt ruhig, wird lebhafter und klingt wie die Morgenstunden.",
- "{minutes} minutes every morning, for the usual listening around {time} – starts calm, gets livelier and sounds like the mornings.": "{minutes} Minuten jeden Morgen, passend zum Hören gegen {time} Uhr – beginnt ruhig, wird lebhafter und klingt wie die Morgenstunden."
+ "{minutes} minutes every morning, for the usual listening around {time} – starts calm, gets livelier and sounds like the mornings.": "{minutes} Minuten jeden Morgen, passend zum Hören gegen {time} Uhr – beginnt ruhig, wird lebhafter und klingt wie die Morgenstunden.",
+ "Discovered for us": "Entdeckt für uns",
+ "Discovered for {name}": "Entdeckt für {name}",
+ "30 songs from the library that this account has never played, picked to fit the taste – new every Monday.": "30 Songs aus der Bibliothek, die auf diesem Konto noch nie liefen – passend zum Geschmack ausgewählt, jeden Montag neu."
 }

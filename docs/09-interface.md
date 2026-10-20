@@ -473,6 +473,10 @@ are buttons:
 | in the trash | “Restore”, “Delete permanently” | – |
 | someone else's, shared | “Copy for me”, “Open in Navidrome” | – |
 
+For mixes with `usage` (own playlists, administrators) the page shows the card **“Is it listened to?”** next to “How
+it is made”: “Listened to on 5 of the last 12 days – 18 % of their songs played.” (weeks, months accordingly), the last
+edition heard, or – highlighted – “Nothing played from the last 12 editions.”; a hint explains what counts.
+
 Playlist cards (`PlaylistCard`) show a **state dot** (`StateDot`) only for administrators and only for states other
 than `aktuell` (“in Navidrome”) – new, changed, scan, error …; users see none (a dot with a tooltip says nothing on a
 phone).
@@ -509,7 +513,8 @@ background · relaxed”).
 ### Listening-based playlist types in the editor
 
 `EditorSheet` recognizes `fav`, `review` and `together` (`special`) and then allows “All × Everything” (also with
-`daytime: "morning"`, where a note explains “Good morning” from the listening clock, and with
+`daytime: "morning"` or `unheard: true`, where a note explains “Good morning” from the listening clock or “Discovered
+for you”, and with
 `mix.flavor: "geschmack"` and with an own sound filter that requires instruments or themes, `sound.instruments`,
 `sound.themes`): for `review` only period and song count, for `fav` only “How long does something count as
 new?” instead of music world and vibe, for `together` instead of the type the choice of whose taste counts (own people

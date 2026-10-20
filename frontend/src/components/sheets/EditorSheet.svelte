@@ -75,7 +75,7 @@
   // Favorite bands, recap, family mix and the morning from the listening clock choose on their own – “All × Everything”
   // is right there; so is a mix whose own sound filter requires instruments or themes (e.g. “calm piano music”)
   const special = $derived(p.fav ? 'fav' : p.review ? 'review' : p.together ? 'together' : null)
-  const isInvalid = () => !p.rules && !p.fav && !p.review && !p.together && !p.radio && !p.daytime && !narrowsLibrary(p.sound)
+  const isInvalid = () => !p.rules && !p.fav && !p.review && !p.together && !p.radio && !p.daytime && !p.unheard && !narrowsLibrary(p.sound)
     && !(p.type === 'mix' && p.mix?.flavor === 'geschmack') && weltIds(p).length === 0 && (p.stil || '*') === '*'
   const invalid = $derived(isInvalid())
   const togetherOptions = $derived(S.config.personen.filter((x) => isAdmin() || ownPersons().includes(x) || x.public))
@@ -323,6 +323,9 @@
       <Select options={stilOptions(counts, ids.length > 0)} value={p.stil} onchange={(v) => set('stil', v)} />
     </label>
     {#if mix}
+      {#if p.unheard}
+        <div class="note">{t('Only songs this account has never played – what sounds like its taste comes much more often. New every week by default, at most one song per album.')}</div>
+      {/if}
       {#if p.daytime === 'morning'}
         <div class="note">{t('Made for the mornings: starts calm and gets livelier, and songs that sound like what is played in the morning come more often. The length fits the usual morning round.')}</div>
       {/if}

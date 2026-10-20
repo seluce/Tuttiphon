@@ -7,6 +7,12 @@ released.
 
 ## Unreleased
 
+- **“Discovered for you”** – like Spotify’s Discover Weekly, inside your own library: every Monday 30 songs the
+  account has never played, picked by its taste, at most two per band and one per album. Suggested for every account
+  with a stored password – in a typical library most songs have never played.
+- **Is a mix listened to?** The page of a mix now shows how much of its last editions was played (“Listened to in 3 of
+  the last 8 weeks – 18 % of their songs played”). A mix of which not a single song played for at least 12 days appears
+  under “To review” with “Pause” – sooner than the 90 days that apply to all playlists.
 - **“Good morning” from your listening.** Tuttiphon now knows when each account listens (from the plays it already
   sees in Navidrome, so it works right away) and suggests “Good morning” only to those who really listen in the
   morning: as long as their usual morning round, starting calm and getting livelier, and sounding like what they play

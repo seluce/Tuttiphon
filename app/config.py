@@ -597,8 +597,8 @@ def _validate_config(cfg):
                                       and all(isinstance(x, str) and x for x in radio["seed"])):
             raise ValueError(_("config: playlist '{id}': radio needs at least one starting band", id=p.get('id')))
         taste_mix = p.get("type") == "mix" and isinstance(p.get("mix"), dict) and p["mix"].get("flavor") == "geschmack"
-        special = p.get("fav") or p.get("review") or p.get("together") or p.get("daytime")   # favorite bands, recap,
-        # family mix, the morning from the listening clock
+        special = p.get("fav") or p.get("review") or p.get("together") or p.get("daytime") or p.get("unheard")
+        # favorite bands, recap, family mix, the morning from the listening clock, what was never played
         # an instrument narrows the whole library enough (“ruhige Klaviermusik”, combined search)
         special = special or (isinstance(p.get("sound"), dict) and (p["sound"].get("instruments") or p["sound"].get("themes")))
         if not wl and p.get("stil") == "*" and not radio and not taste_mix and not special:   # “Your sound” picks from everything
@@ -623,6 +623,8 @@ def _validate_config(cfg):
             raise ValueError(_("config: playlist '{id}': recap invalid", id=p.get('id')))
         if p.get("daytime") is not None and not (p["daytime"] == "morning" and p.get("type") == "mix"):
             raise ValueError(_("config: playlist '{id}': time of day invalid", id=p.get('id')))
+        if p.get("unheard") is not None and not (p["unheard"] is True and p.get("type") == "mix"):
+            raise ValueError(_("config: playlist '{id}': “never played” only exists as a mix", id=p.get('id')))
     for p in cfg["playlists"]:
         # minDuration: seconds (null = from the music world or the settings); every number ends up in int() when
         # writing – a text or an endless number there would stop the playlists of the whole family

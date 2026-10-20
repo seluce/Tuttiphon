@@ -11,7 +11,7 @@
   import { api } from '../lib/api.js'
   import { toast } from '../lib/overlay.svelte.js'
   import { fmt } from '../lib/format.js'
-  import { t } from '../lib/i18n.svelte.js'
+  import { t, tn, locale } from '../lib/i18n.svelte.js'
   import { openArtist } from '../lib/artist.js'
   import { player, playList, toggle } from '../lib/player.svelte.js'
   import { MIXEVERY, reroll } from './playlist/actions.js'
@@ -50,6 +50,21 @@
   const every = $derived(MIXEVERY[p?.mix?.every || 'day'])
   const own = $derived(d?.own !== false && canEdit(p))
   const max = $derived(Math.max(1, ...(d?.topArtists || []).map((a) => a[1])))
+  // is the mix listened to? finished editions from the mix history (GET /api/playlist → usage)
+  const usage = $derived.by(() => {
+    const u = d?.usage
+    if (!u) return null
+    const pct = u.songs ? Math.round((100 * u.played) / u.songs) : 0
+    const when = u.last ? new Date(`${u.last}T12:00`).toLocaleDateString(locale(), { day: 'numeric', month: 'short' }) : ''
+    const vals = { heard: u.heard, pct }
+    const main = !u.heard
+      ? (u.played ? tn(u.periods, 'Only single songs played from the last edition ({pct} % of the songs).', 'Only single songs played from the last {n} editions ({pct} % of the songs).', vals)
+        : tn(u.periods, 'Nothing played from the last edition.', 'Nothing played from the last {n} editions.'))
+      : u.every === 'week' ? tn(u.periods, 'Listened to in the last week – {pct} % of its songs played.', 'Listened to in {heard} of the last {n} weeks – {pct} % of their songs played.', vals)
+      : u.every === 'month' ? tn(u.periods, 'Listened to in the last month – {pct} % of its songs played.', 'Listened to in {heard} of the last {n} months – {pct} % of their songs played.', vals)
+      : tn(u.periods, 'Listened to on the last day – {pct} % of its songs played.', 'Listened to on {heard} of the last {n} days – {pct} % of their songs played.', vals)
+    return { main, last: u.heard ? t('Last edition listened to: {when}', { when }) : '', none: !u.played }
+  })
 
   async function shuffle() {
     try {
@@ -119,6 +134,14 @@
               {/each}
             </div>
           </div>
+          {#if usage}
+            <div class="card">
+              <div class="card-head"><h2>{t('Is it listened to?')}</h2></div>
+              <p class="small" class:warn-t={usage.none}>{usage.main}</p>
+              {#if usage.last}<p class="small muted mt-1">{usage.last}</p>{/if}
+              <div class="hint">{t('Counts the songs of each finished edition that were played in its period – also from the album or elsewhere. An edition counts as listened to from 3 songs.')}</div>
+            </div>
+          {/if}
           <div class="card">
             <div class="card-head"><h2>{t('How it is made')}</h2></div>
             <ul class="rules">

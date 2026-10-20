@@ -450,6 +450,9 @@ def api_playlist(query):
         res["summary"] = [x for x in res["summary"] if not _private_line(x)]
     st = next((x for x in api_playlists()["playlists"] if x["id"] == p["id"]), {})
     res.update({"state": st.get("state"), "navidrome": st.get("navidrome"), "webUrl": nav_web_url(load_env())})
+    if p.get("type") == "mix" and (res["own"] or auth.current()["role"] == "admin"):   # someone else's listening stays private
+        from . import feedback
+        res["usage"] = feedback.usage({p["id"]}).get(p["id"])
     return res
 
 
