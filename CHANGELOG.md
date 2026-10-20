@@ -5,25 +5,27 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 1.2.0
 
+New ways to find music in your own library – most songs in a family library have never been played.
+
+- **“Discovered for you”** – like Spotify’s Discover Weekly, inside your own library: every Monday 30 songs the
+  account has never played, picked by its taste, at most two per band and one per album.
 - **“Album of the week”** – every Monday one whole album the account has never played, by a favorite band or in its
   sound, in album order; no singles, EPs or compilations. It stays the same all week.
-- **Fewer, better suggestions first.** Per person, “Discover” now starts with a small core set of formats with a fixed
-  rhythm (discovered, album of the week, own sound, new from favorite bands, rediscover, your month, good morning and
-  the Daily Mixes of the two most played worlds); all other ideas are behind “more ideas”.
-- **“Discovered for you”** – like Spotify’s Discover Weekly, inside your own library: every Monday 30 songs the
-  account has never played, picked by its taste, at most two per band and one per album. Suggested for every account
-  with a stored password – in a typical library most songs have never played.
-- **Is a mix listened to?** The page of a mix now shows how much of its last editions was played (“Listened to in 3 of
-  the last 8 weeks – 18 % of their songs played”). A mix of which not a single song played for at least 12 days appears
-  under “To review” with “Pause” – sooner than the 90 days that apply to all playlists.
 - **“Good morning” from your listening.** Tuttiphon now knows when each account listens (from the plays it already
   sees in Navidrome, so it works right away) and suggests “Good morning” only to those who really listen in the
   morning: as long as their usual morning round, starting calm and getting livelier, and sounding like what they play
   in the morning. The card says why (“for the usual listening on weekdays around 6:45”).
-- Without listening data (no stored password) the suggestions stay as before; “Good night” and “Car ride” are
-  unchanged.
+- **Fewer, better suggestions first.** Per person, “Discover” now starts with a small core set of formats with a fixed
+  rhythm (discovered, album of the week, own sound, new from favorite bands, rediscover, your month, good morning and
+  the Daily Mixes of the two most played worlds); all other ideas are behind “more ideas”. Music worlds and your own
+  playlists work as before.
+- **Is a mix listened to?** The page of a mix now shows how much of its last editions was played (“Listened to in 3 of
+  the last 8 weeks – 18 % of their songs played”). A mix of which not a single song played for at least 12 days appears
+  under “To review” with “Pause” – sooner than the 90 days that apply to all playlists.
+- The new formats need a stored Navidrome password for the account (its plays). Without one the suggestions stay as
+  before; “Good night” and “Car ride” are unchanged. No changes to `docker-compose.yaml` needed.
 
 ## 1.1.0
 
