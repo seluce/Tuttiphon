@@ -7,6 +7,11 @@ released.
 
 ## Unreleased
 
+- **“Album of the week”** – every Monday one whole album the account has never played, by a favorite band or in its
+  sound, in album order; no singles, EPs or compilations. It stays the same all week.
+- **Fewer, better suggestions first.** Per person, “Discover” now starts with a small core set of formats with a fixed
+  rhythm (discovered, album of the week, own sound, new from favorite bands, rediscover, your month, good morning and
+  the Daily Mixes of the two most played worlds); all other ideas are behind “more ideas”.
 - **“Discovered for you”** – like Spotify’s Discover Weekly, inside your own library: every Monday 30 songs the
   account has never played, picked by its taste, at most two per band and one per album. Suggested for every account
   with a stored password – in a typical library most songs have never played.

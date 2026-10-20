@@ -48,6 +48,7 @@
     const parts = [t('for {name}', { name: findPerson(p.person)?.name || '?' })]
     if (p.hits) parts.push(t('hits only'))
     if (p.review) parts.push(t('{n} songs, changes on the first of the month', { n: fmt(s.count) }))
+    else if (p.album) parts.push(t('one whole album a week, from {n} never played', { n: fmt(s.count) }))
     else if (mix) {
       const v = { when: mixWording(p)[1], size: p.mix?.minutes ? t('{n} minutes', { n: p.mix.minutes }) : p.mix?.size || 50, n: fmt(s.count), max: p.mix?.perArtist || 3 }
       parts.push(p.mix?.perArtist === 0 ? t('{when}: {size} from {n} songs', v) : t('{when}: {size} from {n} songs, max. {max} per band', v))

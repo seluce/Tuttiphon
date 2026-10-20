@@ -332,7 +332,7 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
-| `GET /api/suggestions` | signed in | optional `person` | list of suggestions (`key`, `kind`, `person`, `group`, `score`, `title`, `name`, `count` …) | without `person`: only suggestions for their own people, no new music worlds (`kind: scene`), without the ones they hid; with `person`: own person only (`403`), their own hide list |
+| `GET /api/suggestions` | signed in | optional `person` | list of suggestions (`key`, `kind`, `person`, `group`, `score`, `title`, `name`, `count`, `core` – part of the core set, listed first …) | without `person`: only suggestions for their own people, no new music worlds (`kind: scene`), without the ones they hid; with `person`: own person only (`403`), their own hide list |
 | `GET /api/inbox` | signed in | – | “To review”: list `{key, level, title, text, actions[]}` ([04](04-playlists.md#to-review-inbox)); if another installation's instance has checked in, an `instance` entry comes first | their own, simple list from `user_inbox()` (create profile, preferences, first playlist, store password) without the items they ignored |
 | `GET /api/matrix` | signed in | optional `date` (`YYYY-MM-DD`) | `{"counts": {"<world>\|<style>": n}, "activeSeason": [...]}` | unfiltered |
 | `GET /api/missing` | own | optional `person` (default: first own person or the default person) | `{"seeds", "missing[{artist, score, because}]", "lastfm"}` | own person only |

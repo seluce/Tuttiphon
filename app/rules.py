@@ -308,6 +308,8 @@ def describe(cfg, playlist):
         text = _s("Good morning in the sound of the mornings: {text}", text=text)
     if playlist.get("unheard"):
         text = _s("Never played yet, picked by taste: {text}", text=text)
+    if playlist.get("album"):
+        return _s("Album of the week – one whole album never played yet, picked by taste, new every week")
     if playlist.get("review"):
         if playlist["review"].get("period") == "year":
             return _s("Recap – the most played songs of the year")
@@ -1009,6 +1011,10 @@ def summary(cfg, playlist, ctx=None):
     lines = []
     welten = [_find(cfg["welten"], w) for w in welt_ids(playlist)]
     stil = None if playlist.get("stil", ALL) == ALL else _find(cfg["stile"], playlist["stil"])
+    if playlist.get("album"):
+        return [_("Album of the week: one whole album this account has never played – at least 6 songs, one band, no "
+                  "compilation – picked by its taste, favorite bands first, in album order"),
+                _("New every week – during the week it stays the same, even once it has been played")]
     if playlist.get("review"):
         from .mixer import mix_day, options
         start, end, _title = review_period(playlist["review"].get("period", "month"), mix_day())

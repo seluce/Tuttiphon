@@ -199,5 +199,8 @@
  "Not a single song of its last edition was played. Pausing takes it out of Symfonium, here it stays kept.": "Aus der letzten Ausgabe lief kein einziger Song. Pausieren nimmt sie aus Symfonium, hier bleibt sie aufgehoben.",
  "Not a single song of its last {n} editions was played. Pausing takes it out of Symfonium, here it stays kept.": "Aus den letzten {n} Ausgaben lief kein einziger Song. Pausieren nimmt sie aus Symfonium, hier bleibt sie aufgehoben.",
  "Never played yet, picked by taste: {text}": "Noch nie gehört, nach Geschmack ausgewählt: {text}",
- "Only songs this account has never played – what sounds like its taste comes much more often": "Nur Songs, die dieses Konto noch nie gespielt hat – was nach seinem Geschmack klingt, kommt deutlich öfter"
+ "Only songs this account has never played – what sounds like its taste comes much more often": "Nur Songs, die dieses Konto noch nie gespielt hat – was nach seinem Geschmack klingt, kommt deutlich öfter",
+ "Album of the week – one whole album never played yet, picked by taste, new every week": "Album der Woche – ein ganzes, noch nie gehörtes Album, nach Geschmack ausgewählt, jede Woche neu",
+ "Album of the week: one whole album this account has never played – at least 6 songs, one band, no compilation – picked by its taste, favorite bands first, in album order": "Album der Woche: ein ganzes Album, das dieses Konto noch nie gespielt hat – mindestens 6 Songs, eine Band, kein Sampler –, nach seinem Geschmack ausgewählt, Lieblingsbands zuerst, in Albumreihenfolge",
+ "New every week – during the week it stays the same, even once it has been played": "Jede Woche neu – während der Woche bleibt es gleich, auch wenn es schon gehört wurde"
 }

@@ -75,7 +75,7 @@
   // Favorite bands, recap, family mix and the morning from the listening clock choose on their own – “All × Everything”
   // is right there; so is a mix whose own sound filter requires instruments or themes (e.g. “calm piano music”)
   const special = $derived(p.fav ? 'fav' : p.review ? 'review' : p.together ? 'together' : null)
-  const isInvalid = () => !p.rules && !p.fav && !p.review && !p.together && !p.radio && !p.daytime && !p.unheard && !narrowsLibrary(p.sound)
+  const isInvalid = () => !p.rules && !p.fav && !p.review && !p.together && !p.radio && !p.daytime && !p.unheard && !p.album && !narrowsLibrary(p.sound)
     && !(p.type === 'mix' && p.mix?.flavor === 'geschmack') && weltIds(p).length === 0 && (p.stil || '*') === '*'
   const invalid = $derived(isInvalid())
   const togetherOptions = $derived(S.config.personen.filter((x) => isAdmin() || ownPersons().includes(x) || x.public))
@@ -322,7 +322,9 @@
     <label class="f">{t('Vibe – what plays?')}
       <Select options={stilOptions(counts, ids.length > 0)} value={p.stil} onchange={(v) => set('stil', v)} />
     </label>
-    {#if mix}
+    {#if mix && p.album}
+      <div class="note">{t('Album of the week: one whole album this account has never played, picked by its taste – favorite bands first – in album order. New every Monday; during the week it stays the same.')}</div>
+    {:else if mix}
       {#if p.unheard}
         <div class="note">{t('Only songs this account has never played – what sounds like its taste comes much more often. New every week by default, at most one song per album.')}</div>
       {/if}

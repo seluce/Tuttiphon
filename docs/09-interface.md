@@ -320,6 +320,10 @@ other people. It starts on the default person (`settings.defaultPerson`) and is 
 person, even if it is linked to the same account –, then “Right for the season”, then the shared person,
 the others and “New music worlds discovered”. Each area collapses and expands via its heading, showing the
 number of suggestions when collapsed; the device remembers this (`localStorage` `tuttiphon-discover-folded`).
+Within a person's area the **core set** (`core: true`, [04](04-playlists.md#suggestions)) comes first; the other
+ideas wait behind “n more ideas” (until the page is left). An album of the week reads “one whole album a week, from
+n never played” on its card and, on the playlist page, “One whole album, in album order – next Monday there is a new
+one …”; the editor shows a note instead of the mix settings.
 
 **Hidden suggestions.** ✕ (“Not interested”, at the top right of every card – on a new music world on its picture)
 hides a suggestion for half a year. Below the suggestions it says

@@ -113,7 +113,9 @@
             </div>
           </div>
           <p class="muted small -mt-1.5 mb-2.5">
-            {mix
+            {p.album
+              ? t('One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in Symfonium.')
+              : mix
               ? every.about(fmt(d.count))
               : t('This is how a mix could look – Navidrome reshuffles on every request.')}
           </p>

@@ -141,7 +141,7 @@ def settings_key(cfg, playlist):
     # Radio bands, own sound filter and minimum length count too – only appended when set, so the fingerprint of
     # existing mixes without these fields does not change (otherwise all would be picked anew mid-period)
     extra = {k: playlist[k] for k in ("radio", "sound", "minDuration", "notPlayedDays", "together", "review", "daytime",
-                                      "unheard")
+                                      "unheard", "album")
              if playlist.get(k) is not None}
     if extra:
         parts.append(extra)
@@ -362,6 +362,65 @@ def calm_down(lib, order, feats, quiet_end=0, rise=False):
     return out + tail
 
 
+ALBUM_MIN_TRACKS = 6   # album of the week: no singles or EPs
+ALBUM_MAX_ARTISTS = 3  # … and no compilations
+
+
+def album_candidates(cfg, base, plib, playlist, nsp, today=None):
+    """Albums for "Album of the week": [(weight, album id)] – at least ALBUM_MIN_TRACKS songs, at most ALBUM_MAX_ARTISTS
+    bands, at least half of them in the playlist's selection (music world, filters, dislikes), not a single song of it
+    played on the account. Weight: how much the album sounds like the account's taste (taste.matcher with the sound
+    weighted as for "Your sound", power 3), × 2 for a favorite band, × the Deezer stars of its songs."""
+    from . import rules, taste
+    pool = rules.apply_sound(cfg, plib, playlist, plib.match(nsp))
+    albums = {}
+    for i, s in enumerate(plib.songs):
+        if s.get("albumId"):
+            albums.setdefault(s["albumId"], []).append(i)
+    in_pool = Counter(plib.songs[i].get("albumId") for i in pool)
+    person = rules.person_of(cfg, playlist) or {}
+    user = person.get("user")
+    sim = taste.matcher(taste.profile(cfg, base, user, today), plib, sound=taste.FLAVOR_SOUND) if user else None
+    favorites = set(rules.favorite_artists(cfg, person, rules.BuildContext(plib, today))) if person else set()
+    out = []
+    for aid, idx in albums.items():
+        if len(idx) < ALBUM_MIN_TRACKS or in_pool[aid] * 2 < len(idx):
+            continue
+        songs = [plib.songs[i] for i in idx]
+        if any(s.get("playCount") for s in songs):
+            continue   # already (partly) heard
+        bands = {plib._main_artist(s) for s in songs}
+        if len(bands) > ALBUM_MAX_ARTISTS:
+            continue
+        fit = sum(sim(i) for i in idx) / len(idx) if sim else 0.5
+        stars = sum((s.get("userRating") or s.get("averageRating") or 0) for s in songs) / len(songs)
+        out.append((taste.factor(fit) ** 3 * (2.0 if bands & favorites else 1.0) * (0.5 + 0.25 * stars), aid))
+    return out
+
+
+def album_order(cfg, base, plib, playlist, nsp, today=None):
+    """"Album of the week" -> (song indices in plib in album order, number of candidate albums). One album per period,
+    picked by weight with a random value fixed for (period, playlist) – it stays for the whole period, even after its
+    songs were played (remembered like a mix)."""
+    opt = options(playlist)
+    day = period_start(opt.get("every", "week"), today)
+    saved = _load_state().get(playlist.get("id"))
+    if saved and saved.get("day") == day.isoformat() and saved.get("key") == settings_key(cfg, playlist):
+        index = plib.index_of()
+        order = [index[s] for s in saved.get("ids", []) if s in index]
+        if order:
+            return order, saved.get("albums", 1)
+    cands = album_candidates(cfg, base, plib, playlist, nsp, today)
+    if not cands:
+        return [], 0
+    seed = f"{day.isoformat()}|{playlist.get('id')}|{opt.get('salt', '')}"
+    aid = max(cands, key=lambda c: math.log(_u(seed, c[1])) / c[0])[1]   # weighted random choice (Efraimidis-Spirakis)
+    songs = plib.songs
+    order = sorted((i for i, s in enumerate(songs) if s.get("albumId") == aid),
+                   key=lambda i: (songs[i].get("discNumber") or 1, songs[i].get("track") or 0, songs[i].get("title") or ""))
+    return order, len(cands)
+
+
 def unheard(lib, ids):
     """The songs among ids that the account of this song list has never played (playCount 0)."""
     songs = lib.songs
@@ -434,6 +493,14 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
         return order, len(order)
     plib = person_lib(cfg, playlist, base)
     from . import feedback, rules
+    if playlist.get("album"):   # album of the week: one whole album instead of a selection
+        order, n = album_order(cfg, base, plib, playlist, nsp, today)
+        if keep and order:
+            remember(cfg, playlist, plib, order, period_start(options(playlist).get("every", "week"), today))
+        if plib is not base:
+            index = base.index_of()
+            order = [index[plib.songs[i]["id"]] for i in order if plib.songs[i]["id"] in index]
+        return order, n
     pool = rules.apply_sound(cfg, plib, playlist, plib.match(nsp))   # sound vibes: only matching songs
     if playlist.get("unheard"):   # "Discovered for you": only what this account has never played
         pool = frozenset(unheard(plib, pool))

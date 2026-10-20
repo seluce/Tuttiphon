@@ -56,6 +56,76 @@ class DiscoverTest(unittest.TestCase):
         self.assertFalse(any(x["playlist"].get("unheard") for x in self.suggestions(played_all=True)))
 
 
+class AlbumTest(unittest.TestCase):
+    """“Album of the week”: a whole album never played on the account, by taste, in album order, kept for the week."""
+
+    def setUp(self):
+        self.cfg = base_config()
+        self.cfg["settings"]["allMinRating"] = 0
+        songs = []
+        for a in range(8):   # 8 albums of 8 songs by 8 bands – album 0 was played once, album 7 is a compilation
+            for k in range(8):
+                songs.append(song(f"a{a}-{k}", artist=f"Gruppe {k}" if a == 7 else f"Gruppe {a}", album=f"Platte {a}",
+                                  genres=("Pop",), rating=4, plays=1 if a == 0 and k == 3 else 0))
+                songs[-1]["track"] = 8 - k   # stored out of order on purpose
+        songs.append(song("kurz-1", artist="Gruppe 9", album="EP", genres=("Pop",)))   # too short for an album
+        self.lib = Library(songs)
+        self.p = {"id": "alb", "person": "jonas", "welt": "*", "stil": "*", "type": "mix", "album": True,
+                  "mix": {"every": "week"}}
+        self.patches = [mock.patch.object(mixer, "person_lib", lambda cfg, playlist, base: base),
+                        mock.patch.object(taste, "profile", lambda *a, **k: None),
+                        mock.patch.object(mixer, "_load_state", lambda: {})]
+        for x in self.patches:
+            x.start()
+            self.addCleanup(x.stop)
+
+    def nsp(self):
+        return rules.build_nsp(self.cfg, self.p, rules.BuildContext(self.lib, TODAY))
+
+    def test_candidates_and_album_order(self):
+        config.validate_config({**self.cfg, "playlists": [self.p]})
+        cands = mixer.album_candidates(self.cfg, self.lib, self.lib, self.p, self.nsp(), TODAY)
+        self.assertEqual(sorted(aid for _w, aid in cands), [f"al-Platte {a}" for a in range(1, 7)])   # not 0, 7, the EP
+        order, n = mixer.pick(self.cfg, self.lib, self.p, self.nsp(), TODAY)
+        self.assertEqual(n, 6)
+        songs = [self.lib.songs[i] for i in order]
+        self.assertEqual(len({s["albumId"] for s in songs}), 1)
+        self.assertEqual([s["track"] for s in songs], list(range(1, 9)))   # in album order
+        again, _n = mixer.pick(self.cfg, self.lib, self.p, self.nsp(), TODAY + dt.timedelta(days=2))
+        self.assertEqual(again, order)   # the same album all week (the same random value for the period)
+        self.assertIn("|album", suggest.key_of(self.p))
+        self.assertTrue(rules.summary(self.cfg, self.p)[0].startswith("Album of the week"))
+
+    def test_favorite_band_weighs_double(self):
+        fav = mock.patch.object(rules, "favorite_artists", lambda cfg, person, ctx=None, n=30: ["Gruppe 2"])
+        with fav:
+            weights = dict((aid, w) for w, aid in mixer.album_candidates(self.cfg, self.lib, self.lib, self.p, self.nsp(), TODAY))
+        self.assertAlmostEqual(weights["al-Platte 2"], 2 * weights["al-Platte 3"])
+
+
+class CoreSetTest(unittest.TestCase):
+    def test_core_first_and_not_counted_against_the_limit(self):
+        cfg = base_config()
+        cfg["settings"]["allMinRating"] = 0
+        lib = Library([song(f"s{k}", artist=f"Gruppe {k % 40}", album=f"Album {k % 80}", genres=("Pop",), rating=4,
+                            plays=2 if k % 3 == 0 else 0) for k in range(400)]
+                      + [song(f"c{k}", artist="Band A" if k % 2 else "Band B", album=f"Kinder {k % 6}", genres=("Children",),
+                              rating=4, plays=1) for k in range(60)])
+        with mock.patch.object(taste, "profile", lambda cfg, base, user, today=None:
+                               {"enough": True, "welten": [["kinder", 0.6]], "artists": []} if user == "Jonas" else None), \
+                mock.patch.object(taste, "_person_lib", lambda cfg, base, user: base), \
+                mock.patch("app.listenclock.morning_of", lambda *a, **k: None):
+            out = suggest.suggestions(cfg, lib, today=TODAY, only_person="jonas", per_person=2)
+        flags = [bool(x.get("core")) for x in out]
+        self.assertEqual(flags, sorted(flags, reverse=True))   # the core set comes first
+        core = [x for x in out if x.get("core")]
+        self.assertGreater(len(core), 2)                         # … and is not cut by per_person
+        self.assertLessEqual(len(out) - len(core), 2)
+        kinds = {x["key"] for x in core}
+        self.assertTrue(any("|unheard" in k for k in kinds))
+        self.assertIn("jonas|kinder|*||mix", kinds)              # the Daily Mix of the most played world
+
+
 class UsageTest(unittest.TestCase):
     def history(self, entries):
         return mock.patch.object(feedback, "_cached", lambda path, default, convert=None, extra=None: entries)

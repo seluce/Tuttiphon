@@ -438,6 +438,7 @@ mix: `type: "mix"` and, if `mix` is missing, `{"size": 40, "perArtist": 3, "ever
 |---|---|---|---|
 | `fav` | object | “New from your favorite bands”: `{days}` – what the person's favorite bands added in the last `days` days; `rules.favorite_artists()` determines the bands | `days` 7–365, default 60 |
 | `together` | list | family mix “What everyone likes”: people whose taste counts equally; everyone's dislikes and 1-star songs apply | at least two known people; users only their own and those visible to everyone (`auth.merge_user_changes()`) |
+| `album` | boolean | `true`: “Album of the week” – one whole album the person's account has never played, by its taste, in album order, new every period (`mixer.album_order()`); “All × Everything” is allowed | only `true`, mix only |
 | `unheard` | boolean | `true`: “Discovered for you” – only songs the person's account has never played, the taste decides (`mixer.unheard()`); “All × Everything” is allowed | only `true`, mix only |
 | `daytime` | string | `"morning"`: “Good morning” from the listening clock – starts calm and gets livelier (`mixer.calm_down(rise=True)`), songs that sound like the mornings of the person's account come more often (`mixer.morning_sound()`); “All × Everything” is allowed | only `"morning"`, mix only |
 | `review` | object | recap playlist: `{period}` = `month` (last full month) or `year` (year up to the end of last month, in January the previous year); the most played songs, the name moves along (“Your October 2026”) | mix only |

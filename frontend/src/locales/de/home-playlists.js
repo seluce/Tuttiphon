@@ -259,4 +259,8 @@ export default {
   'Listened to on the last day – {pct} % of its songs played.': 'Am letzten Tag gehört – {pct} % der Songs gespielt.',
   'Listened to on {heard} of the last {n} days – {pct} % of their songs played.': 'An {heard} der letzten {n} Tage gehört – {pct} % der Songs gespielt.',
   'Last edition listened to: {when}': 'Zuletzt gehörte Ausgabe: {when}',
+  'One more idea': 'Eine weitere Idee',
+  '{n} more ideas': '{n} weitere Ideen',
+  'One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in Symfonium.': 'Ein ganzes Album in Albumreihenfolge – nächsten Montag gibt es ein neues. Bis dahin bleibt die Liste gleich – gut für Offline in Symfonium.',
+  'one whole album a week, from {n} never played': 'jede Woche ein ganzes Album, aus {n} noch nie gehörten',
 }

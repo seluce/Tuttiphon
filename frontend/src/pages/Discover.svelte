@@ -84,6 +84,13 @@
     return order.map((g) => [g, shown.filter((s) => s.group === g)]).filter(([, l]) => l.length)
   })
 
+  /* Per person first the core set (few formats with a fixed rhythm), the other ideas folded away below */
+  let moreOpen = $state([])
+  const split = (list) => {
+    const core = list.filter((s) => s.core)
+    return core.length ? [core, list.filter((s) => !s.core)] : [list, []]
+  }
+
   /* Collapse sections – the device remembers it */
   const FOLD_KEY = 'tuttiphon-discover-folded'
   let folded = $state(readFolded())
@@ -141,9 +148,21 @@
           {/if}
         </div>
         {#if open}
+          {@const [first, more] = split(list)}
           <div class={g === 'welten' ? 'g-welt' : 'g-cards'}>
-            {#each list as s (s)}<SuggestionCard {s} onaccepted={() => remove(s)} />{/each}
+            {#each first as s (s)}<SuggestionCard {s} onaccepted={() => remove(s)} />{/each}
           </div>
+          {#if more.length}
+            {#if moreOpen.includes(g)}
+              <div class="g-cards mt-3.5">
+                {#each more as s (s)}<SuggestionCard {s} onaccepted={() => remove(s)} />{/each}
+              </div>
+            {:else}
+              <button type="button" class="btn ghost mt-3" onclick={() => (moreOpen = [...moreOpen, g])}>
+                <Icon name="down" size={16} />{tn(more.length, 'One more idea', '{n} more ideas')}
+              </button>
+            {/if}
+          {/if}
         {/if}
       </section>
     {/each}
