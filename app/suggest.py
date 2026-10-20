@@ -603,18 +603,22 @@ def duplicate_playlists(cfg):
 
 
 TASTE_HINT_SHARE = 0.2   # a separate world (children, audio plays …) with this share of what an account plays: hint
+CHILD_HINT_SHARE = 0.5   # separate worlds together with this share: probably a child's account – ask the administrator
 
 
 def taste_hints(cfg, lib, only_persons=None):
     """"To review": a person's own account plays a lot from a separate music world (e.g. children's music for the kids)
-    that still counts for their taste – offer to keep it out (person.tasteExclude). Not for the shared person.
-    -> [(key, level, title, text, actions)]"""
+    that still counts for their taste – offer to keep it out (person.tasteExclude). If separate worlds make up most of
+    it (CHILD_HINT_SHARE), it may be a child's own account: only the administrator (only_persons None) is asked whether
+    it is a child profile – a child is never told to keep its own music out. Not for the shared person, not for child
+    profiles. -> [(key, level, title, text, actions)]"""
     from . import taste
     default = cfg["settings"].get("defaultPerson")
     separate = {w["id"]: w for w in cfg["welten"] if w.get("separate")}
     out = []
     for p in cfg["personen"]:
-        if not separate or not p.get("user") or p["id"] == default or (only_persons is not None and p["id"] not in only_persons):
+        if not separate or not p.get("user") or p["id"] == default or p.get("child") \
+                or (only_persons is not None and p["id"] not in only_persons):
             continue
         try:
             prof = taste.profile(cfg, lib, p["user"])   # everything the account plays – also what is left out
@@ -623,8 +627,21 @@ def taste_hints(cfg, lib, only_persons=None):
         if not prof or not prof.get("enough"):
             continue
         left_out = set(taste.excluded(p))
-        for wid, share in prof.get("welten", []):
-            if wid in separate and wid not in left_out and share >= TASTE_HINT_SHARE:
+        shares = [(wid, share) for wid, share in prof.get("welten", []) if wid in separate and wid not in left_out]
+        total = min(1.0, sum(share for _wid, share in shares))
+        if total >= CHILD_HINT_SHARE:   # mostly children's music (and audio plays): a child or a parent?
+            if only_persons is None:
+                top = max(shares, key=lambda x: x[1])[0]
+                out.append((f"child|{p['id']}", "info", _("Is {name} a child?", name=p["name"]),
+                            _("{pct} % of what this account plays is from separate music worlds such as “{world}”. For "
+                              "a child, make it a child profile: then discoveries, album of the week and own sound "
+                              "include children’s music, and kid-safe mode is on. If the account belongs to a parent, "
+                              "keep it out of the taste instead.", pct=round(total * 100), world=separate[top]["name"]),
+                            [{"label": _("Child profile"), "do": "childProfile", "person": p["id"]},
+                             {"label": _("Keep it out"), "do": "goto", "href": f"#/person/{p['id']}"}]))
+            continue
+        for wid, share in shares:
+            if share >= TASTE_HINT_SHARE:
                 out.append((f"taste-world|{p['id']}|{wid}", "info",
                             _("“{world}” counts for {name}’s taste", world=separate[wid]["name"], name=p["name"],
                               owner=possessive(p["name"])),

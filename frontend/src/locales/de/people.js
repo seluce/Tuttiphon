@@ -28,6 +28,9 @@ export default {
   'What you like to hear': 'Das hörst du gern',
   'Kid-safe mode': 'Kinderschutz',
   'Leave out songs with explicit lyrics': 'Songs mit derben Texten weglassen',
+  'Child profile': 'Kinderprofil',
+  'For {name}, children’s music is part of the whole library: discoveries, album of the week and own sound include it. Kid-safe mode stays on.':
+    'Für {name} gehört Kindermusik zur ganzen Bibliothek: Entdeckungen, Album der Woche und eigener Sound schließen sie ein. Der Kinderschutz bleibt an.',
   'From your listening': 'Aus deinem Hören',
   'Welcome to Tuttiphon': 'Willkommen bei Tuttiphon',
   'For whom?': 'Für wen?',

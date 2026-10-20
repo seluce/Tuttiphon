@@ -523,11 +523,19 @@ def save_from_ui(incoming, keep_accounts=False):
     with _lock:
         current = load_config()
         new = incoming(copy.deepcopy(current)) if callable(incoming) else incoming
-        new = normalize_playlists(merge_server_fields(new, current, keep_accounts))
+        new = normalize_persons(normalize_playlists(merge_server_fields(new, current, keep_accounts)))
         lang = (new.get("settings") or {}).get("language")
         if lang and lang != current["settings"].get("language"):
             localize_defaults(new, lang)
         save_config(new)
+
+
+def normalize_persons(cfg):
+    """A child profile always has kid-safe mode."""
+    for p in cfg.get("personen") or []:
+        if isinstance(p, dict) and p.get("child") is True:
+            p["clean"] = True
+    return cfg
 
 
 def localize_defaults(cfg, lang):
@@ -705,7 +713,7 @@ def _validate_types(cfg):
                 raise ValueError(_("config: person '{id}': {key} is too long", id=p['id'], key=k))
         if p.get("color") and not COLOR.fullmatch(p["color"]):
             raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key="color"))
-        for k in ("public", "clean"):
+        for k in ("public", "clean", "child"):
             if p.get(k) is not None and not isinstance(p[k], bool):
                 raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key=k))
         if p.get("push") not in (None, "") and not (isinstance(p["push"], str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", p["push"])):

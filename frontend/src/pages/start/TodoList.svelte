@@ -2,7 +2,7 @@
 <script>
   import { untrack } from 'svelte'
   import Icon from '../../components/Icon.svelte'
-  import { S, changed, snapshot, runTask, findWelt, save } from '../../lib/state.svelte.js'
+  import { S, changed, snapshot, runTask, findWelt, findPerson, save } from '../../lib/state.svelte.js'
   import { O, toast } from '../../lib/overlay.svelte.js'
   import { go } from '../../lib/router.svelte.js'
   import { api } from '../../lib/api.js'
@@ -13,7 +13,7 @@
   import { t, tn } from '../../lib/i18n.svelte.js'
 
   const ICONS = { cred: 'lock', deezer: 'star', hand: 'folder', new: 'sparkles', auto: 'check', scenes: 'globe', low: 'alert', gone: 'trash', untagged: 'sliders',
-    unused: 'pause', dup: 'copy', autowelt: 'globe', autowelten: 'globe' }
+    unused: 'pause', dup: 'copy', autowelt: 'globe', autowelten: 'globe', taste: 'sliders', child: 'baby' }
   const kind = (k) => k.split(/[|-]/)[0]
   const items = $derived(cache.inbox || [])
   const list = $derived(items.slice(0, cache.todoAll ? 99 : 5))
@@ -74,6 +74,16 @@
         toast(t('{artist} is no longer in {world}', { artist: a.artist, world: w.name }), { undo: true })
       }
       cache.inbox = (cache.inbox || []).filter((x) => x.key !== `auto|${a.artist}`)
+    }
+    if (a.do === 'childProfile') {   // children's music belongs to "all" for this person, kid-safe mode on
+      const p = findPerson(a.person)
+      if (!p) return
+      snapshot()
+      p.child = true
+      p.clean = true
+      changed()
+      toast(t('{name} is a child profile now', { name: p.name }), { undo: true })
+      cache.inbox = (cache.inbox || []).filter((x) => !(x.actions || []).includes(a))
     }
     if (a.do === 'removeGone') {
       const w = findWelt(a.welt)

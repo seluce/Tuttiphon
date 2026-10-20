@@ -458,7 +458,7 @@ Below it, for every person with an account except the default person, the card *
 (`pages/personen/TasteExclude.svelte`, others: “Not part of <name>’s taste”): toggles for the separate music worlds
 (children's music, audio plays …) and the ones already excluded, plus “Leave out another music world” (a list of the
 others; a world picked there stays visible after switching it off, until the page is left). It changes
-`person.tasteExclude` directly ([Intelligence](06-intelligence.md#taste-per-person)).
+`person.tasteExclude` directly ([Intelligence](06-intelligence.md#taste-per-person)). Not on a child profile.
 
 ### Profile: kid-safe mode and “To your phone”
 
@@ -466,7 +466,11 @@ Under “Dislikes” there are two cards: **Kid-safe mode** turns on `person.cle
 lyrics”), **To your phone** – only if `settings.notify.enabled` – shows `components/PushDevice.svelte` in your own profile
 (turn this device on and off, “Send test”) and below it, collapsed, “Or via the ntfy app”: your own
 ntfy topic `person.push` with “Send test” (`POST /api/notify/test` with `person`). Another person's profile shows
-only the ntfy topic, because everyone registers their devices themselves. Both always set the value
+only the ntfy topic, because everyone registers their devices themselves. Administrators find a second switch in
+the kid-safe card of every person except the default person: **Child profile** (`person.child`, [Playlists](04-playlists.md#music-world-welt));
+turning it on also turns on kid-safe mode, which then cannot be switched off while it is a child profile. The header
+of a child profile shows the pill “Child profile”. “To review” can set it too (action `childProfile` in
+`pages/start/TodoList.svelte`, with undo). Both always set the value
 (`false` or `""`) instead of deleting the field – `merge_user_changes()` only takes over fields that are sent along.
 
 ### Playlist page and playlist cards

@@ -98,6 +98,7 @@ export default {
   'This music world no longer exists': 'Diese Musikwelt gibt es nicht mehr',
   '{artist} is no longer in {world}': '{artist} ist nicht mehr in {world}',
   'Cleaned up': 'Aufgeräumt',
+  '{name} is a child profile now': '{name} ist jetzt ein Kinderprofil',
   'hide': 'ausblenden',
   'All good': 'Alles im Lot',
   'Nothing to do right now.': 'Gerade gibt es nichts zu tun.',

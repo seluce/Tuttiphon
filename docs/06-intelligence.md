@@ -863,6 +863,13 @@ other world can be added from a list. **Hint** (`suggest.taste_hints()`): if a s
 (`TASTE_HINT_SHARE`) of what an account plays and one of its own people (not the default person) does not exclude it
 yet, “To review” says so once per person and world (`taste-world|<person>|<world>`, “Set it” opens the profile).
 
+**A child's own account.** For a child, children's music *is* the own taste. A child profile (`person.child`, set only
+by the administrator, [Playlists](04-playlists.md#music-world-welt)) gets neither the card nor the hint. Before it is
+marked: if the separate worlds not yet excluded make up at least half of what the account plays together
+(`CHILD_HINT_SHARE`), it is probably a child – then only the administrator's “To review” asks “Is <name> a child?”
+(`child|<person>`) with “Child profile” (sets `child` and `clean`) and “Keep it out” (opens the profile, for a parent);
+users get no hint then, so a child is never told to keep its own music out.
+
 ### Sound taste (`app/soundtaste.py`)
 
 With the AI's sound vectors ([Sound similarity](#sound-similarity-appsimilarpy)) the taste also learns what the songs

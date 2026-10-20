@@ -291,6 +291,17 @@ def playlist_name(cfg, playlist):
     return prefix + base_name(cfg, playlist)
 
 
+SPOKEN_SCENE = "hoerspiel"   # audio plays & audiobooks: never part of "all", not even on a child profile
+
+
+def child_worlds(cfg, person):
+    """Separate music worlds that belong to "all" for this person: on a child profile (person.child) the children's
+    music – every separate world except audio plays & audiobooks, which do not belong in a music mix –, otherwise none."""
+    if not (person or {}).get("child"):
+        return set()
+    return {w["id"] for w in cfg["welten"] if w.get("separate") and w.get("scene") != SPOKEN_SCENE}
+
+
 def describe(cfg, playlist):
     """Description for the "comment" in Navidrome (server language)."""
     if playlist.get("rules") is not None:
@@ -367,8 +378,9 @@ def build_nsp(cfg, playlist, ctx=None):
         rules.append({"any": _dedupe([r for w in welten for r in welt_block(w, ctx)] + extra)})
     else:   # all: the whole library without separate music worlds – additionally chosen artists stay in anyway
         keep = set(playlist.get("addArtists", []))
+        own = child_worlds(cfg, person)   # a child profile: children's music belongs to "all"
         for w in cfg["welten"]:
-            if w.get("separate"):
+            if w.get("separate") and w["id"] not in own:
                 rules += welt_negation(w, ctx, keep)
 
     # WHAT
@@ -1064,7 +1076,8 @@ def summary(cfg, playlist, ctx=None):
         lines.append(_n(n, "Bands from {worlds} ({n} band)", "Bands from {worlds} ({n} bands)",
                         worlds=" + ".join(w["name"] for w in welten)))
     else:
-        sep = [w["name"] for w in cfg["welten"] if w.get("separate")]
+        own = child_worlds(cfg, person_of(cfg, playlist))
+        sep = [w["name"] for w in cfg["welten"] if w.get("separate") and w["id"] not in own]
         lines.append(_("The whole library – without {worlds}", worlds=", ".join(sep)) if sep else _("The whole library"))
     if stil:
         if stil.get("kind") == "season":

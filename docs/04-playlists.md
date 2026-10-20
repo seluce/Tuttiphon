@@ -59,6 +59,13 @@ includes albums via `contains` – so exactly what the separate world includes d
 playlist's `addArtists` get no `isNot` rules (`welt_negation(keep=…)`); the album and genre exclusions still apply to
 them.
 
+**Child profile.** For a person with `child: true` (set only by the administrator) the children's music belongs to *All*:
+`rules.child_worlds()` names the separate worlds that are not negated for them – every separate world except audio
+plays & audiobooks (`scene: "hoerspiel"`, `SPOKEN_SCENE`), which do not belong in a music mix. So discovered, album of
+the week, own sound, good morning, rediscover and every “All × vibe” playlist of a child include children's songs;
+`summary()` names only the worlds still left out. `mixer.settings_key()` adds `{"child": true}` (only when set, so
+existing mixes keep their fingerprint), so mixes are picked anew right away. Everyone else's *All* stays as it is.
+
 ### Vibe (`stil`)
 
 A vibe describes *what* is played. All criteria are in one OR block (`stil_block()`), filters are added as AND

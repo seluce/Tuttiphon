@@ -12,6 +12,11 @@ released.
   own sound, favorite bands and “Good morning” then follow the person’s own music; the family person on the same
   account keeps it, and the playlists of the music world stay as they are. “To review” points it out when a separate
   world such as children’s music makes up a big part of what an account plays.
+- **Child profiles.** If a child has a Navidrome account of their own, the administrator marks the profile as a
+  child profile (in the kid-safe card). Then children’s music belongs to the child’s whole library – discoveries, album
+  of the week, own sound and good morning include it, audio plays stay out of the mixes –, and kid-safe mode is always
+  on. When an account plays mostly children’s music, “To review” asks the administrator “Is … a child?” with one click
+  to set it; the child itself is never told to keep its music out.
 - **“New for you this week”** – on Mondays a short notification to each person with “Discovered for you” or “Album of
   the week”: how many never played songs are waiting and which album it is. It can be turned off under Settings →
   Notifications.

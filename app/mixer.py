@@ -145,6 +145,8 @@ def settings_key(cfg, playlist):
              if playlist.get(k) is not None}
     if extra:
         parts.append(extra)
+    if person.get("child"):   # a child profile: children's music belongs to "all" – pick anew right away
+        parts.append({"child": True})
     raw = json.dumps(parts, sort_keys=True, ensure_ascii=False, default=str)
     return hashlib.sha1(raw.encode()).hexdigest()[:16]
 

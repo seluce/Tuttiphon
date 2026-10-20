@@ -1,5 +1,6 @@
 <!--
-  A person's profile: header, taste from listening, preferences, "dislikes", kid-safe mode, notifications,
+  A person's profile: header, taste from listening, preferences, "dislikes", kid-safe mode (with the administrator's
+  switch "Child profile", p.child), notifications,
   profile (prefix, account/visibility), appearance (name, icon, color – folded) and their playlists. p: person from S.config (changed directly) · self: a user looking at their own profile.
 -->
 <script>
@@ -116,6 +117,7 @@
         <div class="hero-meta">
           <span>Navidrome: {p.user}</span>
           <span>{p.public ? t('Playlists visible to everyone') : self ? t('Playlists only for you') : t('Playlists private')}</span>
+          {#if p.child}<span class="pill acc"><Icon name="baby" size={12} />{t('Child profile')}</span>{/if}
           {#if self}
             {#if S.me?.passwordStored}
               <span class="pill ok">{t('Statistics on')}</span>
@@ -138,7 +140,7 @@
 
   {#if p.user}
     <div class="section"><TasteCard person={p.id} likes={p.likes} {self} name={p.name} onchange={ch} /></div>
-    {#if p.id !== S.config.settings.defaultPerson}<div class="section"><TasteExclude {p} {self} onchange={ch} /></div>{/if}
+    {#if p.id !== S.config.settings.defaultPerson && !p.child}<div class="section"><TasteExclude {p} {self} onchange={ch} /></div>{/if}
   {/if}
 
   <div class="card section grid gap-4" data-guide="likes">
@@ -163,9 +165,14 @@
   <div class="g-2 section">
     <div class="card grid gap-3 content-start" data-guide="kinderschutz">
       <h2 class="ih"><span class="hi"><Icon name="shield-check" size={18} /></span>{t('Kid-safe mode')}</h2>
-      <Switch checked={!!p.clean} disabled={cleanLocked} onchange={(v) => { p.clean = v; ch() }}
+      <Switch checked={!!p.clean} disabled={cleanLocked || !!p.child} onchange={(v) => { p.clean = v; ch() }}
         label={t('Leave out songs with explicit lyrics')} />
       <p class="muted small">{cleanText}</p>
+      {#if !self && isAdmin() && p.id !== defaultPerson()}
+        <!-- child profile: only the administrator sets it; children's music belongs to "all", kid-safe mode stays on -->
+        <Switch checked={!!p.child} onchange={(v) => { p.child = v; if (v) p.clean = true; ch() }} label={t('Child profile')} />
+        <p class="muted small">{t('For {name}, children’s music is part of the whole library: discoveries, album of the week and own sound include it. Kid-safe mode stays on.', { name: p.name })}</p>
+      {/if}
     </div>
     {#if S.config.settings.notify?.enabled}
       <div class="card grid gap-3 content-start min-w-0" data-guide="push">

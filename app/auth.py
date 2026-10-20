@@ -498,6 +498,7 @@ def merge_user_changes(current_cfg, incoming, m):
     # kid-safe mode counts for the whole account: a further profile of the same account gets it too (otherwise a
     # second own profile would be a way around it)
     clean = any(p.get("clean") for p in out["personen"] if p["id"] in own or (p.get("user") or "").lower() == user)
+    child = any(p.get("child") for p in out["personen"] if p["id"] in own or (p.get("user") or "").lower() == user)
     persons_before = sum(1 for p in out["personen"] if p["id"] in own)
     for p in incoming.get("personen", []) if isinstance(incoming.get("personen"), list) else []:
         if not isinstance(p, dict):
@@ -517,6 +518,8 @@ def merge_user_changes(current_cfg, incoming, m):
             fresh.update(id=p["id"], user=m["user"])
             if clean:
                 fresh["clean"] = True
+            if child:   # only the administrator sets (and removes) a child profile
+                fresh["child"] = True
             out["personen"].append(fresh)
             own.add(p["id"])
     cur_pl = {p["id"]: p for p in out["playlists"]}

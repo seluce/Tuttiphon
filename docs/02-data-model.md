@@ -279,12 +279,13 @@ to show the field for their own topic.
 | `dislikes.artists` / `dislikes.genres` | lists | dislikes: left out of every playlist of this person |
 | `clean` | boolean | kid-safe mode: songs with explicit lyrics are left out of all playlists and mixes of the person (`rules.clean_rules()`, [Intelligence](06-intelligence.md#lyrics-search-and-kid-safe-mode)) |
 | `push` | string | own ntfy topic for notifications (`[A-Za-z0-9_-]{1,64}`): news from the favorite bands, monthly recap ([Operations](08-operations.md#notifications)); other accounts never see it. Notifications via the app need no topic – there the account's devices count (`state/push.json`) |
+| `child` | boolean | child profile – only the administrator sets it: the children's music belongs to the whole library for this person ([Playlists](04-playlists.md#music-world-welt)), kid-safe mode is always on (`config.normalize_persons()` sets `clean` when saving), no card or hint to keep children's music out of the taste. A further profile a user creates on the same account gets it too |
 | `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. Other people on the same account (the family) keep them ([Intelligence](06-intelligence.md#taste-per-person)). Users set it for their own people |
 
 Several people may share the same account (e.g. a personal profile and the shared family).
 
 `validate_config()` checks types (`_validate_types()`): `name`, `icon`, `color`, `prefix`, `user` must be strings,
-`public` and `clean` booleans, `push` empty or a topic made of letters, digits, `-` and `_`, `likes`/`dislikes` an
+`public`, `clean` and `child` booleans, `push` empty or a topic made of letters, digits, `-` and `_`, `likes`/`dislikes` an
 object of string lists, `tasteExclude` a list of at most 50 strings of at most 100 characters (ids of worlds that no
 longer exist are ignored, not refused). Lengths: `name` at most 120, `prefix` 40, `icon` 64 characters, lists at most 2,000 entries of
 at most 300 characters; `color` empty, `#rgb`, `#rrggbb` or `hsl(…)` (it goes into the page's styles).
@@ -607,7 +608,8 @@ flowchart TD
   applied: the fields `name`, `icon`, `color`, `prefix`, `likes`, `dislikes`, `public`, `clean`, `push`, `tasteExclude` of the user's
   own people (or the newly created own profile), the playlists of their own people (create, change, delete –
   without `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName`, which only the server and administrators set)
-  and `dismissed`/`ignored` into `accounts.<account>`. Settings, music worlds, vibes and other people's playlists
+  and `dismissed`/`ignored` into `accounts.<account>`. `child` is never taken from a user (only the administrator
+  sets it); as with `clean`, a new own profile on the account of a child profile gets it. Settings, music worlds, vibes and other people's playlists
   stay as they are. What `/api/config` delivers to users and why: [Security](07-security.md).
 
 ## .env – credentials
