@@ -223,13 +223,15 @@
     <div class="grid gap-1.5 min-w-0">
       <h2 class="ell">{p.name || res.name}</h2>
       <div class="muted small">
-        {res.mix
+        {p.album
+          ? t('This week: {n} songs, one whole album out of {pool} never played', { n: fmt(res.count), pool: fmt(res.pool) })
+          : res.mix
           ? t('{when}: {n} of {pool} matching songs · {bands} bands · {renew}', { when: mixWording(p)[0], n: fmt(res.count), pool: fmt(res.pool), bands: fmt(res.artistCount), renew: mixWording(p)[1] })
           : res.limit && res.count > res.limit
             ? t('{n} matching songs by {artists} bands · Navidrome shuffles {limit} of them on every load', { n: fmt(res.count), artists: fmt(res.artistCount), limit: res.limit })
             : t('{n} matching songs by {artists} bands', { n: fmt(res.count), artists: fmt(res.artistCount) })}
       </div>
-      {#if (res.mix ? res.pool : res.count) < 15}
+      {#if !p.album && (res.mix ? res.pool : res.count) < 15}
         <div class="warn-t small">{t('Rather few – maybe a lower selection or more music worlds?')}</div>
       {/if}
       <div class="flex gap-2.5 items-center min-w-0">
@@ -283,6 +285,8 @@
       <Select options={[['30', plural(30, 'day', 'days')], ['60', plural(2, 'month', 'months')], ['90', plural(3, 'month', 'months')], ['180', t('half a year')]]} value={String(p.fav.days || 60)}
         onchange={(v) => (p.fav = { ...p.fav, days: Number(v) })} />
     </label>
+  {:else if p.album}
+    <div class="note">{t('Album of the week: one whole album this account has never played, picked by its taste – favorite bands first – in album order. New every Monday; during the week it stays the same.')}</div>
   {:else if raw}
     <div class="note">
       {t('This playlist still has its own rules, taken over unchanged. You can change name, person, count and order – or switch it to the builder, then everything can be set.')}
@@ -322,9 +326,7 @@
     <label class="f">{t('Vibe – what plays?')}
       <Select options={stilOptions(counts, ids.length > 0)} value={p.stil} onchange={(v) => set('stil', v)} />
     </label>
-    {#if mix && p.album}
-      <div class="note">{t('Album of the week: one whole album this account has never played, picked by its taste – favorite bands first – in album order. New every Monday; during the week it stays the same.')}</div>
-    {:else if mix}
+    {#if mix}
       {#if p.unheard}
         <div class="note">{t('Only songs this account has never played – what sounds like its taste comes much more often. New every week by default, at most one song per album.')}</div>
       {/if}

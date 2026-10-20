@@ -28,7 +28,8 @@
   const own = $derived(d.own !== false && canEdit(p))
   const nav = $derived(d.navidrome)
   const eyebrow = $derived([
-    p.review ? t('Recap · changes on the first of the month') : mix ? every.eyebrow : p.rules ? t('Taken-over smart playlist') : t('Smart playlist'),
+    p.review ? t('Recap · changes on the first of the month') : p.album ? t('Album of the week · new every Monday')
+      : mix ? every.eyebrow : p.rules ? t('Taken-over smart playlist') : t('Smart playlist'),
     t('for {name}', { name: person?.name || '?' }),
     // in the trash it is in no one's Navidrome – the state pill says so
     status === 'papierkorb' ? null : person?.public ? t('visible to everyone') : t('private'),
@@ -94,7 +95,10 @@
       <div class="hero-meta">
         <StatePill state={st.state || d.state || status} />
         {#if st.back}<span class="muted">{t('back in Symfonium from {date}', { date: new Date(st.back + 'T00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })}</span>{/if}
-        {#if mix}
+        {#if p.album}
+          <span>{@render bold(t('{n} songs this week'), fmt(d.count))}</span>
+          <span>{t('from {n} albums never played', { n: fmt(d.pool) })}</span>
+        {:else if mix}
           <span>{@render bold(every.songs, fmt(d.count))}</span>
           <span>{t('from {n} matching', { n: fmt(d.pool) })}</span>
         {:else}
@@ -104,10 +108,10 @@
         {#if !mix && d.limit}<span>{t('up to {n} per request', { n: d.limit })}</span>{/if}
         {#if nav}<span class="muted">{t('in Navidrome: {owner}', { owner: nav.owner })}</span>{/if}
       </div>
-      {#if (mix ? d.pool : d.count) < 15 && status === 'aktiv'}
+      {#if !p.album && (mix ? d.pool : d.count) < 15 && status === 'aktiv'}
         <div class="warn-t small">{t('Rather few songs – maybe loosen the selection or add more music worlds.')}</div>
       {/if}
-      {#if mix && !p.review && !p.mix?.minutes && (p.mix?.perArtist ?? 3) > 0 && d.count < (p.mix?.size || 50) && d.pool >= 15 && status === 'aktiv'}
+      {#if mix && !p.review && !p.album && !p.mix?.minutes && (p.mix?.perArtist ?? 3) > 0 && d.count < (p.mix?.size || 50) && d.pool >= 15 && status === 'aktiv'}
         <div class="muted small">{t('The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.', { n: p.mix?.perArtist ?? 3 })}</div>
       {/if}
       {#if !own}

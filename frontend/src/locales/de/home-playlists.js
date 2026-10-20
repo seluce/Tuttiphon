@@ -263,4 +263,7 @@ export default {
   '{n} more ideas': '{n} weitere Ideen',
   'One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in Symfonium.': 'Ein ganzes Album in Albumreihenfolge – nächsten Montag gibt es ein neues. Bis dahin bleibt die Liste gleich – gut für Offline in Symfonium.',
   'one whole album a week, from {n} never played': 'jede Woche ein ganzes Album, aus {n} noch nie gehörten',
+  'from {n} albums never played': 'aus {n} noch nie gehörten Alben',
+  'Album of the week · new every Monday': 'Album der Woche · jeden Montag neu',
+  'This week’s album': 'Das Album dieser Woche',
 }

@@ -98,7 +98,7 @@
       <div class="g-2 section">
         <div class="card">
           <div class="card-head">
-            <h2>{mix ? every.title : t('Sample')}</h2>
+            <h2>{p.album ? t('This week’s album') : mix ? every.title : t('Sample')}</h2>
             <div class="btns">
               {#if tracks.length}
                 <button class="btn sm primary" onclick={() => (playing ? toggle() : playList(tracks, 0, d.name))}>
