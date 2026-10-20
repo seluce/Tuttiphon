@@ -316,4 +316,6 @@ export default {
   'What to notify about?': 'Worüber benachrichtigen?',
   'Once the local administrator has a password (<a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a>), everyone signs in with their own Navidrome account and gets their own view. <a class="link" href="#/hilfe/konten">How it works →</a>': 'Hat der lokale Administrator ein Passwort (<a class="link" href="#/einstellungen/benutzer">Einstellungen → Benutzer & Rechte</a>), meldet sich jede:r mit dem eigenen Navidrome-Konto an und sieht eine eigene Ansicht. <a class="link" href="#/hilfe/konten">So geht’s →</a>',
   'You change the password of the local administrator under Settings → Users & permissions.': 'Das Passwort des lokalen Administrators änderst du unter Einstellungen → Benutzer & Rechte.',
+  'New for you this week': 'Neu für dich diese Woche',
+  'On Mondays to the person, if they have “Discovered for you” or “Album of the week”.': 'Montags an die Person, wenn sie „Entdeckt für dich“ oder „Album der Woche“ hat.',
 }

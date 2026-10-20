@@ -120,6 +120,6 @@ export async function coverSheet(p, d, ondone) {
     return
   }
   let styles = {}
-  try { styles = await api('/api/cover/styles') } catch (e) { toast(e.message, { error: true }); return }
+  try { styles = await api(`/api/cover/styles?id=${encodeURIComponent(p.id)}`) } catch (e) { toast(e.message, { error: true }); return }
   openSheet({ title: t('Cover for “{name}”', { name: d.name }), component: CoverSheet, props: { p, d, styles, ondone } })
 }

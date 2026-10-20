@@ -202,5 +202,14 @@
  "Only songs this account has never played – what sounds like its taste comes much more often": "Nur Songs, die dieses Konto noch nie gespielt hat – was nach seinem Geschmack klingt, kommt deutlich öfter",
  "Album of the week – one whole album never played yet, picked by taste, new every week": "Album der Woche – ein ganzes, noch nie gehörtes Album, nach Geschmack ausgewählt, jede Woche neu",
  "Album of the week: one whole album this account has never played – at least 6 songs, one band, no compilation – picked by its taste, favorite bands first, in album order": "Album der Woche: ein ganzes Album, das dieses Konto noch nie gespielt hat – mindestens 6 Songs, eine Band, kein Sampler –, nach seinem Geschmack ausgewählt, Lieblingsbands zuerst, in Albumreihenfolge",
- "New every week – during the week it stays the same, even once it has been played": "Jede Woche neu – während der Woche bleibt es gleich, auch wenn es schon gehört wurde"
+ "New every week – during the week it stays the same, even once it has been played": "Jede Woche neu – während der Woche bleibt es gleich, auch wenn es schon gehört wurde",
+ "Cover of the format": "Cover des Formats",
+ "for {name}": "für {name}",
+ "Discovered": "Entdeckt",
+ "Album of the week": "Album der Woche",
+ "New from favorite bands": "Neu von Lieblingsbands",
+ "new every Monday": "jeden Montag neu",
+ "new every day": "jeden Tag neu",
+ "{n} minutes every morning": "{n} Minuten jeden Morgen",
+ "new every month": "jeden Monat neu"
 }

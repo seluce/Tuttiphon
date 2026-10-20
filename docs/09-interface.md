@@ -454,6 +454,12 @@ explanation below the heading ends with “Also learns from the sound of what yo
 plays.”). With too little listening a hint; without a stored password a hint as well (own profile:
 “Turn on →” to Settings → My account); without an account nothing.
 
+Below it, for every person with an account except the default person, the card **“Not part of your taste”**
+(`pages/personen/TasteExclude.svelte`, others: “Not part of <name>’s taste”): toggles for the separate music worlds
+(children's music, audio plays …) and the ones already excluded, plus “Leave out another music world” (a list of the
+others; a world picked there stays visible after switching it off, until the page is left). It changes
+`person.tasteExclude` directly ([Intelligence](06-intelligence.md#taste-per-person)).
+
 ### Profile: kid-safe mode and “To your phone”
 
 Under “Dislikes” there are two cards: **Kid-safe mode** turns on `person.clean` (“Leave out songs with explicit
@@ -480,6 +486,11 @@ are buttons:
 For mixes with `usage` (own playlists, administrators) the page shows the card **“Is it listened to?”** next to “How
 it is made”: “Listened to on 5 of the last 12 days – 18 % of their songs played.” (weeks, months accordingly), the last
 edition heard, or – highlighted – “Nothing played from the last 12 editions.”; a hint explains what counts.
+
+**Cover** (`components/sheets/CoverSheet.svelte`, from the “…” sheet or by tapping the picture): previews of the
+styles from `GET /api/cover/styles?id=` – for formats (discovered, album of the week, good morning …) “Cover of the
+format” first, which they get by themselves ([Covers](04-playlists.md#covers-appcoverspy)) –, own image, “Navidrome
+default”. The latter also stops the format cover from coming back; the sheet treats `cover.style: "none"` as no cover.
 
 Playlist cards (`PlaylistCard`) show a **state dot** (`StateDot`) only for administrators and only for states other
 than `aktuell` (“in Navidrome”) – new, changed, scan, error …; users see none (a dot with a tooltip says nothing on a
@@ -639,7 +650,7 @@ by hand” below “Check everything again” (card “In the full run”), whic
   check appears.
 - **Notifications** (`pages/settings/Benachrichtigungen.svelte`): on/off and “This device” (`PushDevice`);
   a separate card “Via ntfy” with server, own topic and “Send test”, Tuttiphon's address, who has their own
-  topic, a note on `NTFY_TOKEN`; a third card with one switch per event.
+  topic, a note on `NTFY_TOKEN`; a third card with one switch per event (among them “New for you this week”).
 
 ### Setup assistant
 

@@ -429,6 +429,7 @@ there.
 | `autoAssigned` | administrators' devices, the administrator's topic | bands were automatically assigned to a music world |
 | `favorites` | devices of the person's account, their topic (`person.push`) | an album by a favorite band was added in the last 3 days (after the scan, once per album) |
 | `review` | devices of the person's account, their topic | in the first three days of the month, if the person has a recap playlist “Your month” |
+| `weekly` | devices of the person's account, their topic | “New for you this week” on Monday (still on Tuesday if no run came on Monday), if the person has an active “Discovered for you” or “Album of the week” that was renewed this week: how many never played songs and which album – once per person and week, tapping opens the first of them |
 
 Each event is sent only once (`state/notified.json`). If two people share the same Navidrome account (such as
 “Familie” and the administrator), each device still gets the message only once.

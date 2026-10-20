@@ -12,6 +12,10 @@ This yields favorite bands, favorite music worlds, the sound (energy, mood, danc
 and the AI music styles. Used for suggestions (suggest.py), "From your listening" in the profile and the weighting of
 mixes (mixer.pick): songs that sound like the person's taste come more often. With the AI's sound vectors there is
 also the sound taste (soundtaste.py, profile["soundTaste"]): a few typical sounds of what the account plays.
+
+A person can keep music worlds out of their taste (person.tasteExclude, e.g. the children's music that plays on a
+parent's account): their songs count neither as liked nor as disliked – profile(…, exclude=…). The same account can
+thus have a taste with them (the family person) and one without (the parent's own person).
 """
 import datetime as dt
 import math
@@ -29,8 +33,41 @@ _lock = threading.Lock()
 _memo = {}
 
 
-def song_scores(plib, user, today=None):
-    """Song index -> weight (>0 liked, <0 rejected) for this account."""
+def excluded(person):
+    """Music worlds the person keeps out of their taste (person.tasteExclude) – as a sorted tuple, part of cache keys."""
+    return tuple(sorted({w for w in (person or {}).get("tasteExclude") or [] if isinstance(w, str)}))
+
+
+_excl_memo = {}
+
+
+def excluded_ids(cfg, plib, exclude, today=None):
+    """Song indices of plib in the music worlds `exclude` (frozenset) – cached per song list, worlds and their rules."""
+    if not exclude:
+        return frozenset()
+    key = (ml.lib_key(plib), tuple(exclude), cfg_key(cfg))
+    with _lock:
+        hit = _excl_memo.get(key)
+    if hit is not None:
+        return hit
+    ctx = rules.BuildContext(plib, today)
+    ids = set()
+    for w in cfg["welten"]:
+        if w["id"] in exclude:
+            block = rules.welt_block(w, ctx)
+            if block:
+                ids |= plib.ids({"any": block})
+    out = frozenset(ids)
+    with _lock:
+        if len(_excl_memo) > 16:
+            _excl_memo.clear()
+        _excl_memo[key] = out
+    return out
+
+
+def song_scores(plib, user, today=None, cfg=None, exclude=()):
+    """Song index -> weight (>0 liked, <0 rejected) for this account – without the songs of the music worlds
+    `exclude` (they say nothing about this person's taste)."""
     today = today or dt.date.today()
     recent, _ = rueckblick.plays_between(user, today - dt.timedelta(days=RECENT_DAYS), today)
     skip = feedback.factors(user, today)
@@ -61,6 +98,9 @@ def song_scores(plib, user, today=None):
             score *= skip[sid]
         if score:
             out[i] = score
+    if exclude and cfg is not None:
+        skip = excluded_ids(cfg, plib, exclude, today)
+        out = {i: v for i, v in out.items() if i not in skip}
     return out
 
 
@@ -73,37 +113,44 @@ def _person_lib(cfg, base, user):
     return plib if getattr(plib, "ratings_exact", False) else None
 
 
-def profile(cfg, base, user, today=None):
-    """Taste of an account, or None (no password stored). {"enough": False, …} if too little was played."""
+def profile(cfg, base, user, today=None, exclude=()):
+    """Taste of an account, or None (no password stored). {"enough": False, …} if too little was played.
+    exclude: music worlds that do not count (excluded(person))."""
     if not user:
         return None
     today = today or dt.date.today()
     plib = _person_lib(cfg, base, user)
     if plib is None:
         return None
-    key = (user.lower(), ml.lib_key(plib), today, audio._cache["stamp"], ml.stamp(), cfg_key(cfg))
+    exclude = tuple(sorted(set(exclude or ())))
+    key = (user.lower(), ml.lib_key(plib), today, audio._cache["stamp"], ml.stamp(), cfg_key(cfg), exclude)
     with _lock:
         out = _memo.get(key)
     if out is None:
-        out = _compute(cfg, plib, user, today)
+        out = _compute(cfg, plib, user, today, exclude)
         with _lock:
             if len(_memo) > 8:
                 _memo.clear()
             _memo[key] = out
     if out.get("enough"):   # sound taste: cached on its own, per account and day
-        st = soundtaste.of(plib, user, today, lambda: song_scores(plib, user, today))
+        st = soundtaste.of(plib, user, today, lambda: song_scores(plib, user, today, cfg, exclude), variant=exclude)
         if st is not None:
             out = {**out, "soundTaste": st}
     return out
+
+
+def for_person(cfg, base, person, today=None):
+    """profile() of a person: their account without the music worlds they keep out of their taste."""
+    return profile(cfg, base, (person or {}).get("user"), today, excluded(person))
 
 
 def cfg_key(cfg):
     return tuple((w["id"], len(w.get("artists", [])), w.get("scene"), tuple(w.get("genres", []))) for w in cfg["welten"])
 
 
-def _compute(cfg, plib, user, today):
+def _compute(cfg, plib, user, today, exclude=()):
     from .classify import song_features
-    scores = song_scores(plib, user, today)
+    scores = song_scores(plib, user, today, cfg, exclude)
     pos = {i: s for i, s in scores.items() if s > 0}
     recent, _ = rueckblick.plays_between(user, today - dt.timedelta(days=RECENT_DAYS), today)
     by_deezer = feedback.deezer_stars(user)

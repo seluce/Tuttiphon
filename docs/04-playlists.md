@@ -1055,6 +1055,7 @@ via the native API.
 
 | Style | Content | needs Pillow |
 |---|---|---|
+| `format` | only for the formats (`format_kind()`): its own gradient per format (`FORMAT_COLORS`), the wordmark, three fanned album covers (album of the week: the album itself, as big as fits above the text), the format's name large (`format_title()`: “Discovered”, “Album of the week”, “Good morning” …, own sound and “your month” keep their name), above it for whom (album of the week: band – album), below it the rhythm (“new every Monday”, “25 minutes every morning”) | yes |
 | `mosaik` | 2 × 2 album covers (from 4 covers on, otherwise the first one large, otherwise a gradient), darkening at the bottom, title | yes |
 | `band` | photo of the largest band with a real image (otherwise a gradient), tinted 22 % in the main color, title | yes |
 | `farbe` | gradient from the main color with a light spot, up to four round band photos, title at the top | yes |
@@ -1065,12 +1066,18 @@ Material comes from `rules.preview()`: covers of the most represented albums, to
 `dominantColor` of the most represented album with cover and color). Title = playlist name without the person prefix and without
 “Daily Mix · ”, subtitle = mix kind and the three largest bands (`_fit_parts()` shortens until it fits). Font:
 DejaVu Sans Bold, otherwise Pillow's default font; emojis are removed. Without Pillow, `available_styles()` returns only
-`album`.
+`album`; `available_styles(playlist)` (`/api/cover/styles?id=`) offers `format` only for a format.
+
+**Formats.** `format_kind()`: `album` (album of the week), `unheard` (discovered), `daytime: "morning"`, `review`,
+`together`, `fav`, mixes with `flavor: "geschmack"` (own sound) and the vibe `wiederentdecken` over the whole library
+(per world it keeps the ordinary styles, so several of them stay apart) – every other playlist is none. They look the same every week, so they are recognizable in the app; the format cover is their default
+(`default_style()`).
 
 **Flow.** `/cover?id=&style=` returns a preview. Apply (`/api/cover/apply`): render, upload
 (`POST /api/playlist/{id}/image`), save `cover = {style, sig, nid, at, rev}` in the configuration. Own image
 (`/api/cover/upload`): `cover = {style: "eigenes", at, rev}`. Remove (`/api/cover/remove`): delete the image in Navidrome,
-remove `cover`. All of them require the playlist to be in Navidrome already.
+remove `cover` – for a format `cover = {style: "none"}` instead, so that it does not get its format cover again
+(`status()` treats `none` like no cover). All of them require the playlist to be in Navidrome already.
 
 **Automatic renewal.** `refresh_auto()` runs after every sync: for every active playlist with a designed
 style (not `eigenes`) that is in Navidrome, the signature (`signature()`: hash of covers, the four largest
@@ -1078,6 +1085,12 @@ bands, name and color) is recalculated. If it differs from `cover.sig` or Navidr
 (`cover.nid` ≠ ID), it is rendered and uploaded again – first it checks in the fresh configuration whether
 the same style is still selected. That way a new Daily Mix gets its matching cover every day. Errors with one cover
 do not stop the run.
+
+**Formats get their cover by themselves.** A format without `cover` gets the style of `default_style()` in the same
+pass – but only if Navidrome reports no image of its own for it (`uploadedImage` empty, so an image set in Navidrome
+stays) and not after it was removed (`none`). It is noted as `cover = {style: "format", auto: true, at, sig, nid}`;
+`tasks._refresh_covers()` writes it into the fresh configuration only where there is still no `cover`. The checklist
+(“Give a playlist a cover”) does not count `auto` covers.
 
 **Own images stay.** `/api/cover/upload` stores a copy under `state/eigene-cover/<playlist-id>.img` and
 remembers the Navidrome ID in `cover.nid`. If Navidrome has created the playlist anew (season over and back again, pause,

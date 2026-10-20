@@ -221,7 +221,7 @@ def favorite_artists(cfg, person, ctx=None, n=30):
     if lib is not None and person.get("user"):
         try:
             from . import taste
-            prof = taste.profile(cfg, lib, person["user"], getattr(ctx, "today", None))
+            prof = taste.for_person(cfg, lib, person, getattr(ctx, "today", None))
             if prof and prof.get("enough"):
                 heard = [a for a, share in prof["artists"] if share >= 0.01]
         except Exception:   # noqa: BLE001 – no password or Navidrome briefly gone: only the ones chosen by hand

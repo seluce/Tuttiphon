@@ -116,12 +116,13 @@ def _round5(minutes):
     return int(5 * round(minutes / 5))
 
 
-def morning(user, songs, now=None):
+def morning(user, songs, now=None, skip=frozenset()):
     """The morning habit of an account, or None: {"days", "weeks", "at": "06:45" (usual start), "minutes" (usual
-    round, MINUTES), "weekdays": mostly Monday to Friday, "songs": {song id: plays in the morning}}."""
+    round, MINUTES), "weekdays": mostly Monday to Friday, "songs": {song id: plays in the morning}}.
+    skip: song ids that do not count (music worlds the person keeps out of their taste, e.g. children's music)."""
     now = now or dt.datetime.now()
-    sess = [s for s in sessions(moments(user, songs, now)) if MORNING[0] <= s["start"].hour < MORNING[1]
-            and len(s["songs"]) >= 2]
+    moms = [m for m in moments(user, songs, now) if m[1] not in skip]
+    sess = [s for s in sessions(moms) if MORNING[0] <= s["start"].hour < MORNING[1] and len(s["songs"]) >= 2]
     per_day = {}
     for s in sess:   # per morning: the longest round decides its length, the first one its time
         d = s["start"].date()
@@ -146,9 +147,10 @@ def _stamp(user):
         return None
 
 
-def morning_of(cfg, base, user, today=None):
+def morning_of(cfg, base, user, today=None, exclude=()):
     """morning() for an account with its own song list (needs its stored password) – cached per account, day,
-    song list and recorded moments; None without a password or without the habit."""
+    song list, recorded moments and the music worlds left out (exclude, taste.excluded(person)); None without a
+    password or without the habit."""
     if not user:
         return None
     from . import ml, taste
@@ -156,12 +158,14 @@ def morning_of(cfg, base, user, today=None):
     if plib is None:
         return None
     today = today or dt.date.today()
-    key = ("morning", user.lower(), today, ml.lib_key(plib), _stamp(user))
+    exclude = tuple(sorted(set(exclude or ())))
+    key = ("morning", user.lower(), today, ml.lib_key(plib), _stamp(user), exclude)
     with _lock:
         if key in _memo:
             return _memo[key]
     now = dt.datetime.now() if today == dt.date.today() else dt.datetime.combine(today, dt.time(23, 59))
-    out = morning(user, plib.songs, now)
+    skip = taste.excluded_ids(cfg, plib, exclude, today)
+    out = morning(user, plib.songs, now, frozenset(plib.songs[i]["id"] for i in skip))
     with _lock:
         if len(_memo) > 32:
             _memo.clear()
@@ -169,11 +173,11 @@ def morning_of(cfg, base, user, today=None):
     return out
 
 
-def morning_taste(cfg, base, plib, user, today=None):
+def morning_taste(cfg, base, plib, user, today=None, exclude=()):
     """Sound of the account's mornings (soundtaste.SoundTaste from what it plays in the morning) for the "Good
     morning" mix, or None – no habit, no sound vectors, too few morning songs with one."""
     from . import similar, soundtaste
-    info = morning_of(cfg, base, user, today)
+    info = morning_of(cfg, base, user, today, exclude)
     stamp = similar.stamp()
     if not info or stamp is None:
         return None

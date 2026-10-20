@@ -4,7 +4,8 @@ server, the ntfy app on the phone).
 * The administrator turns them on (settings.notify) and chooses server, topic and events: run failed, new music
   processed, new bands classified.
 * Every person can enter their own topic in the profile (person.push) and gets their messages there: news from their
-  favorite bands and "Your October is here".
+  favorite bands, "Your October is here" and on Mondays "New for you this week" (discovered for you, album of the
+  week).
 * For protected topics on an own server: access token in .env (NTFY_TOKEN).
 * Every event goes out at most once (state/notified.json).
 """
@@ -18,7 +19,7 @@ from .config import STATE_DIR, load_config, load_env, read_text, write_atomic
 from .i18n import _, _s, _sn
 
 SENT_FILE = STATE_DIR / "notified.json"
-EVENTS = ("failed", "newMusic", "autoAssigned", "favorites", "review")
+EVENTS = ("failed", "newMusic", "autoAssigned", "favorites", "review", "weekly")
 _lock = threading.RLock()   # reentrant: once() may call once() again inside a delivery
 # Names of the runs the folder watch starts for new music (watch.py) – German in older history entries
 NEW_MUSIC_RUNS = ("Neue Musik", "Process new music")   # i18n-ignore
@@ -160,6 +161,8 @@ def for_persons(cfg, lib, today=None):
             sent += _favorites(cfg, lib, ctx, person, topic, today)
         if wants(cfg, "review"):
             sent += _review(cfg, lib, person, topic, today)
+        if wants(cfg, "weekly"):
+            sent += _weekly(cfg, lib, person, topic, today)
     return sent
 
 
@@ -203,3 +206,38 @@ def _review(cfg, lib, person, topic, today):
     return int(once(f"review|{person['id']}|{day:%Y-%m}", lambda: deliver(
         _s("{name} is here", name=name), _s("Your most played songs of last month – now in Symfonium."), ("calendar",),
         f"#/playlist/{p['id']}", cfg, topic=topic, accounts=[person.get("user")], tag=f"review-{p['id']}")))
+
+
+def _weekly(cfg, lib, person, topic, today):
+    """Monday: what is new for the person this week – "Discovered for you" and the album of the week, as written for
+    this week (state/mixes.json). Once per person and week; not later in the week (e.g. when first set up)."""
+    from . import mixer, rules
+    day = mixer.mix_day()
+    if day.weekday() > 1:   # Monday, Tuesday as a fallback if the Monday run did not happen
+        return 0
+    mine = [p for p in cfg["playlists"] if p.get("person") == person["id"] and p.get("status", "aktiv") == "aktiv"
+            and (p.get("unheard") or p.get("album"))]
+    if not mine:
+        return 0
+    start = mixer.period_start("week", day)
+    state = mixer._load_state()
+    index = lib.index_of()
+    parts, first = [], None
+    for p in sorted(mine, key=lambda p: not p.get("unheard")):   # discovered first, then the album
+        saved = state.get(p["id"]) or {}
+        ids = [sid for sid in saved.get("ids") or [] if sid in index]
+        if saved.get("day") != start.isoformat() or not ids:
+            continue   # not written for this week (yet)
+        first = first or p
+        if p.get("album"):
+            s = lib.songs[index[ids[0]]]
+            parts.append(_s("Album of the week: {artist} – {album}", artist=lib._main_artist(s) or "?", album=s.get("album") or "?"))
+        else:
+            parts.append(_sn(len(ids), "{name}: {n} song you have never heard", "{name}: {n} songs you have never heard",
+                             name=rules.playlist_name(cfg, p)))
+    if not parts:
+        return 0
+    year, week, _wd = start.isocalendar()
+    return int(once(f"weekly|{person['id']}|{year}-{week}", lambda: deliver(
+        _s("New for you this week"), " · ".join(parts), ("sparkles",), f"#/playlist/{first['id']}", cfg, topic=topic,
+        accounts=[person.get("user")], tag=f"weekly-{person['id']}")))

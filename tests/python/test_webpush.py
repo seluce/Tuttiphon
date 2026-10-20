@@ -106,9 +106,9 @@ class WebPushTest(unittest.TestCase):
 
     def test_routing_admins_and_accounts(self):
         _, _, _, admin_sub = browser()
-        _, _, _, iris_sub = browser()
+        _, _, _, other_sub = browser()
         webpush.add("niklas", admin_sub, admin=True)
-        webpush.add("Jonas", iris_sub)
+        webpush.add("Jonas", other_sub)
         hits = []
         with mock.patch.object(webpush, "send", side_effect=lambda sub, *a, **k: hits.append(sub["endpoint"]) or True):
             cfg = base_config()

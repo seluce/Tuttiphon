@@ -197,6 +197,7 @@ export default {
   'With a Last.fm key under Settings → Intelligence you get tags here, more accurate similar bands and bands you are still missing.': 'Mit einem Last.fm-Schlüssel unter Einstellungen → Intelligenz gibt es hier Tags, genauere ähnliche Bands und Bands, die euch noch fehlen.',
   // components/sheets/CoverSheet.svelte
   'Four album covers with title': 'Vier Album-Cover mit Titel',
+  'Its own look for this format, renewed with every new selection': 'Eigener Look für dieses Format, mit jeder neuen Auswahl erneuert',
   'Photo of the main band': 'Foto der wichtigsten Band',
   'Color gradient with round band photos': 'Farbverlauf mit runden Bandfotos',
   'Cover of the main album': 'Cover des wichtigsten Albums',

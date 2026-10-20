@@ -40,7 +40,7 @@ class DiscoverTest(unittest.TestCase):
         if played_all:
             for s in self.lib.songs:
                 s["playCount"] = 1
-        with mock.patch.object(taste, "profile", lambda cfg, base, user, today=None:
+        with mock.patch.object(taste, "profile", lambda cfg, base, user, today=None, exclude=():
                                {"enough": True, "welten": [], "artists": []} if user == "Jonas" else None), \
                 mock.patch.object(taste, "_person_lib", lambda cfg, base, user: base), \
                 mock.patch("app.listenclock.morning_of", lambda *a, **k: None):
@@ -111,7 +111,7 @@ class CoreSetTest(unittest.TestCase):
                             plays=2 if k % 3 == 0 else 0) for k in range(400)]
                       + [song(f"c{k}", artist="Band A" if k % 2 else "Band B", album=f"Kinder {k % 6}", genres=("Children",),
                               rating=4, plays=1) for k in range(60)])
-        with mock.patch.object(taste, "profile", lambda cfg, base, user, today=None:
+        with mock.patch.object(taste, "profile", lambda cfg, base, user, today=None, exclude=():
                                {"enough": True, "welten": [["kinder", 0.6]], "artists": []} if user == "Jonas" else None), \
                 mock.patch.object(taste, "_person_lib", lambda cfg, base, user: base), \
                 mock.patch("app.listenclock.morning_of", lambda *a, **k: None):

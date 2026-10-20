@@ -61,6 +61,7 @@
   <p>{@html t('<a class="link" href="#/profil">My profile</a> shows what Tuttiphon knows about your taste. All suggestions and mixes are based on it:')}</p>
   <Bullets>
     <li>{@render rich(t('<b>From your listening</b> – Tuttiphon learns which music worlds and bands you like from what you play in Symfonium, mark as a favorite and rate yourself. <Ui icon="plus">Remember</Ui> or <Ui icon="plus">Add all</Ui> turns it into a favorite.'))}</li>
+    <li>{@html t('<b>Not part of your taste</b> – music that plays on your account for someone else, such as children’s music. Switch it on there: it stays in the family playlists, but your discoveries and mixes follow your own music.')}</li>
     <li>{@html t('<b>Favorite music worlds</b> – you get playlist ideas for these.')}</li>
     <li>{@html t('<b>Favorite bands</b> – come up more often in your mixes.')}</li>
     <li>{@html t('<b>Favorite vibes</b> – kinds of music and decades you like, such as Rock & Punk or 80s – you get playlist ideas for these too.')}</li>
@@ -69,6 +70,7 @@
     <li>{@html t('<b>Prefix</b> – goes in front of every playlist name, such as “Mia · ”, so you spot your playlists in Symfonium right away.')}</li>
     <li>{@html t('<b>Kid-safe mode</b> – songs with explicit lyrics stay out of all your playlists and mixes. Tuttiphon detects them from the lyrics.')}</li>
     <li>{@html t('<b>To your phone</b> – tap “Turn on for this device” on your phone to get news from your favorite bands and your monthly recap as notifications. If you’d rather use the ntfy app, enter a topic under “Or via the ntfy app”. This is available if the administrator has turned on notifications.')}</li>
+    <li>{@html t('<b>New for you this week</b> – on Mondays a short message when your discoveries and your album of the week are new.')}</li>
   </Bullets>
   <p>{t('Changes apply right away – your playlists adjust by themselves. The more you listen, the better Tuttiphon knows your taste, even without you entering anything.')}</p>
 {/snippet}
@@ -150,6 +152,7 @@
     <li>{@render rich(t('<Ui icon="external">Open in Navidrome</Ui> – opens the playlist on Navidrome’s web page.'))}</li>
     <li>{@render rich(t('<Ui icon="trash">Move to trash</Ui> – it can be restored from there for 30 days, after that it is deleted automatically. Under “My playlists”, <Ui icon="trash">Empty trash</Ui> empties it all at once.'))}</li>
   </Bullets>
+  <p>{@html t('<b>Covers:</b> discovered, album of the week, good morning and your sound bring a cover of their own – the same look every week, so you spot them in Symfonium right away. “Navidrome default” in the cover menu removes it for good.')}</p>
   <p>{@html t('<b>Seasonal playlists</b> such as Christmas are only in Symfonium during their season and come back by themselves when it starts – until then the playlist shows “resting until its season”. Playlists nobody has listened to in three months show up under “Next steps”.')}</p>
   <p>{@render rich(t('<b>Shared playlists:</b> you can view playlists that others have shared with everyone and listen to them in Symfonium. With <Ui icon="copy">Copy for me</Ui> you get your own version that you can adjust.'))}</p>
   <p>{@render rich(t('Almost everything can be taken back right away with <Ui icon="undo">Undo</Ui> in the message at the bottom.'))}</p>

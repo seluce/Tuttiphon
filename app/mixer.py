@@ -332,8 +332,9 @@ def morning_sound(cfg, base, plib, pool, playlist, today, adjust):
     plays in the morning (listenclock.morning_taste(): sound prototypes of the morning plays) – multiplied into adjust.
     Without the habit, sound vectors or enough morning songs with one: nothing changes."""
     from . import listenclock, rules, taste
-    user = (rules.person_of(cfg, playlist) or {}).get("user")
-    st = listenclock.morning_taste(cfg, base, plib, user, today) if user else None
+    person = rules.person_of(cfg, playlist) or {}
+    user = person.get("user")
+    st = listenclock.morning_taste(cfg, base, plib, user, today, taste.excluded(person)) if user else None
     if st is None:
         return
     by = st.for_lib(plib)
@@ -380,7 +381,7 @@ def album_candidates(cfg, base, plib, playlist, nsp, today=None):
     in_pool = Counter(plib.songs[i].get("albumId") for i in pool)
     person = rules.person_of(cfg, playlist) or {}
     user = person.get("user")
-    sim = taste.matcher(taste.profile(cfg, base, user, today), plib, sound=taste.FLAVOR_SOUND) if user else None
+    sim = taste.matcher(taste.for_person(cfg, base, person, today), plib, sound=taste.FLAVOR_SOUND) if user else None
     favorites = set(rules.favorite_artists(cfg, person, rules.BuildContext(plib, today))) if person else set()
     out = []
     for aid, idx in albums.items():
@@ -510,7 +511,8 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
         members = [x for x in cfg["personen"] if x["id"] in (playlist.get("together") or [])]
         never = _never(base, plib, [u for u in dict.fromkeys([user] + [x.get("user") for x in members]) if u])   # protection: everyone
         together = rules.together_of(cfg, playlist)   # taste: only with consent
-        users = [u for u in dict.fromkeys([user] + [x.get("user") for x in together]) if u]
+        person = rules.person_of(cfg, playlist) or {}
+        tasters = list({(x.get("user") or "").lower(): x for x in [person] + together if x.get("user")}.values())
         if never:
             pool = frozenset(i for i in pool if plib.songs[i]["id"] not in never)
         adjust = dict(feedback.factors(user, today))
@@ -518,11 +520,12 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
         # Family mix ("What everyone likes"): everyone's taste counts the same – what everyone likes comes much more often
         from . import taste
         if together:
-            sims = [m for m in (taste.matcher(taste.profile(cfg, base, u, today), plib) for u in users) if m]
+            sims = [m for m in (taste.matcher(taste.for_person(cfg, base, x, today), plib) for x in tasters) if m]
             power = 3 / len(sims) if sims else 0
         else:   # "Your sound": the sound taste (soundtaste.py) counts more too
             own_sound = options(playlist).get("flavor") == "geschmack" or bool(playlist.get("unheard"))
-            sim = taste.matcher(taste.profile(cfg, base, user, today), plib, sound=taste.FLAVOR_SOUND if own_sound else 1.0)
+            sim = taste.matcher(taste.for_person(cfg, base, person, today), plib,
+                                sound=taste.FLAVOR_SOUND if own_sound else 1.0)
             sims, power = ([sim] if sim else []), (3 if own_sound else 1)
         if sims:
             for i in pool:

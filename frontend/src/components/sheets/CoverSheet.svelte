@@ -1,6 +1,7 @@
 <!--
   Choose a playlist's cover (sheet, opened via coverSheet() in pages/playlist/actions.js):
-  designed covers as a preview, upload your own image or go back to the Navidrome default.
+  designed covers as a preview, upload your own image or go back to the Navidrome default (formats get their format
+  cover by themselves; after "Navidrome default" it stays away – p.cover = {style: 'none'}).
   p: playlist · d: data from /api/playlist · styles: /api/cover/styles (labels from the server, shown as they are;
   the short name ends before " aus …"/" mit …") · ondone: after a change
 -->
@@ -16,6 +17,7 @@
 
   // Description per cover style (the keys are style ids from the server)
   const STYLE_INFO = $derived({
+    format: t('Its own look for this format, renewed with every new selection'),
     mosaik: t('Four album covers with title'),
     band: t('Photo of the main band'),
     farbe: t('Color gradient with round band photos'),
@@ -24,7 +26,7 @@
 
   const mine = O.sheet   // this sheet – only close our own (not, say, the editor opened in the meantime)
   const id = untrack(() => p.id)
-  const current = untrack(() => plStatus(id)?.cover?.style || p.cover?.style || null)
+  const current = untrack(() => plStatus(id)?.cover?.style || (p.cover?.style !== 'none' && p.cover?.style) || null)
   const stamp = Date.now()
   let status = $state('')
   let busy = $state(false)

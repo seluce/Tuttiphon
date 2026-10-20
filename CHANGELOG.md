@@ -5,6 +5,22 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **Children’s music no longer shapes a parent’s taste.** In the profile, “Not part of your taste” takes music worlds
+  out of a person’s taste – e.g. the children’s music that plays on a parent’s account. Discoveries, album of the week,
+  own sound, favorite bands and “Good morning” then follow the person’s own music; the family person on the same
+  account keeps it, and the playlists of the music world stay as they are. “To review” points it out when a separate
+  world such as children’s music makes up a big part of what an account plays.
+- **“New for you this week”** – on Mondays a short notification to each person with “Discovered for you” or “Album of
+  the week”: how many never played songs are waiting and which album it is. It can be turned off under Settings →
+  Notifications.
+- **Covers for the formats.** Discovered, album of the week, good morning, own sound, new from favorite bands, what
+  everyone likes, rediscover and your month get a cover of their own by themselves – the same look every week, with
+  the album itself on the album of the week – so they are easy to spot in Symfonium. An image set in Navidrome stays;
+  after “Navidrome default” the cover does not come back.
+- No changes to `docker-compose.yaml` needed.
+
 ## 1.2.0
 
 New ways to find music in your own library – most songs in a family library have never been played.

@@ -85,7 +85,7 @@ class ClockTest(unittest.TestCase):
 
 def with_profiles(*users):
     """taste.profile: enough listening for these accounts (as with a stored password)."""
-    return mock.patch.object(taste, "profile", lambda cfg, base, user, today=None:
+    return mock.patch.object(taste, "profile", lambda cfg, base, user, today=None, exclude=():
                              {"enough": True, "welten": [], "artists": []} if user in users else None)
 
 
@@ -102,7 +102,7 @@ class SuggestionTest(unittest.TestCase):
         self.addCleanup(p.stop)
 
     def keys(self, info, users=("Jonas",), person="jonas"):
-        with with_profiles(*users), mock.patch("app.listenclock.morning_of", lambda cfg, base, user, today=None: info):
+        with with_profiles(*users), mock.patch("app.listenclock.morning_of", lambda cfg, base, user, today=None, exclude=(): info):
             return {s["key"]: s for s in suggest.suggestions(self.cfg, self.lib, today=NOW.date(), only_person=person)}
 
     @env.german

@@ -53,7 +53,7 @@ WEB_DIR = Path(env_var("WEB") or ROOT / "web")
 PATH_ENV = {"music": "MUSIC_DIR", "playlists": "PLAYLIST_DIR", "archive": "ARCHIVE_DIR"}
 
 MARKER = "Tuttiphon"   # start of the "comment" of every generated playlist
-CONFIG_VERSION = 11
+CONFIG_VERSION = 12
 
 _lock = threading.RLock()
 
@@ -711,6 +711,9 @@ def _validate_types(cfg):
         if p.get("push") not in (None, "") and not (isinstance(p["push"], str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", p["push"])):
             raise ValueError(_("config: person '{id}': the topic for notifications may only contain letters, digits, - and _",
                                id=p['id']))
+        te = p.get("tasteExclude")   # music worlds that do not count for the person's taste (ids; unknown ones are ignored)
+        if te is not None and (not strs(te) or len(te) > 50 or any(long(x, 100) for x in te)):
+            raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key="tasteExclude"))
         for k in ("likes", "dislikes"):
             v = p.get(k)
             if v is not None and (not isinstance(v, dict) or any(not strs(x) for x in v.values())):
@@ -1045,6 +1048,14 @@ def migrate(cfg):
             st["opus"] = {}
         st["opus"].setdefault("owner", "1000:10")   # an existing installation keeps what it had
         cfg["version"] = 11
+    if version < 12:   # v12: the weekly "new for you" notification – on like the other events (shown as a switch)
+        st = cfg.setdefault("settings", {})
+        if not isinstance(st.get("notify"), dict):
+            st["notify"] = {}
+        if not isinstance(st["notify"].get("events"), dict):
+            st["notify"]["events"] = {}
+        st["notify"]["events"].setdefault("weekly", True)
+        cfg["version"] = 12
     if version < CONFIG_VERSION:   # whatever a stage added gets its name in the server language (chosen names stay)
         localize_defaults(cfg, cfg.get("settings", {}).get("language") or "en")
     return cfg

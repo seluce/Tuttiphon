@@ -20,6 +20,7 @@
     ['autoAssigned', t('New bands were classified'), t('Which band went into which music world, to the administrators’ devices and your topic.')],
     ['favorites', t('News from favorite bands'), t('To the person concerned, on their devices and their topic from the profile.')],
     ['review', t('The monthly recap is here'), t('On the first of the month to the person, if they have “Your month”.')],
+    ['weekly', t('New for you this week'), t('On Mondays to the person, if they have “Discovered for you” or “Album of the week”.')],
   ])
   const set = (k, v) => { if (v) nt[k] = v; else delete nt[k]; changed() }
   const withTopic = $derived(S.config.personen.filter((p) => p.push).map((p) => p.name))

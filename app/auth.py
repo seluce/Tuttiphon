@@ -476,7 +476,7 @@ def view_config(cfg, m=None):
     return out
 
 
-PERSON_FIELDS = ("name", "icon", "color", "prefix", "likes", "dislikes", "public", "clean", "push")
+PERSON_FIELDS = ("name", "icon", "color", "prefix", "likes", "dislikes", "public", "clean", "push", "tasteExclude")
 # playlist fields that only the server or an administrator sets (handmade playlists taken over)
 SERVER_PLAYLIST_FIELDS = ("rules", "rulesExtra", "sortRaw", "takeover", "originalName")
 PUBLIC_PERSON_FIELDS = ("id", "name", "icon", "color", "prefix", "public")

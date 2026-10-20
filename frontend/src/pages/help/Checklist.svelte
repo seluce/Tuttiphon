@@ -16,7 +16,7 @@
       [cfg.personen.some((x) => x.likes?.welten?.length || x.likes?.artists?.length), t('Set preferences for at least one person'), '#/personen'],
       [active.length > 0, t('Create your first playlist'), '#/neu'],  // i18n-ignore: route
       [active.some((x) => x.type === 'mix'), t('Try a mix'), '#/neu?type=mix'],  // i18n-ignore: route
-      [active.some((x) => x.cover), t('Give a playlist a cover'), '#/playlists'],
+      [active.some((x) => x.cover && !x.cover.auto && x.cover.style !== 'none'), t('Give a playlist a cover'), '#/playlists'],
       [Boolean(S.status?.deezer?.lastRun), t('Get Deezer stars: Home → Update everything'), '#/'],
       [Boolean(S.status?.env?.auth), t('Set up separate sign-ins for the family'), '#/hilfe/konten'],
     ] : [

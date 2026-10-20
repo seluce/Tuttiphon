@@ -20,6 +20,7 @@
   import PlaylistCard from '../../components/PlaylistCard.svelte'
   import TasteCard from '../../components/TasteCard.svelte'
   import LikedWelten from './LikedWelten.svelte'
+  import TasteExclude from './TasteExclude.svelte'
   import StilToggles from './StilToggles.svelte'
   import ColorPick from './ColorPick.svelte'
   import { S, findPerson, defaultPerson, changed, snapshot, isAdmin } from '../../lib/state.svelte.js'
@@ -137,6 +138,7 @@
 
   {#if p.user}
     <div class="section"><TasteCard person={p.id} likes={p.likes} {self} name={p.name} onchange={ch} /></div>
+    {#if p.id !== S.config.settings.defaultPerson}<div class="section"><TasteExclude {p} {self} onchange={ch} /></div>{/if}
   {/if}
 
   <div class="card section grid gap-4" data-guide="likes">

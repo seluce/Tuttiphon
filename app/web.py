@@ -779,6 +779,7 @@ def api_taste(query):
     """“From your listening”: what Tuttiphon has learned from plays, favorites and one's own stars – for a person
     (?person=) or one's own account (?me=1, e.g. in the welcome wizard before there is a profile)."""
     cfg = load_config()
+    person = None
     if query.get("me"):
         user = auth.current()["user"]
         if not user or user == auth.NOTFALL:
@@ -791,7 +792,7 @@ def api_taste(query):
             raise ValueError(_("Person not found"))
         user = person.get("user")
     lib = CACHE.get()
-    prof = taste.profile(cfg, lib, user) if user else None
+    prof = (taste.for_person(cfg, lib, person) if person else taste.profile(cfg, lib, user)) if user else None
     return {**taste.summary(cfg, prof, lib), "hasAccount": bool(user)}
 
 
@@ -1116,7 +1117,7 @@ def user_inbox(m):
                       "actions": [{"label": _("Let’s go"), "do": "goto", "href": "#/willkommen"}]})
     def heard(p):   # does Tuttiphon already know the taste from listening? Then no likes by hand are needed
         try:
-            prof = taste.profile(cfg, CACHE.get(), p.get("user")) if p.get("user") else None
+            prof = taste.for_person(cfg, CACHE.get(), p) if p.get("user") else None
         except Exception:   # noqa: BLE001 – without a password, or Navidrome briefly gone
             prof = None
         return bool(prof and prof.get("enough"))
@@ -1138,8 +1139,10 @@ def user_inbox(m):
                       "text": _("For your personal statistics and your own stars, Tuttiphon needs your Navidrome password. "
                                 "It stays on your NAS."),
                       "actions": [{"label": _("Turn on"), "do": "goto", "href": "#/einstellungen/konto"}]})
-    try:   # tidying up: own playlists nobody listens to or that exist twice
-        for key, level, title, text, actions in suggest.playlist_tidy_items(cfg, CACHE.get(), set(m["own"]), user=True):
+    try:   # tidying up: own playlists nobody listens to or that exist twice, a separate world shaping the taste
+        tidy = suggest.playlist_tidy_items(cfg, CACHE.get(), set(m["own"]), user=True) \
+            + suggest.taste_hints(cfg, CACHE.get(), set(m["own"]))
+        for key, level, title, text, actions in tidy:
             items.append({"key": key, "level": level, "title": title, "text": text, "actions": actions})
     except Exception:   # noqa: BLE001 – “To review” must never fail because of this
         pass
@@ -1552,10 +1555,16 @@ def _find_playlist(pid):
     return p
 
 
+def api_cover_styles(query):
+    """Designed styles – with ?id= those for this playlist (the format cover only for a format)."""
+    pid = query.get("id")
+    return covers.available_styles(_own_playlist_id(pid) if pid else None)
+
+
 def api_cover_apply(body):
     p = _own_playlist_id(body["id"])
     style = body.get("style", "mosaik")
-    if style not in covers.available_styles():
+    if style not in covers.available_styles(p):
         raise ValueError(_("This style is not available here"))
     lib = CACHE.get()
     cfg = load_config()
@@ -1602,7 +1611,10 @@ def api_cover_remove(body):
     def apply(fresh):
         for x in fresh["playlists"]:
             if x["id"] == p["id"]:
-                x.pop("cover", None)
+                if covers.default_style(x):
+                    x["cover"] = {"style": "none"}   # a format: do not give it its cover again
+                else:
+                    x.pop("cover", None)
     update_config(apply)
     covers.forget_own(p["id"])
     return {"ok": True}
@@ -1986,7 +1998,7 @@ class Handler(BaseHTTPRequestHandler):
         "/api/users": lambda q: api_users(),
         "/api/task": api_task_status,
         "/api/stats": api_stats,
-        "/api/cover/styles": lambda q: covers.available_styles(),
+        "/api/cover/styles": api_cover_styles,
         "/api/deezer/ranks": lambda q: api_deezer_ranks(),
         "/api/lyrics/stats": lambda q: lyrics.stats(),
         "/api/opus/info": lambda q: api_opus_info(q.get("refresh") == "1"),

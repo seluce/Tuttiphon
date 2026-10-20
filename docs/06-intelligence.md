@@ -844,6 +844,25 @@ song list and state of the sound analysis/AI. With sound vectors it also carries
 | Favorite bands (`rules.favorite_artists()`) | bands chosen by hand plus most played bands (share ≥ 1%), without dislikes, at most 30: “New from your favorite bands”, badge “Favorite band” on new albums on the home page, notification about new albums |
 | Family mix (`together`) | the taste of several accounts counts equally ([04](04-playlists.md#playlists-from-listening)) |
 
+### Taste per person
+
+A profile belongs to an account – but a parent's account also plays the children's music, and then discoveries, album
+of the week, “Your sound” and the favorite bands of the parent fill up with children's songs. `person.tasteExclude`
+(the card “Not part of your taste” in the profile) names music worlds that do not count for **this person**:
+
+| Where | How |
+|---|---|
+| `taste.for_person(cfg, base, person)` | `profile()` with `exclude = taste.excluded(person)` (sorted ids); cached per exclusion too. The other people on the same account – e.g. the shared family – keep the full profile |
+| `song_scores(…, exclude)` | the songs of these worlds (`excluded_ids()`: the world's block via `rules.welt_block()` in the account's song list, cached per song list, exclusion and configuration) count neither as liked nor as disliked – so the sound taste (`soundtaste.of(…, variant=exclude)`) does not learn from them either |
+| Users of the profile | suggestions, mixes (each person of a family mix with its own exclusion), album of the week, “Good morning”, favorite bands (`rules.favorite_artists()`), the card “From your listening” (`/api/taste?person=`), “To review” for users |
+| Listening clock | `morning_of(…, exclude)`: plays of these songs do not make a morning, nor do they shape its sound ([below](#listening-clock-applistenclockpy)) |
+
+The playlists of the music world itself stay as they are – the exclusion is only about the taste. In the profile, the
+toggles show the separate worlds (`separate`, e.g. children's music, audio plays) and the ones already excluded; any
+other world can be added from a list. **Hint** (`suggest.taste_hints()`): if a separate world makes up at least 20 %
+(`TASTE_HINT_SHARE`) of what an account plays and one of its own people (not the default person) does not exclude it
+yet, “To review” says so once per person and world (`taste-world|<person>|<world>`, “Set it” opens the profile).
+
 ### Sound taste (`app/soundtaste.py`)
 
 With the AI's sound vectors ([Sound similarity](#sound-similarity-appsimilarpy)) the taste also learns what the songs
@@ -887,8 +906,10 @@ the length of their usual morning round and the sound of their mornings
 | Morning (`morning()`) | a session of at least two songs starting from 05:00 to 09:59; the habit is there with at least 6 such mornings spread over at least 3 calendar weeks. Usual time = median of the first morning session per day (rounded to 5 minutes), usual length = median of the longest morning session per day (15–60 minutes), “weekdays” when at least 80 % of the mornings are Monday to Friday |
 | Sound of the mornings (`morning_taste()`) | the morning songs (weight 1 + ln(1 + plays)) as liked songs for `soundtaste.compute()` – prototypes of the morning sound, scores 0–1 per song; None without sound vectors or with too few morning songs with one |
 
-Only for accounts with a stored password (the song list of the account is needed). Cached per account, day, song
-list and state of `moments.json` (`morning_of()`), the sound per account, day and sound vectors – in memory. On the
+Only for accounts with a stored password (the song list of the account is needed). Songs of the music worlds the
+person keeps out of their taste (`tasteExclude`, [above](#taste-per-person)) do not count (`morning(…, skip)`): a parent
+whose mornings are the children's music has no morning habit of their own. Cached per account, day, song list, state
+of `moments.json` and exclusion (`morning_of()`), the sound per account, day and sound vectors – in memory. On the
 reference data (two family accounts, 25,000 songs) the habit shows from the plays of the past weeks right away.
 
 ## Lyrics search and kid-safe mode

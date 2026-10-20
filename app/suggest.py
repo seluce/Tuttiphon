@@ -126,7 +126,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
     for person in persons:
         if person.get("user") and (not only_person or person["id"] == only_person):
             try:
-                prof = taste.profile(cfg, lib, person["user"], today)
+                prof = taste.for_person(cfg, lib, person, today)
             except Exception:   # noqa: BLE001 – suggestions must never fail because of one profile
                 prof = None
             if prof and prof.get("enough"):
@@ -255,7 +255,8 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         """"Good morning" from the listening clock (listenclock.py): only if the account really listens in the
         morning – with its usual length, the worlds of its mornings and their sound (mixer.morning_sound)."""
         from . import listenclock
-        info = listenclock.morning_of(cfg, lib, person["user"], today)
+        from . import taste
+        info = listenclock.morning_of(cfg, lib, person["user"], today, taste.excluded(person))
         if not info:
             return
         pid = person["id"]
@@ -601,6 +602,39 @@ def duplicate_playlists(cfg):
     return [g for g in groups.values() if len(g) > 1]
 
 
+TASTE_HINT_SHARE = 0.2   # a separate world (children, audio plays …) with this share of what an account plays: hint
+
+
+def taste_hints(cfg, lib, only_persons=None):
+    """"To review": a person's own account plays a lot from a separate music world (e.g. children's music for the kids)
+    that still counts for their taste – offer to keep it out (person.tasteExclude). Not for the shared person.
+    -> [(key, level, title, text, actions)]"""
+    from . import taste
+    default = cfg["settings"].get("defaultPerson")
+    separate = {w["id"]: w for w in cfg["welten"] if w.get("separate")}
+    out = []
+    for p in cfg["personen"]:
+        if not separate or not p.get("user") or p["id"] == default or (only_persons is not None and p["id"] not in only_persons):
+            continue
+        try:
+            prof = taste.profile(cfg, lib, p["user"])   # everything the account plays – also what is left out
+        except Exception:   # noqa: BLE001 – no password, Navidrome briefly gone
+            continue
+        if not prof or not prof.get("enough"):
+            continue
+        left_out = set(taste.excluded(p))
+        for wid, share in prof.get("welten", []):
+            if wid in separate and wid not in left_out and share >= TASTE_HINT_SHARE:
+                out.append((f"taste-world|{p['id']}|{wid}", "info",
+                            _("“{world}” counts for {name}’s taste", world=separate[wid]["name"], name=p["name"],
+                              owner=possessive(p["name"])),
+                            _("{pct} % of what this account plays is from “{world}”. If that plays for someone else, keep it "
+                              "out of the taste – then discoveries, album of the week and own sound follow the own music. "
+                              "The family playlists keep it.", pct=round(share * 100), world=separate[wid]["name"]),
+                            [{"label": _("Set it"), "do": "goto", "href": f"#/person/{p['id']}"}]))
+    return out
+
+
 def playlist_tidy_items(cfg, lib, only_persons=None, user=False):
     """"To review" entries for tidying up: (key, level, title, text, actions). user=True: for users (links instead of
     buttons)."""
@@ -770,6 +804,11 @@ def inbox(cfg, lib, env, deezer_stats, handmade_list, users_ok):
     # tidy up: what nobody listens to, what exists twice – so Symfonium stays clear
     for x in playlist_tidy_items(cfg, lib):
         item(*x)
+    try:   # children's music on a parent's account that still shapes their taste
+        for x in taste_hints(cfg, lib):
+            item(*x)
+    except Exception:   # noqa: BLE001 – “To review” must never fail because of this
+        pass
 
     from . import selfcheck   # self-check after the last scan: Navidrome returns something other than expected
     for x in selfcheck.load().get("problems", []):

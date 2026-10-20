@@ -271,4 +271,10 @@ export default {
   'Tuttiphon recognizes your taste from what you listen to as soon as statistics & stars are turned on.': 'Tuttiphon erkennt deinen Geschmack aus dem, was du hörst, sobald Statistik & Sterne eingeschaltet sind.',
   'Turn on →': 'Einschalten →',
   'No password is stored for {name}. With a password, Tuttiphon recognizes the taste from what is played.': 'Für {name} ist kein Passwort hinterlegt. Mit Passwort erkennt Tuttiphon den Geschmack aus dem, was gehört wird.',
+  'Not part of your taste': 'Zählt nicht zu deinem Geschmack',
+  'Not part of {name}’s taste': 'Zählt nicht zum Geschmack von {name}',
+  'Music that plays on your account for someone else – e.g. children’s music. It stays in the family playlists, but your discoveries, album of the week, own sound and good morning follow your own music.': 'Musik, die auf deinem Konto für jemand anderen läuft – z. B. Kindermusik. Sie bleibt in den Familien-Playlists, aber deine Entdeckungen, dein Album der Woche, dein eigener Sound und Guten Morgen richten sich nach deiner eigenen Musik.',
+  'Music that plays on {name}’s account for someone else – e.g. children’s music. It stays in the family playlists, but {name}’s discoveries, album of the week, own sound and good morning follow {name}’s own music.': 'Musik, die auf dem Konto von {name} für jemand anderen läuft – z. B. Kindermusik. Sie bleibt in den Familien-Playlists, aber Entdeckungen, Album der Woche, eigener Sound und Guten Morgen von {name} richten sich nach der eigenen Musik.',
+  'Leave out another music world': 'Weitere Musikwelt herausnehmen',
+  'Choose …': 'Auswählen …',
 }

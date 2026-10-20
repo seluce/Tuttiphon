@@ -1,5 +1,5 @@
 {
-  "version": 11,
+  "version": 12,
   "settings": {
     "language": "en",
     "playlistDir": "Music/00_SmartPlaylists",
@@ -173,7 +173,8 @@
         "newMusic": true,
         "autoAssigned": true,
         "favorites": true,
-        "review": true
+        "review": true,
+        "weekly": true
       }
     },
     "welten": {

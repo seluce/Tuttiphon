@@ -654,7 +654,7 @@ class TaskRunner:
         """Renew designed covers when their material has changed (e.g. a new Daily Mix)."""
         from . import covers
         cfg = load_config()
-        if not any((p.get("cover") or {}).get("style") for p in cfg["playlists"]):
+        if not any((p.get("cover") or {}).get("style") or covers.default_style(p) for p in cfg["playlists"]):
             return
         try:
             native = playlists.native_api(env)
@@ -670,6 +670,8 @@ class TaskRunner:
                     cv, new = p.get("cover"), done.get(p["id"])
                     if isinstance(cv, dict) and new and cv.get("style") == new.get("style"):   # not over a cover that is new by now
                         cv.update({k: new[k] for k in ("sig", "nid") if k in new})
+                    elif not cv and new and new.get("auto"):   # a format's own cover, set for the first time
+                        p["cover"] = dict(new)
             update_config(apply)
 
     def _step_deezer(self, ctx, deezer_mode=None, dry_run=False, overwrite_manual=None, **_):

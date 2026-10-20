@@ -248,7 +248,7 @@ def compute(plib, user, today, scores):
     return SoundTaste(liked[0], disliked[0] if disliked else [], liked[1], liked[2])
 
 
-def of(plib, user, today, scores):
+def of(plib, user, today, scores, variant=()):
     """Sound taste of this account for the day – cached per account, day and state of the sound vectors – or None
     (no sound vectors, too few liked songs with one). scores: function -> taste.song_scores() of the account, only
     called when it is computed."""
@@ -257,7 +257,7 @@ def of(plib, user, today, scores):
     stamp = similar.stamp()
     if stamp is None:
         return None
-    key = (user.lower(), today, stamp)
+    key = (user.lower(), today, stamp, variant)   # variant: e.g. the music worlds left out (taste.excluded)
     with _lock:
         if key in _memo:
             return _memo[key]

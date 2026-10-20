@@ -540,7 +540,7 @@ def status(cfg, ctx, native=None):
             "navidrome": {"id": np["id"], "owner": np.get("ownerName"), "public": np.get("public"),
                           "songCount": np.get("songCount")} if np else None,
             "cover": {"style": p["cover"]["style"], "v": f'{p["cover"].get("rev", "")}{p["cover"].get("sig") or p["cover"].get("at") or ""}' or "1"}
-            if np and isinstance(p.get("cover"), dict) and p["cover"].get("style") else None,
+            if np and isinstance(p.get("cover"), dict) and p["cover"].get("style") not in (None, "none") else None,
         }
 
     out = []

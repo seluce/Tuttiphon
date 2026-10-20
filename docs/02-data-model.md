@@ -52,7 +52,7 @@ In addition, there is a folder outside the data folder that all instances share:
 
 | Key | Type | Content | Written by |
 |---|---|---|---|
-| `version` | number | format version, currently `11` (`CONFIG_VERSION`) | server (template, migration); the interface sends the value back unchanged |
+| `version` | number | format version, currently `12` (`CONFIG_VERSION`) | server (template, migration); the interface sends the value back unchanged |
 | `settings` | object | all settings, see [settings](#settings) | interface (Settings); server only during migration |
 | `personen` | list | people, see [personen](#personen) | interface; users only their own |
 | `welten` | list | music worlds, see [welten](#welten) | interface; server adds `artists` during automatic classification |
@@ -259,7 +259,7 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 | `notify.server` | string | `"https://ntfy.sh"` | ntfy server | `http(s)://…` |
 | `notify.topic` | string | `""` | the administrator's topic (run failed, new music, classified bands) | `[A-Za-z0-9_-]{1,64}` |
 | `notify.url` | string | `""` | Tuttiphon's address; tapping the message opens it (with a target, such as `#/verlauf`) | `http(s)://…` |
-| `notify.events.<event>` | boolean | `true` | `failed`, `newMusic`, `autoAssigned` (to the administrator), `favorites`, `review` (to the people's topics) | – |
+| `notify.events.<event>` | boolean | `true` | `failed`, `newMusic`, `autoAssigned` (to the administrator), `favorites`, `review`, `weekly` (to the people's topics) | – |
 
 Of these, users see only `notify.enabled` and `notify.server` (`auth.view_config()`), so that the profile knows whether
 to show the field for their own topic.
@@ -279,12 +279,14 @@ to show the field for their own topic.
 | `dislikes.artists` / `dislikes.genres` | lists | dislikes: left out of every playlist of this person |
 | `clean` | boolean | kid-safe mode: songs with explicit lyrics are left out of all playlists and mixes of the person (`rules.clean_rules()`, [Intelligence](06-intelligence.md#lyrics-search-and-kid-safe-mode)) |
 | `push` | string | own ntfy topic for notifications (`[A-Za-z0-9_-]{1,64}`): news from the favorite bands, monthly recap ([Operations](08-operations.md#notifications)); other accounts never see it. Notifications via the app need no topic – there the account's devices count (`state/push.json`) |
+| `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. Other people on the same account (the family) keep them ([Intelligence](06-intelligence.md#taste-per-person)). Users set it for their own people |
 
 Several people may share the same account (e.g. a personal profile and the shared family).
 
 `validate_config()` checks types (`_validate_types()`): `name`, `icon`, `color`, `prefix`, `user` must be strings,
 `public` and `clean` booleans, `push` empty or a topic made of letters, digits, `-` and `_`, `likes`/`dislikes` an
-object of string lists. Lengths: `name` at most 120, `prefix` 40, `icon` 64 characters, lists at most 2,000 entries of
+object of string lists, `tasteExclude` a list of at most 50 strings of at most 100 characters (ids of worlds that no
+longer exist are ignored, not refused). Lengths: `name` at most 120, `prefix` 40, `icon` 64 characters, lists at most 2,000 entries of
 at most 300 characters; `color` empty, `#rgb`, `#rrggbb` or `hsl(…)` (it goes into the page's styles).
 
 ```json
@@ -464,7 +466,7 @@ recognized rules instead of the rule fields; if Tuttiphon recognizes nothing, th
 |---|---|
 | `file` | file name in the playlist folder (`.nsp` or `.m3u`). The `playlists` step assigns it (`settings.filePrefix` + name, with ` (2)` … if the name is taken) and enters it via `update_config()`. It stays the same when the playlist is renamed – that's how Navidrome recognizes the playlist. If the kind changes (smart ↔ mix), a new file is created |
 | `takeover` | `{original, date, backup}`: file and day of the takeover; `backup` is `null` until the `playlists` step has copied the original to `backup/` (then it holds the file name of the backup) – on the first overwrite or, if the playlist was paused or moved to the trash before that, before the step removes the file |
-| `cover` | designed or custom cover: `{style, sig, nid, at, rev}`. `style` = `mosaik` (mosaic), `band`, `farbe` (color), `album` or `eigenes` (custom); `sig` = fingerprint of the image material (for automatic renewal), `nid` = Navidrome ID of the playlist at upload, `at` = date, `rev` = timestamp (seconds). With `eigenes`: `style`, `at`, `rev` and `nid` (the copy is in `state/eigene-cover/`) |
+| `cover` | designed or custom cover: `{style, sig, nid, at, rev}`. `style` = `format` (cover of the format), `mosaik` (mosaic), `band`, `farbe` (color), `album`, `eigenes` (custom) or `none` (a format whose cover was removed – it does not get it again); `auto: true` = the format cover was set by itself ([Covers](04-playlists.md#covers-appcoverspy)); `sig` = fingerprint of the image material (for automatic renewal), `nid` = Navidrome ID of the playlist at upload, `at` = date, `rev` = timestamp (seconds). With `eigenes`: `style`, `at`, `rev` and `nid` (the copy is in `state/eigene-cover/`) |
 
 On save, the server takes these three fields from its own state (see
 [Saving from the interface](#saving-from-the-interface)). A new playlist may bring `file` along (e.g. after
@@ -542,6 +544,7 @@ through) is read as `null`, so the value falls back to its default and `GET /api
 | 8 → 9 | the sound vibes “In the background” (`klang-hintergrund`) and “For listening closely” (`klang-zuhoeren`) from the template are added where their `id` is missing – only these two, so a delivered vibe someone deleted earlier stays deleted; a configuration at version 9 is not migrated again, so whoever deletes the two later keeps them deleted |
 | 9 → 10 | setup assistant: an existing installation counts as set up – `settings.setup.done = true` (other keys in `setup` stay, no `at`). Defaults that changed for new installations keep their earlier effective value: if `settings.opus.enabled` is missing, it becomes `true` (before `_fill()` could bring the new default `false`); an explicit value stays |
 | 10 → 11 | new files no longer get the owner `1000:10` by default (new installations: empty = the user Tuttiphon runs as). If `settings.opus.owner` is missing, it becomes `"1000:10"` – an existing installation keeps its earlier behavior; an explicit value stays |
+| 11 → 12 | the weekly notification “New for you this week”: `settings.notify.events.weekly = true` where it is missing (a missing `notify` or `events` object is created); an explicit value stays |
 
 After the last stage, `migrate()` calls `localize_defaults()` with `settings.language`: whatever a stage added gets its
 name in the server language, and bundled vibes, the person “Family” and `allName` that still carry a bundled name in
@@ -601,7 +604,7 @@ flowchart TD
   music world from it (`mergeServerFields()` in `frontend/src/lib/state.svelte.js`).
 - **Users:** `save_from_ui()` gets a function that applies `auth.merge_user_changes()` to the current server state
   under the lock – so changes the server made in the meantime (e.g. `lastLogin`, roles) are not lost. Only these are
-  applied: the fields `name`, `icon`, `color`, `prefix`, `likes`, `dislikes`, `public` of the user's
+  applied: the fields `name`, `icon`, `color`, `prefix`, `likes`, `dislikes`, `public`, `clean`, `push`, `tasteExclude` of the user's
   own people (or the newly created own profile), the playlists of their own people (create, change, delete –
   without `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName`, which only the server and administrators set)
   and `dismissed`/`ignored` into `accounts.<account>`. Settings, music worlds, vibes and other people's playlists
