@@ -19,7 +19,7 @@ The handbook describes the current state of the code. Whoever changes something 
 | 5 | [Maintenance](05-maintenance.md) | runs and steps, short pause while applying, “Update everything”, Opus, lyrics, Deezer, scan with self-check, daily refresh, night analysis, folder watch |
 | 6 | [Intelligence](06-intelligence.md) | sound analysis, AI sound analysis (Essentia), moods, Last.fm, classification of new bands, taste per account, statistics and recap |
 | 7 | [Security](07-security.md) | sign-in and lockout, roles, sessions, local administrator and setup mode, network lock, reverse proxy, what the server filters |
-| 8 | [Operations](08-operations.md) | PC and Docker, publishing the image, memory and CPU, storage locations, updates, versions and going back, backup, multiple instances, troubleshooting, server log |
+| 8 | [Operations](08-operations.md) | PC and Docker, publishing the image, memory and CPU, storage locations, updates, versions and going back, the Navidrome plugin, backup, multiple instances, troubleshooting, server log |
 | 9 | [Interface](09-interface.md) | Svelte structure, state and saving, windows, “For you”, search, music world, tour and welcome, design, tests, extending |
 
 **Where to start, by question**

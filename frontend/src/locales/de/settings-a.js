@@ -319,11 +319,12 @@ export default {
   'New for you this week': 'Neu für dich diese Woche',
   'On Mondays to the person, if they have “Discovered for you” or “Album of the week”.': 'Montags an die Person, wenn sie „Entdeckt für dich“ oder „Album der Woche“ hat.',
   'Navidrome plugin': 'Navidrome-Plugin',
-  'With the plugin, Navidrome asks Tuttiphon for similar songs: Instant Mix, song and artist radio and “similar songs” in Symfonium then follow the sound of your own music files – also for bands that other services hardly know.':
-    'Mit dem Plugin fragt Navidrome bei Tuttiphon nach ähnlichen Songs: Instant Mix, Song- und Künstler-Radio und „Ähnliche Titel“ in Symfonium richten sich dann nach dem Klang deiner eigenen Musikdateien – auch bei Bands, die andere Dienste kaum kennen.',
-  'Songs with a sound fingerprint': 'Songs mit Klang-Fingerabdruck',
-  'The AI sound analysis has not run yet – until then the plugin answers with similar bands from Last.fm and the genres.':
-    'Die KI-Klanganalyse ist noch nicht gelaufen – bis dahin antwortet das Plugin mit ähnlichen Bands aus Last.fm und den Genres.',
+  'With the plugin, Navidrome asks Tuttiphon for similar songs and passes every play on: Instant Mix, song and artist radio and the smart queue in Symfonium then follow the sound of your own music files – also for bands that other services hardly know. Needs Navidrome 0.64 or later.':
+    'Mit dem Plugin fragt Navidrome bei Tuttiphon nach ähnlichen Songs und gibt jede Wiedergabe weiter: Instant Mix, Song- und Künstler-Radio und die intelligente Warteschlange in Symfonium richten sich dann nach dem Klang deiner eigenen Musikdateien – auch bei Bands, die andere Dienste kaum kennen. Braucht Navidrome 0.64 oder neuer.',
+  'Songs with a sound vector':
+    'Songs mit Klangvektor',
+  'No sound vectors yet – the AI sound analysis of the Docker image adds them night by night. Until then the plugin answers with similar bands from Last.fm and the genres.':
+    'Noch keine Klangvektoren – die KI-Klanganalyse des Docker-Images ergänzt sie Nacht für Nacht. Bis dahin antwortet das Plugin mit ähnlichen Bands aus Last.fm und den Genres.',
   'Key': 'Schlüssel',
   'Created {when}': 'Erstellt {when}',
   'Navidrome signs in to Tuttiphon with it.': 'Damit meldet sich Navidrome bei Tuttiphon an.',
@@ -335,29 +336,32 @@ export default {
   'Select the text and copy it': 'Markiere den Text und kopiere ihn',
   'Last request from Navidrome': 'Letzte Anfrage von Navidrome',
   '{n} since Tuttiphon started': '{n} seit dem Start von Tuttiphon',
-  'none yet': 'noch keine',
   'Setting it up': 'Einrichten',
   'Download the plugin': 'Plugin herunterladen',
   'Download <b>tuttiphon.ndp</b> from the release on <a class="link" href="https://github.com/seluce/tuttiphon/releases" target="_blank" rel="noopener">GitHub</a>.':
     'Lade <b>tuttiphon.ndp</b> aus dem Release auf <a class="link" href="https://github.com/seluce/tuttiphon/releases" target="_blank" rel="noopener">GitHub</a> herunter.',
-  'Put the file as it is – not unpacked – into Navidrome’s plugins folder (in the Navidrome container <code>/data/plugins</code>) and put “tuttiphon” first in Navidrome’s list of agents, in navidrome.toml or in docker-compose:':
-    'Lege die Datei so, wie sie ist – nicht entpackt – in den Plugin-Ordner von Navidrome (im Navidrome-Container <code>/data/plugins</code>) und setze „tuttiphon“ an den Anfang der Agents-Liste von Navidrome, in navidrome.toml oder in docker-compose:',
-  'If there is a list already, put tuttiphon, in front of it – without one these are Navidrome’s defaults. The docker-compose line wins over navidrome.toml. Restart Navidrome afterwards; where Tuttiphon has no answer, Navidrome asks the next ones.':
-    'Steht dort schon eine Liste, setz tuttiphon, davor – ohne eigene Liste sind das die Voreinstellungen von Navidrome. Die Zeile in docker-compose gewinnt gegen navidrome.toml. Starte Navidrome danach neu; wo Tuttiphon keine Antwort hat, fragt Navidrome die nächsten.',
-  'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Best the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. From this browser Tuttiphon is <code>{address}</code>.':
-    'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein, trage Adresse und Schlüssel ein und gib es für <b>alle Benutzer</b> frei (für die Wiedergaben). Am besten die Adresse im Heimnetz, z. B. <code>http://&lt;NAS&gt;:8765</code> – keine https-Adresse über einen Reverse Proxy, der Navidrome abweisen kann. Von diesem Browser aus ist Tuttiphon <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> in the settings of the Navidrome server.':
-    'Schalte in Symfonium in den Einstellungen des Navidrome-Servers <b>„Use similar tracks for Radio Mix“</b> ein.',
-  'Navidrome does not say who is listening: the songs come from the whole library as for the family. Children’s music only comes for children’s songs – and if there is a child profile, songs with explicit lyrics stay out.':
-    'Navidrome verrät nicht, wer gerade hört: Die Songs kommen aus der ganzen Bibliothek wie für die Familie. Kindermusik kommt nur zu Kinderliedern – und gibt es ein Kinderprofil, bleiben Songs mit derben Texten draußen.',
+  'Put the file as it is – not unpacked and named exactly <b>tuttiphon.ndp</b>, Navidrome takes the name for its list of agents – into Navidrome’s plugins folder (in the Navidrome container <code>/data/plugins</code>) and put “tuttiphon” first in that list, in navidrome.toml or in docker-compose:':
+    'Lege die Datei so, wie sie ist – nicht entpackt und genau als <b>tuttiphon.ndp</b>, Navidrome nimmt den Namen für seine Agents-Liste – in den Plugin-Ordner von Navidrome (im Navidrome-Container <code>/data/plugins</code>) und setze „tuttiphon“ an den Anfang dieser Liste, in navidrome.toml oder in docker-compose:',
+  'If there is a list already, put “tuttiphon,” in front of it – without one these are Navidrome’s defaults. The docker-compose line wins over navidrome.toml. Restart Navidrome afterwards; where Tuttiphon has no answer, Navidrome asks the next ones.':
+    'Steht dort schon eine Liste, setze „tuttiphon,“ davor – ohne eigene Liste sind das die Voreinstellungen von Navidrome. Die Zeile in docker-compose gewinnt gegen navidrome.toml. Starte Navidrome danach neu; wo Tuttiphon keine Antwort hat, fragt Navidrome die nächsten.',
+  'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
+    'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein, trage Adresse und Schlüssel ein und gib es für <b>alle Benutzer</b> frei (für die Wiedergaben). Am besten die Adresse im Heimnetz, z. B. <code>http://&lt;NAS&gt;:8765</code> – keine https-Adresse über einen Reverse Proxy, der Navidrome abweisen kann. Dieser Browser erreicht Tuttiphon unter <code>{address}</code>.',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
+    'Schalte in Symfonium für den Navidrome-Server <b>„Use similar tracks for Radio Mix“</b> ein (Einstellungen → Medienanbieter → der Server).',
+  'Navidrome does not say who is listening: the songs come from the whole library as for the family – children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
+    'Navidrome verrät nicht, wer gerade hört: Die Songs kommen aus der ganzen Bibliothek wie für die Familie – Kindermusik nur zu Kinderliedern, und ohne Songs mit derben Texten, sobald ein Profil Kinderschutz hat oder ein Kinderprofil ist.',
   'Create a new key?': 'Neuen Schlüssel erzeugen?',
   'The old key stops working – enter the new one in Navidrome afterwards.':
     'Der alte Schlüssel gilt dann nicht mehr – trage danach den neuen in Navidrome ein.',
   'Remove the key?': 'Schlüssel entfernen?',
-  'Navidrome then gets no more answers from Tuttiphon and uses its other sources again.':
-    'Navidrome bekommt dann keine Antworten mehr von Tuttiphon und nutzt wieder seine anderen Quellen.',
+  'Navidrome then gets no more answers from Tuttiphon and uses its other sources again – turn the plugin off in Navidrome as well.':
+    'Navidrome bekommt dann keine Antworten mehr von Tuttiphon und nutzt wieder seine anderen Quellen – schalte das Plugin auch in Navidrome aus.',
   'Plays from Navidrome': 'Wiedergaben von Navidrome',
   'Every play as it happens – exact listening times and real skips; for accounts without a stored password also the recap.':
     'Jede Wiedergabe, sobald sie passiert – genaue Hörzeiten und echtes Überspringen; für Konten ohne gespeichertes Passwort auch der Rückblick.',
   '{when} · {accounts}': '{when} · {accounts}',
+  'none since Tuttiphon started':
+    'noch keine seit dem Start von Tuttiphon',
+  'Nothing yet? Put the new plugin file into Navidrome, restart it and allow the plugin all users.':
+    'Noch nichts? Lege die neue Plugin-Datei in Navidrome, starte es neu und gib das Plugin für alle Benutzer frei.',
 }

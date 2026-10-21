@@ -10,7 +10,8 @@ export default {
   'Who may do what in Tuttiphon': 'Wer darf was in Tuttiphon',
   'Home page': 'Startseite',
   'What the home page shows': 'Was die Startseite zeigt',
-  'Server, accounts, scan': 'Server, Konten, Scan',
+  'Server, accounts, scan, plugin':
+    'Server, Konten, Scan, Plugin',
   'Music, playlists, archive': 'Musik, Playlists, Archiv',
   'Playlists': 'Playlists',
   'Basic rules & applying': 'Grundregeln & Übernahme',

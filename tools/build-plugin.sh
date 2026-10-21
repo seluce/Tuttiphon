@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Builds the Navidrome plugin: navidrome-plugin/dist/tuttiphon.ndp (a zip of manifest.json with Tuttiphon's version and
-# plugin.wasm), compiled with TinyGo for WebAssembly (wasip1).
+# Builds the Navidrome plugin: navidrome-plugin/dist/tuttiphon.ndp (a zip of manifest.json with Tuttiphon's version,
+# plugin.wasm compiled with TinyGo for WebAssembly (wasip1), and the licenses LICENSES.txt and GPL-3.0.txt).
 #
 #   tools/build-plugin.sh
 #
@@ -23,6 +23,7 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 (cd navidrome-plugin && tinygo build -o "$tmp/plugin.wasm" -target wasip1 -buildmode=c-shared -no-debug .)
 mkdir -p navidrome-plugin/dist
+rm -f navidrome-plugin/dist/*.part   # a run cut off before
 python3 - "$VERSION" "$tmp/plugin.wasm" navidrome-plugin/manifest.json navidrome-plugin/dist/tuttiphon.ndp <<'PY'
 import json, sys, zipfile
 version, wasm, manifest, out = sys.argv[1:]
@@ -31,7 +32,9 @@ m["version"] = version
 with zipfile.ZipFile(out + ".part", "w", zipfile.ZIP_DEFLATED) as z:
     z.writestr("manifest.json", json.dumps(m, ensure_ascii=False, indent=2) + "\n")
     z.write(wasm, "plugin.wasm")
+    for name in ("LICENSES.txt", "GPL-3.0.txt"):   # the licenses of what plugin.wasm contains go along
+        z.write("navidrome-plugin/" + name, name)
 import os
 os.replace(out + ".part", out)
 PY
-echo "✓ navidrome-plugin/dist/tuttiphon.ndp – Tuttiphon plugin $VERSION ($(( $(stat -c %s navidrome-plugin/dist/tuttiphon.ndp) / 1024 )) KB)"
+echo "✓ navidrome-plugin/dist/tuttiphon.ndp – Tuttiphon plugin $VERSION ($(( $(wc -c < navidrome-plugin/dist/tuttiphon.ndp) / 1024 )) KB)"

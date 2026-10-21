@@ -4,16 +4,17 @@ throwaway folder – never the real Navidrome or the real data.
 1. test music: 3 bands × 4 songs, generated with ffmpeg (sine tones, FLAC);
 2. a fresh Navidrome (its own data folder, 127.0.0.1) with the freshly built plugin, configured and enabled through
    Navidrome's command line, as agent "tuttiphon";
-3. a fresh Tuttiphon (its own data folder, 127.0.0.1, no schedules) with made-up sound vectors for those songs and a
-   plugin key;
+3. a fresh Tuttiphon (its own data folder, 127.0.0.1, no schedules) with made-up sound vectors for those songs, a
+   plugin key and a person for Navidrome's account (plays are kept only for accounts with a person);
 4. questions to Navidrome's Subsonic API – getSimilarSongs2, getArtistInfo2, getSonicSimilarTracks, findSonicPath –
    whose answers have to come from Tuttiphon; plus Tuttiphon's endpoint directly (and a wrong key);
-5. plays through Navidrome (scrobble, reportPlayback): one song left after 5 seconds, the next played – Tuttiphon has
-   to receive them, count the play and recognize the skip.
+5. plays through Navidrome (scrobble, reportPlayback): a song played, the next left after 5 seconds, the one after
+   played – Tuttiphon has to receive them, count the play and recognize the skip.
 
   python3 tools/plugin_check.py --navidrome <navidrome binary> --plugin <tuttiphon.ndp> [--keep]
 """
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -34,7 +35,9 @@ ROOT = Path(__file__).resolve().parent.parent
 ND_PORT, TP_PORT = 4599, 8799
 BANDS = {"Eisen": 0, "Stahl": 0, "Harfe": 1, "Dudel": 1, "Kita": 2, "Rassel": 2}   # band -> sound family
 PER_BAND = 2
-DROP = ("NAV_", "TUTTIPHON_", "ND_")   # nothing of a real setup reaches the throwaway servers
+# nothing of a real setup reaches the throwaway servers – the same names tests/python/env.py removes
+DROP = ("NAV_", "TUTTIPHON_", "ND_", "MUSIC_DIR", "PLAYLIST_DIR", "ARCHIVE_DIR", "BACKUP_DIR", "RATING_USERS",
+        "LASTFM_API_KEY", "NTFY_TOKEN")
 
 
 def say(text):
@@ -104,6 +107,7 @@ def main():
     ap.add_argument("--plugin", required=True)
     ap.add_argument("--keep", action="store_true", help="keep the throwaway folder")
     args = ap.parse_args()
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(1))   # a stopped run still stops both servers (finally)
     for port in (ND_PORT, TP_PORT):
         if subprocess.run(["ss", "-ltn"], capture_output=True, text=True).stdout.count(f":{port} "):
             fail(f"port {port} is in use")
@@ -137,6 +141,8 @@ def main():
         key = sonic.new_key()
         cfg = config.load_config()
         cfg["settings"].update(autoApply=False, minDuration=0)
+        cfg["personen"].append({**copy.deepcopy(cfg["personen"][0]), "id": "check", "name": "Check", "user": nd_user,
+                                "public": False})   # plays are kept only for accounts with a person
         config.save_config(cfg)
         (work / "tp" / ".env").write_text(f"NAV_URL=http://127.0.0.1:{ND_PORT}\nNAV_ADMIN_USER={nd_user}\n"
                                           f"NAV_ADMIN_PASS={nd_pass}\n")
@@ -235,8 +241,12 @@ def main():
         names = [a["name"] for a in info.get("similarArtist", [])]
         say(f"✓ getArtistInfo2 (similar artists): {names}" if names else "• getArtistInfo2: no similar artists (yet)")
 
-        # plays: song a starts and is left after 5 s, song b starts and is played to the end
+        # plays: song z is playing, then a starts and is left after 5 s, b starts and is played to the end (the first
+        # song after a pause is never judged – so z first)
         a, b = [s for s in songs if s["artist"] == "Harfe"][:2]
+        z = next(s for s in songs if s["artist"] != "Harfe")
+        subsonic("reportPlayback", mediaId=z["id"], mediaType="song", positionMs=100000, state="playing")
+        time.sleep(1)
         subsonic("scrobble", id=a["id"], submission="false")
         subsonic("reportPlayback", mediaId=a["id"], mediaType="song", positionMs=5000, state="playing")
         time.sleep(1)

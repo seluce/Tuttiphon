@@ -496,16 +496,25 @@ sound analysis, so the Docker image – without it, the plugin answers with the 
    Navidrome.
 4. **In Navidrome:** Settings → Plugins → “Tuttiphon”: turn on, enter the address of Tuttiphon as Navidrome reaches it
    and the key, and allow it all users (“Users” – Navidrome only hands on the plays of the users assigned to it).
-   Best the address in the home network, e.g. `http://<NAS>:8765` – not `localhost` unless both share a network, and
-   not an https address through a reverse proxy: such a proxy may turn the requests from the Navidrome container away
-   (Navidrome's log then says “Tuttiphon answered 403: …”).
-5. **Symfonium:** in the settings of the Navidrome server, turn on “Use similar tracks for Radio Mix”.
+   Best the address in the home network, e.g. `http://<NAS>:8765` – or, if both containers share a Docker network,
+   the name of Tuttiphon's container (`http://tuttiphon:8765`); never `localhost` (inside the Navidrome container that
+   is Navidrome itself), and not an https address through a reverse proxy: such a proxy may turn the requests from the
+   Navidrome container away (Navidrome's log then says “Tuttiphon answered 403: …”). The file name stays exactly
+   `tuttiphon.ndp` – Navidrome takes it as the plugin's name in the list of agents.
+5. **Symfonium:** in the settings of the Navidrome server (Settings → Media providers → the server), turn on “Use
+   similar tracks for Radio Mix” – Instant Mix, song radio and the smart queue then come from Tuttiphon.
 
 Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix and “Plays from
 Navidrome” after a song (with the accounts). Problems: in
 Navidrome's log lines with `plugin=tuttiphon` (more with `ND_PLUGINS_LOGLEVEL=debug`) – “Tuttiphon not reachable”
 (address, network between the containers), “Tuttiphon answered 401” (key: create a new one and enter it), “answered
-429” (too many wrong keys – wait 10 minutes).
+429” (too many wrong keys from this address – wait 10 minutes). “Last request” counts only Navidrome's questions, not
+the plays.
+
+**When Tuttiphon is not reachable** (being updated, restarting, the NAS asleep): for questions the plugin tells
+Navidrome to try again in 2 minutes (`retry_later`) – Navidrome asks its next agents meanwhile; plays (scrobbles)
+Navidrome keeps and hands on again later, with a wrong key after 15 minutes; starts and reports are only of use right
+away and are dropped. Nothing needs to be done after Tuttiphon is back.
 
 **Building it:** `tools/build-plugin.sh` (Go and TinyGo – in `PATH` or `TUTTIPHON_GO_TOOLS` in `dev.local.env`) writes
 `navidrome-plugin/dist/tuttiphon.ndp` (manifest with Tuttiphon's version + `plugin.wasm`); `npm run release` and the
@@ -513,7 +522,8 @@ image workflow build it, the Dockerfile copies it to `/app/plugin/`, the workflo
 release. `tools/plugin-check.sh` (maintainers) runs the whole way end to end: test music made with ffmpeg, a throwaway
 Navidrome (`TUTTIPHON_NAVIDROME` or in `PATH`, port 4599) with the plugin, a throwaway Tuttiphon (port 8799) with
 made-up sound vectors, then `getSimilarSongs2`, `getSonicSimilarTracks`, `findSonicPath` and `getArtistInfo2` through
-Navidrome – never the real Navidrome or the real data.
+Navidrome and a play (`scrobble`, `reportPlayback`) passed on – never the real Navidrome or the real data. The
+`.ndp` carries the licenses of the parts compiled into it (`LICENSES.txt`, `GPL-3.0.txt`).
 
 ## Backup
 

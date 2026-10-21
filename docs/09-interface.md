@@ -631,13 +631,16 @@ by hand” below “Check everything again” (card “In the full run”), whic
 ### Settings → Navidrome: “Navidrome plugin”
 
 The last card of Settings → Navidrome (`pages/settings/NavidromePlugin.svelte`, [Operations](08-operations.md#navidrome-plugin)):
-what the plugin does; songs with a sound fingerprint (`GET /api/plugin` → `vectors`, with a hint while there are none);
-the key – “Create key” / “New key” (asks first: the old one stops working) and “Remove” –; a new key appears once in a
-field with “Copy”; “Plays from Navidrome” (the last play received and the accounts, `live` from `GET /api/plugin`);
-“Last request from Navidrome” (relative time, count since the start); the setup steps: “Download the
-plugin” (only if the installation has the file, otherwise the GitHub release; not to unpack), the agents line for
-`navidrome.toml` and for docker-compose to copy (Tuttiphon in front of Navidrome's defaults), the
-address as this browser sees Tuttiphon, the Symfonium setting; below a note that Navidrome does not say who listens.
+what the plugin does (Navidrome 0.64 or later); songs with a sound vector (`GET /api/plugin` → `vectors`, with a hint
+while there are none); the key – “Create key” / “New key” (asks first: the old one stops working) and “Remove” (asks
+first, reminds to turn the plugin off in Navidrome) –; a new key appears once in a field with “Copy”; “Plays from
+Navidrome” (the last play received and the accounts, `live` from `GET /api/plugin`; while there is none a hint what to
+check); “Last request from Navidrome” (relative time, count since the start); both reloaded every 30 seconds while the
+card is open. The setup steps: “Download the plugin” (only if the installation has the file, otherwise the GitHub
+release; not to unpack, keep the name), the agents lines for `navidrome.toml` and for docker-compose as read-only
+fields with “Copy” (Tuttiphon in front of Navidrome's defaults; the label above the field on the phone), the address as
+this browser reaches Tuttiphon, the Symfonium setting; below a note that Navidrome does not say who listens. “Copy”
+uses the browser's clipboard with https or on localhost, otherwise a hidden text field.
 
 ### Settings → Playlists and Intelligence
 

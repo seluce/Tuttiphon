@@ -36,14 +36,14 @@ flowchart TD
     N -- yes --> E503["503 locked"]
     N -- no --> P{"administrator password?<br/>(environment or set in the browser)"}
     P -- no --> SM{"bound to a network address?"}
-    SM -- "yes: setup mode" --> L
+    SM -- "yes: setup mode" --> SO
     SM -- no --> H{"Host header localhost<br/>or in TUTTIPHON_HOSTS?"}
     H -- no --> E421["421"]
-    H -- yes --> L
-    P -- yes --> SO{"GET /api/sonic/…?<br/>(the Navidrome plugin)"}
+    H -- yes --> SO
+    P -- yes --> SO{"GET or POST /api/sonic/…?<br/>(the Navidrome plugin)"}
     SO -- yes --> SK{"Authorization: Bearer<br/>= the plugin's key?"}
-    SK -- no --> E401K["401 (lockout like a password)"]
-    SK -- yes --> SA["answer (no session, no other data)"]
+    SK -- no --> E401K["401 – counts toward a lockout<br/>per address (then 429)"]
+    SK -- yes --> SA["answer or keep a play – also during a lockout<br/>(no session, no other data)"]
     SO -- no --> L{"/api/login, /api/setup<br/>or POST /api/logout?"}
     L -- "GET login" --> LI["{setup: bool, navidrome: bool}"]
     L -- "POST login" --> XL{"Header X-Tuttiphon: 1?"}
@@ -551,10 +551,13 @@ The plugin (`navidrome-plugin/`) does not sign in with a password or a session b
 (`sonic.new_key()`: `tp_` + 32 random bytes, URL-safe). Only its SHA-256 is stored (`state/plugin_key.json`); the
 interface shows the key once, after creating it. `sonic.check_key()` compares in constant time. It opens only
 `GET /api/sonic/…` – song ids, titles, bands and albums of the whole library, as the shared person sees them (without
-separate worlds unless asked for one of their songs, without the shared person's dislikes, kid-safe as soon as there is
-a child profile) – and `POST /api/sonic/listen`, which only adds plays of an account (whoever has the key could add
-made-up plays, never read any); nothing of accounts, people, playlists or settings. Wrong keys count toward a lockout like
-passwords (`_limited()`, keys `plugin|<address>` 30, `plugin` 100 in 10 minutes). Creating, removing and the status
+separate worlds unless asked for one of their songs, without the shared person's dislikes, kid-safe as soon as a
+profile has kid-safe mode or is a child profile) – and `POST /api/sonic/listen`, which only adds plays of an account
+with a person in Tuttiphon that is not blocked (`listen.allowed()`; whoever has the key could add made-up plays, never
+read any; the day files `plays/<account>/live-….jsonl` with permissions 0640); nothing of accounts, people, playlists
+or settings. Wrong keys count toward a lockout like passwords, but only per address (`_limited()`, key
+`plugin|<address>`, 30 in 10 minutes) – the right key always passes, so wrong guesses from elsewhere never shut the
+plugin out. Creating, removing and the status
 (`/api/plugin…`) and the download of the plugin are admin only. In Navidrome the key is in the plugin's settings
 (password field); the plugin may reach every host (`requiredHosts: ["*"]`), because the address of Tuttiphon is typed
 in there – since Navidrome 0.64 a host name alone never allows a private address.

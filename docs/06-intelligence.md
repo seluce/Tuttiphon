@@ -616,25 +616,27 @@ of 40 songs from the 177 songs above: energy jumps between neighbours 0.32 → 0
 ### For Navidrome: the plugin (`app/sonic.py`)
 
 The Tuttiphon plugin hands Navidrome's questions to `GET /api/sonic/…` ([API](03-api.md#navidrome-plugin)) – so
-Instant Mix, “similar songs”, song and artist radio in Navidrome and its apps (Symfonium, Feishin …) and the
+Instant Mix, “similar songs”, the smart queue, song and artist radio in Navidrome and its apps (Symfonium, Feishin …) and the
 OpenSubsonic extension `sonicSimilarity` follow the sound of the own files.
 
 **What may come** (`_pool()`, cached per song list, configuration and worlds): Navidrome does not say who listens, so
 “All” as for the shared person – minimum rating 0, without the separate worlds, without its dislikes, without live
-recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon as any profile is a child profile
-(`_view()`). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
+recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon as any profile is a child profile or
+has kid-safe mode on (`_view()`; without a shared person a stand-in without dislikes). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
 lead to children's songs, a rock song never to an audio play.
 
 | Question | How |
 |---|---|
-| Similar songs (`similar`) | the 400 nearest songs by sound (`Index.neighbors()`, `NEIGHBORS`) within what may come; without a vector or too few: the radio of the band (`classify.radio_artists()`) ordered by `classify.rank_like()`, similarity falling from 0.5 |
-| Artist radio (`artist`) | every song by closeness to the band's mean sound (`Index.centroid()`, all at once with `similar.batch()`), + 0.1 for bands of its radio (`RADIO_BONUS`); the band itself up to a third of the songs; without vectors the radio's bands, shuffled by the day |
-| Album (`album`) | closeness to the mean sound of the album's songs, not from the album itself; without vectors like the artist radio of its band |
-| Similar bands (`artists`) | `classify.radio_artists()` (Last.fm and sound), never the band itself, with Navidrome's artist id |
-| Path (`path`) | from the start song to the end song in `count` steps: at step k the song nearest to the normalized point (1 − t)·a + t·b between the two centered sounds (t = k / (count − 1)), every song and recording once; both ends included |
+| Similar songs (`similar`) | every song by closeness to its sound (`_closest()`, all vectors at once with `similar.batch()`) within what may come – a song the AI has not analysed yet takes the mean sound of its album, otherwise of its band (`_sound()`); too few or no sound at all: the radio of the band (`classify.radio_artists()`) ordered by `classify.rank_like()` fills up, its similarity always below the last real one |
+| Artist radio (`artist`) | every song by closeness to the band's mean sound (`Index.centroid()`), + 0.1 for bands of its radio (`RADIO_BONUS` – only for the order, the similarity shown stays the closeness); the band itself up to a third of the songs; without vectors the radio's bands, shuffled by the day, similarity falling from 0.5 |
+| Album (`album`) | closeness to the mean sound of the album's songs (without vectors on the album: of its band), not from the album itself; without any sound like the artist radio of its band, without the album |
+| Similar bands (`artists`) | `classify.radio_artists()` (Last.fm and sound) – only bands with songs that may come for this band (separate worlds only for a band of them), never the band itself, with Navidrome's artist id |
+| Path (`path`) | from the start song to the end song in `count` steps: at step k the song nearest to the normalized point (1 − t)·a + t·b between the two centered sounds (t = k / (count − 1)), every song and recording once, at most `max(2, count / 8)` per band; both ends included; songs without a vector of their own take the sound of their album or band; without any sound the first half from the similar songs of the start, the second from those of the end; from a song to itself: the song and its similar songs |
 
 Every answer: at most `max(2, count / 12)` songs per band (the band asked for a quarter, the artist radio a third),
-every recording once (title without “(…)”/“[…]” + band), never the song asked for; similarity clamped to 0–1.
+every recording once (`_Seen`: the same title without “(…)”/“[…]” – but “(Part 2)”, “(2011)” stay – and band with
+about the same length, ± 4 s), never the song asked for; similarity clamped to 0–1. Answers are remembered per song
+list, configuration and sound vectors (256 for similar songs).
 A band is found by Navidrome's artist id or name among all artists and album artists of a song (Navidrome also asks
 for an artist who only takes part); it counts as the main artist of most of those songs (`_artist_songs()`).
 Measured on the development PC with a made-up library of 25,000 songs: the first answer after the song list changed

@@ -25,9 +25,10 @@ jobs:
       - name: Zip with the license note
         run: |
           cat > models/README.txt <<'TXT'
-          Essentia models (Discogs-EffNet and its classification heads) by the Music Technology Group,
+          Essentia models (Discogs-EffNet and its classification heads) – Copyright Music Technology Group,
           Universitat Pompeu Fabra – https://essentia.upf.edu/models.html
           License: CC BY-NC-SA 4.0 – https://creativecommons.org/licenses/by-nc-sa/4.0/ (non-commercial use only).
+          Provided as-is, without warranties (see section 5 of the license).
           Unchanged copies, so that Tuttiphon's image can be built when essentia.upf.edu does not answer.
           The checksums are in app/ml_worker.py (FILES).
           TXT

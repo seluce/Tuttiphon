@@ -31,6 +31,7 @@ SONG_MINUTES = 3.5           # a session lasts until its last song has played
 MORNING = (5, 10)            # a session starting from 05:00 to 09:59 is a morning one
 MIN_DAYS, MIN_WEEKS = 6, 3
 MINUTES = (15, 60)           # length of the morning mix: the usual round, within these limits
+LIVE_TOLERANCE = 120         # Navidrome's last play this close to a live one is the same play
 _lock = threading.Lock()
 _memo = {}
 
@@ -87,11 +88,17 @@ def moments(user, songs, now=None, days=DAYS):
     cutoff = dt.datetime.combine(now.date() - dt.timedelta(days=days), dt.time())
     seen, out = set(), []
     from . import listen
-    live = [(t, sid) for t, sid in listen.moments(user, cutoff)]   # live from the Navidrome plugin: every play
-    for t, sid in live + [(local_time(iso), sid) for sid, iso in
-                          _stored(user) + [[s["id"], s.get("played")] for s in songs if s.get("played")]]:
+    live = listen.moments(user, cutoff)   # live from the Navidrome plugin: every play, exact
+    near = {}
+    for t, sid in live:
+        near.setdefault(sid, []).append(t)
+    other = [(local_time(iso), sid) for sid, iso in
+             _stored(user) + [[s["id"], s.get("played")] for s in songs if s.get("played")]]
+    for t, sid, is_live in [(t, sid, True) for t, sid in live] + [(t, sid, False) for t, sid in other]:
         if t is None or t < cutoff or t > now + dt.timedelta(hours=1):
             continue
+        if not is_live and any(abs((t - x).total_seconds()) <= LIVE_TOLERANCE for x in near.get(sid, ())):
+            continue   # the same play, known exactly from the plugin
         key = (sid, t.replace(second=0, microsecond=0))
         if key not in seen:
             seen.add(key)

@@ -573,8 +573,8 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
 
 The Tuttiphon plugin for Navidrome (`navidrome-plugin/`, [Operations](08-operations.md#navidrome-plugin)) asks these
 endpoints. They do not use a session: the plugin sends its own key as `Authorization: Bearer tp_…` – checked before
-the sign-in, also in setup mode; a wrong key counts toward a lockout like a password (30 per address, 100 altogether in
-10 minutes, `429` then). Without a key or with a wrong one: `401` “The key of the Navidrome plugin is wrong …”.
+the sign-in, also in setup mode (after the host check); a wrong key counts toward a lockout like a password (30 per
+address in 10 minutes, `429` then) – the right key always passes. Without a key or with a wrong one: `401` “The key of the Navidrome plugin is wrong …”.
 Song ids are Navidrome's; what may come and how it is chosen: [Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy).
 
 | Endpoint | Parameters | Response |
@@ -588,10 +588,13 @@ Song ids are Navidrome's; what may come and how it is chosen: [Intelligence](06-
 Unknown song or band: an empty list. Another `<what>`: `400`.
 
 `POST /api/sonic/listen` (the plugin as Navidrome's scrobbler, no `X-Tuttiphon` header needed – the key is the
-protection): body `{"event": "start" | "play" | "report", "user", "id", "time"?, "position"?, "state"?, "player"?}`
-– `time` (Unix seconds) only for `play` (when the song started; older than 120 days or more than an hour ahead:
-`{"ok": false}`), otherwise the time of arrival; `position` in seconds (0–86,400), `state` one of `starting`,
-`playing`, `paused`, `stopped`, `expired`. `{"ok": true}`; an unknown event, an empty user or song: `400`; another
+protection): body `{"event": "start" | "play" | "report", "user", "id", "time"?, "position"?, "state"?, "player"?,
+"duration"?}` – `time` (Unix seconds) only for `play` (when the song started; older than 120 days or more than an hour
+ahead: `{"ok": false}`), otherwise the time of arrival; `position` and `duration` (the song's length) in seconds
+(0–86,400), `state` one of `starting`, `playing`, `paused`, `stopped`, `expired`. `{"ok": true}` – the same play once
+more (Navidrome retrying) is kept once; `{"ok": false}` and nothing kept for an account without a person in Tuttiphon
+or with the role “none” and for a `start` further than 15 s into the song (the same play going on); an unknown event,
+an empty, unprintable or longer than 100 characters user, an empty song: `400`; another
 `POST /api/sonic/<what>`: `404`. What happens with it: [Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy).
 
 | Endpoint | Access | Parameters | Response |

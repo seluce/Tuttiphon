@@ -7,6 +7,26 @@ released.
 
 ## Unreleased
 
+- **After updating:** put the new `tuttiphon.ndp` into Navidrome's plugins folder (exactly this name, not unpacked)
+  and restart Navidrome; allow the plugin **all users**; if you entered the agents line from 1.4.0, replace it with
+  `tuttiphon,deezer,lastfm,listenbrainz`. Tuttiphon's own docker-compose stays as it is.
+- **Sound answers also for songs the AI has not analysed yet:** Instant Mix, the smart queue and sound paths take the
+  mean sound of the song's album or band – before, such a song got only the radio with the same similarity for every
+  song, and a path between such songs stayed empty. Paths mix bands (only a few songs per band), similar bands come
+  only from what may play, an artist who only takes part in a song leads to their own songs, and the same recording
+  (“(Remastered)”) comes only once.
+- **Navidrome plugin, sturdier:** while Tuttiphon is not reachable (update, restart), Navidrome rests the plugin for
+  two minutes and asks its other sources; plays are handed on later. Wrong keys from elsewhere no longer shut the
+  plugin out – the right key always passes.
+- **Skips, judged more carefully:** a cross-fade, going back to the previous song, the first song after a long pause
+  and a short track played to its end no longer count as skipped; with several devices on one account every player
+  is judged on its own.
+- **Privacy:** live plays are kept only for accounts with a person in Tuttiphon that are not blocked, readable only
+  by Tuttiphon, and removed after 120 days also for accounts that stopped playing. The plugin's answers leave out
+  explicit songs as soon as a profile has kid-safe mode (before only with a child profile).
+- **Navidrome plugin card:** “Copy” also works over http, the agents lines can be selected, the status refreshes
+  itself, and while no play arrives a hint says what to check. The plugin file now carries the licenses of the parts
+  compiled into it.
 - **Plays live from Navidrome.** The Tuttiphon plugin now also passes every play on as it happens (as Navidrome's
   scrobbler): the listening clock gets exact times, also when a song is played twice a day; the mixes learn from real
   skips – a song left within 30 seconds – for every song, not only guessed from the mix history; and accounts without

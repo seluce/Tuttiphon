@@ -95,7 +95,7 @@
     <li>{@html t('<b>Core set first:</b> per person, “Discover” shows the formats with a fixed rhythm first – discovered, album of the week, own sound, new from favorite bands, rediscover, your month, good morning and the Daily Mixes of the two most played worlds. Everything else is behind “more ideas”.')}</li>
   </Bullets>
   <p>{@html t('The change happens at the time set under <a class="link" href="#/einstellungen/ablaeufe">Settings → Automation → Daily refresh</a> – every day, on Mondays or on the 1st, depending on the mix. If Tuttiphon isn’t running at that time, it catches up at the next start – in the Docker container on the NAS it always runs.')}</p>
-  <p>{@html t('<b>Mixes learn:</b> Tuttiphon recognizes what was skipped from the plays Symfonium reports to Navidrome – so, as with statistics and recap, only for accounts whose password Tuttiphon knows. What it learns takes effect from the next new mix. You can turn it off under <a class="link" href="#/einstellungen/playlists">Settings → Playlists</a> with “Mixes that learn”.')}</p>
+  <p>{@html t('<b>Mixes learn:</b> Tuttiphon recognizes what was skipped from the plays Symfonium reports to Navidrome – for accounts whose password Tuttiphon knows, and with the Navidrome plugin for every account, as it happens. What it learns takes effect from the next new mix. You can turn it off under <a class="link" href="#/einstellungen/playlists">Settings → Playlists</a> with “Mixes that learn”.')}</p>
 {/snippet}
 
 {#snippet playlists()}
@@ -260,15 +260,15 @@
 {/snippet}
 
 {#snippet plugin()}
-  <p>{t('With the Tuttiphon plugin, Navidrome asks Tuttiphon for similar songs. Instant Mix in Navidrome, “similar songs”, song and artist radio in Symfonium and other apps then follow the sound of your own files – from the AI sound analysis, also for bands that Last.fm hardly knows.')}</p>
+  <p>{t('With the Tuttiphon plugin (Navidrome 0.64 or later), Navidrome asks Tuttiphon for similar songs. Instant Mix in Navidrome, the smart queue, song and artist radio in Symfonium and other apps then follow the sound of your own files – from the AI sound analysis, also for bands that Last.fm hardly knows.')}</p>
   <Steps>
     <li><span>{@html t('Under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a>, create a key in the card “Navidrome plugin” and download the plugin.')}</span></li>
-    <li><span>{@html t('Put <b>tuttiphon.ndp</b> – not unpacked – into Navidrome’s plugins folder, put <code>tuttiphon</code> first in Navidrome’s list of agents (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) and restart Navidrome.')}</span></li>
+    <li><span>{@html t('Put the file – not unpacked and named exactly <b>tuttiphon.ndp</b> – into Navidrome’s plugins folder, put <code>tuttiphon</code> first in Navidrome’s list of agents (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) and restart Navidrome.')}</span></li>
     <li><span>{t('In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.')}</span></li>
-    <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server.')}</span></li>
+    <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Settings → Media providers).')}</span></li>
   </Steps>
   <p>{t('The plugin also passes every play on: exact listening times, real skips for the mixes – and the recap for accounts without a stored password.')}</p>
-  <p>{t('Navidrome does not say who is listening – the songs come from the whole library as for the family, and with a child profile without explicit songs. The card shows when Navidrome last asked.')}</p>
+  <p>{t('Navidrome does not say who is listening – the songs come from the whole library as for the family, without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile. The card shows when Navidrome last asked.')}</p>
 {/snippet}
 
 {#snippet benachrichtigungen()}
@@ -289,7 +289,7 @@
     <li>{@html t('<b>Users & permissions</b> – who is an administrator, who is a user, who has no access.')}</li>
     <li>{@html t('<b>Home page</b> – which sections, in which order.')}</li>
     <li>{@html t('<b>Notifications</b> – to your phone via the app or ntfy, and about what.')}</li>
-    <li>{@html t('<b>Navidrome</b> – server address and admin with connection test, account passwords, type of scan.')}</li>
+    <li>{@html t('<b>Navidrome</b> – server address and admin with connection test, account passwords, type of scan, the Navidrome plugin.')}</li>
     <li>{@html t('<b>Playlists</b> – apply automatically, mixes that learn, basic rules such as minimum length, live recordings, “the hits” …')}</li>
     <li>{@html t('<b>Storage locations</b> – where music, playlists and the archive are.')}</li>
     <li>{@html t('<b>Deezer stars, Lyrics, Conversion, Intelligence</b> – see the sections above.')}</li>

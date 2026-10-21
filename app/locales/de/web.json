@@ -113,7 +113,7 @@
  "No administrator password yet – open Tuttiphon in the browser and set it with the setup code.": "Noch kein Administrator-Passwort – öffne Tuttiphon im Browser und lege es mit dem Einrichtungscode fest.",
  "Setup code: {code}  (also in setup-code.txt in the data folder)": "Einrichtungscode: {code}  (steht auch in setup-code.txt im Datenordner)",
  "The setup code is wrong – look for the line “Setup code:” in the container log, or open setup-code.txt in the data folder.": "Der Einrichtungscode stimmt nicht – such im Container-Protokoll die Zeile „Setup code:“ oder öffne setup-code.txt im Datenordner.",
- "The key of the Navidrome plugin is wrong – create a new one under Settings → Navidrome plugin.": "Der Schlüssel des Navidrome-Plugins stimmt nicht – erzeuge unter Einstellungen → Navidrome-Plugin einen neuen.",
+ "The key of the Navidrome plugin is wrong – create a new one under Settings → Navidrome.": "Der Schlüssel des Navidrome-Plugins stimmt nicht – erzeuge unter Einstellungen → Navidrome einen neuen.",
  "The plugin file is not part of this installation.": "Die Plugin-Datei gehört nicht zu dieser Installation.",
  "Navidrome plugin": "Navidrome-Plugin"
 }

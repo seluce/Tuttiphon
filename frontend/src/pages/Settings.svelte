@@ -43,7 +43,7 @@
     ['benutzer', 'users', t('Users & permissions'), t('Who may do what in Tuttiphon'), Benutzer, 'family'],
     ['start', 'home', t('Home page'), t('What the home page shows'), Startseite, 'family'],
     ['benachrichtigungen', 'bell', t('Notifications'), t('To your phone via the app or ntfy'), Benachrichtigungen, 'family'],
-    ['navidrome', 'server', 'Navidrome', t('Server, accounts, scan'), Navidrome, 'connection'],
+    ['navidrome', 'server', 'Navidrome', t('Server, accounts, scan, plugin'), Navidrome, 'connection'],
     ['speicher', 'drive', t('Storage locations'), t('Music, playlists, archive'), Speicherorte, 'connection'],
     ['playlists', 'playlists', t('Playlists'), t('Basic rules & applying'), Playlists, 'music'],
     ['deezer', 'star', t('Deezer stars'), t('Popularity → stars'), Deezer, 'music'],

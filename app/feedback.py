@@ -197,7 +197,7 @@ def learn(today=None, log=lambda *_: None):
                 if end >= today:
                     continue   # period still running
                 from . import listen
-                if listen.has_plays(e["user"], start, end):   # live plays know the skips exactly (factors())
+                if listen.has_live(e["user"], start, end):   # live plays know the skips exactly (factors())
                     e["done"] = True
                     changed = True
                     out["periods"] += 1
@@ -286,13 +286,15 @@ def _live_effect(user, today):
     """The same from the live plays (listen.py): skips on their days, every play makes up for half a skip."""
     from . import listen
     key = (user.lower(), today, listen.stamp(user))
-    if key in _live_memo:
-        return _live_memo[key]
+    hit = _live_memo.get(key)
+    if hit is not None:
+        return hit
     start = today - dt.timedelta(days=listen.KEEP_DAYS)
+    skipped, played = listen.summary(user, start, today)
     out = {}
-    for sid, days in listen.skips(user, start, today).items():
+    for sid, days in skipped.items():
         out[sid] = sum(0.5 ** (max((today - dt.date.fromisoformat(d)).days, 0) / HALF_LIFE) for d in days)
-    for sid, n in listen.plays(user, start, today).items():
+    for sid, n in played.items():
         out[sid] = out.get(sid, 0.0) - 0.5 * n
     if len(_live_memo) > 16:
         _live_memo.clear()
@@ -301,6 +303,7 @@ def _live_effect(user, today):
 
 
 _factors_memo = {}
+_NO_EFFECT = {}   # one object for "no feedback file", so that the memo below recognizes it
 
 
 def factors(user, today=None):
@@ -309,7 +312,7 @@ def factors(user, today=None):
     if not user:
         return {}
     today = today or dt.date.today()
-    base = _cached(_feedback_file(user), {}, lambda fb: _effect(fb, today), extra=today)
+    base = _cached(_feedback_file(user), {}, lambda fb: _effect(fb, today), extra=today) or _NO_EFFECT
     live = _live_effect(user, today)
     key = (user.lower(), today)
     hit = _factors_memo.get(key)

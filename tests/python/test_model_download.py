@@ -74,6 +74,37 @@ class DownloadTest(unittest.TestCase):
         self.assertFalse(self.run_with(lambda url: mirror_zip(bad) if "mirror" in url else (_ for _ in ()).throw(OSError("down"))))
         self.assertEqual(ml_worker.missing_models(self.folder), [next(iter(DATA))])
 
+    def test_a_transfer_that_breaks_off(self):
+        import http.client
+        import urllib.request
+
+        class Broken:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                raise http.client.IncompleteRead(b"half")
+        with mock.patch.object(urllib.request, "urlopen", lambda url, timeout=60: Broken()):
+            with self.assertRaises(OSError):   # an OSError like any other network failure – so the copy follows
+                ml_worker._fetch("https://essentia.test/x")
+
+    def test_one_file_missing_at_the_source(self):
+        import urllib.error
+        first = next(iter(DATA))
+
+        def source(url):
+            name = url.rsplit("/", 1)[1]
+            if "mirror" in url:
+                return mirror_zip(DATA)
+            if name == first:
+                raise urllib.error.HTTPError(url, 404, "Not Found", {}, None)
+            return DATA[name]
+        self.assertTrue(self.run_with(source))
+        self.assertEqual(sum("essentia" in u for u in self.calls), len(DATA) - 1 + len(ml_worker.WAITS))   # the rest still from there
+
     def test_without_a_copy(self):
         with mock.patch.dict(os.environ, {"TUTTIPHON_MODELS_MIRROR": ""}):
             self.assertFalse(self.run_with(lambda url: (_ for _ in ()).throw(OSError("down"))))

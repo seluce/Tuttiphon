@@ -11,11 +11,13 @@ Navidrome does not say who is listening. So the songs come from the whole librar
 without the shared person's dislikes, without live recordings and the like (settings.excludeTitles, minDuration) –
 and without explicit songs as soon as there is a child profile.
 
-The plugin signs in with its own key (Settings → Navidrome plugin): only its SHA-256 is stored (state/plugin_key.json),
+The plugin signs in with its own key (Settings → Navidrome, card "Navidrome plugin"): only its SHA-256 is stored
+(state/plugin_key.json),
 the key itself is shown once.
 """
 import datetime as dt
 import hashlib
+import heapq
 import hmac
 import json
 import random
@@ -33,7 +35,6 @@ KEY_FILE = STATE_DIR / "plugin_key.json"
 _ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_FILES = (_ROOT / "plugin" / "tuttiphon.ndp",                     # in the Docker image
                 _ROOT / "navidrome-plugin" / "dist" / "tuttiphon.ndp")   # built here (tools/build-plugin.sh)
-NEIGHBORS = 400        # nearest songs looked at per song (cached in similar.Index)
 MAX_COUNT = 200        # never more songs per answer
 RADIO_BONUS = 0.1      # a band Last.fm counts as similar moves up this much (artist radio)
 _lock = threading.Lock()
@@ -69,12 +70,7 @@ def check_key(key):
     stored = _stored()
     if not stored or not isinstance(key, str) or not key:
         return False
-    ok = hmac.compare_digest(hashlib.sha256(key.encode()).hexdigest(), stored["sha256"])
-    if ok:
-        with _lock:
-            _seen["at"] = dt.datetime.now().isoformat(timespec="seconds")
-            _seen["calls"] += 1
-    return ok
+    return hmac.compare_digest(hashlib.sha256(key.encode()).hexdigest(), stored["sha256"])
 
 
 def plugin_file():
@@ -92,12 +88,19 @@ def status():
 # ---------------------------------------------------------------------------- the songs that may come
 
 def _view(cfg):
-    """The configuration as the plugin sees the library: the shared person, with kid-safe mode as soon as there is
-    a child profile (Navidrome does not say who is listening)."""
+    """The configuration as the plugin sees the library: the shared person – kid-safe as soon as any profile is a
+    child profile or has kid-safe mode on (Navidrome does not say who is listening). Without a shared person a stand-in
+    without dislikes. -> (configuration, person id)"""
     default = cfg["settings"].get("defaultPerson")
-    child = any(p.get("child") for p in cfg.get("personen", []))
-    personen = [{**p, "clean": True} if p["id"] == default and child else p for p in cfg.get("personen", [])]
-    return {**cfg, "personen": personen}, default
+    clean = any(p.get("child") or p.get("clean") for p in cfg.get("personen", []))
+    personen = [dict(p) for p in cfg.get("personen", [])]
+    me = next((p for p in personen if p["id"] == default), None)
+    if me is None:
+        me = {"id": "_sonic", "name": "", "user": ""}
+        personen.append(me)
+    if clean:
+        me["clean"] = True
+    return {**cfg, "personen": personen}, me["id"]
 
 
 def _cfg_key(cfg):
@@ -106,25 +109,37 @@ def _cfg_key(cfg):
     return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()
 
 
+def _remember(kind, key, value, keep=16):
+    """Into the memory of this kind – the entries of another song list go (the list is reloaded now and then)."""
+    with _lock:
+        box = _memo.setdefault(kind, {})
+        for k in [k for k in box if k[0] != key[0]]:
+            del box[k]
+        if len(box) >= keep:
+            box.pop(next(iter(box)))
+        box[key] = value
+    return value
+
+
+def _recall(kind, key):
+    with _lock:
+        return _memo.get(kind, {}).get(key)
+
+
 def _pool(cfg, lib, worlds=()):
     """Indices of the songs that may come: "All" for the shared person (minimum rating 0) – plus the separate worlds
     `worlds` (those of the song asked for)."""
-    key = ("pool", ml.lib_key(lib), _cfg_key(cfg), tuple(sorted(worlds)))
-    with _lock:
-        if key in _memo:
-            return _memo[key]
-    view, default = _view(cfg)
-    base = {"id": "_sonic", "person": default, "welt": rules.ALL, "stil": rules.ALL, "minRating": 0}
+    key = (ml.lib_key(lib), _cfg_key(cfg), tuple(sorted(worlds)))
+    hit = _recall("pool", key)
+    if hit is not None:
+        return hit
+    view, person = _view(cfg)
+    base = {"id": "_sonic", "person": person, "welt": rules.ALL, "stil": rules.ALL, "minRating": 0}
     ctx = rules.BuildContext(lib)
     ids = set(lib.match(rules.build_nsp(view, base, ctx)))
     if worlds:
         ids |= set(lib.match(rules.build_nsp(view, {**base, "welt": sorted(worlds)}, ctx)))
-    out = frozenset(ids)
-    with _lock:
-        if len(_memo) > 16:
-            _memo.clear()
-        _memo[key] = out
-    return out
+    return _remember("pool", key, frozenset(ids))
 
 
 def _worlds_of(cfg, lib, indices):
@@ -165,33 +180,75 @@ def _closest(lib, vec, allowed, exclude=frozenset()):
     return scored
 
 
-_PAREN = re.compile(r"\s*[\(\[].*?[\)\]]")
+def _albums(lib):
+    """Album id -> song indices (per song list)."""
+    key = (ml.lib_key(lib),)
+    hit = _recall("albums", key)
+    if hit is None:
+        hit = {}
+        for i, s in enumerate(lib.songs):
+            hit.setdefault(s.get("albumId"), []).append(i)
+        _remember("albums", key, hit, keep=2)
+    return hit
 
 
-def _same_song(s):
-    """Key of a recording regardless of edition – "Song (Remastered)" and "Song" are the same."""
-    return (_PAREN.sub("", (s.get("title") or "").lower()).strip(), (s.get("artist") or "").lower())
+def _sound(lib, idx, i):
+    """The sound of song i as a unit vector: its own – or, while the AI has not analysed it yet, the mean sound of its
+    album, otherwise of its band. None without anything."""
+    if idx is None:
+        return None
+    own = idx.centered(i)
+    if own is not None:
+        return similar.unit(own)
+    album = [v for v in (idx.centered(j) for j in _albums(lib).get(lib.songs[i].get("albumId"), ()) if j != i)
+             if v is not None]
+    if album:
+        return similar.mean_unit(album)
+    return idx.centroid(lib._main_artist(lib.songs[i]))
 
 
-def _diverse(lib, scored, count, seeds=(), seed_share=0.25):
-    """The best `count` of scored [(index, score)] – at most a few per band (the seed bands a bit more), every recording
-    once, none of the seeds."""
+_PAREN = re.compile(r"\s*[\(\[](?![^\)\]]*\d)[^\)\]]*[\)\]]")   # “(Remastered)”, “[Live]” – not “(Part 2)”, “(2011)”
+
+
+class _Seen:
+    """Every recording once: the same title and band with about the same length (± 4 s) is the same recording –
+    “Song (Remastered)” and “Song”; “Intro” of two albums or “Teil 1”/“Teil 2” are not."""
+
+    def __init__(self):
+        self.lengths = {}
+
+    def add(self, s):
+        """-> False if this recording was taken already."""
+        key = (_PAREN.sub("", (s.get("title") or "").lower()).strip(), (s.get("artist") or "").lower())
+        d = s.get("duration") or 0
+        known = self.lengths.setdefault(key, [])
+        if any(not d or not x or abs(d - x) <= 4 for x in known):
+            return False
+        known.append(d)
+        return True
+
+
+def _diverse(lib, scored, count, seeds=(), seed_share=0.25, own=None, exclude=frozenset()):
+    """The best `count` of scored [(index, score)] – at most a few per band (the seed bands a bit more; `own`: this
+    band up to a third), every recording once, none of the seeds or `exclude`."""
     songs = lib.songs
     seed_artists = {lib._main_artist(songs[i]) for i in seeds}
-    taken = {_same_song(songs[i]) for i in seeds}
+    seen = _Seen()
+    for i in seeds:
+        seen.add(songs[i])
     per = Counter()
     cap_other = max(2, count // 12)
     cap_seed = max(cap_other, round(count * seed_share))
+    cap_own = max(2, count // 3)
     out = []
     for i, sc in scored:
-        if i in seeds:
+        if i in seeds or i in exclude:
             continue
         s = songs[i]
         a = lib._main_artist(s)
-        same = _same_song(s)
-        if same in taken or per[a] >= (cap_seed if a in seed_artists else cap_other):
+        cap = cap_own if a == own else cap_seed if a in seed_artists else cap_other
+        if per[a] >= cap or not seen.add(s):
             continue
-        taken.add(same)
         per[a] += 1
         out.append((i, max(0.0, min(1.0, round(sc, 4)))))
         if len(out) >= count:
@@ -199,19 +256,15 @@ def _diverse(lib, scored, count, seeds=(), seed_share=0.25):
     return out
 
 
-def _radio(cfg, lib, i, allowed, exclude):
-    """Without a sound vector: songs of the band and similar bands (radio) ordered by how much they sound like song i
-    (our features), with falling scores."""
+def _radio(lib, i, allowed, exclude, count, below=0.5):
+    """Without any sound: songs of the band and similar bands (radio) ordered by how much they sound like song i
+    (our features). Scores fall from `below` – always under the real ones they follow – over `count` places."""
     artist = lib._main_artist(lib.songs[i])
     bands = set(classify.radio_artists([artist], lib, limit=25))
     cands = [j for j in allowed if j not in exclude and lib._main_artist(lib.songs[j]) in bands]
     ranked = classify.rank_like(lib, i, cands, random.Random(lib.songs[i]["id"]))
-    idx = similar.index(lib)
-    out = []
-    for k, j in enumerate(ranked):
-        c = idx.cos(i, j) if idx is not None else None
-        out.append((j, c if c is not None else max(0.05, 0.5 - 0.45 * k / max(1, len(ranked)))))
-    return out
+    top = max(0.05, min(0.5, below - 0.01))
+    return [(j, max(0.01, top - (top - 0.01) * k / max(1, count))) for k, j in enumerate(ranked)]
 
 
 def _clamp(count, default=50):
@@ -224,29 +277,32 @@ def _clamp(count, default=50):
 # ---------------------------------------------------------------------------- answers
 
 def similar_songs(cfg, lib, song_id, count=50):
-    """Songs that sound like this one (Instant Mix, song radio): [(index, similarity 0–1)]."""
+    """Songs that sound like this one (Instant Mix, song radio): [(index, similarity 0–1)], most similar first."""
     count = _clamp(count)
     i = lib.index_of().get(song_id)
     if i is None:
         return []
     allowed = _pool(cfg, lib, _worlds_of(cfg, lib, [i]))
+    key = (ml.lib_key(lib), _cfg_key(cfg), similar.stamp(), song_id, count)
+    hit = _recall("similar", key)
+    if hit is not None:
+        return hit
     idx = similar.index(lib)
-    scored = []
-    if idx is not None and idx.has(i):
-        scored = [(j, sc) for j, sc in idx.neighbors(i, NEIGHBORS) if j in allowed]
-    out = _diverse(lib, scored, count, seeds=[i])
-    if len(out) < count:   # no vector (yet) or too few near ones: the radio fills up
+    out = _diverse(lib, _closest(lib, _sound(lib, idx, i), allowed, exclude={i}), count, seeds=[i])
+    if len(out) < count:   # no sound at all, or too few near ones: the radio fills up – below the real ones
         have = {j for j, _sc in out} | {i}
-        out = _diverse(lib, out + _radio(cfg, lib, i, allowed, have), count, seeds=[i])
-    return out
+        low = out[-1][1] if out else 0.5
+        out = _diverse(lib, out + _radio(lib, i, allowed, have, count, below=low), count, seeds=[i])
+    return _remember("similar", key, out, keep=256)
 
 
 def _artist_songs(lib, name=None, artist_id=None):
     """Songs of a band – by Navidrome's artist id or its name, as main artist, among the artists or as album artist
-    (Navidrome asks for every artist, also one who only takes part) – and the band as Tuttiphon counts it: the main
-    artist of most of them. -> (indices, band name)"""
+    (Navidrome asks for every artist, also one who only takes part) – and the band as Tuttiphon counts it: the artist
+    itself where it is the main artist of some of them, otherwise the main artist of most. -> (indices, band name)"""
     songs = lib.songs
     low = (name or "").lower()
+    ids = lib.artist_ids(all=True)
 
     def hit(s):
         people = (s.get("artists") or []) + (s.get("albumArtists") or [])
@@ -257,13 +313,17 @@ def _artist_songs(lib, name=None, artist_id=None):
     found = [i for i, s in enumerate(songs) if hit(s)]
     if not found:
         return [], name
-    main = Counter(lib._main_artist(songs[i]) for i in found).most_common(1)[0][0]
-    return found, main
+    mains = Counter(lib._main_artist(songs[i]) for i in found)
+    for a in mains:
+        if (low and (a or "").lower() == low) or (artist_id and ids.get(a) == artist_id):
+            return found, a
+    return found, mains.most_common(1)[0][0]
 
 
-def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50):
-    """Artist radio: songs that sound like the band – its own, of bands that sound like it and of those Last.fm counts
-    as similar (RADIO_BONUS); without vectors the radio's bands, shuffled by the day."""
+def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50, exclude=frozenset()):
+    """Artist radio: songs that sound like the band – its own (up to a third), of bands that sound like it and of
+    those Last.fm counts as similar (they move up by RADIO_BONUS, the similarity shown stays the sound's); without
+    vectors the radio's bands, shuffled by the day."""
     count = _clamp(count)
     own, artist = _artist_songs(lib, name, artist_id)
     if not own:
@@ -273,40 +333,20 @@ def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50):
     idx = similar.index(lib)
     centre = idx.centroid(artist) if idx is not None else None
     if centre is not None:
-        scored = [(i, sc + (RADIO_BONUS if lib._main_artist(lib.songs[i]) in bands else 0))
-                  for i, sc in _closest(lib, centre, allowed)]
-        scored.sort(key=lambda x: -x[1])
-    else:
-        rnd = random.Random(f"{artist}|{dt.date.today()}")
-        cands = [i for i in allowed if lib._main_artist(lib.songs[i]) in bands]
-        rnd.shuffle(cands)
-        scored = [(i, 0.5) for i in cands]
-    return _diverse_with_own(lib, scored, count, artist)
-
-
-def _diverse_with_own(lib, scored, count, artist):
-    """As _diverse(), the band itself with up to a third of the songs."""
-    songs = lib.songs
-    per, taken, out = Counter(), set(), []
-    cap_other, cap_own = max(2, count // 12), max(2, count // 3)
-    for i, sc in scored:
-        a = lib._main_artist(songs[i])
-        same = _same_song(songs[i])
-        if same in taken or per[a] >= (cap_own if a == artist else cap_other):
-            continue
-        taken.add(same)
-        per[a] += 1
-        out.append((i, max(0.0, min(1.0, round(sc, 4)))))
-        if len(out) >= count:
-            break
-    return out
+        ranked = sorted(_closest(lib, centre, allowed, exclude),
+                        key=lambda x: -(x[1] + (RADIO_BONUS if lib._main_artist(lib.songs[x[0]]) in bands else 0)))
+        return _diverse(lib, ranked, count, own=artist)
+    rnd = random.Random(f"{artist}|{dt.date.today()}")
+    cands = [i for i in allowed if i not in exclude and lib._main_artist(lib.songs[i]) in bands]
+    rnd.shuffle(cands)
+    return _diverse(lib, [(i, max(0.01, 0.5 - 0.49 * k / count)) for k, i in enumerate(cands)], count, own=artist)
 
 
 def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50):
-    """Songs that sound like an album (its mean sound) – not from the album itself."""
+    """Songs that sound like an album (its mean sound) – never from the album itself."""
     count = _clamp(count)
     songs = lib.songs
-    own = [i for i, s in enumerate(songs) if album_id and s.get("albumId") == album_id]
+    own = list(_albums(lib).get(album_id, ())) if album_id else []
     if not own and name:
         own = [i for i, s in enumerate(songs) if (s.get("album") or "").lower() == name.lower()
                and (not artist or artist.lower() in ((s.get("displayAlbumArtist") or s.get("artist") or "").lower()))]
@@ -315,49 +355,65 @@ def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50):
     allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own))
     idx = similar.index(lib)
     vec = similar.mean_unit([v for v in (idx.centered(i) for i in own) if v is not None]) if idx is not None else None
+    if vec is None and idx is not None:
+        vec = idx.centroid(lib._main_artist(songs[own[0]]))
     if vec is not None:
         return _diverse(lib, _closest(lib, vec, allowed, exclude=set(own)), count, seeds=own)
-    return songs_like_artist(cfg, lib, name=lib._main_artist(songs[own[0]]), count=count)
+    return songs_like_artist(cfg, lib, name=lib._main_artist(songs[own[0]]), count=count, exclude=set(own))
 
 
 def similar_artists(cfg, lib, name=None, artist_id=None, limit=20):
-    """Bands that sound like this one or count as similar (radio): [(name, artist id or None)] – only bands that are in
-    the library, never the band itself."""
+    """Bands that sound like this one or count as similar (radio): [(name, Navidrome's artist id or None)] – only
+    bands with songs that may come for this band (separate worlds only for a band of them, kid-safe as the rest),
+    never the band itself."""
     limit = _clamp(limit, 20)
     own, artist = _artist_songs(lib, name, artist_id)
-    if not artist:
+    if not own:
         return []
-    ids = {}
-    for s in lib.songs:
-        a = lib._main_artist(s)
-        if a and a not in ids:
-            ids[a] = ((s.get("artists") or [{}])[0]).get("id") or s.get("artistId")
-    return [(a, ids.get(a)) for a in classify.radio_artists([artist], lib, limit=limit + 1) if a != artist][:limit]
+    allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own))
+    present = {lib._main_artist(lib.songs[i]) for i in allowed}
+    ids = lib.artist_ids(all=True)
+    out = [a for a in classify.radio_artists([artist], lib, limit=limit * 3) if a != artist and a in present]
+    return [(a, ids.get(a)) for a in out[:limit]]
 
 
 def path(cfg, lib, start_id, end_id, count=25):
     """A path from one song to another: `count` songs (with both ends), each step sounding close to the last – at
-    every step the song nearest to the point between the two sounds. [(index, similarity to that point)]; empty
-    without sound vectors for both."""
+    every step the song nearest to the point between the two sounds, at most a few per band. Songs without a vector
+    of their own take the sound of their album or band; without any sound: the first half from the similar songs of
+    the start, the second from those of the end. [(index, similarity to that point)]"""
     count = max(2, _clamp(count, 25))
     index = lib.index_of()
     a, b = index.get(start_id), index.get(end_id)
+    if a is None or b is None:
+        return []
+    if a == b:   # from a song to itself: the song and what sounds like it
+        return [(a, 1.0)] + similar_songs(cfg, lib, start_id, count - 1)
     idx = similar.index(lib)
-    if a is None or b is None or idx is None:
-        return []
-    va, vb = idx.centered(a), idx.centered(b)
-    va, vb = similar.unit(va) if va is not None else None, similar.unit(vb) if vb is not None else None
-    if va is None or vb is None:
-        return []
+    va, vb = _sound(lib, idx, a), _sound(lib, idx, b)
     allowed = _pool(cfg, lib, _worlds_of(cfg, lib, [a, b]))
     got = _all_batch()
-    if not got:
-        return []
+    if va is None or vb is None or not got:
+        first = similar_songs(cfg, lib, start_id, count)
+        last = similar_songs(cfg, lib, end_id, count)
+        middle, used = [], {a, b}
+        for k in range(count - 2):
+            pool = first if k < (count - 2 + 1) // 2 else last
+            pick = next(((j, sc) for j, sc in (pool if pool is first else reversed(pool)) if j not in used), None)
+            if pick is None:
+                continue
+            used.add(pick[0])
+            middle.append(pick)
+        return [(a, 1.0)] + middle + [(b, 1.0)]
     sids, batch = got
     rows = [(index.get(sid), k) for k, sid in enumerate(sids)]
     rows = [(i, k) for i, k in rows if i is not None and i in allowed]
     used = {a, b}
-    taken = {_same_song(lib.songs[a]), _same_song(lib.songs[b])}
+    seen = _Seen()
+    seen.add(lib.songs[a])
+    seen.add(lib.songs[b])
+    per = Counter()
+    cap = max(2, round(count / 8))
     out = [(a, 1.0)]
     for step in range(1, count - 1):
         t = step / (count - 1)
@@ -365,18 +421,21 @@ def path(cfg, lib, start_id, end_id, count=25):
         if target is None:
             continue
         scores = batch.closeness(target)
-        best = None
-        for i, k in rows:
-            if i in used or (best is not None and scores[k] <= best[1]):
-                continue
-            if _same_song(lib.songs[i]) in taken:
-                continue
-            best = (i, scores[k])
-        if best is None:
-            break
-        used.add(best[0])
-        taken.add(_same_song(lib.songs[best[0]]))
-        out.append((best[0], max(0.0, min(1.0, round(best[1], 4)))))
+        near = heapq.nlargest(64, rows, key=lambda r: scores[r[1]])   # nearly always the pick is among these
+        for cands in (near, sorted(rows, key=lambda r: -scores[r[1]])):
+            pick = None
+            for i, k in cands:
+                band = lib._main_artist(lib.songs[i])
+                if i in used or per[band] >= cap or not seen.add(lib.songs[i]):
+                    continue
+                pick = (i, k, band)
+                break
+            if pick:
+                i, k, band = pick
+                used.add(i)
+                per[band] += 1
+                out.append((i, max(0.0, min(1.0, round(scores[k], 4)))))
+                break
     out.append((b, 1.0))
     return out
 
@@ -395,6 +454,9 @@ def as_songs(lib, scored):
 def answer(cfg, lib, what, query):
     """One request of the plugin: what = similar | artist | album | artists | path. -> JSON-able dict"""
     started = time.time()
+    with _lock:   # for the settings page: the last question (plays do not count here)
+        _seen["at"] = dt.datetime.now().isoformat(timespec="seconds")
+        _seen["calls"] += 1
     if what == "similar":
         out = {"songs": as_songs(lib, similar_songs(cfg, lib, query.get("id", ""), query.get("count", 50)))}
     elif what == "artist":

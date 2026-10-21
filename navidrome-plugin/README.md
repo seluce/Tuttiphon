@@ -10,9 +10,11 @@ Navidrome's scrobbler it passes every play on (`POST /api/sonic/listen`: start, 
 
 - Setting it up: Tuttiphon's Settings → Navidrome → "Navidrome plugin", and [docs/08-operations.md](../docs/08-operations.md#navidrome-plugin).
 - Building: `tools/build-plugin.sh` (Go and TinyGo) → `dist/tuttiphon.ndp` (a zip of `manifest.json` with Tuttiphon's
-  version and `plugin.wasm`).
+  version, `plugin.wasm` and the license texts `LICENSES.txt`, `GPL-3.0.txt`).
 - Checking end to end: `tools/plugin-check.sh` – a throwaway Navidrome with the plugin and a throwaway Tuttiphon.
 - Plugin development kit: `github.com/navidrome/navidrome/plugins/pdk/go`, pinned to the commit of Navidrome 0.64.2
   (`go.mod`); when Navidrome changes its plugin interface, update it there and run the check again.
 
-License: AGPL-3.0, like Tuttiphon (see `../THIRD-PARTY-NOTICES.md` for the parts it contains).
+License: AGPL-3.0, like Tuttiphon. The parts compiled into `plugin.wasm` (Navidrome's plugin kit, Extism, the Go and
+TinyGo libraries, wasi-libc, compiler-rt) and their licenses: `LICENSES.txt` and `GPL-3.0.txt`, which go into the
+`.ndp`, and `../THIRD-PARTY-NOTICES.md`.

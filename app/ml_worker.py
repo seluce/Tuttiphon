@@ -144,9 +144,17 @@ def score(x):
 
 
 def _fetch(url, timeout=60):
+    """-> the bytes; OSError also for a transfer that broke off (IncompleteRead, a confused proxy …)."""
+    import http.client
+    import urllib.error
     import urllib.request
-    with urllib.request.urlopen(url, timeout=timeout) as r:
-        return r.read()
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            return r.read()
+    except urllib.error.HTTPError:
+        raise
+    except http.client.HTTPException as e:
+        raise OSError(f"{type(e).__name__}: {e}") from None
 
 
 def _store(folder, name, data):
@@ -166,6 +174,7 @@ def _from_mirror(folder, names):
     """The missing files from the copy (one zip with all models) – only files whose checksum matches."""
     import io
     import zipfile
+    import zlib
     url = os.environ.get("TUTTIPHON_MODELS_MIRROR", MIRROR)
     if not url:
         return
@@ -179,28 +188,37 @@ def _from_mirror(folder, names):
                     if name in inside:
                         _store(folder, name, z.read(name))
             return
-        except (OSError, ValueError, zipfile.BadZipFile) as e:
+        except (OSError, ValueError, zipfile.BadZipFile, zlib.error) as e:
             print(f"  ⚠ copy: {e}" + (" – trying again" if k < len(WAITS) - 1 else ""))   # i18n-ignore
 
 
 def download(folder):
     """Download and check the models (while building the image): each file up to three times with a pause; if
-    essentia.upf.edu does not answer at all, the rest from the copy (MIRROR). -> True if all are there."""
+    essentia.upf.edu does not answer at all, the rest from the copy (MIRROR) – as well as files it does not have.
+    -> True if all are there."""
+    import urllib.error
     os.makedirs(folder, exist_ok=True)
     down = False
     for name in FILES:
         if os.path.isfile(os.path.join(folder, name)) or down:
             continue
+        unreachable = False
         for k, wait in enumerate(WAITS):
             time.sleep(wait)
             try:
                 if _store(folder, name, _fetch(SOURCE + model_path(name) + name)):
                     break
+                unreachable = False   # a wrong checksum: the server answers
+            except urllib.error.HTTPError as e:   # the server answers (e.g. 404): only this file is missing there
+                print(f"  ⚠ {name}: {e}" + (" – trying again" if k < len(WAITS) - 1 else ""))   # i18n-ignore
+                unreachable = e.code >= 500
             except (OSError, ValueError) as e:
                 print(f"  ⚠ {name}: {e}" + (" – trying again" if k < len(WAITS) - 1 else ""))   # i18n-ignore
+                unreachable = True
         else:
-            down = True   # not even after the pauses: do not wait for every further file
-            print("  ⚠ essentia.upf.edu does not answer")   # i18n-ignore
+            if unreachable:   # not even after the pauses: do not wait for every further file
+                down = True
+                print("  ⚠ essentia.upf.edu does not answer")   # i18n-ignore
     left = missing_models(folder)
     if left:
         _from_mirror(folder, left)

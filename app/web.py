@@ -1362,7 +1362,13 @@ def api_rueckblick(query):
     kind = query.get("kind", "woche")
     if kind not in ("woche", "monat", "jahr"):
         raise ValueError(_("Unknown period"))
-    lib = stats.songs_for(person["user"], CACHE.get())
+    try:
+        lib = stats.songs_for(person["user"], CACHE.get())
+    except ValueError:   # no stored password: the plays from the Navidrome plugin (if any) with the shared song list
+        if not rueckblick.last_snapshot(person["user"]) and rueckblick.plays_between(
+                person["user"], dt.date.today() - dt.timedelta(days=400), dt.date.today())[1]:
+            return {**rueckblick.summary(cfg, CACHE.get(), person["user"], kind, query.get("year")), "person": person["id"]}
+        raise
     last = rueckblick.last_snapshot(person["user"])
     if not last or (dt.datetime.now() - dt.datetime.fromisoformat(last["at"])).total_seconds() > 1800:
         rueckblick.snapshot(person["user"], lib.songs)   # keep it fresh (at most every 30 min)
@@ -1882,13 +1888,11 @@ class Handler(BaseHTTPRequestHandler):
         given = self.headers.get("Authorization") or ""
         key = given[7:].strip() if given[:7].lower() == "bearer " else ""
 
-        def attempt():
-            if not sonic.check_key(key):
+        if not sonic.check_key(key):   # the right key always passes – a lockout must never shut the plugin out
+            def attempt():
                 raise auth.LoginError(_("The key of the Navidrome plugin is wrong – create a new one under Settings → "
-                                        "Navidrome plugin."), counts=bool(key))
-            return True
-        ok, _r = self._limited(((f"plugin|{ip}", 30), ("plugin", 100)), _s("Navidrome plugin"), attempt)
-        if not ok:
+                                        "Navidrome."), counts=bool(key))
+            self._limited(((f"plugin|{ip}", 30),), _s("Navidrome plugin"), attempt)
             return None
         what = path[len("/api/sonic/"):]
         if method == "POST":
@@ -1897,7 +1901,8 @@ class Handler(BaseHTTPRequestHandler):
             from . import listen
             body = self._body()
             kept = listen.record(body.get("user"), body.get("event"), body.get("id"), body.get("time"),
-                                 body.get("position"), body.get("state"), body.get("player"))
+                                 body.get("position"), body.get("state"), body.get("player"), body.get("duration"),
+                                 cfg=load_config())
             return self._json({"ok": kept})
         return self._json(sonic.answer(load_config(), CACHE.get(), what, query))
 

@@ -728,10 +728,15 @@ evaluated – k× skipped, m× played.”
 
 **Live plays** (the Navidrome plugin as scrobbler, `app/listen.py`): Navidrome hands every start (“now playing”),
 every play (scrobble, with the time it started) and the players' reports (state, position, player) to the plugin,
-which passes them to `POST /api/sonic/listen` ([API](03-api.md#navidrome-plugin)). `listen.skips()`: per player from
-its reports – a song that gave way to another one before 30 s (`SKIP_SECONDS`; the furthest position reported or the
-time until the next song, whichever is more) and was not scrobbled counts as skipped on that day; without reports from
-the starts of the account (two devices playing at once on one account can look like a skip there). `factors()` adds
+which passes them to `POST /api/sonic/listen` ([API](03-api.md#navidrome-plugin)) – only for accounts with a person in
+Tuttiphon that are not blocked. `listen.skips()`: per player from its reports – a song that gave way to another one
+before 30 s (`SKIP_SECONDS`; the furthest position reported or the time until the next song, whichever is more) and
+was not scrobbled counts as skipped on that day. Not a skip: a moment of another song between two parts of the same
+song (under 5 s, `SHORT_PIECE` – a cross-fade, a report arriving late), going back to the song before (“previous”),
+the first song on a player after a pause of 30 minutes (`IDLE_SECONDS` – a resumed queue), a short track left less
+than 5 s before its end (the limit is then its length − 5 s, at least 3 s). Without reports from the starts of the
+account near the beginning of a song (position up to 15 s, `START_SECONDS`; two devices playing at once on one account
+can look like a skip there). `factors()` adds
 these skips like the marks of the mix history (half-life 60 days) for every song, not only mix songs, and every live
 play makes up for half a skip (`_live_effect()`, cached per account, day and state of the live files). A mix period
 with live plays of the account is only marked as done in `learn()` – no guess from the mix history, nothing counts

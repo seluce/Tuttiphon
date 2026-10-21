@@ -16,7 +16,7 @@
         "key": {
           "type": "string",
           "title": "Key",
-          "description": "From Tuttiphon: Settings → Navidrome plugin → Create key"
+          "description": "From Tuttiphon: Settings → Navidrome → Navidrome plugin → Create key"
         }
       },
       "required": [

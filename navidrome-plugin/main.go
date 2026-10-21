@@ -18,7 +18,12 @@ import (
 	"github.com/navidrome/navidrome/plugins/pdk/go/sonicsimilarity"
 )
 
-const timeoutMs = 20000
+const (
+	askTimeoutMs   = 8000 // a question (Tuttiphon answers in well under a second)
+	startTimeoutMs = 3000 // a start or a player's report – Navidrome's background worker must not wait long
+	playTimeoutMs  = 10000
+	coolDown       = 120 // seconds Navidrome leaves Tuttiphon alone when it cannot be reached
+)
 
 type plugin struct{}
 
@@ -45,7 +50,18 @@ func config(key string) string {
 	return strings.TrimSpace(v)
 }
 
-// ask sends one question to Tuttiphon: GET <url>/api/sonic/<what>?<params>.
+// cut shortens an answer for the log
+func cut(body []byte) string {
+	text := strings.TrimSpace(string(body))
+	if len(text) > 200 {
+		text = text[:200]
+	}
+	return text
+}
+
+// ask sends one question to Tuttiphon: GET <url>/api/sonic/<what>?<params>. If Tuttiphon cannot be reached, is busy
+// or fails, the error carries Navidrome's "agent(retry_later:…)" – Navidrome then leaves the plugin alone for a while
+// instead of waiting for it with every Instant Mix.
 func ask(what string, params url.Values) (*answer, error) {
 	base := strings.TrimRight(config("url"), "/")
 	key := config("key")
@@ -56,20 +72,16 @@ func ask(what string, params url.Values) (*answer, error) {
 		Method:    "GET",
 		URL:       base + "/api/sonic/" + what + "?" + params.Encode(),
 		Headers:   map[string]string{"Authorization": "Bearer " + key, "Accept": "application/json"},
-		TimeoutMs: timeoutMs,
+		TimeoutMs: askTimeoutMs,
 	})
-	if err != nil {
-		return nil, fmt.Errorf("Tuttiphon not reachable: %w", err)
+	if err != nil || resp == nil {
+		return nil, fmt.Errorf("agent(retry_later:%d) Tuttiphon not reachable: %v", coolDown, err)
 	}
-	if resp == nil {
-		return nil, fmt.Errorf("Tuttiphon sent no answer")
+	if resp.StatusCode == 429 || resp.StatusCode >= 500 {
+		return nil, fmt.Errorf("agent(retry_later:%d) Tuttiphon answered %d: %s", coolDown, resp.StatusCode, cut(resp.Body))
 	}
 	if resp.StatusCode != 200 {
-		text := strings.TrimSpace(string(resp.Body))
-		if len(text) > 200 {
-			text = text[:200]
-		}
-		return nil, fmt.Errorf("Tuttiphon answered %d: %s", resp.StatusCode, text)
+		return nil, fmt.Errorf("Tuttiphon answered %d: %s", resp.StatusCode, cut(resp.Body))
 	}
 	var out answer
 	if err := json.Unmarshal(resp.Body, &out); err != nil {
@@ -179,12 +191,13 @@ type listenEvent struct {
 	ID       string   `json:"id"`
 	Time     int64    `json:"time,omitempty"`
 	Position *float64 `json:"position,omitempty"`
+	Duration float64  `json:"duration,omitempty"`
 	State    string   `json:"state,omitempty"`
 	Player   string   `json:"player,omitempty"`
 }
 
 // tell passes a play on. -> nil, or the HTTP status (0: Tuttiphon not reachable) with the error
-func tell(e listenEvent) (int32, error) {
+func tell(e listenEvent, timeout int32) (int32, error) {
 	base := strings.TrimRight(config("url"), "/")
 	key := config("key")
 	if base == "" || key == "" {
@@ -199,13 +212,13 @@ func tell(e listenEvent) (int32, error) {
 		URL:       base + "/api/sonic/listen",
 		Headers:   map[string]string{"Authorization": "Bearer " + key, "Content-Type": "application/json"},
 		Body:      body,
-		TimeoutMs: 10000,
+		TimeoutMs: timeout,
 	})
 	if err != nil || resp == nil {
 		return 0, fmt.Errorf("Tuttiphon not reachable: %v", err)
 	}
 	if resp.StatusCode != 200 {
-		return resp.StatusCode, fmt.Errorf("Tuttiphon answered %d: %s", resp.StatusCode, strings.TrimSpace(string(resp.Body)))
+		return resp.StatusCode, fmt.Errorf("Tuttiphon answered %d: %s", resp.StatusCode, cut(resp.Body))
 	}
 	return 200, nil
 }
@@ -224,7 +237,8 @@ func (plugin) IsAuthorized(req scrobbler.IsAuthorizedRequest) (bool, error) {
 
 func (plugin) NowPlaying(req scrobbler.NowPlayingRequest) error {
 	pos := float64(req.Position)
-	return quietly(tell(listenEvent{Event: "start", User: req.Username, ID: req.Track.ID, Position: &pos}))
+	return quietly(tell(listenEvent{Event: "start", User: req.Username, ID: req.Track.ID, Position: &pos,
+		Duration: float64(req.Track.Duration)}, startTimeoutMs))
 }
 
 func (plugin) PlaybackReport(req scrobbler.PlaybackReportRequest) error {
@@ -234,16 +248,21 @@ func (plugin) PlaybackReport(req scrobbler.PlaybackReportRequest) error {
 		player = req.PlayerName
 	}
 	return quietly(tell(listenEvent{Event: "report", User: req.Username, ID: req.Track.ID, Position: &pos,
-		State: req.State, Player: player}))
+		Duration: float64(req.Track.Duration), State: req.State, Player: player}, startTimeoutMs))
 }
 
-// Scrobble: a play – if Tuttiphon cannot be reached, Navidrome tries again later; a refusal (wrong key) is final
+// Scrobble: a play – if Tuttiphon cannot be reached or does not know the key yet (a new key not entered here yet),
+// Navidrome tries again later; only a play Tuttiphon refuses as such is dropped
 func (plugin) Scrobble(req scrobbler.ScrobbleRequest) error {
-	status, err := tell(listenEvent{Event: "play", User: req.Username, ID: req.Track.ID, Time: req.Timestamp})
+	status, err := tell(listenEvent{Event: "play", User: req.Username, ID: req.Track.ID, Time: req.Timestamp,
+		Duration: float64(req.Track.Duration)}, playTimeoutMs)
 	if err == nil {
 		return nil
 	}
 	pdk.Log(pdk.LogWarn, "[Tuttiphon] "+err.Error())
+	if status == 401 {
+		return fmt.Errorf("scrobbler(retry_later:900) %v", err)
+	}
 	if status == 0 || status >= 500 || status == 429 {
 		return scrobbler.ScrobblerErrorRetryLater
 	}

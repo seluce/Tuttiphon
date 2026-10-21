@@ -46,9 +46,13 @@ packages in `/usr/local/lib/python3.12/site-packages/<package>.dist-info/`.
 | [Navidrome plugin development kit](https://github.com/navidrome/navidrome/tree/master/plugins/pdk/go) (`github.com/navidrome/navidrome/plugins/pdk/go`) | GPL-3.0 |
 | [Extism Go PDK](https://github.com/extism/go-pdk) (`github.com/extism/go-pdk`) | BSD-3-Clause |
 | Go and TinyGo runtime and standard library | BSD-3-Clause |
+| wasi-libc (parts compiled in, incl. parts of musl) | MIT; Apache-2.0 WITH LLVM-exception |
+| compiler-rt builtins (LLVM) | Apache-2.0 WITH LLVM-exception |
 
 The plugin as a whole is distributed under the AGPL-3.0 like Tuttiphon (GPL-3.0 code may be combined with it, both
-licenses section 13); its source is in `navidrome-plugin/`.
+licenses section 13); its source is in `navidrome-plugin/`. The full license texts go along inside `tuttiphon.ndp`:
+`LICENSES.txt` (the notices and texts of Extism, Go, TinyGo, wasi-libc – also in `navidrome-plugin/LICENSES.txt`) and
+`GPL-3.0.txt` (the plugin development kit).
 
 ## AI models
 

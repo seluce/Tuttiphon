@@ -58,6 +58,11 @@ def run(lib, log=print, today=None, force=False):
     if not force and st.get("at") and _days(st["at"], today) < EVERY_DAYS:
         return None
     out = {"trash": expire_trash(today), "songs": 0, "marks": 0, "compacted": None, "dismissed": expire_dismissed(today)}
+    try:   # live plays of the Navidrome plugin older than they are kept – also of accounts that stopped playing
+        from . import listen
+        listen.prune_all()
+    except OSError:
+        pass
     n = len(lib.songs)
     usual = int(st.get("maxSongs") or 0)
     missing = st.get("missing") if isinstance(st.get("missing"), dict) else {}

@@ -68,7 +68,7 @@ class SonicTest(unittest.TestCase):
         self.assertLessEqual(radio.count("Eisen"), 4)                         # the band itself: up to a third
         self.assertTrue(set(radio) <= {"Eisen", "Stahl", "Blech", "Harfe", "Dudel", "Flöte"})
         self.assertEqual(radio, by_id)
-        self.assertEqual(near, [("Stahl", "ar-Stahl"), ("Blech", "ar-Blech"), ("Kita", "ar-Kita")])   # never itself
+        self.assertEqual(near, [("Stahl", "ar-Stahl"), ("Blech", "ar-Blech")])   # never itself, no children's band
         album = sonic.songs_like_album(self.cfg, self.lib, album_id="al-Harfe-0", count=6)
         ids = [self.lib.songs[i]["id"] for i, _sc in album]
         self.assertTrue(ids)
@@ -95,14 +95,71 @@ class SonicTest(unittest.TestCase):
         self.assertEqual(scenes[-2], "folk")                                  # … and ends close to the end
         self.assertEqual(sonic.path(self.cfg, self.lib, "Eisen-0", "gibt-es-nicht", 8), [])
 
+    def test_a_song_without_a_vector_takes_the_sound_of_its_album(self):
+        vecs = {x["id"]: vector(BANDS[x["artist"]], k) for k, x in enumerate(self.lib.songs) if x["id"] != "Harfe-0"}
+        write_vectors(vecs)
+        sonic._memo.clear()
+        got = sonic.similar_songs(self.cfg, self.lib, "Harfe-0", 8)
+        scores = [sc for _i, sc in got]
+        self.assertEqual(scores, sorted(scores, reverse=True))                 # most similar first
+        self.assertGreater(scores[0], 0.5)                                     # real closeness, not a placeholder
+        self.assertTrue(set(self.bands(got)[:3]) <= {"Harfe", "Dudel", "Flöte"})
+        ids = [self.lib.songs[i]["id"] for i, _sc in sonic.path(self.cfg, self.lib, "Harfe-0", "Eisen-0", 6)]
+        self.assertEqual((ids[0], ids[-1], len(ids)), ("Harfe-0", "Eisen-0", 6))   # a path also without its own vector
+
+    def test_radio_scores_stay_below_the_real_ones(self):
+        write_vectors({x["id"]: vector(BANDS[x["artist"]], k) for k, x in enumerate(self.lib.songs)
+                       if x["artist"] != "Harfe"})   # a whole band without vectors: no stand-in either
+        sonic._memo.clear()
+        with mock.patch.object(sonic.similar.Index, "centroid", lambda self, artist: None), \
+                mock.patch.object(classify, "radio_artists", lambda seeds, lib, limit=25: ["Harfe", "Dudel"]):
+            got = sonic.similar_songs(self.cfg, self.lib, "Harfe-0", 6)
+        scores = [sc for _i, sc in got]
+        self.assertEqual(scores, sorted(scores, reverse=True))
+        self.assertLessEqual(scores[0], 0.5)
+        self.assertGreater(scores[0], scores[-1])                              # falling over the places, not all 0.5
+
+    def test_path_has_few_songs_per_band(self):
+        got = sonic.path(self.cfg, self.lib, "Eisen-0", "Harfe-0", 16)
+        bands = self.bands(got[1:-1])
+        self.assertLessEqual(max(bands.count(b) for b in set(bands)), 2)      # round(16 / 8)
+        same = sonic.path(self.cfg, self.lib, "Eisen-0", "Eisen-0", 5)
+        self.assertEqual(self.lib.songs[same[0][0]]["id"], "Eisen-0")
+        self.assertEqual(len({i for i, _sc in same}), 5)                       # not the song twice
+
+    def test_recordings(self):
+        seen = sonic._Seen()
+        base = {"artist": "Eisen", "duration": 200}
+        self.assertTrue(seen.add({**base, "title": "Lied"}))
+        self.assertFalse(seen.add({**base, "title": "Lied (Remastered)", "duration": 202}))   # the same recording
+        self.assertTrue(seen.add({**base, "title": "Lied (Teil 2)"}))                          # a part of its own
+        self.assertTrue(seen.add({**base, "title": "Intro", "duration": 40}))
+        self.assertTrue(seen.add({**base, "title": "Intro", "duration": 75}))                  # another album's intro
+
+    def test_artist_ids_and_guests(self):
+        self.lib.songs[0]["albumArtists"] = [{"id": "ar-Komponist", "name": "Komponist"}]   # a soundtrack: the
+        self.lib.songs[0]["artists"] = [{"id": "ar-Sängerin", "name": "Sängerin"}]          # singer on its first song
+        self.lib._artist_ids_all = None
+        sonic._memo.clear()
+        with mock.patch.object(classify, "radio_artists", lambda seeds, lib, limit=25: [seeds[0], "Komponist", "Stahl"]):
+            near = sonic.similar_artists(self.cfg, self.lib, name="Blech", limit=5)
+        self.assertIn(("Komponist", "ar-Komponist"), near)                     # its own id, not the singer's
+        found, band = sonic._artist_songs(self.lib, artist_id="ar-Eisen")
+        self.assertEqual(band, "Eisen")                                         # its own band, not a guest spot
+
     def test_kid_safe_with_a_child_profile(self):
         explicit = self.lib.songs[1]   # Eisen-1, the nearest of Eisen-0
         explicit["explicitStatus"] = "explicit"
         sonic._memo.clear()
         self.assertIn("Eisen-1", [s["id"] for s in sonic.as_songs(self.lib, sonic.similar_songs(self.cfg, self.lib, "Eisen-0", 12))])
-        self.cfg["personen"][1]["child"] = True   # someone listening could be a child
+        for flag in ("child", "clean"):   # a child profile or kid-safe mode on any profile: someone listening could be a child
+            cfg = config()
+            cfg["personen"][1][flag] = True
+            sonic._memo.clear()
+            self.assertNotIn("Eisen-1", [s["id"] for s in sonic.as_songs(self.lib, sonic.similar_songs(cfg, self.lib, "Eisen-0", 12))])
+        cfg["settings"]["defaultPerson"] = None   # also without a shared person
         sonic._memo.clear()
-        self.assertNotIn("Eisen-1", [s["id"] for s in sonic.as_songs(self.lib, sonic.similar_songs(self.cfg, self.lib, "Eisen-0", 12))])
+        self.assertNotIn("Eisen-1", [s["id"] for s in sonic.as_songs(self.lib, sonic.similar_songs(cfg, self.lib, "Eisen-0", 12))])
 
     def test_answer(self):
         out = sonic.answer(self.cfg, self.lib, "similar", {"id": "Eisen-0", "count": "3"})

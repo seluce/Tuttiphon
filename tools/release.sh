@@ -52,8 +52,15 @@ if grep -qi "warn" "$LOGS/build.log"; then
   echo "✕ Interface builds with warnings – see $LOGS/build.log"; exit 1
 fi
 PLUGIN=1
-tools/build-plugin.sh >"$LOGS/plugin.log" 2>&1 \
-  || { PLUGIN=0; echo "⚠ Navidrome plugin not built (Go/TinyGo missing?) – see $LOGS/plugin.log; the image will be without it"; }
+if ! tools/build-plugin.sh >"$LOGS/plugin.log" 2>&1; then
+  if grep -q "not found" "$LOGS/plugin.log"; then   # no Go/TinyGo here: a release without the plugin file
+    PLUGIN=0
+    echo "⚠ Navidrome plugin not built (Go/TinyGo missing) – see $LOGS/plugin.log. When updating a NAS, delete"
+    echo "  navidrome-plugin/dist/ there, otherwise the image takes the old plugin file along."
+  else
+    echo "✕ The Navidrome plugin does not build – see $LOGS/plugin.log"; exit 1
+  fi
+fi
 
 rm -rf "$TARGET"
 mkdir -p "$TARGET"
