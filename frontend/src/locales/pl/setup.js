@@ -1,4 +1,4 @@
-// Same keys as ../de/setup.js
+// Same keys as ../de/setup.js (tools/translate.py)
 export default {
   'Set up Tuttiphon':
     'Skonfiguruj Tuttiphon',

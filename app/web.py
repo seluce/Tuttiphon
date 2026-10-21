@@ -1516,7 +1516,8 @@ def api_push_subscribe(body):
         raise ValueError(_("Notifications through the app: {why}.", why=why))
     account, admin = _push_account()
     origin = str(body.get("origin") or "")
-    n = webpush.add(account, body.get("subscription"), admin=admin, origin=origin if re.fullmatch(r"https://[^/\s]{1,200}", origin) else "")
+    n = webpush.add(account, body.get("subscription"), admin=admin, origin=origin if re.fullmatch(r"https://[^/\s]{1,200}", origin) else "",
+                    lang=i18n.requested())
     return {"ok": True, "devices": n}
 
 
@@ -1527,9 +1528,13 @@ def api_push_unsubscribe(body):
 
 
 def api_push_status(body):
+    """State of this device – and its notifications follow the language of its interface."""
     account = _push_account()[0]
     mine = webpush.devices(account)
-    return {"known": str(body.get("endpoint") or "") in mine, "devices": len(mine)}
+    endpoint = str(body.get("endpoint") or "")
+    if endpoint in mine and i18n.requested():
+        webpush.set_lang(endpoint, account, i18n.requested())
+    return {"known": endpoint in mine, "devices": len(mine)}
 
 
 def api_push_test(body):

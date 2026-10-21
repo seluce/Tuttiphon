@@ -497,9 +497,9 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
 | Endpoint | Parameters | Response |
 |---|---|---|
 | `GET /api/push/key` | – | `{"available", "why", "key", "enabled"}` – whether the server supports it (package `cryptography`), its public key (base64url) for `pushManager.subscribe()` and whether notifications are turned on |
-| `POST /api/push/subscribe` | Body `{"subscription": {endpoint, keys: {p256dh, auth}}, "origin"}` | `{"ok": true, "devices": n}` – remember the device for one's own account; administrators' devices also get the notifications meant for administrators. `origin` (only `https://…`) is the target when the notification is tapped. Push address of an unknown service or invalid keys → `400` |
+| `POST /api/push/subscribe` | Body `{"subscription": {endpoint, keys: {p256dh, auth}}, "origin"}` | `{"ok": true, "devices": n}` – remember the device for one's own account; administrators' devices also get the notifications meant for administrators. `origin` (only `https://…`) is the target when the notification is tapped. The language of the request (`X-Lang`) is kept with the device: its notifications speak it. Push address of an unknown service or invalid keys → `400` |
 | `POST /api/push/unsubscribe` | Body `{"endpoint"}` | `{"ok": true}` – only from one's own account |
-| `POST /api/push/status` | Body `{"endpoint"}` | `{"known", "devices"}` – whether this device is registered with one's own account and how many devices there are |
+| `POST /api/push/status` | Body `{"endpoint"}` | `{"known", "devices"}` – whether this device is registered with one's own account and how many devices there are; a known device takes on the language of the request (`X-Lang`) – the interface asks after every change of language |
 | `POST /api/push/test` | – | `{"ok": true}` or `{"ok": false, "error"}` – test message to one's own devices; at most one per 30 seconds, only when notifications are on |
 
 ## Songs & listening in

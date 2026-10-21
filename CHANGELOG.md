@@ -13,7 +13,13 @@ released.
   and themes in these languages too (“musique calme”, “chitarra”, “kerstmuziek”). The translations were made with AI
   help – corrections are welcome on GitHub.
 - **A new installation speaks the language of its first administrator:** the language of the server (notifications,
-  playlist names in Navidrome) is taken from the browser at the first setup.
+  playlist names in Navidrome) is taken from the browser at the first setup, and the setup assistant shows it in its
+  first step to change.
+- **Notifications in your own language:** every phone gets its notifications in the language of its Tuttiphon
+  interface – also after you switch it; an ntfy topic in the language of the person's devices. Playlist names in them
+  stay as in Navidrome.
+- **Helping with translations:** `tools/translate.py` exports every text of a language as a simple table and puts
+  corrections back after checking them – also for a new language.
 
 ## 1.6.0
 

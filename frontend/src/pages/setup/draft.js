@@ -29,6 +29,7 @@ export function draftFrom(st) {
       users: Array.isArray(dz.users) ? [...dz.users] : null,   // null = the accounts of all people
       overwriteManual: !!dz.overwriteManual,
     },
+    language: st.language || 'en',   // of the server: names in Navidrome, notifications
     dailyMode: st.dailyMode || 'playlists',
     dailyAt: st.dailyAt || '05:30',
     watch: { enabled: !!wt.enabled, interval: wt.interval || 15 },
@@ -67,6 +68,7 @@ export function applyDraft(st, d, before, day) {
     st.deezer.refresh = d.deezer.on
     st.watch.deezer = d.deezer.on
   }
+  st.language = d.language
   st.dailyMode = d.dailyMode
   st.dailyAt = d.dailyAt
   st.watch.enabled = d.watch.enabled

@@ -1,4 +1,4 @@
-// Same keys as ../de/settings-b.js
+// Same keys as ../de/settings-b.js (tools/translate.py)
 export default {
   'General':
     'Ogólne',

@@ -1,4 +1,4 @@
-// Same keys as ../de/settings-a.js
+// Same keys as ../de/settings-a.js (tools/translate.py)
 export default {
   'testing …':
     'testowanie …',

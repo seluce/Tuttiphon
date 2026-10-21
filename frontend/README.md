@@ -121,7 +121,10 @@ The server does the same (`i18n.category()`, `_n()`/`_sn()`, entries as JSON obj
 checked strictly (missing = error); for the other languages `npm run test:i18n` lists `missing` texts as a warning
 (they show in English) and checks every entry like the German one – placeholders, the same markup as the English
 text, valid plural forms. Address: German, Spanish, Italian, Dutch informal (du, tú, tu, je), French “vous”, Portuguese
-(European) the polite third person, Polish the imperative.
+(European) the polite third person, Polish the imperative. For many texts at once (corrections, a new language):
+`tools/translate.py export <lang> [--missing]` → TSV files in `translations/` (form, English, German, translation;
+Polish plurals one line per form) → `tools/translate.py import <lang>` checks placeholders, markup and plural forms
+and writes the dictionaries; lines are matched by their English text.
 
 **Switching happens without a reload.** The language is reactive state (`$state.raw` in `i18n.svelte.js`): every
 `t()` that runs inside a template expression or a `$derived` follows a switch at once; `lang()` and `locale()` are

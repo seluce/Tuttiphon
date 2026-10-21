@@ -761,7 +761,8 @@ Above it, administrators find the card “Setup assistant” ([Setup assistant](
 - **Notifications via the app**: `lib/push.js` – `supported()` (secure address, service worker, `PushManager`,
   `Notification`), `state()` asks `POST /api/push/status` with this device's push address, `enable()` gets the
   permission, subscribes with the push service using the key from `GET /api/push/key` (again if the key has
-  changed) and sends the subscription together with `location.origin` to `POST /api/push/subscribe`; `disable()` unsubscribes.
+  changed) and sends the subscription together with `location.origin` to `POST /api/push/subscribe`; `disable()` unsubscribes;
+  `syncLanguage()` (after a change of language in Settings → General) lets the server know the device's new language.
   `components/PushDevice.svelte` shows from this: not possible (with a reason: https missing, on iPhone first add it to the
   Home Screen, the browser can't do it, something is missing on the server), blocked, on (“Send test”, “Turn off”) or
   “Turn on for this device”. `sw.js` shows incoming messages (`push`: title, text, icon, `tag`) and

@@ -9,6 +9,7 @@
   import { themeChoice, setTheme } from '../../lib/theme.js'
   import { LANGUAGES, choice as langChoice, setLanguage, t } from '../../lib/i18n.svelte.js'
   import { api } from '../../lib/api.js'
+  import { syncLanguage } from '../../lib/push.js'
   import { toast } from '../../lib/overlay.svelte.js'
   import { install, standalone as isStandalone, ios as isIos, secure as isSecure } from '../../lib/install.svelte.js'
 
@@ -30,7 +31,10 @@
       toast(t('The language could not be loaded. Please try again shortly.'), { error: true })
       return
     }
-    if (switched) await reloadTexts()
+    if (switched) {
+      syncLanguage().catch(() => {})   // the notifications of this device follow the language
+      await reloadTexts()
+    }
   }
 
   /** Save at once and reload: the server renames the delivered vibes into the new language. */

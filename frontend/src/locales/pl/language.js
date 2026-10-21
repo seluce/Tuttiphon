@@ -1,4 +1,4 @@
-// Same keys as ../de/language.js
+// Same keys as ../de/language.js (tools/translate.py)
 export default {
   'Language':
     'Język',

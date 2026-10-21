@@ -1,4 +1,4 @@
-// Same keys as ../de/settings-opus.js
+// Same keys as ../de/settings-opus.js (tools/translate.py)
 export default {
   'At least one format':
     'Co najmniej jeden format',

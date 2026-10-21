@@ -1,4 +1,4 @@
-// Same keys as ../de/people.js
+// Same keys as ../de/people.js (tools/translate.py)
 export default {
   'Color {n}':
     'Kolor {n}',

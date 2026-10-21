@@ -1,4 +1,4 @@
-// Same keys as ../de/shell.js
+// Same keys as ../de/shell.js (tools/translate.py)
 export default {
   'First a profile':
     'Najpierw profil',

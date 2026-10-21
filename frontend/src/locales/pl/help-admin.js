@@ -1,4 +1,4 @@
-// Same keys as ../de/help-admin.js
+// Same keys as ../de/help-admin.js (tools/translate.py)
 export default {
   'Show me – step by step on the page':
     'Pokaż mi – krok po kroku na stronie',

@@ -1,4 +1,4 @@
-// Same keys as ../de/home-playlists.js
+// Same keys as ../de/home-playlists.js (tools/translate.py)
 export default {
   'Hidden':
     'Ukryto',

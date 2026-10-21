@@ -1,4 +1,4 @@
-// Same keys as ../de/help-user.js
+// Same keys as ../de/help-user.js (tools/translate.py)
 export default {
   'How Tuttiphon works':
     'Jak działa Tuttiphon',

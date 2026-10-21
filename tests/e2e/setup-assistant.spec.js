@@ -41,6 +41,7 @@ test.describe('Administrator', () => {
     await expect(page).toHaveURL(/#\/einrichtung$/)
     await expect(page.getByRole('heading', { name: 'Tuttiphon einrichten' })).toBeVisible()
     await expect(page.getByText('Verbunden – Navidrome 0.64.2')).toBeVisible()
+    await page.getByRole('combobox', { name: 'Sprache des Servers' }).selectOption('fr')   // names in Navidrome
 
     await foot(page).getByRole('button', { name: 'Weiter' }).click()
     await expect(page.getByRole('heading', { name: 'Verlustfreie Dateien umwandeln?' })).toBeVisible()
@@ -56,6 +57,7 @@ test.describe('Administrator', () => {
       await expect(page.getByRole('heading', { name: heading })).toBeVisible()
     }
     await expect(page.locator('.member-row', { hasText: 'Umwandlung' })).toContainText('Opus · ')
+    await expect(page.locator('.member-row', { hasText: 'Navidrome' })).toContainText('Français')
     expect(writes).toEqual([])   // nothing saved so far
 
     await foot(page).getByRole('button', { name: 'Fertig' }).click()
@@ -66,6 +68,7 @@ test.describe('Administrator', () => {
     expect(st.setup.done).toBe(true)
     expect(st.setup.at).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     expect([st.opus.enabled, st.opus.codec, st.opus.original]).toEqual([true, 'opus', 'archive'])
+    expect(st.language).toBe('fr')
     expect(writes.some((w) => w.path === '/api/task')).toBe(false)   // no run without “Start the first run now”
   })
 

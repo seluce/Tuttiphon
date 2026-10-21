@@ -45,6 +45,14 @@ export async function enable() {
   await api('/api/push/subscribe', { body: { subscription: sub.toJSON(), origin: location.origin } })
 }
 
+/** The interface speaks another language now: the notifications of this device follow (the server keeps the language
+ *  with the device – api() sends it along). Nothing to do without notifications on this device. */
+export async function syncLanguage() {
+  if (!supported()) return
+  const { sub } = await current()
+  if (sub) await api('/api/push/status', { body: { endpoint: sub.endpoint } })
+}
+
 /** Unsubscribe this device */
 export async function disable() {
   const { sub } = await current()

@@ -18,7 +18,7 @@
   import StepAutomation from './setup/StepAutomation.svelte'
   import StepSummary from './setup/StepSummary.svelte'
   import { PIPELINE, draftFrom, applyDraft } from './setup/draft.js'
-  import { S, changed, save, loadStatus, runTask } from '../lib/state.svelte.js'
+  import { S, changed, save, loadStatus, reloadConfig, runTask } from '../lib/state.svelte.js'
   import { toast, confirmDialog } from '../lib/overlay.svelte.js'
   import { go } from '../lib/router.svelte.js'
   import { api } from '../lib/api.js'
@@ -88,10 +88,12 @@
   async function finish() {
     if (busy) return
     busy = true
+    const spoke = S.config.settings.language
     applyDraft(S.config.settings, $state.snapshot(d), before, today())
     const ok = await store()
     busy = false
     if (!ok) return
+    if (S.config.settings.language !== spoke) await reloadConfig().catch(() => {})   // the server renamed the delivered vibes
     loadStatus().catch(() => {})   // “Update everything” on the home page uses the new steps
     if (start && connected) {
       const pipe = S.config.settings.pipeline
@@ -122,7 +124,7 @@
 
   <div class="min-h-[40vh]">
     {#if step === 0}
-      <StepNavidrome />
+      <StepNavidrome {d} />
     {:else if step === 1}
       <StepConvert {d} />
     {:else if step === 2}

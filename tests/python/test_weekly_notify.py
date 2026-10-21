@@ -31,7 +31,8 @@ class WeeklyTest(unittest.TestCase):
         self.topics, self.devices, self.keys = [], [], set()
         for p in (mock.patch.object(mixer, "_load_state", lambda: self.state),
                   mock.patch.object(notify, "send", lambda topic, title, text, *a, **k: self.topics.append((topic, title, text)) or True),
-                  mock.patch.object(webpush, "send_to", lambda title, text, path, **k: self.devices.append((title, text, k)) or True),
+                  mock.patch.object(webpush, "send_to", lambda title, text, path, **k: self.devices.append(
+                      (*(k["make"]() if k.get("make") else (title, text)), k)) or True),
                   mock.patch.object(notify, "once", lambda key, go: key not in self.keys and bool(go()) and not self.keys.add(key))):
             p.start()
             self.addCleanup(p.stop)

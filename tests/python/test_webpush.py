@@ -135,5 +135,47 @@ class WebPushTest(unittest.TestCase):
         self.assertEqual(sent, ["Neu von Band A"])
 
 
+class LanguageTest(unittest.TestCase):
+    """Every device gets its notifications in the language of its interface; a person's ntfy topic in that of their
+    account's devices."""
+
+    def test_each_device_in_its_language(self):
+        from app import i18n
+        subs = {"anna": [{"endpoint": "https://push.example/1", "lang": "fr"},
+                         {"endpoint": "https://push.example/2", "lang": "pl"},
+                         {"endpoint": "https://push.example/3"}]}
+        got, built = [], []
+
+        def make():
+            built.append(1)
+            return (i18n._s("New for you this week"),
+                    i18n._sn(5, "Tuttiphon: {n} new band classified", "Tuttiphon: {n} new bands classified"))
+        with mock.patch.object(webpush, "available", lambda: (True, "")), mock.patch.object(webpush, "_load", lambda: subs), \
+                mock.patch.object(webpush, "send", lambda sub, title, body, path="", tag=None: got.append((sub["endpoint"], title, body)) or True), \
+                mock.patch.object(i18n, "server_lang", wraps=i18n.server_lang):
+            self.assertTrue(webpush.send_to(None, None, "#/", accounts=["Anna"], make=make))
+        mine = {e: (t, b) for e, t, b in got}
+        self.assertEqual(mine["https://push.example/1"][0], i18n.tr("New for you this week", "fr"))
+        self.assertEqual(mine["https://push.example/2"][1],
+                         i18n.tr("Tuttiphon: {n} new bands classified", "pl", "many", n=5))   # Polish: 5 takes "many"
+        self.assertNotEqual(mine["https://push.example/1"], mine["https://push.example/2"])
+        self.assertEqual(len(built), 3)   # once per language
+
+    def test_the_language_follows_the_interface(self):
+        sub = {"endpoint": "https://fcm.googleapis.com/fcm/send/x", "keys": {"p256dh": "a", "auth": "b"}}
+        import copy
+        store = {"v": {}}   # like the file: every load a copy
+        with mock.patch.object(webpush, "_load", lambda: copy.deepcopy(store["v"])), \
+                mock.patch.object(webpush, "_save", lambda d: store.update(v=copy.deepcopy(d))), \
+                mock.patch.object(webpush, "check", lambda s: {"endpoint": s["endpoint"], "keys": s["keys"]}):
+            webpush.add("Anna", sub, lang="de")
+            self.assertEqual(webpush.lang_of("anna"), "de")
+            webpush.set_lang(sub["endpoint"], "anna", "nl")
+            self.assertEqual(webpush.lang_of("Anna"), "nl")
+            webpush.set_lang(sub["endpoint"], "anna", "xx")   # unknown: stays
+            self.assertEqual(webpush.lang_of("anna"), "nl")
+        self.assertIsNone(webpush.lang_of("nobody"))
+
+
 if __name__ == "__main__":
     unittest.main()

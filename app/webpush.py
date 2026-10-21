@@ -112,10 +112,12 @@ def check(sub):
     return {"endpoint": endpoint, "p256dh": keys["p256dh"], "auth": keys["auth"]}
 
 
-def add(account, sub, admin=False, origin=""):
-    """Remember a device for an account (the same device replaces its old entry)."""
+def add(account, sub, admin=False, origin="", lang=None):
+    """Remember a device for an account (the same device replaces its old entry) – with the language of its interface,
+    for the notifications it gets."""
+    from .i18n import LANGS
     entry = {**check(sub), "admin": bool(admin), "origin": origin if origin.startswith("https://") else "",
-             "added": int(time.time())}
+             "added": int(time.time()), **({"lang": lang} if lang in LANGS else {})}
     with _lock:
         data = _load()
         for acc in list(data):   # same device under another account? remove it there
@@ -138,6 +140,26 @@ def remove(endpoint, account=None):
 
 def devices(account):
     return [x["endpoint"] for x in _load().get((account or "").lower(), [])]
+
+
+def set_lang(endpoint, account, lang):
+    """The interface of this device speaks another language now – its notifications follow."""
+    from .i18n import LANGS
+    if lang not in LANGS:
+        return
+    with _lock:
+        data = _load()
+        for x in data.get((account or "").lower(), []):
+            if x.get("endpoint") == endpoint and x.get("lang") != lang:
+                x["lang"] = lang
+                _save(data)
+                return
+
+
+def lang_of(account):
+    """The language of the account's device added last – None without devices (then the server language)."""
+    subs = _load().get((account or "").lower(), [])
+    return next((x["lang"] for x in reversed(subs) if x.get("lang")), None)
 
 
 # ---------------------------------------------------------------------------- Encrypting and sending
@@ -196,18 +218,27 @@ def send(sub, title, body, path="", tag=None):
         return False
 
 
-def send_to(title, body, path="", accounts=(), admins=False, tag=None):
-    """To all devices of these accounts (and, with admins, all administrator devices). -> True if one received it."""
+def send_to(title, body, path="", accounts=(), admins=False, tag=None, make=None):
+    """To all devices of these accounts (and, with admins, all administrator devices). make: a function -> (title,
+    body), called in the language of each device (i18n.speaking) instead of title and body. -> True if one received
+    it."""
     if not available()[0]:
         return False
+    from .i18n import speaking
     accounts = {(a or "").lower() for a in accounts if a}
     targets = {}
     for acc, subs in _load().items():
         for sub in subs:
             if acc in accounts or (admins and sub.get("admin")):
                 targets[sub["endpoint"]] = sub
-    ok = False
+    ok, texts = False, {}
     for sub in targets.values():
+        if make:
+            lang = sub.get("lang")
+            if lang not in texts:
+                with speaking(lang):
+                    texts[lang] = make()
+            title, body = texts[lang]
         res = send(sub, title, body, path, tag)
         if res == "gone":
             remove(sub["endpoint"])

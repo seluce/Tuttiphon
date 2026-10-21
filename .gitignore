@@ -23,6 +23,7 @@ __pycache__/
 
 # Release folder (npm run release) – generated, contains credentials with --with-data
 /release/
+/translations/
 
 # Interface: web/ is built from frontend/ (npm run build) – not in Git
 node_modules/

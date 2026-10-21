@@ -455,6 +455,9 @@ device”. The browser asks for permission.
   Apple, Microsoft), which delivers it. It is end-to-end encrypted – the service only sees that something is coming.
   The container needs internet access for this; the `cryptography` package is in the Docker image.
 - Tapping opens Tuttiphon on the matching page (at the address through which the device was signed up).
+- **Language:** every device gets its notifications in the language of its interface (kept when it signs up and after
+  every change of language); a person's ntfy topic in the language of their account's devices, the administrator's
+  topic in the server language. Playlist names in them stay as in Navidrome.
 - At most 10 devices per account are remembered (`state/push.json`). If the push service reports a device as expired
   (app deleted, permission revoked), it is dropped. Tuttiphon creates the sender key (`state/push_keys.json`) the
   first time; it is included in the backup – if it is lost, every device has to be turned on again.

@@ -8,7 +8,7 @@
   import { S } from '../../lib/state.svelte.js'
   import { STEP_INFO } from '../../lib/settings-info.js'
   import { pipelineOf } from './draft.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { LANGUAGES, t } from '../../lib/i18n.svelte.js'
 
   /** d: draft · intel: GET /api/intel (is the AI installed?) · goto(i): back to a step ·
    *  start: start the first run after “Finish” */
@@ -25,7 +25,8 @@
     const providers = ly.providers.filter((p) => p.on).map((p) => (p.id === 'lrclib' ? 'LRCLIB' : 'NetEase'))
     const accounts = dz.users ?? users
     return [
-      ['plug', 'Navidrome', nav?.ok ? t('Connected – Navidrome {version}', { version: String(nav.version || '').split(' ')[0] }) : t('Not connected')],
+      ['plug', 'Navidrome', [nav?.ok ? t('Connected – Navidrome {version}', { version: String(nav.version || '').split(' ')[0] }) : t('Not connected'),
+        LANGUAGES.find((l) => l.key === d.language)?.name].filter(Boolean).join(' · ')],
       ['headphones', t('Conversion'), op.enabled
         ? [`${op.codec === 'aac' ? 'AAC' : 'Opus'} · ${op.codec === 'aac' ? op.aacBitrate : op.bitrate} kbit/s`, ORIGINAL[op.original]].join(' · ')
         : t('Off – files stay as they are')],

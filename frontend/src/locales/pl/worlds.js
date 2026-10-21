@@ -1,4 +1,4 @@
-// Same keys as ../de/worlds.js
+// Same keys as ../de/worlds.js (tools/translate.py)
 export default {
   'keyword':
     'słowo kluczowe',

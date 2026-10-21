@@ -83,7 +83,9 @@ starts it on the PC; tests: `npm run test:py` and `npm run test:i18n`. More in t
 
 Translations are dictionaries in `frontend/src/locales/<lang>/` (interface) and `app/locales/<lang>/` (server). French,
 Dutch, Spanish, Italian, Portuguese and Polish were translated with AI help – corrections are very welcome as an issue
-or pull request.
+or pull request. `python3 tools/translate.py export <lang>` writes every text as a simple table (English, German, your
+language) to `translations/`; edit the last column and `python3 tools/translate.py import <lang>` checks it and puts
+it back – also for a new language.
 
 ## Acknowledgements
 

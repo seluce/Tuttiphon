@@ -1,11 +1,16 @@
 <!-- Setup step 1: connection to Navidrome – the status and, if something can be changed, the form of
-     Settings → Navidrome (saved right away). Without a working connection the assistant does not go on. -->
+     Settings → Navidrome (saved right away). Without a working connection the assistant does not go on. Below the
+     language of the server (the names in Navidrome) – only in the draft d. -->
 <script>
   import Icon from '../../components/Icon.svelte'
   import Card from '../settings/Card.svelte'
   import Connection from '../settings/Connection.svelte'
+  import Row from '../settings/Row.svelte'
+  import Select from '../../components/Select.svelte'
   import { S, loadStatus } from '../../lib/state.svelte.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { LANGUAGES, t } from '../../lib/i18n.svelte.js'
+
+  let { d } = $props()
 
   const nav = $derived(S.status?.navidrome)
   const env = $derived(S.status?.env || {})
@@ -53,4 +58,7 @@
       <div class="hint">{t('Without a working connection Tuttiphon can neither read your library nor write playlists – so the next steps only make sense once it works. Can’t get it to work right now? Skip the setup and connect later under Settings → Navidrome.')}</div>
     {/if}
   {/if}
+  <Row label={t('Language of the server')} hint={t('For run logs, notifications and the names Tuttiphon gives playlists and music worlds by itself. Delivered vibes that still have their original name are renamed too.')}>
+    <Select options={LANGUAGES.map((l) => [l.key, l.name])} value={d.language} onchange={(v) => (d.language = v)} aria-label={t('Language of the server')} />
+  </Row>
 </Card>

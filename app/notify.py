@@ -8,6 +8,9 @@ server, the ntfy app on the phone).
   week).
 * For protected topics on an own server: access token in .env (NTFY_TOKEN).
 * Every event goes out at most once (state/notified.json).
+* In the reader's language: a message is built by a function (make -> title, text) for every language it goes out in
+  – each device in the language of its interface (webpush), a person's ntfy topic in the language of their account's
+  devices, otherwise (and the administrator's topic) in the server language. Playlist names stay as in Navidrome.
 """
 import datetime as dt
 import json
@@ -16,7 +19,7 @@ import urllib.error
 import urllib.request
 
 from .config import STATE_DIR, load_config, load_env, read_text, write_atomic
-from .i18n import _, _s, _sn
+from .i18n import _, _s, _sn, speaking
 
 SENT_FILE = STATE_DIR / "notified.json"
 EVENTS = ("failed", "newMusic", "autoAssigned", "favorites", "review", "weekly")
@@ -58,12 +61,25 @@ def send(topic, title, message, tags=(), path="", cfg=None):
         return False
 
 
-def deliver(title, message, tags=(), path="", cfg=None, topic=None, accounts=(), admins=False, tag=None):
-    """Deliver through every channel: ntfy topic (if given) and the devices of these accounts or of the administrators.
+def deliver(make, tags=(), path="", cfg=None, topic=None, accounts=(), admins=False, tag=None, topic_lang=None):
+    """Deliver through every channel: ntfy topic (if given, in topic_lang or the server language) and the devices of
+    these accounts or of the administrators (each in its language). make: function -> (title, message).
     -> True if it arrived anywhere."""
     from . import webpush
-    ok = bool(topic) and send(topic, title, message, tags, path, cfg)
-    return webpush.send_to(title, message, path, accounts=accounts, admins=admins, tag=tag) or ok
+    ok = bool(topic) and send(topic, *_in(topic_lang, make), tags, path, cfg)
+    return webpush.send_to(None, None, path, accounts=accounts, admins=admins, tag=tag, make=make) or ok
+
+
+def _in(lang, make):
+    """(title, message) in lang (None: the server language)."""
+    with speaking(lang):
+        return make()
+
+
+def _lang_of(person):
+    """The language for a person's ntfy topic: that of their account's devices, otherwise the server language."""
+    from . import webpush
+    return webpush.lang_of(person.get("user"))
 
 
 def test(topic=None, cfg=None, fallback=True):
@@ -118,30 +134,31 @@ def after_run(entry, cfg=None):
     from .tasks import STEP_TITLES
     topic = st.get("topic")
 
-    def to_admin(title, message, tags, path):   # the administrator's ntfy topic and all administrator devices
-        return deliver(title, message, tags, path, cfg, topic=topic, admins=True)
+    def to_admin(make, tags, path):   # the administrator's ntfy topic and all administrator devices
+        return deliver(make, tags, path, cfg, topic=topic, admins=True)
     results = entry.get("results") or {}
-    # step titles in the server language – they are also part of the "failed|…" key (German as before)
-    failed = [_s(STEP_TITLES[s]) if s in STEP_TITLES else s for s, r in results.items() if r == "fehler"]   # i18n-ignore
+    steps = [s for s, r in results.items() if r == "fehler"]   # i18n-ignore – a state, not a text
+    titled = lambda: [_s(STEP_TITLES[s]) if s in STEP_TITLES else s for s in steps]   # noqa: E731  i18n-ignore – N_ titles, in the reader's language
+    failed = titled()   # in the server language – part of the "failed|…" key (German as before)
     name = entry.get("name") or _s("Run")
     if failed and wants(cfg, "failed"):   # the same error at most once a day (the night runs repeat themselves)
         once(f"failed|{dt.date.today()}|{'+'.join(sorted(failed))}",
-             lambda: to_admin(_s("Tuttiphon: {name} failed", name=name), _s("Errors in: {steps}", steps=", ".join(failed)),
+             lambda: to_admin(lambda: (_s("Tuttiphon: {name} failed", name=name), _s("Errors in: {steps}", steps=", ".join(titled()))),
                               ("warning",), "#/verlauf"))
     done = bool(results) and all(r in ("ok", "warnung") for r in results.values())   # cancelled is not done
     if name.startswith(NEW_MUSIC_RUNS) and done and wants(cfg, "newMusic"):
-        to_admin(_s("Tuttiphon: New music has arrived"), _s("{name} – done, playlists are up to date.", name=name),
+        to_admin(lambda: (_s("Tuttiphon: New music has arrived"), _s("{name} – done, playlists are up to date.", name=name)),
                  ("headphones",), "#/")
     welten = (entry.get("summary") or {}).get("welten") or []
     if welten and wants(cfg, "autoAssigned"):
-        to_admin(_sn(len(welten), "Tuttiphon: {n} new music world", "Tuttiphon: {n} new music worlds"), ", ".join(welten),
-                 ("sparkles",), "#/welten")
+        to_admin(lambda: (_sn(len(welten), "Tuttiphon: {n} new music world", "Tuttiphon: {n} new music worlds"),
+                          ", ".join(welten)), ("sparkles",), "#/welten")
     bands = ((entry.get("summary") or {}).get("analyse") or {}).get("assignedBands") or []
     if bands and wants(cfg, "autoAssigned"):
         names = {w["id"]: w["name"] for w in cfg["welten"]}
         lines = [f"{a} → {names.get(w, w)}" for a, w in bands[:10]]
-        to_admin(_sn(len(bands), "Tuttiphon: {n} new band classified", "Tuttiphon: {n} new bands classified"),
-                 "\n".join(lines), ("sparkles",), "#/")
+        to_admin(lambda: (_sn(len(bands), "Tuttiphon: {n} new band classified", "Tuttiphon: {n} new bands classified"),
+                          "\n".join(lines)), ("sparkles",), "#/")
 
 
 def for_persons(cfg, lib, today=None):
@@ -176,16 +193,18 @@ def _favorites(cfg, lib, ctx, person, topic, today):
     for album in lib.albums().values():
         if (album.get("created") or "")[:10] < since or album.get("artist") not in favs:
             continue
-        title = _s("New from {artist}", artist=album['artist'])
-        text = _s("“{album}” is now in your library.", album=album.get('name') or _s("New album"))
+        def make(album=album):
+            return (_s("New from {artist}", artist=album['artist']),
+                    _s("“{album}” is now in your library.", album=album.get('name') or _s("New album")))
 
-        def go(title=title, text=text, album=album):
-            ok = bool(topic) and send(topic, title, text, ("cd",), "#/", cfg)
+        def go(make=make, album=album):
+            ok = bool(topic) and send(topic, *_in(_lang_of(person), make), ("cd",), "#/", cfg)
             account = (person.get("user") or "").lower()
             if account:   # devices of the account: once per album, even if several people share the account
                 from . import webpush
                 ok = once(f"favpush|{account}|{album['id']}",
-                          lambda: webpush.send_to(title, text, "#/", accounts=[account], tag=f"fav-{album['id']}")) or ok
+                          lambda: webpush.send_to(None, None, "#/", accounts=[account], tag=f"fav-{album['id']}",
+                                                  make=make)) or ok
             return ok
         sent += once(f"fav|{person['id']}|{album['id']}", go)
     return sent
@@ -202,9 +221,11 @@ def _review(cfg, lib, person, topic, today):
     if day.day > 3:   # only in the first days of the month – otherwise the message would come mid-month when first set up
         return 0
     p = mine[0]
-    name = rules.review_name(cfg, p, day)
-    title, text = _s("{name} is here", name=name), _s("Your most played songs of last month – now in Symfonium.")
-    return _to_person(f"review|{person['id']}|{day:%Y-%m}", f"reviewpush|{{account}}|{day:%Y-%m}", title, text,
+    name = rules.review_name(cfg, p, day)   # as in Navidrome
+
+    def make():
+        return _s("{name} is here", name=name), _s("Your most played songs of last month – now in Symfonium.")
+    return _to_person(f"review|{person['id']}|{day:%Y-%m}", f"reviewpush|{{account}}|{day:%Y-%m}", make,
                       ("calendar",), f"#/playlist/{p['id']}", cfg, person, topic, tag=f"review-{p['id']}")
 
 
@@ -213,24 +234,25 @@ def _of(cfg, playlist):
     return playlist.get("person") or cfg["settings"].get("defaultPerson")
 
 
-def _to_person(key, device_key, title, text, tags, path, cfg, person, topic, tag):
+def _to_person(key, device_key, make, tags, path, cfg, person, topic, tag):
     """A message to one person: their ntfy topic once per `key`, the devices of their account once per `device_key`
-    ("{account}" filled in) – so the devices get it once, even if several people share the account. -> 1/0"""
+    ("{account}" filled in) – so the devices get it once, even if several people share the account. make: function
+    -> (title, text), in each reader's language. -> 1/0"""
     from . import webpush
 
     def go():
-        ok = bool(topic) and send(topic, title, text, tags, path, cfg)
+        ok = bool(topic) and send(topic, *_in(_lang_of(person), make), tags, path, cfg)
         account = (person.get("user") or "").lower()
         if account:
             ok = once(device_key.format(account=account),
-                      lambda: webpush.send_to(title, text, path, accounts=[account], tag=tag)) or ok
+                      lambda: webpush.send_to(None, None, path, accounts=[account], tag=tag, make=make)) or ok
         return ok
     return int(once(key, go))
 
 
 def _weekly_parts(cfg, lib, person, start, state, index):
     """What is new for a person this week: [(playlist, text)] – "Discovered for you" first, then the album of the week,
-    each only if it renews weekly and was written for this week."""
+    each only if it renews weekly and was written for this week. The texts are functions (in the reader's language)."""
     from . import mixer, rules
     mine = [p for p in cfg["playlists"] if _of(cfg, p) == person["id"] and p.get("status", "aktiv") == "aktiv"
             and (p.get("unheard") or p.get("album")) and mixer.options(p).get("every") == "week"]
@@ -243,11 +265,12 @@ def _weekly_parts(cfg, lib, person, start, state, index):
         name = rules.playlist_name(cfg, p)
         if p.get("album"):
             s = lib.songs[index[ids[0]]]
-            out.append((p, _s("{name}: {artist} – {album}", name=name, artist=s.get("displayAlbumArtist") or lib._main_artist(s) or "?",
-                              album=s.get("album") or "?")))
+            artist, album = s.get("displayAlbumArtist") or lib._main_artist(s) or "?", s.get("album") or "?"
+            out.append((p, lambda name=name, artist=artist, album=album:
+                        _s("{name}: {artist} – {album}", name=name, artist=artist, album=album)))
         else:
-            out.append((p, _sn(len(ids), "{name}: {n} song you have never heard", "{name}: {n} songs you have never heard",
-                               name=name)))
+            out.append((p, lambda name=name, n=len(ids):
+                        _sn(n, "{name}: {n} song you have never heard", "{name}: {n} songs you have never heard", name=name)))
     return out
 
 
@@ -266,12 +289,12 @@ def _weekly(cfg, lib, person, topic, today):
     if not parts:
         return 0
     year, week, _wd = start.isocalendar()
-    title = _s("New for you this week")
     account = (person.get("user") or "").lower()
 
     def go():
-        ok = bool(topic) and send(topic, title, " · ".join(t for _p, t in parts), ("sparkles",),
-                                  f"#/playlist/{parts[0][0]['id']}", cfg)
+        ok = bool(topic) and send(topic, *_in(_lang_of(person), lambda: (_s("New for you this week"),
+                                                                          " · ".join(t() for _p, t in parts))),
+                                  ("sparkles",), f"#/playlist/{parts[0][0]['id']}", cfg)
         if account:   # the devices of the account: once, with what is new for each of its people
             default = cfg["settings"].get("defaultPerson")
             same = sorted((x for x in cfg["personen"] if (x.get("user") or "").lower() == account),
@@ -279,7 +302,7 @@ def _weekly(cfg, lib, person, topic, today):
             every = [pt for x in same for pt in (parts if x["id"] == person["id"]
                                                   else _weekly_parts(cfg, lib, x, start, state, index))]
             ok = once(f"weeklypush|{account}|{year}-{week}", lambda: webpush.send_to(
-                title, " · ".join(t for _p, t in every), f"#/playlist/{every[0][0]['id']}", accounts=[account],
-                tag=f"weekly-{account}")) or ok
+                None, None, f"#/playlist/{every[0][0]['id']}", accounts=[account], tag=f"weekly-{account}",
+                make=lambda: (_s("New for you this week"), " · ".join(t() for _p, t in every)))) or ok
         return ok
     return int(once(f"weekly|{person['id']}|{year}-{week}", go))

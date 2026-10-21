@@ -19,6 +19,7 @@ Values go into {placeholders}: _("Unknown playlist: {name}", name=x) – any nam
 them from the code. Never translate at import time (the language changes per request and with the setting): fixed
 texts in module-level constants are marked with N_("…") and translated where they are used, e.g. _(STEP_TITLES[s]).
 """
+import contextlib
 import json
 import threading
 import time
@@ -43,8 +44,23 @@ def _dict(lang):
     return _dicts[lang]
 
 
+@contextlib.contextmanager
+def speaking(lang):
+    """Texts for one reader: inside, _s()/_sn() speak lang instead of the server language (a notification to a device
+    in the language it uses). None or an unknown language: the server language."""
+    before = getattr(_local, "speak", None)
+    _local.speak = lang if lang in LANGS else None
+    try:
+        yield
+    finally:
+        _local.speak = before
+
+
 def server_lang():
-    """settings.language – checked at most every few seconds (log lines ask for it all the time)."""
+    """settings.language – checked at most every few seconds (log lines ask for it all the time); inside speaking() the
+    reader's language."""
+    if getattr(_local, "speak", None):
+        return _local.speak
     if _server["lang"] is None or time.monotonic() - _server["at"] > 5:
         from .config import load_config   # here, not at the top: config itself uses _()
         try:

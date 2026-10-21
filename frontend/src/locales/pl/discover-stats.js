@@ -1,4 +1,4 @@
-// Same keys as ../de/discover-stats.js
+// Same keys as ../de/discover-stats.js (tools/translate.py)
 export default {
   'Discover':
     'Odkrywaj',

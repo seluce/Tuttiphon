@@ -1,4 +1,4 @@
-// Same keys as ../de/common.js
+// Same keys as ../de/common.js (tools/translate.py)
 export default {
   'just now':
     'przed chwilą',
