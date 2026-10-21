@@ -695,8 +695,8 @@ kept.
 
 | Signal | Source | Effect |
 |---|---|---|
-| skipped | mix history + the account's daily play increments (recap, `state/plays/<account>/`) | weight drops, recovers over time |
-| played | the same | partly offsets skipping |
+| skipped | mix history + the account's daily play increments (recap, `state/plays/<account>/`) – or, with the Navidrome plugin, live: a song left within 30 s for another one | weight drops, recovers over time |
+| played | the same – live: every scrobble | partly offsets skipping |
 | 1 star by hand | the account's star in Navidrome (e.g. given in Symfonium) that was not set by the Deezer rating (rules below) | the song no longer appears in this person's mixes |
 
 **Remembering.** `mixer.remember()` calls `feedback.record()` when writing the `.m3u`: start of the period, `every`, account
@@ -725,6 +725,17 @@ takes every period not yet evaluated whose last day is before today:
 
 The result is stored per account in `state/feedback/<account>.json`; the log reports “Mixes learn: n periods
 evaluated – k× skipped, m× played.”
+
+**Live plays** (the Navidrome plugin as scrobbler, `app/listen.py`): Navidrome hands every start (“now playing”),
+every play (scrobble, with the time it started) and the players' reports (state, position, player) to the plugin,
+which passes them to `POST /api/sonic/listen` ([API](03-api.md#navidrome-plugin)). `listen.skips()`: per player from
+its reports – a song that gave way to another one before 30 s (`SKIP_SECONDS`; the furthest position reported or the
+time until the next song, whichever is more) and was not scrobbled counts as skipped on that day; without reports from
+the starts of the account (two devices playing at once on one account can look like a skip there). `factors()` adds
+these skips like the marks of the mix history (half-life 60 days) for every song, not only mix songs, and every live
+play makes up for half a skip (`_live_effect()`, cached per account, day and state of the live files). A mix period
+with live plays of the account is only marked as done in `learn()` – no guess from the mix history, nothing counts
+twice.
 
 **How much a mix is listened to** (`feedback.usage()`, read only, also with `mixLearn` off): the same finished and
 counted periods of the mix history (rules 1–2 above, without waiting or discarding) – per mix the number of editions

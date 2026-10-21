@@ -1630,7 +1630,8 @@ def api_cover_remove(body):
 def api_plugin_status(query=None):
     """Settings → Navidrome plugin: key, the plugin's last request, sound vectors, whether the plugin file is here."""
     from .version import VERSION
-    return {**sonic.status(), "file": bool(sonic.plugin_file()), "version": VERSION}
+    from . import listen
+    return {**sonic.status(), "live": listen.status(), "file": bool(sonic.plugin_file()), "version": VERSION}
 
 
 def api_plugin_key(body):
@@ -1873,9 +1874,10 @@ class Handler(BaseHTTPRequestHandler):
         release(False)
         return True, result
 
-    def _sonic(self, path, query):
-        """A request of the Navidrome plugin (GET /api/sonic/<what>, sonic.py) – signed in with its own key
-        (Authorization: Bearer …) instead of a session; wrong keys count toward a lockout like passwords."""
+    def _sonic(self, method, path, query):
+        """A request of the Navidrome plugin – GET /api/sonic/<what> (sonic.py), POST /api/sonic/listen (a play,
+        listen.py) – signed in with its own key (Authorization: Bearer …) instead of a session; wrong keys count
+        toward a lockout like passwords."""
         ip, _https = self._client()
         given = self.headers.get("Authorization") or ""
         key = given[7:].strip() if given[:7].lower() == "bearer " else ""
@@ -1888,7 +1890,16 @@ class Handler(BaseHTTPRequestHandler):
         ok, _r = self._limited(((f"plugin|{ip}", 30), ("plugin", 100)), _s("Navidrome plugin"), attempt)
         if not ok:
             return None
-        return self._json(sonic.answer(load_config(), CACHE.get(), path[len("/api/sonic/"):], query))
+        what = path[len("/api/sonic/"):]
+        if method == "POST":
+            if what != "listen":
+                return self._json({"error": "not found"}, 404)   # i18n-ignore – technical code
+            from . import listen
+            body = self._body()
+            kept = listen.record(body.get("user"), body.get("event"), body.get("id"), body.get("time"),
+                                 body.get("position"), body.get("state"), body.get("player"))
+            return self._json({"ok": kept})
+        return self._json(sonic.answer(load_config(), CACHE.get(), what, query))
 
     def _session_cookie(self, user, https):
         cookie = f"tuttiphon={auth.make_token(user)}; Path=/; Max-Age={auth.SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax"
@@ -2120,8 +2131,8 @@ class Handler(BaseHTTPRequestHandler):
                 if self.headers.get("X-Tuttiphon") != "1":
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – only from the interface
                 return self._setup(setup)
-            if path.startswith("/api/sonic/") and method == "GET":   # the Navidrome plugin: its own key, no session
-                return self._sonic(path, query)
+            if path.startswith("/api/sonic/") and method in ("GET", "POST"):   # the Navidrome plugin: its own key, no session
+                return self._sonic(method, path, query)
             clean = posixpath.normpath(urllib.parse.unquote(path))   # “/assets/../help/…” is not public
             public = clean in ("/login.html", "/favicon.svg", "/manifest.webmanifest", "/sw.js") or clean.startswith(("/icons/", "/assets/"))
             if path == "/api/logout" and method == "POST":
@@ -2161,7 +2172,8 @@ class Handler(BaseHTTPRequestHandler):
                     file = sonic.plugin_file()
                     if not file:
                         return self._json({"error": _("The plugin file is not part of this installation.")}, 404)
-                    return self._send(read_bytes(file), "application/zip", headers={
+                    # not "application/zip": browsers (phones above all) would save it as tuttiphon.ndp.zip
+                    return self._send(read_bytes(file), "application/octet-stream", headers={
                         "Content-Disposition": 'attachment; filename="tuttiphon.ndp"', "Cache-Control": "no-store"})
                 if path == "/api/backups/file":   # download a backup (admin only, see ADMIN_ONLY)
                     file = backup.path_of(query.get("name", ""))

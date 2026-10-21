@@ -36,8 +36,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     TZ=Europe/Berlin
 
 WORKDIR /app
-# AI models (30 MB, with checksums) – their own layer so updates do not download them again. If the download
-# fails, a build of your own still finishes; the AI sound analysis then reports that the models are missing.
+# AI models (30 MB, with checksums) – their own layer so updates do not download them again. From essentia.upf.edu,
+# with pauses between attempts; if it does not answer, from the copy in the project's releases. If both fail, a build
+# of your own still finishes; the AI sound analysis then reports that the models are missing.
 # MODELS_REQUIRED=1 (the published image, .github/workflows/docker.yaml) stops the build instead.
 ARG MODELS_REQUIRED=0
 COPY app/ml_worker.py ./app/ml_worker.py

@@ -1,6 +1,7 @@
 <!--
   Settings → Navidrome → "Navidrome plugin": the plugin asks Tuttiphon for similar songs (Instant Mix, song and artist
-  radio, "similar songs" in Symfonium). Status from GET /api/plugin (key, the plugin's last request, sound vectors),
+  radio, "similar songs" in Symfonium) and passes the plays on. Status from GET /api/plugin (key, the plugin's last
+  request, the last play received, sound vectors),
   key: POST /api/plugin/key (shown once) and /api/plugin/key/remove, download: /plugin/tuttiphon.ndp, the setup steps.
 -->
 <script>
@@ -16,6 +17,9 @@
   let key = $state('')   // a new key – shown only now
   let busy = $state(false)
   const address = location.origin
+  // Navidrome's agents with Tuttiphon first – in front of Navidrome's defaults (0.64: deezer,lastfm,listenbrainz)
+  const AGENTS = [['navidrome.toml', 'Agents = "tuttiphon,deezer,lastfm,listenbrainz"'],   // i18n-ignore: setting
+    ['docker-compose', 'ND_AGENTS=tuttiphon,deezer,lastfm,listenbrainz']]   // i18n-ignore: setting
 
   async function load() {
     try { st = await api('/api/plugin') } catch (e) { toast(e.message, { error: true }) }
@@ -70,6 +74,9 @@
         </div>
       </div>
     {/if}
+    <Row label={t('Plays from Navidrome')} hint={t('Every play as it happens – exact listening times and real skips; for accounts without a stored password also the recap.')}>
+      <span class={st.live?.lastEvent ? 'pill ok' : 'pill'}>{st.live?.lastEvent ? t('{when} · {accounts}', { when: relTime(st.live.lastEvent), accounts: st.live.accounts.join(', ') }) : t('none yet')}</span>
+    </Row>
     <Row label={t('Last request from Navidrome')} hint={st.lastCall ? t('{n} since Tuttiphon started', { n: fmt(st.calls) }) : ''}>
       <span class={st.lastCall ? 'pill ok' : 'pill'}>{st.lastCall ? relTime(st.lastCall) : t('none yet')}</span>
     </Row>
@@ -85,14 +92,17 @@
           {@html t('Download <b>tuttiphon.ndp</b> from the release on <a class="link" href="https://github.com/seluce/tuttiphon/releases" target="_blank" rel="noopener">GitHub</a>.')}
         {/if}
       </li>
-      <li>{@html t('Put it into Navidrome’s plugins folder – in the Navidrome container <code>/data/plugins</code> – and add to Navidrome’s settings (docker-compose):')}
-        <div class="flex gap-2 items-center mt-1.5">
-          <code class="code flex-1 min-w-0">ND_AGENTS=tuttiphon,lastfm,deezer</code><!-- i18n-ignore: setting -->
-          <button class="btn sm ghost" onclick={() => copy('ND_AGENTS=tuttiphon,lastfm,deezer')} title={t('Copy')}><Icon name="copy" size={15} /></button>
-        </div>
-        <span class="muted">{t('Restart Navidrome afterwards. Tuttiphon comes first – where it has no answer, Navidrome asks Last.fm and Deezer.')}</span>
+      <li>{@html t('Put the file as it is – not unpacked – into Navidrome’s plugins folder (in the Navidrome container <code>/data/plugins</code>) and put “tuttiphon” first in Navidrome’s list of agents, in navidrome.toml or in docker-compose:')}
+        {#each AGENTS as [where, line] (where)}
+          <div class="flex gap-2 items-center mt-1.5">
+            <code class="code flex-1 min-w-0">{line}</code>
+            <span class="tiny muted w-[110px] max-mobile:hidden">{where}</span>
+            <button class="btn sm ghost" onclick={() => copy(line)} title={t('Copy')}><Icon name="copy" size={15} /></button>
+          </div>
+        {/each}
+        <span class="muted">{t('If there is a list already, put tuttiphon, in front of it – without one these are Navidrome’s defaults. The docker-compose line wins over navidrome.toml. Restart Navidrome afterwards; where Tuttiphon has no answer, Navidrome asks the next ones.')}</span>
       </li>
-      <li>{@html t('In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon” and enter the address and the key. The address as Navidrome reaches Tuttiphon – from this browser it is <code>{address}</code>; inside Docker often the address of the NAS.', { address })}</li>
+      <li>{@html t('In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Best the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. From this browser Tuttiphon is <code>{address}</code>.', { address })}</li>
       <li>{@html t('In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> in the settings of the Navidrome server.')}</li>
     </ol>
   </div>

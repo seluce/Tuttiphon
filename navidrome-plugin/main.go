@@ -1,6 +1,7 @@
 // Tuttiphon plugin for Navidrome: similar songs, similar artists and sonic similarity, answered by Tuttiphon from the
-// sound of the music files (its AI sound analysis). The plugin only passes the questions on: it asks Tuttiphon's
-// /api/sonic/… with the key from the plugin settings and hands the answer back to Navidrome. See README.md.
+// sound of the music files (its AI sound analysis) – and, as Navidrome's scrobbler, every play passed on to Tuttiphon
+// as it happens. The plugin only passes things on: it asks Tuttiphon's /api/sonic/… with the key from the plugin
+// settings and hands the answer back to Navidrome; plays go to /api/sonic/listen. See README.md.
 package main
 
 import (
@@ -13,6 +14,7 @@ import (
 	"github.com/navidrome/navidrome/plugins/pdk/go/host"
 	"github.com/navidrome/navidrome/plugins/pdk/go/metadata"
 	"github.com/navidrome/navidrome/plugins/pdk/go/pdk"
+	"github.com/navidrome/navidrome/plugins/pdk/go/scrobbler"
 	"github.com/navidrome/navidrome/plugins/pdk/go/sonicsimilarity"
 )
 
@@ -63,7 +65,11 @@ func ask(what string, params url.Values) (*answer, error) {
 		return nil, fmt.Errorf("Tuttiphon sent no answer")
 	}
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Tuttiphon answered %d", resp.StatusCode)
+		text := strings.TrimSpace(string(resp.Body))
+		if len(text) > 200 {
+			text = text[:200]
+		}
+		return nil, fmt.Errorf("Tuttiphon answered %d: %s", resp.StatusCode, text)
 	}
 	var out answer
 	if err := json.Unmarshal(resp.Body, &out); err != nil {
@@ -164,9 +170,90 @@ func (plugin) FindSonicPath(req sonicsimilarity.FindSonicPathRequest) (sonicsimi
 	return sonicsimilarity.SonicSimilarityResponse{Matches: matches(got.Songs)}, nil
 }
 
+// ---- plays, as Navidrome's scrobbler (only for the users assigned to the plugin in Navidrome)
+
+// listenEvent as Tuttiphon takes it (POST /api/sonic/listen, app/listen.py)
+type listenEvent struct {
+	Event    string   `json:"event"`
+	User     string   `json:"user"`
+	ID       string   `json:"id"`
+	Time     int64    `json:"time,omitempty"`
+	Position *float64 `json:"position,omitempty"`
+	State    string   `json:"state,omitempty"`
+	Player   string   `json:"player,omitempty"`
+}
+
+// tell passes a play on. -> nil, or the HTTP status (0: Tuttiphon not reachable) with the error
+func tell(e listenEvent) (int32, error) {
+	base := strings.TrimRight(config("url"), "/")
+	key := config("key")
+	if base == "" || key == "" {
+		return 400, fmt.Errorf("Tuttiphon address or key missing in the plugin settings")
+	}
+	body, err := json.Marshal(e)
+	if err != nil {
+		return 400, err
+	}
+	resp, err := host.HTTPSend(host.HTTPRequest{
+		Method:    "POST",
+		URL:       base + "/api/sonic/listen",
+		Headers:   map[string]string{"Authorization": "Bearer " + key, "Content-Type": "application/json"},
+		Body:      body,
+		TimeoutMs: 10000,
+	})
+	if err != nil || resp == nil {
+		return 0, fmt.Errorf("Tuttiphon not reachable: %v", err)
+	}
+	if resp.StatusCode != 200 {
+		return resp.StatusCode, fmt.Errorf("Tuttiphon answered %d: %s", resp.StatusCode, strings.TrimSpace(string(resp.Body)))
+	}
+	return 200, nil
+}
+
+// quietly: a start or a player's report that does not arrive is not worth retrying
+func quietly(_ int32, err error) error {
+	if err != nil {
+		pdk.Log(pdk.LogWarn, "[Tuttiphon] "+err.Error())
+	}
+	return nil
+}
+
+func (plugin) IsAuthorized(req scrobbler.IsAuthorizedRequest) (bool, error) {
+	return config("url") != "" && config("key") != "", nil
+}
+
+func (plugin) NowPlaying(req scrobbler.NowPlayingRequest) error {
+	pos := float64(req.Position)
+	return quietly(tell(listenEvent{Event: "start", User: req.Username, ID: req.Track.ID, Position: &pos}))
+}
+
+func (plugin) PlaybackReport(req scrobbler.PlaybackReportRequest) error {
+	pos := float64(req.PositionMs) / 1000
+	player := req.PlayerId
+	if player == "" {
+		player = req.PlayerName
+	}
+	return quietly(tell(listenEvent{Event: "report", User: req.Username, ID: req.Track.ID, Position: &pos,
+		State: req.State, Player: player}))
+}
+
+// Scrobble: a play – if Tuttiphon cannot be reached, Navidrome tries again later; a refusal (wrong key) is final
+func (plugin) Scrobble(req scrobbler.ScrobbleRequest) error {
+	status, err := tell(listenEvent{Event: "play", User: req.Username, ID: req.Track.ID, Time: req.Timestamp})
+	if err == nil {
+		return nil
+	}
+	pdk.Log(pdk.LogWarn, "[Tuttiphon] "+err.Error())
+	if status == 0 || status >= 500 || status == 429 {
+		return scrobbler.ScrobblerErrorRetryLater
+	}
+	return scrobbler.ScrobblerErrorUnrecoverable
+}
+
 func init() {
 	metadata.Register(plugin{})
 	sonicsimilarity.Register(plugin{})
+	scrobbler.Register(plugin{})
 }
 
 func main() {}

@@ -250,12 +250,14 @@ export default {
     'Mit dem Tuttiphon-Plugin fragt Navidrome bei Tuttiphon nach ähnlichen Songs. Instant Mix in Navidrome, „Ähnliche Titel“, Song- und Künstler-Radio in Symfonium und anderen Apps richten sich dann nach dem Klang deiner eigenen Dateien – aus der KI-Klanganalyse, auch für Bands, die Last.fm kaum kennt.',
   'Under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a>, create a key in the card “Navidrome plugin” and download the plugin.':
     'Erzeuge unter <a class="link" href="#/einstellungen/navidrome">Einstellungen → Navidrome</a> in der Karte „Navidrome-Plugin“ einen Schlüssel und lade das Plugin herunter.',
-  'Put <b>tuttiphon.ndp</b> into Navidrome’s plugins folder and add <code>ND_AGENTS=tuttiphon,lastfm,deezer</code> to Navidrome’s settings, then restart Navidrome.':
-    'Lege <b>tuttiphon.ndp</b> in den Plugin-Ordner von Navidrome, ergänze <code>ND_AGENTS=tuttiphon,lastfm,deezer</code> in den Einstellungen von Navidrome und starte Navidrome neu.',
-  'In Navidrome under Settings → Plugins, turn on “Tuttiphon” and enter Tuttiphon’s address and the key.':
-    'Schalte in Navidrome unter Einstellungen → Plugins „Tuttiphon“ ein und trage die Adresse von Tuttiphon und den Schlüssel ein.',
+  'Put <b>tuttiphon.ndp</b> – not unpacked – into Navidrome’s plugins folder, put <code>tuttiphon</code> first in Navidrome’s list of agents (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) and restart Navidrome.':
+    'Lege <b>tuttiphon.ndp</b> – nicht entpackt – in den Plugin-Ordner von Navidrome, setze <code>tuttiphon</code> an den Anfang der Agents-Liste von Navidrome (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) und starte Navidrome neu.',
+  'In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.':
+    'Schalte in Navidrome unter Einstellungen → Plugins „Tuttiphon“ ein, trage die Adresse von Tuttiphon im Heimnetz und den Schlüssel ein und gib es für alle Benutzer frei.',
   'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server.':
     'Schalte in Symfonium für den Navidrome-Server „Use similar tracks for Radio Mix“ ein.',
   'Navidrome does not say who is listening – the songs come from the whole library as for the family, and with a child profile without explicit songs. The card shows when Navidrome last asked.':
     'Navidrome verrät nicht, wer gerade hört – die Songs kommen aus der ganzen Bibliothek wie für die Familie, und mit einem Kinderprofil ohne derbe Texte. Die Karte zeigt, wann Navidrome zuletzt gefragt hat.',
+  'The plugin also passes every play on: exact listening times, real skips for the mixes – and the recap for accounts without a stored password.':
+    'Das Plugin gibt außerdem jede Wiedergabe weiter: genaue Hörzeiten, echtes Überspringen für die Mixe – und den Rückblick für Konten ohne gespeichertes Passwort.',
 }

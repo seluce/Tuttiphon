@@ -263,10 +263,11 @@
   <p>{t('With the Tuttiphon plugin, Navidrome asks Tuttiphon for similar songs. Instant Mix in Navidrome, “similar songs”, song and artist radio in Symfonium and other apps then follow the sound of your own files – from the AI sound analysis, also for bands that Last.fm hardly knows.')}</p>
   <Steps>
     <li><span>{@html t('Under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a>, create a key in the card “Navidrome plugin” and download the plugin.')}</span></li>
-    <li><span>{@html t('Put <b>tuttiphon.ndp</b> into Navidrome’s plugins folder and add <code>ND_AGENTS=tuttiphon,lastfm,deezer</code> to Navidrome’s settings, then restart Navidrome.')}</span></li>
-    <li><span>{t('In Navidrome under Settings → Plugins, turn on “Tuttiphon” and enter Tuttiphon’s address and the key.')}</span></li>
+    <li><span>{@html t('Put <b>tuttiphon.ndp</b> – not unpacked – into Navidrome’s plugins folder, put <code>tuttiphon</code> first in Navidrome’s list of agents (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) and restart Navidrome.')}</span></li>
+    <li><span>{t('In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.')}</span></li>
     <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server.')}</span></li>
   </Steps>
+  <p>{t('The plugin also passes every play on: exact listening times, real skips for the mixes – and the recap for accounts without a stored password.')}</p>
   <p>{t('Navidrome does not say who is listening – the songs come from the whole library as for the family, and with a child profile without explicit songs. The card shows when Navidrome last asked.')}</p>
 {/snippet}
 

@@ -4,7 +4,9 @@ Passes Navidrome's questions for similar songs and artists to Tuttiphon, which a
 files (its AI sound analysis): Instant Mix, song and artist radio, related artists (`getSimilarSongs2`,
 `getArtistInfo2`) and the OpenSubsonic extension `sonicSimilarity` (`getSonicSimilarTracks`, `findSonicPath`).
 The plugin itself only asks `GET <Tuttiphon>/api/sonic/<similar|artist|album|artists|path>` with the key from its
-settings (`Authorization: Bearer …`) and hands the answer back – the answers are made in `app/sonic.py`.
+settings (`Authorization: Bearer …`) and hands the answer back – the answers are made in `app/sonic.py`. As
+Navidrome's scrobbler it passes every play on (`POST /api/sonic/listen`: start, play, the players' reports –
+`app/listen.py`); Navidrome does that only for the users assigned to the plugin (`users` permission).
 
 - Setting it up: Tuttiphon's Settings → Navidrome → "Navidrome plugin", and [docs/08-operations.md](../docs/08-operations.md#navidrome-plugin).
 - Building: `tools/build-plugin.sh` (Go and TinyGo) → `dist/tuttiphon.ndp` (a zip of `manifest.json` with Tuttiphon's

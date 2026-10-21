@@ -707,7 +707,7 @@ environment and in `.env` ([Keys](#keys)).
 | `install_id` | random ID of this installation (16 hex characters) – tells announcements of the own installation in `.tuttiphon/` apart from those of another one ([Shared folder .tuttiphon/](#shared-folder-tuttiphon)) | `instances.install_id()` on first need – a new one only if the file is missing or doesn't contain a valid ID; if it is briefly unreadable, no new one (that would look like another installation), it is read again later | state, deletable (a new one is created at the next start); not in the backup (`backup.SKIP_STATE`) – a copy elsewhere is another installation |
 | `deezer.json` | Deezer rank and stars set per song | `deezer` step, `/api/deezer/ranks` | important |
 | `lautstaerke.json` | measured loudness and peak per song, and which of it has already been written to the file | `analyse` step (`lautstaerke.run()`) | state; deleting = measure everything again (only what changes is written) |
-| `plays/<account>/` | plays per day for the recap | `rueckblick.snapshot()` | important, not recoverable |
+| `plays/<account>/` | plays per day for the recap, live plays from the Navidrome plugin | `rueckblick.snapshot()`, `listen.record()` | important, not recoverable |
 | `managed_playlists.json` | which files in the playlist folder belong to Tuttiphon | `playlists` step | important |
 | `history.jsonl` | history of the runs | `TaskRunner`, trimmed by `tasks.tidy()` | history |
 | `audio.json` | raw measurements of the sound analysis | `analyse` step | cache, recomputing takes hours |
@@ -842,6 +842,7 @@ One folder `plays/<account>/` per Navidrome account (name via `slug()`, i.e. low
 | `<YYYY-MM-DD>.json` | `{song-id: n}`: new plays of this listening day – the day midway between the previous and this measurement (measurement at 05:30 or 07:00: the previous day; a second one in the afternoon: today); without an earlier measurement, the time minus 6 hours |
 | `first.json` | `{song-id: day}`: when a song was counted for the first time |
 | `moments.json` | `{"v": 1, "moments": [[song-id, played], …]}`: listening clock – for every song with new plays its last play (`played` from Navidrome, UTC) at the time of the snapshot, so a later play doesn't erase it; kept 120 days, at most 30,000 (`listenclock.record()`, [06](06-intelligence.md#listening-clock-applistenclockpy)) |
+| `live-<YYYY-MM-DD>.jsonl` | live plays from the Navidrome plugin (`listen.record()`), one event per line: `{"t": Unix seconds, "k": "start" \| "play" \| "report", "id": song-id, "pos": seconds, "st": state, "pl": player}` – the day of `t` in local time; kept 120 days (`KEEP_DAYS`). For an account without `baseline.json` every `play` also goes into `<YYYY-MM-DD>.json` and `first.json` (the listening day: time minus 6 hours) – with the first counter snapshot that stops ([Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy)) |
 
 Navidrome only knows counters, not a history – what is missing here can't be recovered. Counter snapshots are taken at
 server start, once a day from `settings.dailyAt` on and when the recap is fetched (at most every 30 minutes); only for

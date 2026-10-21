@@ -83,7 +83,8 @@ Every song is listened to – locally, at night, gently on a few cores:
 - **Navidrome plugin**: with it, Navidrome asks Tuttiphon – Instant Mix, song and artist radio, "similar songs" and
   related artists in Navidrome, Symfonium, Feishin and other apps follow the sound of your own files, also for bands
   that Last.fm hardly knows; sound paths from one song to another for apps that support OpenSubsonic's
-  `sonicSimilarity`.
+  `sonicSimilarity`. It also passes every play on as it happens – exact listening times and real skips for the
+  mixes, and the recap even for accounts without a stored password.
 - **Taste per person**: what someone plays, favors and rates – including how it sounds – shapes their suggestions.
 - Last.fm (optional, free key) adds similar bands and tags.
 

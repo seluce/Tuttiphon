@@ -184,6 +184,7 @@ The “Users” column in the tables below lists what the server leaves out for 
 | POST | `/api/cover/remove` | own | [Images & covers](#images--covers) |
 | POST | `/api/cover/upload` | own | [Images & covers](#images--covers) |
 | GET | `/api/sonic/similar`, `/artist`, `/album`, `/artists`, `/path` | the plugin's key | [Navidrome plugin](#navidrome-plugin) |
+| POST | `/api/sonic/listen` | the plugin's key | [Navidrome plugin](#navidrome-plugin) |
 | GET | `/api/plugin` | admin | [Navidrome plugin](#navidrome-plugin) |
 | POST | `/api/plugin/key`, `/api/plugin/key/remove` | admin | [Navidrome plugin](#navidrome-plugin) |
 | GET | `/plugin/tuttiphon.ndp` | admin | [Navidrome plugin](#navidrome-plugin) |
@@ -586,9 +587,16 @@ Song ids are Navidrome's; what may come and how it is chosen: [Intelligence](06-
 
 Unknown song or band: an empty list. Another `<what>`: `400`.
 
+`POST /api/sonic/listen` (the plugin as Navidrome's scrobbler, no `X-Tuttiphon` header needed – the key is the
+protection): body `{"event": "start" | "play" | "report", "user", "id", "time"?, "position"?, "state"?, "player"?}`
+– `time` (Unix seconds) only for `play` (when the song started; older than 120 days or more than an hour ahead:
+`{"ok": false}`), otherwise the time of arrival; `position` in seconds (0–86,400), `state` one of `starting`,
+`playing`, `paused`, `stopped`, `expired`. `{"ok": true}`; an unknown event, an empty user or song: `400`; another
+`POST /api/sonic/<what>`: `404`. What happens with it: [Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy).
+
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
-| `GET /api/plugin` | admin | – | `{"key": bool, "keyAt", "lastCall", "calls", "vectors", "file": bool, "version"}` – `lastCall`/`calls` since Tuttiphon started (memory only), `file`: the plugin file is part of this installation |
+| `GET /api/plugin` | admin | – | `{"key": bool, "keyAt", "lastCall", "calls", "vectors", "live": {"lastEvent", "events", "accounts"}, "file": bool, "version"}` – `lastCall`/`calls` and `live` since Tuttiphon started (memory only), `file`: the plugin file is part of this installation |
 | `POST /api/plugin/key` | admin | `{}` | `{"key": "tp_…"}` – a new key, shown once (only its SHA-256 is stored in `state/plugin_key.json`); the old one stops working |
 | `POST /api/plugin/key/remove` | admin | `{}` | `{"ok": true}` |
-| `GET /plugin/tuttiphon.ndp` | admin | – | the plugin (`application/zip`, as a download); `404` if this installation has none |
+| `GET /plugin/tuttiphon.ndp` | admin | – | the plugin as a download (`application/octet-stream` – with `application/zip` browsers save it as `tuttiphon.ndp.zip`; it is a zip inside all the same, as every `.ndp`); `404` if this installation has none |

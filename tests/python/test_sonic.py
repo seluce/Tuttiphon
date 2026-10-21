@@ -176,7 +176,7 @@ class EndpointTest(unittest.TestCase):
         self.addCleanup(ndp.unlink)
         with mock.patch.object(sonic, "PLUGIN_FILES", (ndp,)):
             status, headers, body = request("GET", "/plugin/tuttiphon.ndp")
-        self.assertEqual((status.split()[1], headers["content-type"], body), ("200", "application/zip", b"PK-test"))
+        self.assertEqual((status.split()[1], headers["content-type"], body), ("200", "application/octet-stream", b"PK-test"))
         status, _h, body = request("POST", "/api/plugin/key", b"{}")
         key = json.loads(body)["key"]
         self.assertTrue(sonic.check_key(key))

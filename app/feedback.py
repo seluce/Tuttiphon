@@ -10,6 +10,9 @@
   account's star differs from the one the Deezer rating last set (state/deezer.json).
 
 Result per account: state/feedback/<account>.json = {song ID: {"s": [days on which it was skipped], "p": plays from mixes}}
+* Live plays (the Navidrome plugin, listen.py): a song left within the first seconds counts as skipped there and then,
+  every play partly makes up for skips – for every song, not only in mixes. For a mix period with live plays of the
+  account the guess from the mix history above is left out, so nothing counts twice.
 With the setting settings.mixLearn = false none of this has an effect (the history is still kept).
 """
 import calendar
@@ -193,6 +196,12 @@ def learn(today=None, log=lambda *_: None):
                 end = period_end(e.get("every", "day"), start)
                 if end >= today:
                     continue   # period still running
+                from . import listen
+                if listen.has_plays(e["user"], start, end):   # live plays know the skips exactly (factors())
+                    e["done"] = True
+                    changed = True
+                    out["periods"] += 1
+                    continue
                 snap = rueckblick.last_snapshot(e["user"])
                 if not snap or (snap.get("since") or "") > start.isoformat():
                     if (today - end).days > 14:   # never counted (no password or the like) – do not carry it along forever
@@ -254,27 +263,66 @@ def learn(today=None, log=lambda *_: None):
 
 # ---------------------------------------------------------------------------- Applying
 
+def _effect(fb, today):
+    """Song ID -> how strongly it counts as skipped: every skip mark halves with HALF_LIFE, every play from a mix
+    makes up for half a skip."""
+    out = {}
+    for sid, item in fb.items():
+        eff = 0.0
+        for day in item.get("s", []):
+            try:
+                age = (today - dt.date.fromisoformat(day)).days
+            except ValueError:
+                continue
+            eff += 0.5 ** (max(age, 0) / HALF_LIFE)
+        out[sid] = eff - 0.5 * item.get("p", 0)
+    return out
+
+
+_live_memo = {}
+
+
+def _live_effect(user, today):
+    """The same from the live plays (listen.py): skips on their days, every play makes up for half a skip."""
+    from . import listen
+    key = (user.lower(), today, listen.stamp(user))
+    if key in _live_memo:
+        return _live_memo[key]
+    start = today - dt.timedelta(days=listen.KEEP_DAYS)
+    out = {}
+    for sid, days in listen.skips(user, start, today).items():
+        out[sid] = sum(0.5 ** (max((today - dt.date.fromisoformat(d)).days, 0) / HALF_LIFE) for d in days)
+    for sid, n in listen.plays(user, start, today).items():
+        out[sid] = out.get(sid, 0.0) - 0.5 * n
+    if len(_live_memo) > 16:
+        _live_memo.clear()
+    _live_memo[key] = out
+    return out
+
+
+_factors_memo = {}
+
+
 def factors(user, today=None):
-    """Song ID -> weight factor (< 1 for skipped songs) for the mixes of this account."""
+    """Song ID -> weight factor (< 1 for skipped songs) for the mixes of this account – the same object as long as
+    neither the feedback file nor the live plays change (mixes ask often)."""
     if not user:
         return {}
     today = today or dt.date.today()
-
-    def compute(fb):
-        out = {}
-        for sid, item in fb.items():
-            eff = 0.0
-            for day in item.get("s", []):
-                try:
-                    age = (today - dt.date.fromisoformat(day)).days
-                except ValueError:
-                    continue
-                eff += 0.5 ** (max(age, 0) / HALF_LIFE)
-            eff -= 0.5 * item.get("p", 0)
-            if eff > 0.05:
-                out[sid] = SKIP_FACTOR ** min(eff, MAX_SKIPS)
-        return out
-    return _cached(_feedback_file(user), {}, compute, extra=today)
+    base = _cached(_feedback_file(user), {}, lambda fb: _effect(fb, today), extra=today)
+    live = _live_effect(user, today)
+    key = (user.lower(), today)
+    hit = _factors_memo.get(key)
+    if hit and hit[0] is base and hit[1] is live:
+        return hit[2]
+    eff = dict(base)
+    for sid, value in live.items():
+        eff[sid] = eff.get(sid, 0.0) + value
+    out = {sid: SKIP_FACTOR ** min(e, MAX_SKIPS) for sid, e in eff.items() if e > 0.05}
+    if len(_factors_memo) > 32:
+        _factors_memo.clear()
+    _factors_memo[key] = (base, live, out)
+    return out
 
 
 def deezer_stars(user):

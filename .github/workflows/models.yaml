@@ -1,0 +1,44 @@
+# Copies the AI models (Essentia by the Music Technology Group, Universitat Pompeu Fabra – CC BY-NC-SA 4.0) as one zip
+# into the pre-release "ai-models-v1" of this repository. The image build takes them from there when essentia.upf.edu
+# does not answer (app/ml_worker.py, MIRROR). By hand only ("Run workflow"): once, and again when app/ml_worker.py
+# gets other models (then also a new name, e.g. ai-models-v2, in MIRROR).
+name: AI models copy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Download from essentia.upf.edu (checked against the checksums)
+        env:
+          TUTTIPHON_MODELS_MIRROR: ""   # only the original source – never the copy itself
+        run: python3 app/ml_worker.py --download models
+      - name: Zip with the license note
+        run: |
+          cat > models/README.txt <<'TXT'
+          Essentia models (Discogs-EffNet and its classification heads) by the Music Technology Group,
+          Universitat Pompeu Fabra – https://essentia.upf.edu/models.html
+          License: CC BY-NC-SA 4.0 – https://creativecommons.org/licenses/by-nc-sa/4.0/ (non-commercial use only).
+          Unchanged copies, so that Tuttiphon's image can be built when essentia.upf.edu does not answer.
+          The checksums are in app/ml_worker.py (FILES).
+          TXT
+          (cd models && zip -X -q ../tuttiphon-ai-models-v1.zip ./*)
+          unzip -l tuttiphon-ai-models-v1.zip
+      - name: To the pre-release ai-models-v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view ai-models-v1 >/dev/null 2>&1; then
+            gh release create ai-models-v1 --prerelease --latest=false --title "AI models (copy)" \
+              --notes "Copy of the Essentia AI models for building the image when essentia.upf.edu does not answer – CC BY-NC-SA 4.0, see README.txt in the zip. Not a Tuttiphon version."
+          fi
+          gh release upload ai-models-v1 tuttiphon-ai-models-v1.zip --clobber

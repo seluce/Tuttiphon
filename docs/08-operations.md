@@ -132,7 +132,11 @@ The image is built in two stages:
    (`fpcalc` for the audio fingerprints), Pillow 11.3.0, NumPy 2.5.4 and `essentia-tensorflow` (AI sound analysis,
    about 700 MB extra in the image). In a layer of its own,
    only `app/ml_worker.py` goes into the image first and downloads the AI models (`python3 app/ml_worker.py --download
-   /app/models`, about 30 MB, with checksums) – so they are not downloaded again on updates. If the download fails,
+   /app/models`, about 30 MB, with checksums) – so they are not downloaded again on updates. Each file gets three
+   attempts with pauses of 10 and 30 s (`WAITS`); if essentia.upf.edu does not answer even then, the remaining files
+   come from the copy in the pre-release `ai-models-v1` of the repository (`MIRROR`, one zip, the same checksums;
+   made once by hand with the workflow “AI models copy”, `.github/workflows/models.yaml`; `TUTTIPHON_MODELS_MIRROR`
+   overrides the address, empty = no copy). If the download fails,
    a build of your own still finishes (note “⚠ AI models not loaded …” in the build log); the AI sound analysis then
    reports “AI models missing”. With the build argument `MODELS_REQUIRED=1` (the published image) the build stops
    instead. After that the build copies `tuttiphon.py`, `CHANGELOG.md` (for `GET /api/changelog` and “What’s new?”),
@@ -471,7 +475,9 @@ server, enter the access token as `NTFY_TOKEN` in the `.env` or in `docker-compo
 
 ## Navidrome plugin
 
-With the Tuttiphon plugin, Navidrome asks Tuttiphon for similar songs and similar artists: Instant Mix in Navidrome's
+With the Tuttiphon plugin, Navidrome asks Tuttiphon for similar songs and similar artists – and passes every play on
+(as a scrobbler: exact listening times, real skips for the mixes, and for accounts without a stored password the
+plays in the recap, [Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy)): Instant Mix in Navidrome's
 web interface, “similar songs”, song and artist radio in Symfonium and other apps (`getSimilarSongs2`,
 `getArtistInfo2`) and the OpenSubsonic extension `sonicSimilarity` (`getSonicSimilarTracks`, `findSonicPath`) then
 follow the sound of the own files ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Needs
@@ -480,16 +486,23 @@ sound analysis, so the Docker image – without it, the plugin answers with the 
 
 1. **Key:** Settings → Navidrome → “Navidrome plugin” → “Create key” (shown once – copy it).
 2. **Plugin file:** “Download the plugin” there (`/plugin/tuttiphon.ndp`, part of the image) or `tuttiphon.ndp` from
-   the GitHub release. Put it into Navidrome's plugins folder – `<DataFolder>/plugins`, in the Navidrome container
-   usually `/data/plugins`.
-3. **Navidrome's settings** (its `docker-compose.yaml` or `navidrome.toml`): `ND_AGENTS=tuttiphon,lastfm,deezer` –
-   Tuttiphon first; where it has no answer (an empty list), Navidrome asks the next agent. Plugins are on by default
-   (`ND_PLUGINS_ENABLED=true`). Restart Navidrome.
+   the GitHub release. Put it as it is – not unpacked; an `.ndp` is a zip of `manifest.json` and `plugin.wasm` – into
+   Navidrome's plugins folder: `<DataFolder>/plugins`, in the Navidrome container usually `/data/plugins`.
+3. **Navidrome's agents:** `tuttiphon` first, in front of the list Navidrome uses so far – in `navidrome.toml`
+   `Agents = "tuttiphon,deezer,lastfm,listenbrainz"`, in its `docker-compose.yaml`
+   `ND_AGENTS=tuttiphon,deezer,lastfm,listenbrainz` (`deezer,lastfm,listenbrainz` are Navidrome 0.64's defaults; the
+   environment variable wins over the toml; a second `Agents` line in the toml is an error). Where Tuttiphon has no
+   answer (an empty list), Navidrome asks the next agent. Plugins are on by default (`Plugins.Enabled`). Restart
+   Navidrome.
 4. **In Navidrome:** Settings → Plugins → “Tuttiphon”: turn on, enter the address of Tuttiphon as Navidrome reaches it
-   (e.g. `http://<NAS>:8765` – not `localhost` unless both share a network) and the key.
+   and the key, and allow it all users (“Users” – Navidrome only hands on the plays of the users assigned to it).
+   Best the address in the home network, e.g. `http://<NAS>:8765` – not `localhost` unless both share a network, and
+   not an https address through a reverse proxy: such a proxy may turn the requests from the Navidrome container away
+   (Navidrome's log then says “Tuttiphon answered 403: …”).
 5. **Symfonium:** in the settings of the Navidrome server, turn on “Use similar tracks for Radio Mix”.
 
-Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix. Problems: in
+Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix and “Plays from
+Navidrome” after a song (with the accounts). Problems: in
 Navidrome's log lines with `plugin=tuttiphon` (more with `ND_PLUGINS_LOGLEVEL=debug`) – “Tuttiphon not reachable”
 (address, network between the containers), “Tuttiphon answered 401” (key: create a new one and enter it), “answered
 429” (too many wrong keys – wait 10 minutes).

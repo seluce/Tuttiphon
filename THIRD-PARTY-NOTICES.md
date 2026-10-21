@@ -56,7 +56,8 @@ The AI sound analysis uses the Essentia models Discogs-EffNet and its classifica
 in `app/ml_worker.py`) by the **Music Technology Group, Universitat Pompeu Fabra**
 ([essentia.upf.edu/models](https://essentia.upf.edu/models.html)), licensed under
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). They are used unchanged; the image downloads
-them while it is built. The license allows non-commercial use only – the MTG offers a commercial license on request.
+them while it is built – from essentia.upf.edu, or, if it does not answer, from an unchanged copy with this license
+note in the pre-release `ai-models-v1` of Tuttiphon's repository (`.github/workflows/models.yaml`). The license allows non-commercial use only – the MTG offers a commercial license on request.
 
 ## Deezer star ratings: dztnr and sptnr
 

@@ -35,6 +35,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 VERSION = 3            # 2: instruments, key, tempo and sound vector · 3: approachability and engagement
 SR = 16000
@@ -85,8 +86,11 @@ def send(obj):
 
 # Models of the Music Technology Group (Universitat Pompeu Fabra), license CC BY-NC-SA 4.0 – free for private use.
 # Downloaded while the Docker image is built (python3 app/ml_worker.py --download /app/models) and checked against
-# their checksums.
+# their checksums. If essentia.upf.edu does not answer, the rest comes from the copy in this project's releases
+# (MIRROR, one zip – made by .github/workflows/models.yaml; TUTTIPHON_MODELS_MIRROR overrides it, empty: none).
 SOURCE = "https://essentia.upf.edu/models/"
+MIRROR = "https://github.com/seluce/tuttiphon/releases/download/ai-models-v1/tuttiphon-ai-models-v1.zip"
+WAITS = (0, 10, 30)   # seconds before each attempt – a short outage of the server passes
 FILES = {
     "discogs-effnet-bs64-1.pb": "3ed9af50d5367c0b9c795b294b00e7599e4943244f4cbd376869f3bfc87721b1",
     "danceability-discogs-effnet-1.json": "589e61dc05f0d7935be4b5fa7ab4341e5dc7cfecc6898f83503558564790cd75",
@@ -139,28 +143,68 @@ def score(x):
     return round(min(1.0, max(0.0, x)), 3) if math.isfinite(x) else None
 
 
-def download(folder):
-    """Download and check the models (while building the image). -> True if all are there."""
+def _fetch(url, timeout=60):
     import urllib.request
+    with urllib.request.urlopen(url, timeout=timeout) as r:
+        return r.read()
+
+
+def _store(folder, name, data):
+    """Keep a model file if its checksum matches. -> True if stored"""
+    if hashlib.sha256(data).hexdigest() != FILES[name]:
+        print(f"  ⚠ {name}: checksum does not match")   # i18n-ignore
+        return False
+    target = os.path.join(folder, name)
+    with open(target + ".part", "wb") as f:
+        f.write(data)
+    os.replace(target + ".part", target)
+    print(f"  ✓ {name} ({len(data) // 1024} KB)")   # i18n-ignore
+    return True
+
+
+def _from_mirror(folder, names):
+    """The missing files from the copy (one zip with all models) – only files whose checksum matches."""
+    import io
+    import zipfile
+    url = os.environ.get("TUTTIPHON_MODELS_MIRROR", MIRROR)
+    if not url:
+        return
+    print(f"  … the rest from the copy: {url}")   # i18n-ignore
+    for k, wait in enumerate(WAITS):
+        time.sleep(wait)
+        try:
+            with zipfile.ZipFile(io.BytesIO(_fetch(url, timeout=180))) as z:
+                inside = set(z.namelist())
+                for name in names:
+                    if name in inside:
+                        _store(folder, name, z.read(name))
+            return
+        except (OSError, ValueError, zipfile.BadZipFile) as e:
+            print(f"  ⚠ copy: {e}" + (" – trying again" if k < len(WAITS) - 1 else ""))   # i18n-ignore
+
+
+def download(folder):
+    """Download and check the models (while building the image): each file up to three times with a pause; if
+    essentia.upf.edu does not answer at all, the rest from the copy (MIRROR). -> True if all are there."""
     os.makedirs(folder, exist_ok=True)
-    for name, sha in FILES.items():
-        target = os.path.join(folder, name)
-        if os.path.isfile(target):
+    down = False
+    for name in FILES:
+        if os.path.isfile(os.path.join(folder, name)) or down:
             continue
-        for attempt in range(3):
+        for k, wait in enumerate(WAITS):
+            time.sleep(wait)
             try:
-                with urllib.request.urlopen(SOURCE + model_path(name) + name, timeout=60) as r:
-                    data = r.read()
-                if hashlib.sha256(data).hexdigest() != sha:
-                    raise ValueError("checksum does not match")   # i18n-ignore
-                with open(target + ".part", "wb") as f:
-                    f.write(data)
-                os.replace(target + ".part", target)
-                print(f"  ✓ {name} ({len(data) // 1024} KB)")
-                break
+                if _store(folder, name, _fetch(SOURCE + model_path(name) + name)):
+                    break
             except (OSError, ValueError) as e:
-                print(f"  ⚠ {name}: {e}" + (" – trying again" if attempt < 2 else ""))   # i18n-ignore
+                print(f"  ⚠ {name}: {e}" + (" – trying again" if k < len(WAITS) - 1 else ""))   # i18n-ignore
+        else:
+            down = True   # not even after the pauses: do not wait for every further file
+            print("  ⚠ essentia.upf.edu does not answer")   # i18n-ignore
     left = missing_models(folder)
+    if left:
+        _from_mirror(folder, left)
+        left = missing_models(folder)
     print("AI models complete." if not left else f"AI models incomplete – {len(left)} files missing.")   # i18n-ignore
     return not left
 

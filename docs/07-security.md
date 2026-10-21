@@ -552,7 +552,8 @@ The plugin (`navidrome-plugin/`) does not sign in with a password or a session b
 interface shows the key once, after creating it. `sonic.check_key()` compares in constant time. It opens only
 `GET /api/sonic/…` – song ids, titles, bands and albums of the whole library, as the shared person sees them (without
 separate worlds unless asked for one of their songs, without the shared person's dislikes, kid-safe as soon as there is
-a child profile) – nothing of accounts, people, playlists or settings. Wrong keys count toward a lockout like
+a child profile) – and `POST /api/sonic/listen`, which only adds plays of an account (whoever has the key could add
+made-up plays, never read any); nothing of accounts, people, playlists or settings. Wrong keys count toward a lockout like
 passwords (`_limited()`, keys `plugin|<address>` 30, `plugin` 100 in 10 minutes). Creating, removing and the status
 (`/api/plugin…`) and the download of the plugin are admin only. In Navidrome the key is in the plugin's settings
 (password field); the plugin may reach every host (`requiredHosts: ["*"]`), because the address of Tuttiphon is typed

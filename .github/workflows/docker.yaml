@@ -21,6 +21,8 @@ concurrency:
 
 jobs:
   image:
+    # not for the copy of the AI models (pre-release ai-models-…, .github/workflows/models.yaml)
+    if: ${{ !startsWith(github.event.release.tag_name || github.ref_name, 'ai-models') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

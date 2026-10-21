@@ -2,7 +2,7 @@
   "name": "Tuttiphon",
   "author": "Tuttiphon",
   "version": "0.0.0",
-  "description": "Similar songs, artist radio and sonic similarity from the sound of your own music files – answered by Tuttiphon's AI sound analysis.",
+  "description": "Similar songs, artist radio and sonic similarity from the sound of your own music files – answered by Tuttiphon's AI sound analysis; plays passed on to Tuttiphon as they happen.",
   "website": "https://github.com/seluce/tuttiphon",
   "config": {
     "schema": {
@@ -19,20 +19,37 @@
           "description": "From Tuttiphon: Settings → Navidrome plugin → Create key"
         }
       },
-      "required": ["url", "key"]
+      "required": [
+        "url",
+        "key"
+      ]
     },
     "uiSchema": {
       "type": "VerticalLayout",
       "elements": [
-        { "type": "Control", "scope": "#/properties/url" },
-        { "type": "Control", "scope": "#/properties/key", "options": { "format": "password" } }
+        {
+          "type": "Control",
+          "scope": "#/properties/url"
+        },
+        {
+          "type": "Control",
+          "scope": "#/properties/key",
+          "options": {
+            "format": "password"
+          }
+        }
       ]
     }
   },
   "permissions": {
     "http": {
       "reason": "To ask Tuttiphon (at the address in the settings, usually in the local network) for similar songs and artists",
-      "requiredHosts": ["*"]
+      "requiredHosts": [
+        "*"
+      ]
+    },
+    "users": {
+      "reason": "To pass the plays of the users assigned to the plugin on to Tuttiphon (listening times, skips, recap)"
     }
   }
 }

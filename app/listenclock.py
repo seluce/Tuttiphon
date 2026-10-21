@@ -6,7 +6,8 @@ Navidrome keeps per account and song only the time of the last play ("played", U
 * the song list of the account right now – the last play of every song, so the clock works from the first day on
   with the plays of the past weeks,
 * moments recorded by the recap snapshots (rueckblick.snapshot -> record()): the last play of every song with new plays,
-  in state/plays/<account>/moments.json – so a song played again later does not erase its earlier moment.
+  in state/plays/<account>/moments.json – so a song played again later does not erase its earlier moment,
+* with the Navidrome plugin every start and play as it happens (listen.py) – exact, also several plays a day.
 Times count in the local time zone (TZ of the container).
 
 Sessions: plays less than SESSION_GAP apart belong together; a session lasts from its first to its last play plus one
@@ -85,8 +86,10 @@ def moments(user, songs, now=None, days=DAYS):
     now = now or dt.datetime.now()
     cutoff = dt.datetime.combine(now.date() - dt.timedelta(days=days), dt.time())
     seen, out = set(), []
-    for sid, iso in _stored(user) + [[s["id"], s.get("played")] for s in songs if s.get("played")]:
-        t = local_time(iso)
+    from . import listen
+    live = [(t, sid) for t, sid in listen.moments(user, cutoff)]   # live from the Navidrome plugin: every play
+    for t, sid in live + [(local_time(iso), sid) for sid, iso in
+                          _stored(user) + [[s["id"], s.get("played")] for s in songs if s.get("played")]]:
         if t is None or t < cutoff or t > now + dt.timedelta(hours=1):
             continue
         key = (sid, t.replace(second=0, microsecond=0))
@@ -159,7 +162,8 @@ def morning_of(cfg, base, user, today=None, exclude=()):
         return None
     today = today or dt.date.today()
     exclude = tuple(sorted(set(exclude or ())))
-    key = ("morning", user.lower(), today, ml.lib_key(plib), _stamp(user), exclude)
+    from . import listen
+    key = ("morning", user.lower(), today, ml.lib_key(plib), _stamp(user), listen.stamp(user), exclude)
     with _lock:
         if key in _memo:
             return _memo[key]

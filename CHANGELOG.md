@@ -5,6 +5,25 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **Plays live from Navidrome.** The Tuttiphon plugin now also passes every play on as it happens (as Navidrome's
+  scrobbler): the listening clock gets exact times, also when a song is played twice a day; the mixes learn from real
+  skips – a song left within 30 seconds – for every song, not only guessed from the mix history; and accounts without
+  a stored password get their plays into the recap. In Navidrome, allow the plugin **all users** (plugin settings →
+  Users) and update the plugin file. Settings → Navidrome shows the last play received.
+- **Navidrome plugin address:** the card now recommends Tuttiphon's address in the home network – an https address
+  through a reverse proxy may turn the plugin's requests away. Errors in Navidrome's log now say what Tuttiphon
+  answered.
+- **The image no longer depends on one server for the AI models:** each model file gets three attempts with pauses,
+  and if essentia.upf.edu does not answer (as during the 1.3.0 build), the rest comes from an unchanged copy in the
+  repository's pre-release `ai-models-v1` – with the same checksums. The copy is made once with the workflow “AI
+  models copy”.
+- **Navidrome plugin, setting it up:** the plugin downloaded in Settings → Navidrome keeps its name `tuttiphon.ndp`
+  (phones saved it as `tuttiphon.ndp.zip` – rename such a file, do not unpack it). The card, the help and the handbook
+  show the agents line for `navidrome.toml` as well (`Agents = "tuttiphon,deezer,lastfm,listenbrainz"`) and put
+  Tuttiphon in front of Navidrome's own defaults – the line given in 1.4.0 left out ListenBrainz.
+
 ## 1.4.0
 
 Navidrome and its apps now find similar songs by sound – with a plugin that asks Tuttiphon.

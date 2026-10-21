@@ -340,12 +340,12 @@ export default {
   'Download the plugin': 'Plugin herunterladen',
   'Download <b>tuttiphon.ndp</b> from the release on <a class="link" href="https://github.com/seluce/tuttiphon/releases" target="_blank" rel="noopener">GitHub</a>.':
     'Lade <b>tuttiphon.ndp</b> aus dem Release auf <a class="link" href="https://github.com/seluce/tuttiphon/releases" target="_blank" rel="noopener">GitHub</a> herunter.',
-  'Put it into Navidrome’s plugins folder – in the Navidrome container <code>/data/plugins</code> – and add to Navidrome’s settings (docker-compose):':
-    'Lege es in den Plugin-Ordner von Navidrome – im Navidrome-Container <code>/data/plugins</code> – und ergänze in den Einstellungen von Navidrome (docker-compose):',
-  'Restart Navidrome afterwards. Tuttiphon comes first – where it has no answer, Navidrome asks Last.fm and Deezer.':
-    'Starte Navidrome danach neu. Tuttiphon kommt zuerst – wo es keine Antwort hat, fragt Navidrome Last.fm und Deezer.',
-  'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon” and enter the address and the key. The address as Navidrome reaches Tuttiphon – from this browser it is <code>{address}</code>; inside Docker often the address of the NAS.':
-    'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein und trage Adresse und Schlüssel ein. Gemeint ist die Adresse, unter der Navidrome Tuttiphon erreicht – von diesem Browser aus ist es <code>{address}</code>; in Docker oft die Adresse des NAS.',
+  'Put the file as it is – not unpacked – into Navidrome’s plugins folder (in the Navidrome container <code>/data/plugins</code>) and put “tuttiphon” first in Navidrome’s list of agents, in navidrome.toml or in docker-compose:':
+    'Lege die Datei so, wie sie ist – nicht entpackt – in den Plugin-Ordner von Navidrome (im Navidrome-Container <code>/data/plugins</code>) und setze „tuttiphon“ an den Anfang der Agents-Liste von Navidrome, in navidrome.toml oder in docker-compose:',
+  'If there is a list already, put tuttiphon, in front of it – without one these are Navidrome’s defaults. The docker-compose line wins over navidrome.toml. Restart Navidrome afterwards; where Tuttiphon has no answer, Navidrome asks the next ones.':
+    'Steht dort schon eine Liste, setz tuttiphon, davor – ohne eigene Liste sind das die Voreinstellungen von Navidrome. Die Zeile in docker-compose gewinnt gegen navidrome.toml. Starte Navidrome danach neu; wo Tuttiphon keine Antwort hat, fragt Navidrome die nächsten.',
+  'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Best the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. From this browser Tuttiphon is <code>{address}</code>.':
+    'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein, trage Adresse und Schlüssel ein und gib es für <b>alle Benutzer</b> frei (für die Wiedergaben). Am besten die Adresse im Heimnetz, z. B. <code>http://&lt;NAS&gt;:8765</code> – keine https-Adresse über einen Reverse Proxy, der Navidrome abweisen kann. Von diesem Browser aus ist Tuttiphon <code>{address}</code>.',
   'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> in the settings of the Navidrome server.':
     'Schalte in Symfonium in den Einstellungen des Navidrome-Servers <b>„Use similar tracks for Radio Mix“</b> ein.',
   'Navidrome does not say who is listening: the songs come from the whole library as for the family. Children’s music only comes for children’s songs – and if there is a child profile, songs with explicit lyrics stay out.':
@@ -356,4 +356,8 @@ export default {
   'Remove the key?': 'Schlüssel entfernen?',
   'Navidrome then gets no more answers from Tuttiphon and uses its other sources again.':
     'Navidrome bekommt dann keine Antworten mehr von Tuttiphon und nutzt wieder seine anderen Quellen.',
+  'Plays from Navidrome': 'Wiedergaben von Navidrome',
+  'Every play as it happens – exact listening times and real skips; for accounts without a stored password also the recap.':
+    'Jede Wiedergabe, sobald sie passiert – genaue Hörzeiten und echtes Überspringen; für Konten ohne gespeichertes Passwort auch der Rückblick.',
+  '{when} · {accounts}': '{when} · {accounts}',
 }

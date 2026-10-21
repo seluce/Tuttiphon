@@ -7,7 +7,9 @@ throwaway folder – never the real Navidrome or the real data.
 3. a fresh Tuttiphon (its own data folder, 127.0.0.1, no schedules) with made-up sound vectors for those songs and a
    plugin key;
 4. questions to Navidrome's Subsonic API – getSimilarSongs2, getArtistInfo2, getSonicSimilarTracks, findSonicPath –
-   whose answers have to come from Tuttiphon; plus Tuttiphon's endpoint directly (and a wrong key).
+   whose answers have to come from Tuttiphon; plus Tuttiphon's endpoint directly (and a wrong key);
+5. plays through Navidrome (scrobble, reportPlayback): one song left after 5 seconds, the next played – Tuttiphon has
+   to receive them, count the play and recognize the skip.
 
   python3 tools/plugin_check.py --navidrome <navidrome binary> --plugin <tuttiphon.ndp> [--keep]
 """
@@ -153,7 +155,7 @@ def main():
         native = {"X-ND-Authorization": f"Bearer {login['token']}"}
         http(f"http://127.0.0.1:{ND_PORT}/api/plugin/rescan", native, data={}, method="POST")
         status, _r = http(f"http://127.0.0.1:{ND_PORT}/api/plugin/tuttiphon", native, method="PUT", data={
-            "config": json.dumps({"url": f"http://127.0.0.1:{TP_PORT}", "key": key}), "enabled": True})
+            "config": json.dumps({"url": f"http://127.0.0.1:{TP_PORT}", "key": key}), "enabled": True, "allUsers": True})
         if status != 200:
             fail(f"configuring the plugin in Navidrome: HTTP {status} (see navidrome.log)")
         status, plugins = http(f"http://127.0.0.1:{ND_PORT}/api/plugin", native)
@@ -232,6 +234,35 @@ def main():
             time.sleep(1)
         names = [a["name"] for a in info.get("similarArtist", [])]
         say(f"✓ getArtistInfo2 (similar artists): {names}" if names else "• getArtistInfo2: no similar artists (yet)")
+
+        # plays: song a starts and is left after 5 s, song b starts and is played to the end
+        a, b = [s for s in songs if s["artist"] == "Harfe"][:2]
+        subsonic("scrobble", id=a["id"], submission="false")
+        subsonic("reportPlayback", mediaId=a["id"], mediaType="song", positionMs=5000, state="playing")
+        time.sleep(1)
+        subsonic("scrobble", id=b["id"], submission="false")
+        subsonic("reportPlayback", mediaId=b["id"], mediaType="song", positionMs=0, state="starting")
+        subsonic("reportPlayback", mediaId=b["id"], mediaType="song", positionMs=120000, state="playing")
+        subsonic("scrobble", id=b["id"], submission="true", time=int(time.time() * 1000) - 120000)
+        from app import listen, rueckblick
+        import datetime as dt
+        today = dt.date.today()
+        for _ in range(40):   # Navidrome hands plays on in the background
+            evs = listen.events(nd_user, today - dt.timedelta(days=1), today)
+            if any(e["k"] == "play" for e in evs):
+                break
+            time.sleep(0.5)
+        kinds = sorted({e["k"] for e in evs})
+        if "play" not in kinds or "start" not in kinds:
+            fail(f"Tuttiphon did not receive the plays (got {kinds}) – see navidrome.log")
+        skipped = listen.skips(nd_user, today - dt.timedelta(days=1), today)
+        if a["id"] not in skipped or b["id"] in skipped:
+            fail(f"skip not recognized: {skipped}")
+        counted, _days = rueckblick.plays_between(nd_user, today - dt.timedelta(days=2), today)
+        if counted.get(b["id"]) != 1:
+            fail(f"the play is not in the recap: {dict(counted)}")
+        say(f"✓ plays through Navidrome: {len(evs)} events ({', '.join(kinds)}), the left song counts as skipped, "
+            "the played one in the recap")
 
         status, plugin_status = http(f"http://127.0.0.1:{TP_PORT}/api/plugin")
         if status != 200 or not plugin_status.get("lastCall"):
