@@ -5,7 +5,10 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 1.3.0
+
+A family library played by parents and children – each with their own taste – and covers that make the
+formats easy to spot.
 
 - **Children’s music no longer shapes a parent’s taste.** In the profile, “Not part of your taste” takes music worlds
   out of a person’s taste – e.g. the children’s music that plays on a parent’s account. Discoveries, album of the week,
