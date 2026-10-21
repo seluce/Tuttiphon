@@ -16,6 +16,9 @@ released.
 - **The smart queue does not stay with one band:** Symfonium takes the most similar song every time – mostly of the
   same band, so it could play five of them in a row. After two songs of a band in a row, other bands now come first,
   and a band heard often in the last hour comes a little later.
+- **Shorter help:** every help topic now says in a few short points what something does and where to find it –
+  about half as long as before, without technical details; administrator topics point to the handbook for those. The
+  questions & answers are shorter too and no longer repeat the topics.
 - **Help for the family:** the help topic “Listening in Symfonium” explains the two Symfonium settings for the
   plugin – similar tracks for the radio mix and the smart queue by sonic analysis – as soon as the plugin is set up.
   The German texts now use Symfonium's German names for them.

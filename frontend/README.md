@@ -203,6 +203,12 @@ export const STEPS = translated(() => [{ title: t('…') }])   // at module leve
   | Familie | family |
   | Administrator:in / Benutzer:in | administrator / user |
 
+**Help texts** (`pages/help/`): a topic opens with one sentence, then at most about seven points of one or two short
+sentences each – what something does and where it is (a link to the page). No technical details (models, percentages,
+file sizes, internal limits) and nothing the page already says in its own hints; administrator topics point to the
+handbook on GitHub for details. Buttons and terms exactly as the interface names them (`<Ui>` chips, “Dislikes”/„Mag
+nicht“). Questions & answers do not repeat a topic.
+
 Checks: `node tools/i18n-check.mjs` (all files: missing and conflicting German entries, German entries whose `{name}`
 placeholders differ from the English text, `t()`/`tn()` values that lack a placeholder, German or bare text left in the
 code, unused entries) and `node tools/compile-check.mjs <files>` (compiles single files without a full build). The
