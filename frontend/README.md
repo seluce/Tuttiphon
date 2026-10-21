@@ -105,11 +105,23 @@ closes it; `go()` and links from a sheet replace that entry.
 
 ## Texts and languages
 
-The interface speaks English and German. **English is the source language:** every text in the code is English and
-goes through `t()` from `lib/i18n.svelte.js`. German comes from dictionaries `{ 'English text': 'German text' }` in
-`locales/de/*.js` (one file per area, merged by `locales/de/index.js`). The language: the choice saved on this device
-(Settings → General → Language), otherwise the browser language, otherwise English. The German dictionary is its own
-file in the build and is only loaded for German.
+The interface speaks English, German, French, Dutch, Spanish, Italian, Portuguese and Polish (`LANGUAGES` in
+`lib/i18n.svelte.js`). **English is the source language:** every text in the code is English and goes through `t()`.
+The other languages come from dictionaries `{ 'English text': 'translation' }` in `locales/<lang>/*.js` – the same
+file names in every language (one per area, merged by `locales/<lang>/index.js`). The language: the choice saved on
+this device (Settings → General → Language), otherwise the browser language, otherwise English. Every dictionary is
+its own file in the build and is only loaded for its language; numbers and dates follow `LOCALES` (pt: pt-PT).
+
+**Counts:** `tn(n, '{n} song', '{n} songs')`, `plural()` and `tword()` pick the form by the plural rules of the
+language (`Intl.PluralRules`): the English singular text for the category “one” (French: 0 and 1), otherwise the plural
+text – whose entry may hold several forms. Polish does: `'{n} songs': { few: '{n} piosenki', many: '{n} piosenek' }`.
+The server does the same (`i18n.category()`, `_n()`/`_sn()`, entries as JSON objects).
+
+**Keeping the languages complete:** a new or changed English text gets its entry in every language. German is
+checked strictly (missing = error); for the other languages `npm run test:i18n` lists `missing` texts as a warning
+(they show in English) and checks every entry like the German one – placeholders, the same markup as the English
+text, valid plural forms. Address: German, Spanish, Italian, Dutch informal (du, tú, tu, je), French “vous”, Portuguese
+(European) the polite third person, Polish the imperative.
 
 **Switching happens without a reload.** The language is reactive state (`$state.raw` in `i18n.svelte.js`): every
 `t()` that runs inside a template expression or a `$derived` follows a switch at once; `lang()` and `locale()` are

@@ -95,7 +95,7 @@ Every song is listened to – locally, at night, gently on a few cores:
 Everyone signs in with their own **Navidrome account** and gets their own view: their mixes, their statistics, their
 profile with likes and dislikes. Administrators see and change everything; users can create their own playlists and
 see what others share with everyone – but cannot change it. A **local administrator** works even when Navidrome is
-down. The interface speaks **English and German**, works on the phone and can be installed as an app; "Show me"
+down. The interface speaks **English, German, French, Dutch, Spanish, Italian, Portuguese and Polish**, works on the phone and can be installed as an app; "Show me"
 guides walk through each task right on the page.
 
 ## Housekeeping

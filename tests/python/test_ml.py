@@ -824,6 +824,13 @@ class TestKeyTempoInstruments(MlTest):
         for word, first in (("harps", "harp"), ("geigenmusik", "violin"), ("synthesizer", "synthesizer"),
                             ("orgelmusik", "organ"), ("saxofon", "saxophone")):
             self.assertEqual(ml.instrument_word(word)[0], first, word)
+        for word, first in (("guitare", "guitar"), ("chitarra", "guitar"), ("gitaar", "guitar"), ("gitara", "guitar"),
+                            ("violon", "violin"), ("violoncelle", "cello"), ("tromba", "trumpet"),
+                            ("trombone", "trombone"), ("batterie", "drums"), ("fisarmonica", "accordion")):
+            self.assertEqual(ml.instrument_word(word)[0], first, word)   # the other languages of the interface
+        for word, theme in (("noël", "christmas"), ("navidad", "christmas"), ("kerstmis", "christmas"),
+                            ("kolędy", "christmas"), ("épique", "epic"), ("sombre", "dark"), ("zomer", "summer")):
+            self.assertEqual(ml.theme_word(word), [theme], word)
         hits = ml.search_instruments("Klavier", self.lib)
         self.assertEqual([(x["id"], x["count"]) for x in hits], [("piano", 1)])
         self.assertEqual(ml.search_instruments("drums", self.lib)[0]["ids"], ["drums"])

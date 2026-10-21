@@ -6,7 +6,7 @@
 //   --mobile-small  small phone (360 × 740) – narrow layouts break here first
 //   --text    also print the visible text of the page (shortened)
 //   --fresh   tour and welcome assistant as on the very first visit (otherwise they count as seen)
-//   --lang en|de  interface language (otherwise the browser's: German)
+//   --lang en|de|fr|nl|es|it|pt|pl  interface language (otherwise the browser's: German)
 // Exit code 1 if a page had console errors or JavaScript errors.
 import { chromium, devices } from '@playwright/test'
 import { existsSync, mkdirSync } from 'node:fs'
@@ -23,6 +23,7 @@ const light = flag('--light')
 const text = flag('--text')
 const fresh = flag('--fresh')
 const lang = opt('--lang')
+const LOCALES = { en: 'en-US', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL', es: 'es-ES', it: 'it-IT', pt: 'pt-PT', pl: 'pl-PL' }
 const routes = args.length ? args : ['#/']
 mkdirSync(out, { recursive: true })
 
@@ -30,7 +31,7 @@ const browser = await chromium.launch({ executablePath: existsSync('/usr/bin/chr
 const context = await browser.newContext({
   ...(mobile ? devices['Pixel 7'] : { viewport: { width: 1360, height: 900 } }),
   ...(small ? { viewport: { width: 360, height: 740 }, screen: { width: 360, height: 740 } } : {}),
-  locale: lang === 'en' ? 'en-US' : 'de-DE', timezoneId: 'Europe/Berlin', colorScheme: light ? 'light' : 'dark',
+  locale: LOCALES[lang] ?? 'de-DE', timezoneId: 'Europe/Berlin', colorScheme: light ? 'light' : 'dark',
 })
 let account = ''
 if (cookie) {

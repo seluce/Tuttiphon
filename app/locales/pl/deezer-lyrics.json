@@ -1,0 +1,112 @@
+{
+ "Deezer does not respond (tried several times)": "Deezer nie odpowiada (kilka prób)",
+ "{n} song in Navidrome.": "{n} piosenka w Navidrome.",
+ "{n} songs in Navidrome.": {
+  "few": "{n} piosenki w Navidrome.",
+  "many": "{n} piosenek w Navidrome."
+ },
+ "⚠ No password for “{user}” – please enter it under Settings → Navidrome.": "⚠ Brak hasła dla „{user}” – wpisz je w Ustawienia → Navidrome.",
+ "No accounts selected for rating (Settings → Deezer stars).": "Nie wybrano kont do oceniania (Ustawienia → Gwiazdki Deezer).",
+ "No user available for rating – passwords are missing (Settings → Navidrome).": "Brak użytkownika do oceniania – brakuje haseł (Ustawienia → Navidrome).",
+ "Full check started – it can be stopped at any time and continued later.": "Rozpoczęto pełne sprawdzenie – można je w każdej chwili zatrzymać i później kontynuować.",
+ "Continuing the full check (started {date}).": "Kontynuacja pełnego sprawdzenia (rozpoczętego {date}).",
+ "new": "nowe",
+ "not found so far": "dotąd nieznalezione",
+ "new or not found so far": "nowe lub dotąd nieznalezione",
+ "not checked yet": "jeszcze niesprawdzone",
+ "recalculate stars from saved ranks": "przeliczenie gwiazdek z zapisanych rang",
+ "unchecked the longest": "najdłużej niesprawdzane",
+ "To rate: {n} song ({label}) – dry run, nothing is saved": "Do oceny: {n} piosenka ({label}) – próbny przebieg, nic nie jest zapisywane",
+ "To rate: {n} songs ({label}) – dry run, nothing is saved": {
+  "few": "Do oceny: {n} piosenki ({label}) – próbny przebieg, nic nie jest zapisywane",
+  "many": "Do oceny: {n} piosenek ({label}) – próbny przebieg, nic nie jest zapisywane"
+ },
+ "To rate: {n} song ({label})": "Do oceny: {n} piosenka ({label})",
+ "To rate: {n} songs ({label})": {
+  "few": "Do oceny: {n} piosenki ({label})",
+  "many": "Do oceny: {n} piosenek ({label})"
+ },
+ "{found} found ({isrc} of them via the ISRC)": "znaleziono {found} (w tym przez ISRC: {isrc})",
+ "{n} found": "znaleziono {n}",
+ "{n} not found": "nie znaleziono {n}",
+ "{n} rating set": "ustawiono {n} ocenę",
+ "{n} ratings set": {
+  "few": "ustawiono {n} oceny",
+  "many": "ustawiono {n} ocen"
+ },
+ "{n} manual rating kept": "zachowano {n} ręczną ocenę",
+ "{n} manual ratings kept": {
+  "few": "zachowano {n} ręczne oceny",
+  "many": "zachowano {n} ręcznych ocen"
+ },
+ "{n} wrong star removed": "usunięto {n} błędną gwiazdkę",
+ "{n} wrong stars removed": {
+  "few": "usunięto {n} błędne gwiazdki",
+  "many": "usunięto {n} błędnych gwiazdek"
+ },
+ "{n} top track highlighted": "wyróżniono {n} najlepszy utwór",
+ "{n} top tracks highlighted": {
+  "few": "wyróżniono {n} najlepsze utwory",
+  "many": "wyróżniono {n} najlepszych utworów"
+ },
+ "Deezer done: {details}.": "Deezer gotowe: {details}.",
+ "Stopped – progress is saved.": "Zatrzymano – postęp jest zapisany.",
+ "  … {done}/{total} ({rate:.1f} songs/s, about {minutes} min left)": "  … {done}/{total} ({rate:.1f} piosenek/s, zostało ok. {minutes} min)",
+ "  ?? {artist} – {title} (not found on Deezer)": "  ?? {artist} – {title} (nie znaleziono w Deezer)",
+ "  ⚠ {artist} – {title}: star for {user} not removed ({error})": "  ⚠ {artist} – {title}: nie usunięto gwiazdki dla konta {user} ({error})",
+ "top track of the band": "najlepszy utwór zespołu",
+ "no longer a top track": "już nie najlepszy utwór",
+ "{user}: {stars}★ by hand, stays": "{user}: {stars}★ ręcznie, zostaje",
+ "  ⚠ {artist} – {title}: star for {user} not set ({error})": "  ⚠ {artist} – {title}: nie ustawiono gwiazdki dla konta {user} ({error})",
+ "(before {stars}★)": "(wcześniej {stars}★)",
+ "LRCLIB – open, free lyrics database": "LRCLIB – otwarta, darmowa baza tekstów",
+ "NetEase – large Chinese music platform, many synced lyrics (unofficial interface)": "NetEase – duża chińska platforma muzyczna, wiele zsynchronizowanych tekstów (nieoficjalny interfejs)",
+ "  🗑 {path} (dry run)": "  🗑 {path} (próbny przebieg)",
+ "Cleanup: {n} duplicate .txt file deleted.": "Porządki: usunięto {n} zdublowany plik .txt.",
+ "Cleanup: {n} duplicate .txt files deleted.": {
+  "few": "Porządki: usunięto {n} zdublowane pliki .txt.",
+  "many": "Porządki: usunięto {n} zdublowanych plików .txt."
+ },
+ "No lyrics provider turned on (Settings → Lyrics).": "Nie włączono żadnego dostawcy tekstów (Ustawienia → Teksty).",
+ "{total} songs · {synced} with synced lyrics · {plain} with text only · {without} without. To search now: {todo} (at most {minutes} min) · providers: {providers} – dry run, nothing is saved": "Piosenki: {total} · z tekstem zsynchronizowanym: {synced} · tylko z tekstem: {plain} · bez: {without}. Do wyszukania teraz: {todo} (najwyżej {minutes} min) · dostawcy: {providers} – próbny przebieg, nic nie jest zapisywane",
+ "{total} songs · {synced} with synced lyrics · {plain} with text only · {without} without. To search now: {todo} (at most {minutes} min) · providers: {providers}": "Piosenki: {total} · z tekstem zsynchronizowanym: {synced} · tylko z tekstem: {plain} · bez: {without}. Do wyszukania teraz: {todo} (najwyżej {minutes} min) · dostawcy: {providers}",
+ "{total} songs · {synced} with synced lyrics · {plain} with text only · {without} without. To search now: {todo} · providers: {providers} – dry run, nothing is saved": "Piosenki: {total} · z tekstem zsynchronizowanym: {synced} · tylko z tekstem: {plain} · bez: {without}. Do wyszukania teraz: {todo} · dostawcy: {providers} – próbny przebieg, nic nie jest zapisywane",
+ "{total} songs · {synced} with synced lyrics · {plain} with text only · {without} without. To search now: {todo} · providers: {providers}": "Piosenki: {total} · z tekstem zsynchronizowanym: {synced} · tylko z tekstem: {plain} · bez: {without}. Do wyszukania teraz: {todo} · dostawcy: {providers}",
+ "  📝 {song} (text only)": "  📝 {song} (tylko tekst)",
+ "  🎻 {song} (instrumental)": "  🎻 {song} (instrumentalne)",
+ "Lyrics: {synced} synced, {plain} text only, {instrumental} instrumental, {not_found} not found, {errors} errors – {later} more follow in the next run (time limit).": "Teksty: zsynchronizowane: {synced}, tylko tekst: {plain}, instrumentalne: {instrumental}, nieznalezione: {not_found}, błędy: {errors} – kolejne ({later}) w następnym przebiegu (limit czasu).",
+ "Lyrics: {synced} synced, {plain} text only, {instrumental} instrumental, {not_found} not found, {errors} errors.": "Teksty: zsynchronizowane: {synced}, tylko tekst: {plain}, instrumentalne: {instrumental}, nieznalezione: {not_found}, błędy: {errors}.",
+ "Lyrics: {synced} synced, {plain} text only, {instrumental} instrumental, {not_found} not found – {later} more follow in the next run (time limit).": "Teksty: zsynchronizowane: {synced}, tylko tekst: {plain}, instrumentalne: {instrumental}, nieznalezione: {not_found} – kolejne ({later}) w następnym przebiegu (limit czasu).",
+ "Lyrics: {synced} synced, {plain} text only, {instrumental} instrumental, {not_found} not found.": "Teksty: zsynchronizowane: {synced}, tylko tekst: {plain}, instrumentalne: {instrumental}, nieznalezione: {not_found}.",
+ "Lyrics search is turned off in the settings.": "Wyszukiwanie tekstów jest wyłączone w ustawieniach.",
+ "Music folder {path} not found": "Nie znaleziono folderu muzyki {path}",
+ "Lyrics search and cleanup are turned off in the settings.": "Wyszukiwanie tekstów i porządki są wyłączone w ustawieniach.",
+ "Lyrics index: {n} read in …": "Indeks tekstów: wczytano {n} …",
+ "Lyrics index: {changed} new or changed, {removed} removed ({seconds:.0f} s).": "Indeks tekstów: nowe lub zmienione: {changed}, usunięte: {removed} ({seconds:.0f} s).",
+ "No Last.fm key entered (Settings → Intelligence).": "Nie wpisano klucza Last.fm (Ustawienia → Inteligencja).",
+ "Last.fm not reachable: {error}": "Last.fm nieosiągalny: {error}",
+ "The Last.fm key is invalid.": "Klucz Last.fm jest nieprawidłowy.",
+ "Last.fm: {current} bands up to date, {todo} to load (at most {minutes} min).": "Last.fm: aktualne zespoły: {current}, do wczytania: {todo} (najwyżej {minutes} min).",
+ "Last.fm: {current} bands up to date, {todo} to load.": "Last.fm: aktualne zespoły: {current}, do wczytania: {todo}.",
+ "Last.fm: {n} band updated, {later} follow in the next run.": "Last.fm: zaktualizowano {n} zespół, pozostałe ({later}) w następnym przebiegu.",
+ "Last.fm: {n} bands updated, {later} follow in the next run.": {
+  "few": "Last.fm: zaktualizowano {n} zespoły, pozostałe ({later}) w następnym przebiegu.",
+  "many": "Last.fm: zaktualizowano {n} zespołów, pozostałe ({later}) w następnym przebiegu."
+ },
+ "Last.fm: {n} band updated.": "Last.fm: zaktualizowano {n} zespół.",
+ "Last.fm: {n} bands updated.": {
+  "few": "Last.fm: zaktualizowano {n} zespoły.",
+  "many": "Last.fm: zaktualizowano {n} zespołów."
+ },
+ "Fetching missing covers is turned off.": "Pobieranie brakujących okładek jest wyłączone.",
+ "Albums without any cover: {n} – taking the first {max}.": "Albumy bez żadnej okładki: {n} – pobieranie pierwszych {max}.",
+ "Albums without any cover: {n}": "Albumy bez żadnej okładki: {n}",
+ "  · {artist} – {album}: no cover found": "  · {artist} – {album}: nie znaleziono okładki",
+ "  (dry run) {artist} – {album}: cover from {source}": "  (próbny przebieg) {artist} – {album}: okładka z {source}",
+ "  ✓ {artist} – {album}: cover from {source}": "  ✓ {artist} – {album}: okładka z {source}",
+ "{n} cover saved – Navidrome shows it after the next scan.": "Zapisano {n} okładkę – Navidrome pokaże ją po następnym skanie.",
+ "{n} covers saved – Navidrome shows them after the next scan.": {
+  "few": "Zapisano {n} okładki – Navidrome pokaże je po następnym skanie.",
+  "many": "Zapisano {n} okładek – Navidrome pokaże je po następnym skanie."
+ }
+}

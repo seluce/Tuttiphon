@@ -1,0 +1,14 @@
+{
+ "⚠ Audio fingerprints: the file was damaged – set aside as {name}, starting over.": "⚠ Impressões digitais de áudio: o ficheiro estava danificado – posto de parte como {name}, a recomeçar do início.",
+ "⚠ Audio fingerprints: file not readable ({error}) – skipped.": "⚠ Impressões digitais de áudio: ficheiro ilegível ({error}) – ignorado.",
+ "Audio fingerprints: {done} songs done, {open} pending (until {time}).": "Impressões digitais de áudio: {done} músicas concluídas, {open} pendentes (até às {time}).",
+ "Audio fingerprints: {done} songs done, {open} pending.": "Impressões digitais de áudio: {done} músicas concluídas, {open} pendentes.",
+ "  {n} fingerprinted, {errors} not readable.": "  {n} registadas, {errors} ilegíveis.",
+ "  {n} fingerprinted.": "  {n} registadas.",
+ "Audio fingerprints: {n} recording is there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Impressões digitais de áudio: {n} gravação existe mais de uma vez ({dup} ficheiros a mais, comparados em {secs} s) – ver Definições → Verificar biblioteca.",
+ "Audio fingerprints: {n} recordings are there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Impressões digitais de áudio: {n} gravações existem mais de uma vez ({dup} ficheiros a mais, comparados em {secs} s) – ver Definições → Verificar biblioteca.",
+ "⚠ Audio fingerprints: {error}": "⚠ Impressões digitais de áudio: {error}",
+ "Settings: same recording twice – yes/no expected": "Definições: a mesma gravação duas vezes – esperado sim/não",
+ "Same recording twice": "A mesma gravação duas vezes",
+ "The same audio as more than one file – also across formats, folders and albums, for example a FLAC file still next to its converted Opus file, or a song on an album and on a best-of. One copy is enough; a lossless original that has already been converted belongs in the archive.": "O mesmo som em mais de um ficheiro – também entre formatos, pastas e álbuns, por exemplo um ficheiro FLAC ainda ao lado do seu ficheiro Opus convertido, ou uma música num álbum e numa coletânea. Basta uma cópia; um original sem perdas que já foi convertido pertence ao arquivo."
+}

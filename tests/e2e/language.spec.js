@@ -11,7 +11,7 @@ test.describe('Language', () => {
     await expect(page.getByText('Aussehen', { exact: true })).toBeVisible()
     await page.evaluate(() => { window.stillTheSamePage = true })
 
-    await page.getByRole('button', { name: 'English', exact: true }).first().click()
+    await page.getByRole('combobox', { name: 'Sprache', exact: true }).selectOption('en')
     await expect(page.getByText('Appearance', { exact: true })).toBeVisible()
     await expect(page.getByText('Aussehen', { exact: true })).toHaveCount(0)
     await expect(page.locator('nav').first()).toContainText('Settings')
@@ -21,7 +21,11 @@ test.describe('Language', () => {
     await page.reload()
     await expect(page.getByText('Appearance', { exact: true })).toBeVisible()   // kept for the next visit
 
-    await page.getByRole('button', { name: 'Deutsch', exact: true }).first().click()
+    await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('fr')   // one of the other languages
+    await expect(page.getByText('Apparence', { exact: true })).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.lang)).toBe('fr')
+
+    await page.getByRole('combobox', { name: 'Langue', exact: true }).selectOption('de')
     await expect(page.getByText('Aussehen', { exact: true })).toBeVisible()
     await expect(page.locator('nav').first()).toContainText('Einstellungen')
   })

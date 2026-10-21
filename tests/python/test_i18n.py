@@ -6,6 +6,7 @@ import copy
 import json
 import threading
 import unittest
+from unittest import mock
 
 from app import config, i18n
 from tests.python.factory import base_config
@@ -86,9 +87,40 @@ class LanguagesTest(unittest.TestCase):
 
     def test_language_setting_is_checked(self):
         cfg = base_config()
-        cfg["settings"]["language"] = "fr"
+        cfg["settings"]["language"] = "xx"
         with self.assertRaises(ValueError):
             config.validate_config(cfg)
+        cfg["settings"]["language"] = "pl"
+        config.validate_config(cfg)
+
+    def test_status_sends_the_name_templates_of_the_server_language(self):
+        """The interface builds the name of a new playlist like the server – with the server's templates."""
+        import json
+        from tests.python.test_audit_server import request
+        with mock.patch.object(i18n, "server_lang", lambda: "de"):
+            status, _h, content = request("GET", "/api/status")
+        names = json.loads(content)["names"]
+        self.assertEqual((names["all"], names["hits"], names["everything"]), ("{world} · Querbeet", "{world} · Die Hits", "Alles"))
+
+    def test_plural_forms(self):
+        """A count picks its form by the rules of the language – Polish has several, French counts 0 as one; the
+        English form for the log follows the English rules."""
+        self.assertEqual([i18n.category(n, "pl") for n in (1, 2, 4, 5, 12, 22, 25, 0)],
+                         ["one", "few", "few", "many", "many", "few", "many", "many"])
+        self.assertEqual([i18n.category(n, "fr") for n in (0, 1, 2)], ["one", "one", "other"])
+        self.assertEqual([i18n.category(n, "de") for n in (0, 1, 2)], ["other", "one", "other"])
+        fake = {"pl": {"{n} song": "{n} piosenka", "{n} songs": {"few": "{n} piosenki", "many": "{n} piosenek"}},
+                "fr": {"{n} song": "{n} chanson", "{n} songs": "{n} chansons"}}
+        with mock.patch.dict(i18n._dicts, fake):
+            i18n.use("pl")
+            self.assertEqual([str(i18n._n(n, "{n} song", "{n} songs")) for n in (1, 3, 5)],
+                             ["1 piosenka", "3 piosenki", "5 piosenek"])
+            self.assertEqual(i18n._n(5, "{n} song", "{n} songs").en, "5 songs")
+            i18n.use("fr")
+            zero = i18n._n(0, "{n} song", "{n} songs")
+            self.assertEqual((str(zero), zero.en), ("0 chanson", "0 songs"))
+            self.assertEqual(i18n.tr("{n} songs", "pl"), "{n} piosenek")   # without a count: a form all the same
+        i18n.use(None)
 
 
 if __name__ == "__main__":

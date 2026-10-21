@@ -2,6 +2,7 @@
 <script>
   import Icon from '../../components/Icon.svelte'
   import Seg from '../../components/Seg.svelte'
+  import Select from '../../components/Select.svelte'
   import Card from './Card.svelte'
   import Row from './Row.svelte'
   import { S, isAdmin, changed, reloadConfig, reloadTexts } from '../../lib/state.svelte.js'
@@ -49,11 +50,11 @@
     <Seg options={[['system', t('System')], ['light', t('Light')], ['dark', t('Dark')]]} value={themeChoice()} onchange={setTheme} />
   </Row>
   <Row label={t('Language')} hint={t('Automatic follows the language of the browser. Applies to this device.')}>
-    <Seg options={[['auto', t('Automatic')], ...LANGUAGES.map((l) => [l.key, l.name])]} value={langPick} onchange={setInterfaceLanguage} />
+    <Select options={[['auto', t('Automatic')], ...LANGUAGES.map((l) => [l.key, l.name])]} value={langPick} onchange={setInterfaceLanguage} aria-label={t('Language')} />
   </Row>
   {#if isAdmin()}
     <Row label={t('Language of the server')} hint={t('For run logs, notifications and the names Tuttiphon gives playlists and music worlds by itself. Delivered vibes that still have their original name are renamed too.')}>
-      <Seg options={LANGUAGES.map((l) => [l.key, l.name])} value={S.config.settings.language || 'en'} onchange={setServerLanguage} />
+      <Select options={LANGUAGES.map((l) => [l.key, l.name])} value={S.config.settings.language || 'en'} onchange={setServerLanguage} aria-label={t('Language of the server')} />
     </Row>
   {/if}
 </Card>

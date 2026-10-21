@@ -1,0 +1,14 @@
+{
+ "⚠ Audio fingerprints: the file was damaged – set aside as {name}, starting over.": "⚠ Huellas de audio: el archivo estaba dañado – apartado como {name}, se empieza de nuevo.",
+ "⚠ Audio fingerprints: file not readable ({error}) – skipped.": "⚠ Huellas de audio: archivo ilegible ({error}) – omitido.",
+ "Audio fingerprints: {done} songs done, {open} pending (until {time}).": "Huellas de audio: {done} canciones listas, {open} pendientes (hasta las {time}).",
+ "Audio fingerprints: {done} songs done, {open} pending.": "Huellas de audio: {done} canciones listas, {open} pendientes.",
+ "  {n} fingerprinted, {errors} not readable.": "  {n} con huella, {errors} ilegibles.",
+ "  {n} fingerprinted.": "  {n} con huella.",
+ "Audio fingerprints: {n} recording is there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Huellas de audio: {n} grabación está más de una vez ({dup} archivos de más, comparado en {secs} s) – ver Ajustes → Revisar biblioteca.",
+ "Audio fingerprints: {n} recordings are there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Huellas de audio: {n} grabaciones están más de una vez ({dup} archivos de más, comparado en {secs} s) – ver Ajustes → Revisar biblioteca.",
+ "⚠ Audio fingerprints: {error}": "⚠ Huellas de audio: {error}",
+ "Settings: same recording twice – yes/no expected": "Ajustes: la misma grabación dos veces – se esperaba sí/no",
+ "Same recording twice": "La misma grabación dos veces",
+ "The same audio as more than one file – also across formats, folders and albums, for example a FLAC file still next to its converted Opus file, or a song on an album and on a best-of. One copy is enough; a lossless original that has already been converted belongs in the archive.": "El mismo audio en más de un archivo – también entre formatos, carpetas y álbumes, por ejemplo un archivo FLAC todavía junto a su archivo Opus convertido, o una canción en un álbum y en un recopilatorio. Basta con una copia; un original sin pérdida ya convertido debe archivarse."
+}

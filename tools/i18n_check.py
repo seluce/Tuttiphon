@@ -17,9 +17,12 @@ Errors (exit code 1):
   shadow    a function assigns to _ (or _s …) and also calls it – the call raises UnboundLocalError
   bare      a visible text that does not go through the functions: log lines, exceptions, notifications and the
             "error"/"message"/"title"/"text"/"hint" values of answers
+The other languages (every other folder in app/locales/): per entry the same placeholder check and, for an entry with
+several forms ({"few": …, "many": …}), only plural categories; a conflict as in German. These are errors too.
 Warnings:
   dynamic   a translation function without a literal text (fine for N_() constants – mark the line "i18n-ignore")
   unused    a German entry nobody uses (only with all files)
+  missing   per other language: texts it lacks – they show in English (only with all files)
 Docstrings and comments are not checked.
 """
 import ast
@@ -31,6 +34,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LOCALES = ROOT / "app" / "locales" / "de"
+FORMS = {"zero", "one", "two", "few", "many", "other"}
 GERMAN = re.compile(r"[äöüÄÖÜß]|\b(und|oder|nicht|mit|für|auf|der|das|dem|den|des|ein|eine|einen|einem|ist|sind|wird|"
                     r"werden|noch|alle|alles|keine|kein|bitte|zum|zur|vom|beim|nach|über|wenn|dann|schon|auch|nur|"
                     r"hier|jetzt|heute|gestern|neu|neue|neuen|Woche|Monat|Jahr|Tage|Tagen|Fehler|gespeichert|"
@@ -67,23 +71,35 @@ def placeholders(text):
         return {"{"}
 
 
-def load_dict():
+def load_dict(folder=LOCALES):
     merged, origin, errors = {}, {}, []
-    for f in sorted(LOCALES.glob("*.json")):
+    lang = "" if folder == LOCALES else folder.name + " "
+    for f in sorted(folder.glob("*.json")):
         for k, v in json.loads(f.read_text(encoding="utf-8")).items():
             if k in merged and merged[k] != v:
-                errors.append(f"conflict  \"{k}\": \"{merged[k]}\" ({origin[k]}) ≠ \"{v}\" ({f.name})")
+                errors.append(f"conflict  {lang}\"{k}\": \"{merged[k]}\" ({origin[k]}) ≠ \"{v}\" ({f.name})")
             merged[k], origin[k] = v, f.name
-    for k, v in merged.items():
-        en, de = placeholders(k), placeholders(v)
-        alt = {a for x in en for a in PLACEHOLDER_ALTERNATIVES.get(x, ())}
-        missing = sorted(x for x in en - de if not PLACEHOLDER_ALTERNATIVES.get(x, set()) & de)
-        extra = sorted(de - en - alt)
-        if missing or extra:
-            errors.append(f"placeholder {json.dumps(k, ensure_ascii=False)[:90]} ({origin[k]}):"
-                          + (f" German lacks {{{'}, {'.join(missing)}}}" if missing else "")
-                          + (f" German has unknown {{{'}, {'.join(extra)}}}" if extra else ""))
+    for k, value in merged.items():
+        forms = value.items() if isinstance(value, dict) and lang else [("", value)]
+        for form, v in forms:
+            where = f"{lang}{json.dumps(k, ensure_ascii=False)[:90]} ({origin[k]}){f' [{form}]' if form else ''}"
+            if form and form not in FORMS or not isinstance(v, str):
+                errors.append(f"plural    {where}: not a text of a plural category")
+                continue
+            errors += _placeholder_errors(k, v, where, "German" if not lang else "it")
     return merged, origin, errors
+
+
+def _placeholder_errors(k, v, where, who):
+    """{placeholders} of the translation v against the English text k."""
+    en, tr = placeholders(k), placeholders(v)
+    alt = {a for x in en for a in PLACEHOLDER_ALTERNATIVES.get(x, ())}
+    missing = sorted(x for x in en - tr if not PLACEHOLDER_ALTERNATIVES.get(x, set()) & tr)
+    extra = sorted(tr - en - alt)
+    if not (missing or extra):
+        return []
+    return [f"placeholder {where}:" + (f" {who} lacks {{{'}, {'.join(missing)}}}" if missing else "")
+            + (f" {who} has unknown {{{'}, {'.join(extra)}}}" if extra else "")]
 
 
 def check(files):
@@ -209,6 +225,16 @@ def main():
     args = [Path(a).resolve() for a in sys.argv[1:]]
     files = args or sorted((ROOT / "app").glob("*.py")) + [ROOT / "tuttiphon.py"]
     de, origin, used, errors, warnings = check(files)
+    others = {}
+    for folder in sorted(d for d in LOCALES.parent.iterdir() if d.is_dir() and d != LOCALES):
+        d, from_, errs = load_dict(folder)
+        errors += errs
+        others[folder.name] = d
+        if not args:
+            missing = [k for k in used if k and k not in d]
+            if missing:
+                warnings.append(f"missing   {folder.name}: {len(missing)} text(s), e.g. {json.dumps(sorted(missing)[0], ensure_ascii=False)[:80]}")
+            warnings += [f"unused    {folder.name} \"{k}\" ({from_[k]})" for k in d if k not in used]
     if not args:
         warnings += [f"unused    \"{k}\" ({origin[k]})" for k in de if k not in used]
     for w in warnings:
@@ -216,7 +242,8 @@ def main():
     for e in dict.fromkeys(errors):
         print("✕ " + e)
     n = len(dict.fromkeys(errors))
-    print(f"✕ {n} error(s), {len(warnings)} warning(s)" if n else f"✓ server translations complete ({len(de)} German entries, {len(warnings)} warning(s))")
+    counts = "".join(f" {lang} {len(d)}," for lang, d in others.items())
+    print(f"✕ {n} error(s), {len(warnings)} warning(s)" if n else f"✓ server translations complete ({len(de)} German entries,{counts} {len(warnings)} warning(s))")
     return 1 if n else 0
 
 

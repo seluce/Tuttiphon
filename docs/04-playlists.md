@@ -1005,7 +1005,7 @@ The search in the header suggests a mix right away for inputs such as “ruhige 
    that of the vibe). The search also lists the vibe on its own under “Mood” with the number of matching songs
    (`web._listen_vibes()`, also when its name is typed).
 5. **Instrument:** of the words no world or vibe has taken, the first one that starts with a search word from
-   `ml.INSTRUMENT_WORDS` (German and English: „Klavier“, „Gitarre“, „Streicher“, „Geige“, “piano”, “strings” …; the
+   `ml.INSTRUMENT_WORDS` (all interface languages: „Klavier“, „Gitarre“, „Streicher“, „Geige“, “piano”, “strings” …; the
    longest match wins, so „Akustikgitarre“ is the acoustic guitar, not every guitar) – “ruhige Klaviermusik”. Two-word
    terms such as „E-Gitarre“ or “acoustic guitar” are merged first (`ml.INSTRUMENT_PHRASES`).
 6. **Theme:** likewise with `ml.THEME_WORDS` – „episch“, „Filmmusik“, „düster“, „Liebeslieder“, “dark” … (two-word
@@ -1036,7 +1036,7 @@ nothing is created until “Create playlist” there ([Interface](09-interface.m
 (“For listening closely” + „ruhige“), the assistant starts the playlist's own filter from a copy of the vibe's and
 adds mood, instruments and themes to it.
 
-`MOOD_WORDS` holds German and English search words (the start of a word is enough: „ruhige“, „tanzbare“, “calm”,
+`MOOD_WORDS` holds search words of all interface languages (the start of a word is enough: „ruhige“, „tanzbare“, “calm”,
 “sleep”, “danc…”). Two-word phrases are merged first: „gute laune“ / “good mood” → cheerful, „ohne gesang“ /
 “without vocals” / “no vocals” → `instrumental`.
 

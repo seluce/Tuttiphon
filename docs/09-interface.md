@@ -65,11 +65,15 @@ frontend/
 
 ## Languages
 
-The interface speaks English and German. English is in the code and goes through `t()` from `lib/i18n.svelte.js`;
-German comes from dictionaries `{ 'English text': 'deutscher Text' }` in `src/locales/de/*.js` (one file per area). The
-language: the choice on this device (Settings → General → Language), otherwise the browser's, otherwise English. The
-German dictionary is a separate file in the build and is only loaded for German (`await import()` in
-`i18n.svelte.js`). `api()` sends the language along as `X-Lang` (`lang()`).
+The interface speaks English, German, French, Dutch, Spanish, Italian, Portuguese and Polish. English is in the code
+and goes through `t()` from `lib/i18n.svelte.js`; the other languages come from dictionaries `{ 'English text':
+'translation' }` in `src/locales/<lang>/*.js` (one file per area, the same names in every language). The language:
+the choice on this device (Settings → General → Language, a list), otherwise the browser's, otherwise English. Every
+dictionary is a separate file in the build and is only loaded for its language (`await import()` in
+`i18n.svelte.js`). `api()` sends the language along as `X-Lang` (`lang()`). Counts follow the plural rules of the
+language (`Intl.PluralRules`; Polish entries hold `{few, many}`) – details in `frontend/README.md`. The server language
+(Settings → General, administrators) is the same list; a new installation takes it from the browser of the first
+administrator (`POST /api/setup` with `X-Lang`).
 
 **Switching without a reload.** The language is reactive state (`$state.raw`): `t()` and `tn()` in a template or a
 `$derived` follow a switch at once; `lang()` and `locale()` are functions for the same reason. Texts outside the

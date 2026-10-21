@@ -235,7 +235,10 @@ def schedule_warm(delay=2.5):
 
 def api_status():
     from .version import VERSION
-    out = {**_status_full(), "version": VERSION, "plugin": sonic.has_key()}
+    lang = i18n.server_lang()   # how the server names playlists – the interface builds names of new ones the same way
+    names = {"all": i18n.tr("{world} · All Sorts", lang), "hits": i18n.tr("{world} · The Hits", lang),
+             "everything": i18n.tr("Everything", lang)}
+    out = {**_status_full(), "version": VERSION, "plugin": sonic.has_key(), "names": names}
     m = auth.current()
     if m["role"] == "admin":
         return out
@@ -246,7 +249,7 @@ def api_status():
             "env": {"users": [u for u in env.get("users", []) if u["name"].lower() in own_users], "auth": env.get("auth"),
                     "webUrl": env.get("webUrl"), "lastfm": env.get("lastfm")},
             "steps": [], "allSteps": [], "daily": out.get("daily"), "instance": {"docker": out.get("instance", {}).get("docker"), "others": []},
-            "version": out["version"], "plugin": out["plugin"]}
+            "version": out["version"], "plugin": out["plugin"], "names": names}
 
 
 def api_changelog():
@@ -857,8 +860,8 @@ def api_search(query):
             "themes": _search_themes(q, cfg, lib), "combos": _search_combos(q, cfg, lib), "lyrics": out_lyrics}
 
 
-# Words for moods in the search (the start of a word is enough): „ruhige“, „tanzbare“, „fröhlicher“ … – German search
-# words matched against the input, i.e. data.
+# Words for moods in the search (the start of a word is enough): „ruhige“, „tanzbare“, „fröhlicher“ … – search words
+# of all interface languages matched against the input, i.e. data.
 # i18n-ignore-start
 MOOD_WORDS = {"ruhig": "ruhig", "sanft": "ruhig", "chill": "ruhig", "entspann": "ruhig", "relax": "ruhig",
               "schlaf": "schlaf", "einschlaf": "schlaf", "fröhlich": "froh", "froh": "froh", "lustig": "froh",
@@ -869,13 +872,33 @@ MOOD_WORDS = {"ruhig": "ruhig", "sanft": "ruhig", "chill": "ruhig", "entspann": 
               # English search words
               "calm": "ruhig", "quiet": "ruhig", "gentle": "ruhig", "soft": "ruhig", "sleep": "schlaf", "asleep": "schlaf",
               "bedtime": "schlaf", "lullab": "schlaf", "cheer": "froh", "joy": "froh", "goodmood": "froh", "danc": "tanzbar",
-              "sad": "melancholisch", "thought": "melancholisch", "acoustic": "akustisch"}
+              "sad": "melancholisch", "thought": "melancholisch", "acoustic": "akustisch",
+              # French, Dutch, Spanish, Italian, Portuguese and Polish search words
+              "apais": "ruhig", "doux": "ruhig", "douce": "ruhig", "détente": "ruhig", "detente": "ruhig",
+              "tranquil": "ruhig", "suave": "ruhig", "relaj": "ruhig", "rilass": "ruhig", "rustig": "ruhig",
+              "kalm": "ruhig", "zacht": "ruhig", "ontspan": "ruhig", "spokojn": "ruhig", "relaks": "ruhig",
+              "łagodn": "ruhig", "lagodn": "ruhig",
+              "sommeil": "schlaf", "endorm": "schlaf", "dormi": "schlaf", "berceuse": "schlaf", "ninna": "schlaf",
+              "slaap": "schlaf", "inslap": "schlaf", "kołysan": "schlaf", "kolysan": "schlaf", "senn": "schlaf",
+              "joyeu": "froh", "heureu": "froh", "alegr": "froh", "allegr": "froh", "feliz": "froh", "felic": "froh",
+              "vrolijk": "froh", "blij": "froh", "wesoł": "froh", "wesol": "froh", "radosn": "froh",
+              "danse": "tanzbar", "dansant": "tanzbar", "dansab": "tanzbar", "dansb": "tanzbar", "dansen": "tanzbar",
+              "baila": "tanzbar", "ballabil": "tanzbar", "ballare": "tanzbar", "dança": "tanzbar", "danca": "tanzbar",
+              "taneczn": "tanzbar", "fête": "tanzbar", "fiesta": "tanzbar", "festa": "tanzbar", "feest": "tanzbar",
+              "imprez": "tanzbar",
+              "énerg": "energie", "enérg": "energie", "dynami": "energie", "dinami": "energie",
+              "triste": "melancholisch", "mélancol": "melancholisch", "melancol": "melancholisch",
+              "melancól": "melancholisch", "malinconi": "melancholisch", "verdriet": "melancholisch",
+              "droevig": "melancholisch", "smutn": "melancholisch",
+              "acoustiq": "akustisch", "acústic": "akustisch", "acustic": "akustisch", "akoesti": "akustisch",
+              "akustyczn": "akustisch", "instrumentaal": "instrumental", "instrumentaln": "instrumental"}
 # Words for the listening vibes (the start of a word is enough) -> id of the delivered sound vibe whose filter on the AI
 # values approachable/engaging fits: „Hintergrundmusik“, „nebenbei“, „easy listening“, „zum Zuhören“, „hinhören“
 LISTEN_WORDS = {"hintergrund": "klang-hintergrund", "nebenbei": "klang-hintergrund", "berieselung": "klang-hintergrund",
                 "background": "klang-hintergrund", "easylistening": "klang-hintergrund",
                 "zuhör": "klang-zuhoeren", "zuhoer": "klang-zuhoeren", "hinhör": "klang-zuhoeren", "hinhoer": "klang-zuhoeren",
-                "closelistening": "klang-zuhoeren", "attentivelistening": "klang-zuhoeren"}
+                "closelistening": "klang-zuhoeren", "attentivelistening": "klang-zuhoeren",
+                "achtergrond": "klang-hintergrund", "sottofondo": "klang-hintergrund"}
 # two-word terms that become one word before the input is split (also takes the „zum“ along)
 LISTEN_PHRASES = {"zum zuhören": "zuhören", "zum zuhoeren": "zuhören", "im hintergrund": "hintergrund",
                   "background music": "background", "easy listening": "easylistening", "close listening": "closelistening",
@@ -954,7 +977,12 @@ def _search_combos(q, cfg, lib):
     world or vibe of the same name takes a word before the AI („Kinder“, „Weihnachten“), and so does the vibe linked
     to a theme (ml.THEME_VIBES)."""
     phrases = {"gute laune": "gutelaune", "good mood": "goodmood", "ohne gesang": "instrumental",   # i18n-ignore
-               "without vocals": "instrumental", "no vocals": "instrumental", **ml.INSTRUMENT_PHRASES,
+               "without vocals": "instrumental", "no vocals": "instrumental",
+               "bonne humeur": "goodmood", "buen humor": "goodmood", "buon umore": "goodmood", "bom humor": "goodmood",
+               "goed humeur": "goodmood", "dobry humor": "goodmood", "sans voix": "instrumental",
+               "sans paroles": "instrumental", "sin voz": "instrumental", "senza voce": "instrumental",
+               "sem voz": "instrumental", "zonder zang": "instrumental", "bez wokalu": "instrumental",
+               **ml.INSTRUMENT_PHRASES,
                **ml.THEME_PHRASES, **LISTEN_PHRASES}
     text = q
     for phrase, word in phrases.items():   # two-word moods become one word before splitting
@@ -1949,6 +1977,16 @@ class Handler(BaseHTTPRequestHandler):
         ok, user = self._limited(((f"setup|{ip}", 10), ("setup", 50)), _s("setup code"), attempt)
         if not ok:
             return None
+        lang = i18n.requested()   # a new installation speaks the language of its first administrator
+        if lang:
+            from .config import localize_defaults, update_config
+
+            def speak(cfg):
+                if cfg["settings"].get("language") != lang:
+                    cfg["settings"]["language"] = lang
+                    localize_defaults(cfg, lang)
+            update_config(speak)
+            i18n.forget_server_lang()
         events.say(_s("Setup: the password of the local administrator is set."))
         return self._json({"ok": True, "user": user}, headers={"Set-Cookie": self._session_cookie(user, https)})
 

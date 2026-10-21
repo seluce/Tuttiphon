@@ -145,9 +145,9 @@ class ServerTest(unittest.TestCase):
         self.log = quiet.__enter__()
         self.addCleanup(quiet.__exit__, None, None, None)
 
-    def request(self, method, path, body=None, cookie=None, header=True):
+    def request(self, method, path, body=None, cookie=None, header=True, lang=None):
         web.Handler._pw_cache = (0.0, None)
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", **({"X-Lang": lang} if lang else {})}
         if header:
             headers["X-Tuttiphon"] = "1"
         if cookie:
@@ -174,8 +174,12 @@ class ServerTest(unittest.TestCase):
             self.assertIn("setup code", data["error"])
             self.assertEqual(self.request("POST", "/api/setup", {"code": code, "password": "kurz"})[0], 401)
             self.assertFalse(localadmin.configured())
-            status, data, cookie = self.request("POST", "/api/setup", {"code": code, "password": "ein-gutes-passwort"})
+            before = config.load_config()["settings"].get("language")
+            self.addCleanup(lambda: config.update_config(lambda c: c["settings"].update(language=before)))
+            status, data, cookie = self.request("POST", "/api/setup", {"code": code, "password": "ein-gutes-passwort"},
+                                                lang="pl")
             self.assertEqual((status, data["user"]), (200, auth.NOTFALL))
+            self.assertEqual(config.load_config()["settings"]["language"], "pl")   # the first administrator's language
             self.assertIn("HttpOnly", cookie)
             self.assertEqual(localadmin.source(), "stored")
             self.assertFalse(localadmin.CODE_FILE.exists())

@@ -1,12 +1,14 @@
 """Languages of the server's texts. English is the source language: every text in the code is English and goes through
-one of the functions below; German comes from app/locales/de/*.json ({"English text": "German text"}, one file per
-area). A missing entry shows the English text.
+one of the functions below; the other languages (LANGS) come from app/locales/<lang>/*.json ({"English text":
+"translation"}, one file per area). A missing entry shows the English text. A text with a count (_n/_sn) picks its form
+by the plural rules of the language (category()): the English "one" form for the category "one", otherwise the
+"other" form – whose entry may be an object of forms such as {"few": …, "many": …} (Polish).
 
 * _(text)  – for the person using the interface: error messages and texts in API answers. Language of the request
   (header X-Lang, sent by the interface), outside a request the server language.
 * _s(text) – texts that are written down or sent without anyone looking at the page: run logs, notifications,
   playlist names and descriptions for Navidrome, file headers. Always the server language: settings.language
-  (Settings → General), "en" or "de".
+  (Settings → General), one of LANGS.
 * _n / _sn – the same with a count: _n(n, "{n} song", "{n} songs").
 
 The server log (stdout – docker logs) is always English: a translated text is a Text that also carries its English
@@ -22,7 +24,7 @@ import threading
 import time
 from pathlib import Path
 
-LANGS = ("en", "de")
+LANGS = ("en", "de", "fr", "nl", "es", "it", "pt", "pl")
 LOCALES = Path(__file__).resolve().parent / "locales"
 _local = threading.local()
 _dicts = {}
@@ -67,8 +69,33 @@ def current():
     return getattr(_local, "lang", None) or server_lang()
 
 
-def tr(text, lang, /, **values):
+def requested():
+    """The language the interface asked for in the current request – None if it sent none (or an unknown one)."""
+    return getattr(_local, "lang", None)
+
+
+def category(n, lang):
+    """Plural category of the count n in lang (CLDR rules for whole numbers): "one", "few", "many" or "other"."""
+    try:
+        i = abs(int(n))
+        if i != abs(float(n)):
+            return "other"
+    except (TypeError, ValueError):
+        return "other"
+    if lang == "pl":
+        if i == 1:
+            return "one"
+        return "few" if 2 <= i % 10 <= 4 and not 12 <= i % 100 <= 14 else "many"
+    if lang == "fr":
+        return "one" if i in (0, 1) else "other"
+    return "one" if i == 1 else "other"
+
+
+def tr(text, lang, form="other", /, **values):
+    """text in lang, {placeholders} filled; form: the plural category (an entry with several forms picks it)."""
     s = text if lang == "en" else _dict(lang).get(text, text)
+    if isinstance(s, dict):
+        s = s.get(form) or s.get("other") or s.get("many") or next(iter(s.values()), text)
     return s.format(**values) if values else s
 
 
@@ -117,14 +144,20 @@ def _has_en(value):
                                        and isinstance(value.args[0], Text))
 
 
-def _both(text, lang, values):
-    """Text in lang – with its English form if that differs (values that are Texts go in as their English form)."""
-    local = tr(text, lang, **values)
+def _both(text, lang, values, en_text=None, form="other"):
+    """Text in lang – with its English form if that differs (values that are Texts go in as their English form).
+    en_text: the English text if it is another one (a count: the forms of English and lang differ, e.g. 0 in French)."""
+    local = tr(text, lang, form, **values)
     has_text = any(_has_en(v) for v in values.values())
-    if lang == "en" and not has_text:
+    if lang == "en" and not has_text and en_text in (None, text):
         return local
-    en = tr(text, "en", **({k: english(v) if _has_en(v) else v for k, v in values.items()} if has_text else values))
+    en = tr(en_text or text, "en", **({k: english(v) if _has_en(v) else v for k, v in values.items()} if has_text else values))
     return Text(local, en) if en != local else local
+
+
+def _count(n, one, other, lang, values):
+    form = category(n, lang)
+    return _both(one if form == "one" else other, lang, {"n": n, **values}, one if n == 1 else other, form)
 
 
 def N_(text, /):
@@ -141,8 +174,8 @@ def _s(text, /, **values):
 
 
 def _n(n, one, other, /, **values):
-    return _both(one if n == 1 else other, current(), {"n": n, **values})
+    return _count(n, one, other, current(), values)
 
 
 def _sn(n, one, other, /, **values):
-    return _both(one if n == 1 else other, server_lang(), {"n": n, **values})
+    return _count(n, one, other, server_lang(), values)

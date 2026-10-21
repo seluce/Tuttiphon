@@ -19,9 +19,13 @@
 //               Array.from(x, fn) and Object.fromEntries(…). Fix: $derived(…) in a component, translated(() => …)
 //               at module level, or a function called later. Allowed: $state(t('…')) / $state.raw(t('…')) with a
 //               single t()/tn()/plural() as the direct argument (a deliberate starting value someone edits).
+// The other languages (every other folder in locales/): per entry the same placeholder check, the same markup as the
+// English text (markup: tags such as <b>, <a …>, <Ui …>) and, for an entry with several forms, only plural categories
+// (one, few, many, other …); a conflict as in German. These are errors too.
 // Warnings:
 //   dynamic     t() with a non-literal argument – the checker cannot see that text (only for data from the server)
 //   unused      a German entry nobody uses (only with all files)
+//   missing     per other language: texts it lacks – they show in English (only with all files)
 // Comments are ignored. A line containing "i18n-ignore" is skipped by the german, bare, shadow and dynamic checks;
 // the static check skips only a line marked "i18n-ignore static" (a text that may deliberately stay as it is).
 import { readFileSync, readdirSync, statSync } from 'node:fs'
@@ -61,6 +65,36 @@ for (const [k, v] of Object.entries(dict)) {
     errors.push(`placeholder "${k.slice(0, 80)}" (${origin[k]}):${missing.length ? ` German lacks {${missing.join('}, {')}}` : ''}`
       + `${extra.length ? ` German has unknown {${extra.join('}, {')}}` : ''}`)
   }
+}
+
+// The other languages: { lang: { dict, origin } }
+const FORMS = new Set(['zero', 'one', 'two', 'few', 'many', 'other'])
+const markup = (s) => [...String(s).matchAll(/<\/?([A-Za-z][\w-]*)/g)].map((m) => m[0]).sort().join(' ')
+const langs = {}
+for (const l of readdirSync(LOCALES).filter((d) => d !== 'de' && statSync(join(LOCALES, d)).isDirectory()).sort()) {
+  const d = {}, from = {}
+  for (const n of readdirSync(join(LOCALES, l)).filter((n) => n.endsWith('.js') && n !== 'index.js').sort()) {
+    for (const [k, v] of Object.entries((await import(join(LOCALES, l, n))).default)) {
+      if (k in d && JSON.stringify(d[k]) !== JSON.stringify(v)) errors.push(`conflict  ${l} "${k.slice(0, 80)}" (${from[k]} ≠ ${n})`)
+      d[k] = v
+      from[k] = n
+    }
+  }
+  for (const [k, v] of Object.entries(d)) {
+    const forms = v && typeof v === 'object' ? Object.entries(v) : [['', v]]
+    for (const [form, text] of forms) {
+      const where = `${l} "${k.slice(0, 80)}" (${from[k]})${form ? ` [${form}]` : ''}`
+      if (form && !FORMS.has(form)) { errors.push(`plural    ${where}: no plural category`); continue }
+      if (typeof text !== 'string') { errors.push(`plural    ${where}: not a text`); continue }
+      const en = placeholders(k), tr = placeholders(text)
+      const missing = [...en].filter((x) => !tr.has(x)), extra = [...tr].filter((x) => !en.has(x))
+      if (missing.length || extra.length) {
+        errors.push(`placeholder ${where}:${missing.length ? ` lacks {${missing.join('}, {')}}` : ''}${extra.length ? ` has unknown {${extra.join('}, {')}}` : ''}`)
+      }
+      if (markup(k) !== markup(text)) errors.push(`markup    ${where}: ${markup(text) || '–'} instead of ${markup(k) || '–'}`)
+    }
+  }
+  langs[l] = { d, from }
 }
 
 const GERMAN = /[äöüÄÖÜß]|\b(und|oder|nicht|mit|für|auf|der|das|dem|den|des|ein|eine|einen|einem|ist|sind|wird|werden|noch|alle|alles|keine|kein|bitte|zum|zur|vom|beim|nach|über|wenn|dann|schon|auch|nur|hier|jetzt|heute|gestern|morgen|neu|neue|neuen|Woche|Monat|Jahr|Tage|Tagen|Fehler|Speichern|Abbrechen|Löschen|Einstellungen|gespeichert|gelöscht|angelegt|Sterne|Wiedergaben|Vorschläge|hören|gehört|Lieder)\b/
@@ -235,8 +269,14 @@ for (const file of files) {
 
 if (!args.length) {
   for (const k of Object.keys(dict)) if (!used.has(k)) warnings.push(`unused    "${k}" (${origin[k]})`)
+  for (const [l, { d, from }] of Object.entries(langs)) {
+    const missing = [...used].filter((k) => !(k in d))
+    if (missing.length) warnings.push(`missing   ${l}: ${missing.length} text(s), e.g. "${missing[0].slice(0, 80)}"`)
+    for (const k of Object.keys(d)) if (!used.has(k)) warnings.push(`unused    ${l} "${k}" (${from[k]})`)
+  }
 }
 for (const w of warnings) console.log('⚠ ' + w)
 for (const e of errors) console.log('✕ ' + e)
-console.log(errors.length ? `✕ ${errors.length} error(s), ${warnings.length} warning(s)` : `✓ translations complete (${Object.keys(dict).length} German entries, ${warnings.length} warning(s))`)
+const others = Object.entries(langs).map(([l, { d }]) => ` ${l} ${Object.keys(d).length}`).join(',')
+console.log(errors.length ? `✕ ${errors.length} error(s), ${warnings.length} warning(s)` : `✓ translations complete (${Object.keys(dict).length} German entries,${others || ''} ${warnings.length} warning(s))`)
 process.exit(errors.length ? 1 : 0)

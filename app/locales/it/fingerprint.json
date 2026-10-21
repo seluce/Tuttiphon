@@ -1,0 +1,14 @@
+{
+ "⚠ Audio fingerprints: the file was damaged – set aside as {name}, starting over.": "⚠ Impronte audio: il file era danneggiato – messo da parte come {name}, si ricomincia da capo.",
+ "⚠ Audio fingerprints: file not readable ({error}) – skipped.": "⚠ Impronte audio: file non leggibile ({error}) – saltato.",
+ "Audio fingerprints: {done} songs done, {open} pending (until {time}).": "Impronte audio: {done} brani completati, {open} in attesa (fino alle {time}).",
+ "Audio fingerprints: {done} songs done, {open} pending.": "Impronte audio: {done} brani completati, {open} in attesa.",
+ "  {n} fingerprinted, {errors} not readable.": "  {n} con impronta, {errors} non leggibili.",
+ "  {n} fingerprinted.": "  {n} con impronta.",
+ "Audio fingerprints: {n} recording is there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Impronte audio: {n} registrazione è presente più volte ({dup} file in più, confrontati in {secs} s) – vedi Impostazioni → Controllo libreria.",
+ "Audio fingerprints: {n} recordings are there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Impronte audio: {n} registrazioni sono presenti più volte ({dup} file in più, confrontati in {secs} s) – vedi Impostazioni → Controllo libreria.",
+ "⚠ Audio fingerprints: {error}": "⚠ Impronte audio: {error}",
+ "Settings: same recording twice – yes/no expected": "Impostazioni: stessa registrazione due volte – atteso sì/no",
+ "Same recording twice": "Stessa registrazione due volte",
+ "The same audio as more than one file – also across formats, folders and albums, for example a FLAC file still next to its converted Opus file, or a song on an album and on a best-of. One copy is enough; a lossless original that has already been converted belongs in the archive.": "Lo stesso audio in più file – anche tra formati, cartelle e album diversi, ad esempio un file FLAC ancora accanto al suo file Opus convertito, o un brano in un album e in un best of. Basta una copia; un originale lossless già convertito va nell'archivio."
+}

@@ -1,5 +1,5 @@
 // Small helpers for numbers, texts and times – without state.
-import { lang, locale, t } from './i18n.svelte.js'
+import { lang, locale, t, tword } from './i18n.svelte.js'
 
 export const fmt = (n) => (n == null ? '–' : Number(n).toLocaleString(locale()))
 export const stars = (n) => (n ? '★'.repeat(Math.round(n)) : '')
@@ -13,7 +13,7 @@ export const mmss = (s) => (s ? `${Math.floor(s / 60)}:${String(Math.round(s % 6
 /** First letter in upper case ("piano" → "Piano") – for labels the server sends in lower case */
 export const capitalize = (s) => (s ? s.charAt(0).toLocaleUpperCase(locale()) + s.slice(1) : s)
 /** "3 songs" – both forms in English, each translated (plural(n, 'song', 'songs')). */
-export const plural = (n, one, many) => `${fmt(n)} ${t(n === 1 ? one : many)}`   // i18n-ignore: checked where it is called
+export const plural = (n, one, many) => `${fmt(n)} ${tword(n, one, many)}`   // i18n-ignore: checked where it is called
 
 export function relTime(iso) {
   if (!iso) return '–'

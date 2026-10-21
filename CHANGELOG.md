@@ -5,6 +5,16 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **Six more languages:** the interface and the server now also speak French, Dutch, Spanish, Italian, Portuguese
+  and Polish – chosen per device under Settings → General (now a list), otherwise the browser's language. Counts
+  follow the rules of each language (Polish “2 piosenki”, “5 piosenek”). The search understands moods, instruments
+  and themes in these languages too (“musique calme”, “chitarra”, “kerstmuziek”). The translations were made with AI
+  help – corrections are welcome on GitHub.
+- **A new installation speaks the language of its first administrator:** the language of the server (notifications,
+  playlist names in Navidrome) is taken from the browser at the first setup.
+
 ## 1.6.0
 
 The smart queue in Symfonium now plays for whoever is listening and moves on between bands; the help is half as long.

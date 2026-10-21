@@ -74,7 +74,7 @@ INSTRUMENTS = {
     "voice": N_("voice"),
 }
 # Search words for instruments (the start of a word is enough, the longest match wins) -> instrument ids, the first one
-# names the group – German and English search words matched against the input, i.e. data
+# names the group – search words of all interface languages matched against the input, i.e. data
 # i18n-ignore-start
 _GUITARS = ["guitar", "acousticguitar", "electricguitar", "classicalguitar"]
 _STRINGS = ["strings", "violin", "viola", "cello"]
@@ -99,6 +99,22 @@ INSTRUMENT_WORDS = {
     "drummachine": ["drummachine"], "trommel": ["drums", "percussion"], "perkussion": ["percussion"],
     "percussion": ["percussion"], "bongo": ["bongo"], "glocke": ["bell"], "glockensp": ["bell"], "bells": ["bell"],
     "keyboard": ["keyboard"],
+    # French, Dutch, Spanish, Italian, Portuguese and Polish search words
+    "chitarr": _GUITARS, "gitaar": _GUITARS, "gitara": _GUITARS, "violon": ["violin"], "violín": ["violin"],
+    "viool": ["violin"], "skrzyp": ["violin"], "violoncel": ["cello"], "violonch": ["cello"], "wiolonczel": ["cello"],
+    "contreb": ["doublebass"], "contrab": ["doublebass"], "cordes": _STRINGS, "cuerdas": _STRINGS, "cordas": _STRINGS,
+    "strijk": _STRINGS, "smyczk": _STRINGS, "flûte": ["flute"], "flauta": ["flute"], "flauto": ["flute"],
+    "fluit": ["flute"], "flet": ["flute"], "klarinet": ["clarinet"], "klarnet": ["clarinet"], "tromba": ["trumpet"],
+    "trąbk": ["trumpet"], "trabk": ["trumpet"], "cuivres": _BRASS, "ottoni": _BRASS, "accordéon": ["accordion"],
+    "accordeon": ["accordion"], "acordeón": ["accordion"], "acordeon": ["accordion"], "acordeão": ["accordion"],
+    "fisarmonic": ["accordion"], "akordeon": ["accordion"], "armónic": ["harmonica"], "armonic": ["harmonica"],
+    "harmonijk": ["harmonica"], "harpe": ["harp"], "arpa": ["harp"], "harpa": ["harp"], "harfa": ["harp"],
+    "orgue": ["organ", "pipeorgan"], "órgano": ["organ", "pipeorgan"], "organo": ["organ", "pipeorgan"],
+    "órgão": ["organ", "pipeorgan"], "orgao": ["organ", "pipeorgan"], "organy": ["organ", "pipeorgan"],
+    "batterie": ["drums"], "batería": ["drums"], "bateria": ["drums"], "batteria": ["drums"],
+    "perkusj": ["drums", "percussion"], "percusi": ["percussion"], "percuss": ["percussion"], "saksofon": ["saxophone"],
+    "sintet": ["synthesizer", "pad"], "orkest": ["orchestra"], "orquest": ["orchestra"], "orkiestr": ["orchestra"],
+    "cloche": ["bell"], "campan": ["bell"], "dzwonk": ["bell"], "dzwony": ["bell"],
 }
 # short search words only count with these endings ("harp" fits "harps", not the band "Harpyie"; "organ" not "organic")
 _ENDINGS = ("", "musik", "music", "klang", "klänge", "solo", "sound", "sounds", "ist", "isten", "er")
@@ -129,8 +145,8 @@ THEME_PRESENT = {"christmas": 0.2, "film": 0.12, "epic": 0.15, "dark": 0.1, "lov
 # Delivered vibes that hide the same content from every other playlist (excludeElsewhere): a playlist that asks for
 # the theme may contain it all the same (rules.shown_vibes)
 THEME_VIBES = {"christmas": "weihnachten"}
-# Search words for themes (the start of a word is enough, as for instruments) -> theme ids – German and English search
-# words matched against the input, i.e. data
+# Search words for themes (the start of a word is enough, as for instruments) -> theme ids – search words of all
+# interface languages matched against the input, i.e. data
 # i18n-ignore-start
 THEME_WORDS = {
     "weihnacht": ["christmas"], "christmas": ["christmas"], "xmas": ["christmas"], "filmmusik": ["film"],
@@ -140,8 +156,24 @@ THEME_WORDS = {
     "love": ["love"], "romanti": ["romantic"], "ballade": ["ballad"], "ballad": ["ballad"], "sommer": ["summer"],
     "summer": ["summer"], "weltraum": ["space"], "weltall": ["space"], "space": ["space"], "kosmisch": ["space"],
     "cosmic": ["space"],
+    # French, Dutch, Spanish, Italian, Portuguese and Polish search words
+    "noël": ["christmas"], "noel": ["christmas"], "navidad": ["christmas"], "navideñ": ["christmas"],
+    "natale": ["christmas"], "natal": ["christmas"], "natalin": ["christmas"], "kerstmis": ["christmas"],
+    "kerstlied": ["christmas"], "kerstmuziek": ["christmas"], "świątecz": ["christmas"], "swiatecz": ["christmas"],
+    "kolędy": ["christmas"], "koledy": ["christmas"], "cinéma": ["film"], "cine": ["film"], "películ": ["film"],
+    "pelicul": ["film"], "épique": ["epic"], "epique": ["epic"], "épico": ["epic"], "épica": ["epic"],
+    "epico": ["epic"], "epica": ["epic"], "epicki": ["epic"], "sombre": ["dark"], "oscuro": ["dark"],
+    "oscura": ["dark"], "escuro": ["dark"], "escura": ["dark"], "duister": ["dark"], "mroczn": ["dark"],
+    "amour": ["love"], "amor": ["love"], "amore": ["love"], "liefde": ["love"], "miłość": ["love"],
+    "milosc": ["love"], "miłosn": ["love"], "románti": ["romantic"], "romantycz": ["romantic"],
+    "balada": ["ballad"], "ballata": ["ballad"], "verano": ["summer"], "verão": ["summer"], "verao": ["summer"],
+    "estivo": ["summer"], "estiva": ["summer"], "zomer": ["summer"], "letni": ["summer"], "espace": ["space"],
+    "espacio": ["space"], "spazio": ["space"], "espaço": ["space"], "ruimte": ["space"], "kosmos": ["space"],
+    "cosmiq": ["space"], "cósmic": ["space"], "cosmico": ["space"], "cosmica": ["space"],
 }
-THEME_PHRASES = {"x-mas": "xmas", "love song": "lovesong", "film music": "filmmusic", "outer space": "space"}
+THEME_PHRASES = {"x-mas": "xmas", "love song": "lovesong", "film music": "filmmusic", "outer space": "space",
+                 "musique de film": "film", "bande originale": "film", "banda sonora": "film",
+                 "colonna sonora": "film", "trilha sonora": "film"}
 # i18n-ignore-end
 # Camelot wheel: key -> number 1–12 (A = minor, B = major); neighbours on the wheel blend well
 _PITCH = {"C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8,
@@ -397,20 +429,22 @@ def theme_word(word):
 
 
 def _word(word, table):
-    """Search word -> ids of the longest matching key of table (a word start; short keys only with fitting endings,
-    a typed word from 5 letters as the start of a key)."""
-    best = None
+    """Search word -> ids of the longest matching key of table (a word start; short keys only with fitting endings) –
+    otherwise of the shortest key that a typed word from 5 letters begins ("violon" is the violin, not the
+    "violoncelle")."""
+    best, begun = None, None
     for k, ids in table.items():
         if word.startswith(k):
             rest = word[len(k):]
             if len(k) <= 5 and rest.removeprefix("en").removeprefix("e").removeprefix("n").removeprefix("s") not in _ENDINGS \
                     and rest not in _ENDINGS:
                 continue
-        elif not (len(word) >= 5 and k.startswith(word)):
-            continue
-        if best is None or len(k) > len(best[0]):
-            best = (k, ids)
-    return best[1] if best else None
+            if best is None or len(k) > len(best[0]):
+                best = (k, ids)
+        elif len(word) >= 5 and k.startswith(word) and (begun is None or len(k) < len(begun[0])):
+            begun = (k, ids)
+    hit = best or begun
+    return hit[1] if hit else None
 
 
 def search_instruments(q, lib):

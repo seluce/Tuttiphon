@@ -1,0 +1,14 @@
+{
+ "⚠ Audio fingerprints: the file was damaged – set aside as {name}, starting over.": "⚠ Empreintes audio : le fichier était endommagé – mis de côté sous {name}, nouveau départ.",
+ "⚠ Audio fingerprints: file not readable ({error}) – skipped.": "⚠ Empreintes audio : fichier illisible ({error}) – ignoré.",
+ "Audio fingerprints: {done} songs done, {open} pending (until {time}).": "Empreintes audio : {done} titres faits, {open} en attente (jusqu’à {time}).",
+ "Audio fingerprints: {done} songs done, {open} pending.": "Empreintes audio : {done} titres faits, {open} en attente.",
+ "  {n} fingerprinted, {errors} not readable.": "  {n} empreintes créées, {errors} illisibles.",
+ "  {n} fingerprinted.": "  {n} empreintes créées.",
+ "Audio fingerprints: {n} recording is there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Empreintes audio : {n} enregistrement existe plusieurs fois ({dup} fichiers en trop, comparés en {secs} s) – voir Paramètres → Vérifier la bibliothèque.",
+ "Audio fingerprints: {n} recordings are there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Empreintes audio : {n} enregistrements existent plusieurs fois ({dup} fichiers en trop, comparés en {secs} s) – voir Paramètres → Vérifier la bibliothèque.",
+ "⚠ Audio fingerprints: {error}": "⚠ Empreintes audio : {error}",
+ "Settings: same recording twice – yes/no expected": "Paramètres : même enregistrement en double – oui/non attendu",
+ "Same recording twice": "Même enregistrement en double",
+ "The same audio as more than one file – also across formats, folders and albums, for example a FLAC file still next to its converted Opus file, or a song on an album and on a best-of. One copy is enough; a lossless original that has already been converted belongs in the archive.": "Le même son dans plus d’un fichier – y compris entre formats, dossiers et albums, par exemple un fichier FLAC encore à côté de son fichier Opus converti, ou un titre sur un album et sur un best-of. Une copie suffit ; un original sans perte déjà converti a sa place dans l’archive."
+}

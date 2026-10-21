@@ -95,10 +95,11 @@
       background: color-mix(in srgb, var(--bg-2) 92%, transparent); backdrop-filter: blur(16px); border-top: 1px solid var(--line);
       padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
     }
-    .bottomnav a, .bottomnav button { display: grid; justify-items: center; gap: 2px; font-size: .68rem; font-weight: 650; color: var(--muted); text-decoration: none; padding: 4px 0; position: relative; min-width: 0; }
+    .bottomnav a, .bottomnav button { display: grid; justify-items: center; align-content: start; gap: 2px; font-size: .68rem; font-weight: 650; color: var(--muted); text-decoration: none; padding: 4px 0; position: relative; min-width: 0; }
     @media (max-width: 400px) { .bottomnav a, .bottomnav button { font-size: clamp(.6rem, 2.95vw, .68rem); letter-spacing: -.01em; } }
-    /* one line, centered – a long label would push its icon out of line with the others */
-    .bottomnav .lbl { max-width: 100%; padding: 0 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+    /* centered, at most two lines (“Univers musicaux”, “Mundos musicales”) – the icons stay in line at the top */
+    .bottomnav .lbl { max-width: 100%; padding: 0 1px; text-align: center; line-height: 1.15; overflow: hidden;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow-wrap: anywhere; hyphens: auto; }
     .bottomnav .on { color: var(--text); }
     .bottomnav .on :global(svg) { color: var(--accent); }
     .bottomnav .count { position: absolute; top: 0; right: calc(50% - 22px); margin: 0; font-size: .62rem; padding: 0 5px; }

@@ -108,4 +108,5 @@ volumes:
 Everyone chooses the language of the interface for their own device (Settings → General – users too) and it
 switches instantly; the sign-in page follows that choice, otherwise the browser's language. The server language – for
 playlist names in Navidrome, notifications and the run logs – is set there too, by administrators only. The container
-log (`docker logs`) is always English.
+log (`docker logs`) is always English. Languages: English, German, French, Dutch, Spanish, Italian, Portuguese and
+Polish. A new installation takes the server language from the browser of its first administrator.

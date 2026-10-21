@@ -11,12 +11,9 @@ export function plEmoji(p) {
 }
 
 // Words of generated names: they are part of the name in Navidrome, so they follow the server language
-// (Settings → General), not the language of the interface – like rules.base_name() and mixer.EVERY on the server.
-// "Mix" only for real mixes; a whole music world without a vibe is "All Sorts".
-const NAME_WORDS = {
-  en: { all: 'All Sorts', hits: 'The Hits', everything: 'Everything' },
-  de: { all: 'Querbeet', hits: 'Die Hits', everything: 'Alles' },   // i18n-ignore: playlist names in Navidrome
-}
+// (Settings → General), not the language of the interface – the server sends its templates (GET /api/status → names,
+// as rules.base_name() uses them). "Mix" only for real mixes; a whole music world without a vibe is "All Sorts".
+const NAMES_EN = { all: '{world} · All Sorts', hits: '{world} · The Hits', everything: 'Everything' }
 const MIX_LABEL = { day: 'Daily Mix', week: 'Weekly Mix', month: 'Monthly Mix' }
 
 /**
@@ -28,12 +25,12 @@ export function plName(p) {
   if (st?.name && !p.name) return st.name
   if (p.name) return p.name
   if (p.rules) return p.originalName || t('Playlist')
-  const words = NAME_WORDS[S.config.settings.language] || NAME_WORDS.en
+  const words = S.status?.names || NAMES_EN
   const person = findPerson(p.person || defaultPerson())
   const w = weltIds(p).map((id) => findWelt(id)?.name).filter(Boolean).join(' + ')
   const s = p.stil && p.stil !== '*' ? findStil(p.stil)?.name : null
   const base = p.type === 'mix' ? `${MIX_LABEL[p.mix?.every] || MIX_LABEL.day} · ${[w, s].filter(Boolean).join(' · ') || words.everything}`
-    : !s ? `${w} · ${p.hits ? words.hits : words.all}` : !w ? s + (p.hits ? ' (Hits)' : '')
+    : !s ? (p.hits ? words.hits : words.all).replace('{world}', w) : !w ? s + (p.hits ? ' (Hits)' : '')
       : S.config.settings.namePattern.replace('{welt}', w).replace('{stil}', s + (p.hits ? ' (Hits)' : ''))
   return (person?.prefix || '') + base
 }

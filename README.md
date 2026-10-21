@@ -37,8 +37,8 @@ container – made for a NAS, local, no cloud, no GPU.
   analysis (Essentia).
 - **Instant Mix by sound** – with the Tuttiphon plugin for Navidrome, Instant Mix, song and artist radio and
   “similar songs” in Symfonium and other apps follow the sound of your own files.
-- **For the whole family** – everyone signs in with their own Navidrome account and gets their own view; English and
-  German; installable as an app.
+- **For the whole family** – everyone signs in with their own Navidrome account and gets their own view; in
+  English, German, French, Dutch, Spanish, Italian, Portuguese and Polish; installable as an app.
 - **Housekeeping** – folder watch for new music, duplicates found by audio fingerprints, covers, even loudness,
   statistics, backups and notifications.
 
@@ -80,6 +80,10 @@ weeks per pass. The reasoning for each choice: [Under the hood](docs/features.md
 Python 3 (standard library) and Node.js 22 (Svelte 5, Vite, Tailwind). `npm ci`, `npm run build`, `./tuttiphon.sh`
 starts it on the PC; tests: `npm run test:py` and `npm run test:i18n`. More in the
 [technical handbook](docs/README.md) and [frontend/README.md](frontend/README.md).
+
+Translations are dictionaries in `frontend/src/locales/<lang>/` (interface) and `app/locales/<lang>/` (server). French,
+Dutch, Spanish, Italian, Portuguese and Polish were translated with AI help – corrections are very welcome as an issue
+or pull request.
 
 ## Acknowledgements
 

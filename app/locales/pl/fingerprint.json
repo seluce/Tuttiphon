@@ -1,0 +1,17 @@
+{
+ "⚠ Audio fingerprints: the file was damaged – set aside as {name}, starting over.": "⚠ Odciski audio: plik był uszkodzony – odłożony jako {name}, start od nowa.",
+ "⚠ Audio fingerprints: file not readable ({error}) – skipped.": "⚠ Odciski audio: plik nieczytelny ({error}) – pominięto.",
+ "Audio fingerprints: {done} songs done, {open} pending (until {time}).": "Odciski audio: gotowe piosenki: {done}, oczekujące: {open} (do {time}).",
+ "Audio fingerprints: {done} songs done, {open} pending.": "Odciski audio: gotowe piosenki: {done}, oczekujące: {open}.",
+ "  {n} fingerprinted, {errors} not readable.": "  z odciskiem: {n}, nieczytelne: {errors}.",
+ "  {n} fingerprinted.": "  z odciskiem: {n}.",
+ "Audio fingerprints: {n} recording is there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Odciski audio: {n} nagranie występuje więcej niż raz (zbędne pliki: {dup}, porównano w {secs} s) – zobacz Ustawienia → Sprawdź bibliotekę.",
+ "Audio fingerprints: {n} recordings are there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": {
+  "few": "Odciski audio: {n} nagrania występują więcej niż raz (zbędne pliki: {dup}, porównano w {secs} s) – zobacz Ustawienia → Sprawdź bibliotekę.",
+  "many": "Odciski audio: {n} nagrań występuje więcej niż raz (zbędne pliki: {dup}, porównano w {secs} s) – zobacz Ustawienia → Sprawdź bibliotekę."
+ },
+ "⚠ Audio fingerprints: {error}": "⚠ Odciski audio: {error}",
+ "Settings: same recording twice – yes/no expected": "Ustawienia: to samo nagranie dwa razy – oczekiwano tak/nie",
+ "Same recording twice": "To samo nagranie dwa razy",
+ "The same audio as more than one file – also across formats, folders and albums, for example a FLAC file still next to its converted Opus file, or a song on an album and on a best-of. One copy is enough; a lossless original that has already been converted belongs in the archive.": "To samo audio jako więcej niż jeden plik – także między formatami, folderami i albumami, np. plik FLAC wciąż obok swojego skonwertowanego pliku Opus albo piosenka na albumie i na składance best-of. Wystarczy jedna kopia; bezstratny oryginał, który został już skonwertowany, należy do archiwum."
+}

@@ -1,0 +1,14 @@
+{
+ "⚠ Audio fingerprints: the file was damaged – set aside as {name}, starting over.": "⚠ Audiovingerafdrukken: het bestand was beschadigd – apart gezet als {name}, opnieuw begonnen.",
+ "⚠ Audio fingerprints: file not readable ({error}) – skipped.": "⚠ Audiovingerafdrukken: bestand niet leesbaar ({error}) – overgeslagen.",
+ "Audio fingerprints: {done} songs done, {open} pending (until {time}).": "Audiovingerafdrukken: {done} nummers klaar, {open} nog te doen (tot {time}).",
+ "Audio fingerprints: {done} songs done, {open} pending.": "Audiovingerafdrukken: {done} nummers klaar, {open} nog te doen.",
+ "  {n} fingerprinted, {errors} not readable.": "  {n} met vingerafdruk, {errors} niet leesbaar.",
+ "  {n} fingerprinted.": "  {n} met vingerafdruk.",
+ "Audio fingerprints: {n} recording is there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Audiovingerafdrukken: {n} opname staat er meer dan eens ({dup} extra bestanden, vergeleken in {secs} s) – zie Instellingen → Bibliotheek controleren.",
+ "Audio fingerprints: {n} recordings are there more than once ({dup} extra files, compared in {secs} s) – see Settings → Check library.": "Audiovingerafdrukken: {n} opnames staan er meer dan eens ({dup} extra bestanden, vergeleken in {secs} s) – zie Instellingen → Bibliotheek controleren.",
+ "⚠ Audio fingerprints: {error}": "⚠ Audiovingerafdrukken: {error}",
+ "Settings: same recording twice – yes/no expected": "Instellingen: dezelfde opname dubbel – ja/nee verwacht",
+ "Same recording twice": "Dezelfde opname dubbel",
+ "The same audio as more than one file – also across formats, folders and albums, for example a FLAC file still next to its converted Opus file, or a song on an album and on a best-of. One copy is enough; a lossless original that has already been converted belongs in the archive.": "Dezelfde audio als meer dan één bestand – ook over formaten, mappen en albums heen, bijvoorbeeld een FLAC-bestand dat nog naast het geconverteerde Opus-bestand staat, of een nummer op een album en op een best-of. Eén kopie is genoeg; een lossless origineel dat al is geconverteerd, hoort in het archief."
+}
