@@ -5,7 +5,10 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 1.5.0
+
+Every play now reaches Tuttiphon as it happens through the Navidrome plugin, and the plugin answers by sound also for
+songs the AI has not analysed yet.
 
 - **After updating:** put the new `tuttiphon.ndp` into Navidrome's plugins folder (exactly this name, not unpacked)
   and restart Navidrome; allow the plugin **all users**; if you entered the agents line from 1.4.0, replace it with
