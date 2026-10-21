@@ -5,8 +5,11 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 1.6.0
 
+The smart queue in Symfonium now plays for whoever is listening and moves on between bands; the help is half as long.
+
+- **After updating:** nothing to do – the Navidrome plugin file stays the same as in 1.5.0.
 - **The smart queue for whoever is listening.** Navidrome does not tell the plugin who asks – but Tuttiphon sees from
   the plays who is playing what. If the song asked about is playing on exactly one account (or only one account is
   playing), Instant Mix, song, artist and album radio and the smart queue in Symfonium answer for that person: without
