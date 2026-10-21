@@ -41,6 +41,9 @@ PLUGIN_FILES = (_ROOT / "plugin" / "tuttiphon.ndp",                     # in the
                 _ROOT / "navidrome-plugin" / "dist" / "tuttiphon.ndp")   # built here (tools/build-plugin.sh)
 MAX_COUNT = 200        # never more songs per answer
 RADIO_BONUS = 0.1      # a band Last.fm counts as similar moves up this much (artist radio)
+RUN_MAX = 2            # the smart queue: after this many songs of one band in a row, other bands come first …
+RUN_FACTOR = 0.2       # … (that band's scores times this)
+HOUR_FACTOR = 0.85     # a band heard several times in the last hour: times this for every further song of it
 _lock = threading.Lock()
 _memo = {}
 _seen = {"at": None, "calls": 0, "for": None}   # the last call of the plugin (for the settings page)
@@ -217,10 +220,51 @@ def _rated_one(lib, user):
     return hit[1] if hit else frozenset()
 
 
-def _who(cfg, lib, ids, personal):
+def _bands(lib):
+    """Main artist -> song indices (per song list)."""
+    key = (ml.lib_key(lib),)
+    hit = _recall("bands", key)
+    if hit is None:
+        hit = {}
+        for i, s in enumerate(lib.songs):
+            hit.setdefault(lib._main_artist(s), []).append(i)
+        _remember("bands", key, hit, keep=2)
+    return hit
+
+
+def _variety(lib, user, seed):
+    """{index: factor} so that the smart queue does not stay with one band: Symfonium asks about every new song and
+    takes the most similar – mostly of the same band. After RUN_MAX songs of the band in a row (the song asked about
+    included) its songs come after the others (RUN_FACTOR); a band heard several times in the last hour comes a
+    little later (HOUR_FACTOR for every further song of it)."""
+    from . import listen
+    index = lib.index_of()
+    seq = [index[s] for s in listen.sequence(user) if s in index]
+    if not seq or seq[-1] != seed:
+        seq.append(seed)
+    band = lib._main_artist(lib.songs[seed])
+    run = 0
+    for i in reversed(seq):
+        if lib._main_artist(lib.songs[i]) != band:
+            break
+        run += 1
+    members = _bands(lib)
+    out = {}
+    for b, n in Counter(lib._main_artist(lib.songs[i]) for i in seq).items():
+        if n > 1:
+            for j in members.get(b, ()):
+                out[j] = HOUR_FACTOR ** (n - 1)
+    if run >= RUN_MAX:
+        for j in members.get(band, ()):
+            out[j] = out.get(j, 1.0) * RUN_FACTOR
+    return out
+
+
+def _who(cfg, lib, ids, personal, seed=None):
     """For whom the answer is: (person id, indices to leave out, {index: factor}) of the person listening to one of
     these song ids – what they heard in the last hours (listen.heard()) or rated 1 star by hand stays out, what they
-    skip comes further down (feedback.factors(), with "Mixes that learn" on). _FAMILY if not asked or unclear."""
+    skip comes further down (feedback.factors(), with "Mixes that learn" on); for the songs like `seed` (the smart
+    queue) also variety between bands (_variety()). _FAMILY if not asked or unclear."""
     _last.person = None
     person = _listener(cfg, ids) if personal else None
     if not person:
@@ -233,6 +277,9 @@ def _who(cfg, lib, ids, personal):
     factor = {}
     if cfg["settings"].get("mixLearn", True):
         factor = {index[s]: f for s, f in feedback.factors(user).items() if s in index}
+    if seed is not None:
+        for j, f in _variety(lib, user, seed).items():
+            factor[j] = factor.get(j, 1.0) * f
     return person["id"], leave, factor
 
 
@@ -362,7 +409,7 @@ def similar_songs(cfg, lib, song_id, count=50, personal=False):
     i = lib.index_of().get(song_id)
     if i is None:
         return []
-    pid, leave, factor = _who(cfg, lib, {song_id}, personal)
+    pid, leave, factor = _who(cfg, lib, {song_id}, personal, seed=i)
     allowed = _pool(cfg, lib, _worlds_of(cfg, lib, [i]), pid)
     key = (ml.lib_key(lib), _cfg_key(cfg), similar.stamp(), song_id, count)
     if pid is None:

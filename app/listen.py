@@ -278,6 +278,16 @@ def listener(ids, now=None):
     return playing[0] if len(playing) == 1 else None
 
 
+def sequence(user, seconds=3600, now=None):
+    """The songs this account played in the last `seconds`, in order – the same song several times in a row once."""
+    now_t = now or time.time()
+    out = []
+    for r in _recent(_folder(user), now_t - seconds, now_t):
+        if not out or out[-1] != r["id"]:
+            out.append(r["id"])
+    return out
+
+
 def heard(user, seconds=HEARD_SECONDS, now=None):
     """Song ids this account started, played or reported in the last `seconds`."""
     now_t = now or time.time()

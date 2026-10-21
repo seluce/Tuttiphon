@@ -259,6 +259,19 @@ class ListenerTest(unittest.TestCase):
             self.assertEqual(sonic._rated_one(self.lib, "oma"), frozenset())   # loading
             self.assertEqual(sonic._rated_one(self.lib, "Oma"), {theirs.songs[3]["id"]})
 
+    def test_not_one_band_all_the_time(self):
+        self.play("niklas", "Eisen-0")
+        bands = self.ask()[1]
+        self.assertIn("Eisen", bands[:3])                    # the first song of a band: its own songs may follow
+        self.clean()
+        self.play("niklas", "Eisen-1", ago=500)
+        self.play("niklas", "Eisen-2", ago=250)
+        self.play("niklas", "Eisen-0")                       # the third Eisen song in a row
+        bands = self.ask()[1]
+        self.assertNotIn("Eisen", bands[:2])                 # now other bands first
+        self.assertIn("Eisen", bands)                        # … but still there, further down
+        self.assertEqual(sonic.status()["lastFor"], "Niklas")
+
     def test_kid_safe_stays(self):
         self.lib.songs[1]["explicitStatus"] = "explicit"   # Eisen-1, the nearest of Eisen-0
         self.cfg["personen"][1]["child"] = True            # Jonas

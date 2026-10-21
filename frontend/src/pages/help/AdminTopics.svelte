@@ -268,7 +268,7 @@
     <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Settings → Media providers).')}</span></li>
   </Steps>
   <p>{t('The plugin also passes every play on: exact listening times, real skips for the mixes – and the recap for accounts without a stored password.')}</p>
-  <p>{t('Navidrome does not say who is asking. Tuttiphon sees from the plays who is listening: if the song is playing on exactly one account – or only one account is playing – the answer is for that person (their dislikes, without what they just heard or rated 1 star, what they skip later), otherwise for the family. Kid-safe always as for the family: without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile. The card shows when Navidrome last asked and for whom.')}</p>
+  <p>{t('Navidrome does not say who is asking. Tuttiphon sees from the plays who is listening: if the song is playing on exactly one account – or only one account is playing – the answer is for that person (their dislikes, without what they just heard or rated 1 star, what they skip later, after two songs of a band other bands first), otherwise for the family. Kid-safe always as for the family: without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile. The card shows when Navidrome last asked and for whom.')}</p>
 {/snippet}
 
 {#snippet benachrichtigungen()}

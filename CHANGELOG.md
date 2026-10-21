@@ -13,6 +13,9 @@ released.
   their dislikes, without what they heard in the last three hours or rated 1 star, songs they often skip further down.
   Otherwise the answer is for the family as before; kid-safe always stays as for the family. Settings → Navidrome
   shows for whom the last answer was.
+- **The smart queue does not stay with one band:** Symfonium takes the most similar song every time – mostly of the
+  same band, so it could play five of them in a row. After two songs of a band in a row, other bands now come first,
+  and a band heard often in the last hour comes a little later.
 - **Help for the family:** the help topic “Listening in Symfonium” explains the two Symfonium settings for the
   plugin – similar tracks for the radio mix and the smart queue by sonic analysis – as soon as the plugin is set up.
   The German texts now use Symfonium's German names for them.

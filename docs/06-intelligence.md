@@ -637,6 +637,11 @@ exactly one person who is allowed (`listen.allowed()`). Then, for similar songs,
   songs it rated 1 star by hand (`feedback.manual_dislikes()` – from the account's own song list, loaded in the
   background with `stats.songs_for()` and kept an hour, `_rated_one()`; the first answer goes without);
 - songs it skips come further down: scores times `feedback.factors()` (with “Mixes that learn” on);
+- for similar songs also variety between bands (`_variety()`): Symfonium's smart queue asks about every new song and
+  takes the most similar – mostly of the same band. From the account's songs of the last hour in order
+  (`listen.sequence()`, the song asked about at the end): after `RUN_MAX` = 2 songs of one band in a row its songs
+  count only a fifth (`RUN_FACTOR`), so other bands come first; a band heard n times in the last hour counts
+  `HOUR_FACTOR`^(n − 1) (0.85);
 - kid-safe stays as for the family – never loosened on a guess;
 - not remembered (the family's answers are).
 
