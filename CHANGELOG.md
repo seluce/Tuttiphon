@@ -18,6 +18,10 @@ released.
 - **Notifications in your own language:** every phone gets its notifications in the language of its Tuttiphon
   interface – also after you switch it; an ntfy topic in the language of the person's devices. Playlist names in them
   stay as in Navidrome.
+- **The smart queue knows you on a shared account:** if the family person uses your Navidrome account too, the
+  answers are now for you instead of for the family.
+- **The bar of a running task can be put away:** ✕ or swipe it aside – it stays away until the run ends (a night
+  analysis runs for hours); the spinning icon in the header stays.
 - **Helping with translations:** `tools/translate.py` exports every text of a language as a simple table and puts
   corrections back after checking them – also for a new language.
 

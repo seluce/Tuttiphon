@@ -222,7 +222,9 @@ and (administrator) the history, and increments `S.done`.
 
 `shell/TaskBar.svelte` shows a small indicator at the top of the header while something is running, and a floating bar
 at the bottom (notice bar). Users only see apply runs (all steps are `playlists` or `scan`, `isApplyRun()`),
-no analysis or maintenance runs. The bar shows the first thing that applies:
+no analysis or maintenance runs. The bar of a running task can be put away – with ✕ or swiped aside (it follows the
+finger; 90 px to the side or 40 px down) – until that run ends; the indicator in the header stays. The bar shows the
+first thing that applies:
 
 | State | Bar |
 |---|---|

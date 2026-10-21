@@ -259,6 +259,18 @@ class ListenerTest(unittest.TestCase):
             self.assertEqual(sonic._rated_one(self.lib, "oma"), frozenset())   # loading
             self.assertEqual(sonic._rated_one(self.lib, "Oma"), {theirs.songs[3]["id"]})
 
+    def test_the_own_person_of_a_shared_account(self):
+        """The shared person on a parent's account ("Family" on ferris' account): the parent's own person listens."""
+        self.cfg["personen"][0]["user"] = "niklas"   # the shared person "Familie" uses Niklas' account too
+        self.play("niklas", "Eisen-0")
+        self.assertNotIn("Blech", self.ask()[1])
+        self.assertEqual(sonic.status()["lastFor"], "Niklas")
+        self.cfg["personen"][2]["user"] = "oma"   # now only the shared person is left on the account: it listens
+        self.clean()
+        self.play("niklas", "Eisen-0")
+        self.ask()
+        self.assertEqual(sonic.status()["lastFor"], "Familie")
+
     def test_not_one_band_all_the_time(self):
         self.play("niklas", "Eisen-0")
         bands = self.ask()[1]

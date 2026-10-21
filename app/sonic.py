@@ -181,14 +181,17 @@ def _all_batch():
 
 
 def _listener(cfg, ids):
-    """The person listening to one of these songs right now (listen.listener()) – the one person of that account;
-    None if that is unclear."""
+    """The person listening to one of these songs right now (listen.listener()) – the person of that account; if the
+    shared person uses the account too ("Family" on a parent's account), the account's own person. None if that is
+    unclear."""
     from . import listen
     from .config import slug
     folder = listen.listener(ids)
     if not folder:
         return None
     people = [p for p in cfg.get("personen", []) if p.get("user") and slug(p["user"]) == folder]
+    if len(people) > 1:
+        people = [p for p in people if p["id"] != cfg["settings"].get("defaultPerson")]
     if len(people) != 1 or not listen.allowed(cfg, people[0]["user"]):
         return None
     return people[0]

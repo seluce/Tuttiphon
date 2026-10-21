@@ -630,7 +630,8 @@ looks at the day files of all accounts: the account that played the song asked a
 the band, for an album one of the album – in the last 15 minutes (`LISTENER_SONG`), if it is exactly one; if none did,
 the one account whose last event is at most 10 minutes old and not “stopped” (`LISTENER_ACTIVE`). Two accounts on the
 same song, or two playing at once and neither the song: unclear – the family's answer. The account must belong to
-exactly one person who is allowed (`listen.allowed()`). Then, for similar songs, artist and album radio:
+exactly one person who is allowed (`listen.allowed()`) – if the shared person uses the account too (“Family” on a
+parent's account), the account's own person. Then, for similar songs, artist and album radio:
 
 - what may come is that person's “All” and dislikes (`_pool(…, pid)`; a child profile: its children's music too);
 - left out: what the account started, played or reported in the last 3 hours (`listen.heard()`, `HEARD_SECONDS`) and
