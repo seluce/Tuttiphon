@@ -257,9 +257,9 @@ export default {
   'In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.':
     'Schalte in Navidrome unter Einstellungen → Plugins „Tuttiphon“ ein, trage die Adresse von Tuttiphon im Heimnetz und den Schlüssel ein und gib es für alle Benutzer frei.',
   'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Settings → Media providers).':
-    'Schalte in Symfonium für den Navidrome-Server „Use similar tracks for Radio Mix“ ein (Einstellungen → Medienanbieter).',
-  'Navidrome does not say who is listening – the songs come from the whole library as for the family, without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile. The card shows when Navidrome last asked.':
-    'Navidrome verrät nicht, wer gerade hört – die Songs kommen aus der ganzen Bibliothek wie für die Familie, ohne Songs mit derben Texten, sobald ein Profil Kinderschutz hat oder ein Kinderprofil ist. Die Karte zeigt, wann Navidrome zuletzt gefragt hat.',
+    'Schalte in Symfonium für den Navidrome-Server „Ähnliche Titel für Radio-Mix verwenden“ ein (Medienquellen verwalten).',
+  'Navidrome does not say who is asking. Tuttiphon sees from the plays who is listening: if the song is playing on exactly one account – or only one account is playing – the answer is for that person (their dislikes, without what they just heard or rated 1 star, what they skip later), otherwise for the family. Kid-safe always as for the family: without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile. The card shows when Navidrome last asked and for whom.':
+    'Navidrome verrät nicht, wer fragt. Tuttiphon sieht an den Wiedergaben, wer gerade hört: Läuft der Song auf genau einem Konto – oder spielt nur ein Konto –, gilt die Antwort dieser Person (ihre Abneigungen, ohne das gerade Gehörte und ihre 1-Stern-Songs, Übersprungenes später), sonst der Familie. Kinderschutz immer wie für die Familie: ohne Songs mit derben Texten, sobald ein Profil Kinderschutz hat oder ein Kinderprofil ist. Die Karte zeigt, wann Navidrome zuletzt gefragt hat und für wen.',
   'The plugin also passes every play on: exact listening times, real skips for the mixes – and the recap for accounts without a stored password.':
     'Das Plugin gibt außerdem jede Wiedergabe weiter: genaue Hörzeiten, echtes Überspringen für die Mixe – und den Rückblick für Konten ohne gespeichertes Passwort.',
 }

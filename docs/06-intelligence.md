@@ -619,11 +619,28 @@ The Tuttiphon plugin hands Navidrome's questions to `GET /api/sonic/…` ([API](
 Instant Mix, “similar songs”, the smart queue, song and artist radio in Navidrome and its apps (Symfonium, Feishin …) and the
 OpenSubsonic extension `sonicSimilarity` follow the sound of the own files.
 
-**What may come** (`_pool()`, cached per song list, configuration and worlds): Navidrome does not say who listens, so
-“All” as for the shared person – minimum rating 0, without the separate worlds, without its dislikes, without live
+**What may come** (`_pool()`, cached per song list, configuration, worlds and person): Navidrome does not say who asks,
+so “All” as for the shared person – minimum rating 0, without the separate worlds, without its dislikes, without live
 recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon as any profile is a child profile or
 has kid-safe mode on (`_view()`; without a shared person a stand-in without dislikes). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
 lead to children's songs, a rock song never to an audio play.
+
+**For the one listening** (`_who()`): the live plays (`app/listen.py`) tell who is playing what. `listen.listener()`
+looks at the day files of all accounts: the account that played the song asked about – for the artist radio a song of
+the band, for an album one of the album – in the last 15 minutes (`LISTENER_SONG`), if it is exactly one; if none did,
+the one account whose last event is at most 10 minutes old and not “stopped” (`LISTENER_ACTIVE`). Two accounts on the
+same song, or two playing at once and neither the song: unclear – the family's answer. The account must belong to
+exactly one person who is allowed (`listen.allowed()`). Then, for similar songs, artist and album radio:
+
+- what may come is that person's “All” and dislikes (`_pool(…, pid)`; a child profile: its children's music too);
+- left out: what the account started, played or reported in the last 3 hours (`listen.heard()`, `HEARD_SECONDS`) and
+  songs it rated 1 star by hand (`feedback.manual_dislikes()` – from the account's own song list, loaded in the
+  background with `stats.songs_for()` and kept an hour, `_rated_one()`; the first answer goes without);
+- songs it skips come further down: scores times `feedback.factors()` (with “Mixes that learn” on);
+- kid-safe stays as for the family – never loosened on a guess;
+- not remembered (the family's answers are).
+
+The settings card shows for whom the last song answer was (`status()["lastFor"]`).
 
 | Question | How |
 |---|---|

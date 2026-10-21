@@ -419,6 +419,23 @@ def forget_own(pid):
         path.unlink(missing_ok=True)
 
 
+def digest(data):
+    """A short checksum of an uploaded image (cover.hash) – to recognize it again in Navidrome."""
+    return hashlib.sha256(data).hexdigest()[:16]
+
+
+def set_by_hand(native, cv, np):
+    """Is the image in Navidrome no longer the one Tuttiphon uploaded? Navidrome names the file after the playlist
+    (<id>_<name>.<type>), so an image of the same type set there by hand keeps the name – its content tells (Navidrome
+    serves the uploaded file as it is). Unknown (uploaded before checksums were kept, Navidrome briefly gone): no."""
+    if not cv.get("hash") or cv.get("nid") != np["id"] or not np.get("uploadedImage"):
+        return False
+    try:
+        return digest(native.playlist_image(np["id"])) != cv["hash"]
+    except Exception:   # noqa: BLE001 – unknown: renew as before
+        return False
+
+
 def upload(native, navidrome_id, data, ctype=None):
     ctype = sniff(data)
     if not ctype:
@@ -431,7 +448,8 @@ def refresh_auto(cfg, lib, native, by_file, log=print, dropped=None):
     """Renew designed covers whose material has changed (e.g. a Daily Mix with a new selection). A format without a
     cover (default_style) gets its format cover – unless it has an image in Navidrome already; it is then noted in the
     playlist as {"style": "format", "auto": true}. Removing it leaves {"style": "none"}: it does not come back.
-    After an upload the image Navidrome reports is kept (cover.img): if Navidrome later reports another one, it was set
+    After an upload the image Navidrome reports and the checksum of the image are kept (cover.img, cover.hash): if
+    Navidrome later reports another name – or, before a renewal, serves another image (set_by_hand()) – it was set
     there by hand and stays ({"style": "navidrome"}); none at all: it was removed there ("none"). A format cover on a
     playlist that is no longer a format goes again (its id into `dropped`)."""
     changed = 0
@@ -472,10 +490,16 @@ def refresh_auto(cfg, lib, native, by_file, log=print, dropped=None):
             fresh = next((x for x in load_config()["playlists"] if x["id"] == p["id"]), None)
             if fresh is None or (fresh.get("cover") or {}).get("style") != cv.get("style"):
                 continue   # deleted, or another cover was chosen in the meantime
-            upload(native, np["id"], render(cfg, lib, p, style))
+            if set_by_hand(native, cv, np):   # the same name, another image: set in Navidrome itself – it stays
+                p["cover"] = {"style": "navidrome", "at": today, "rev": int(time.time()), "nid": np["id"]}
+                changed += 1
+                log(_s("  🖼 Cover changed in Navidrome – it stays: {name}", name=np.get("name")))
+                continue
+            data = render(cfg, lib, p, style)
+            upload(native, np["id"], data)
             if not cv:   # the format's own cover, the first time
                 cv = p["cover"] = {"style": style, "auto": True, "at": today}
-            cv["sig"], cv["nid"] = sig, np["id"]
+            cv["sig"], cv["nid"], cv["hash"] = sig, np["id"], digest(data)
             cv.pop("img", None)
             uploaded.append(cv)
             changed += 1

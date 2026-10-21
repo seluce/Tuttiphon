@@ -20,7 +20,9 @@ What comes of it:
   (feedback.learn);
 * plays without a stored password – as long as an account has no counter snapshots (rueckblick, baseline.json), its
   plays go into the recap from here (the day files rueckblick.snapshot writes); with the first snapshot that stops, so
-  nothing counts twice. A play that arrives twice (Navidrome retrying it) is kept once.
+  nothing counts twice. A play that arrives twice (Navidrome retrying it) is kept once;
+* who is listening right now (listener(), heard()) – Navidrome does not say who asks the plugin for similar songs;
+  sonic.py answers for the person playing the song asked about.
 """
 import datetime as dt
 import json
@@ -38,6 +40,9 @@ START_SECONDS = 15   # a "now playing" further into the song is the same play go
 SAME_PLAY = 60       # a start and the scrobble of the same song this close together are one play
 SHORT_PIECE = 5      # a moment of another song between two parts of the same song: not a change of song
 IDLE_SECONDS = 1800  # the first song after this long a pause on a player never counts as skipped
+LISTENER_SONG = 900       # the song asked about played on exactly one account this recently: that account listens
+LISTENER_ACTIVE = 600     # otherwise: the one account playing anything right now (its last event this recent)
+HEARD_SECONDS = 3 * 3600  # what the listener heard this recently does not come again at once (sonic.py)
 KINDS = ("start", "play", "report")
 STATES = ("starting", "playing", "paused", "stopped", "expired")
 _lock = threading.Lock()
@@ -243,6 +248,40 @@ def moments(user, since):
         if _local(r["t"]) >= since:
             out.append((_local(r["t"]), r["id"]))
     return out
+
+
+def _recent(folder, since, now_t):
+    """The events of one account folder from `since` to `now_t` (Unix seconds), oldest first."""
+    days = sorted({_local(since).date().isoformat(), _local(now_t).date().isoformat()})
+    rows = [r for d in days for r in _rows(folder / f"live-{d}.jsonl") if since <= r["t"] <= now_t]
+    rows.sort(key=lambda r: r["t"])
+    return rows
+
+
+def listener(ids, now=None):
+    """Who is listening – the account folder (config.slug of the account) or None if that is unclear. `ids`: the
+    song asked about (or the songs of the band or album asked about). The account that played one of them in the
+    last LISTENER_SONG seconds – if it is exactly one; if none did, the one account playing anything right now (its
+    last event at most LISTENER_ACTIVE seconds ago and not "stopped")."""
+    from .rueckblick import PLAYS_DIR
+    now_t = now or time.time()
+    try:
+        folders = [f for f in PLAYS_DIR.iterdir() if f.is_dir()]
+    except OSError:
+        return None
+    recent = {f.name: _recent(f, now_t - LISTENER_SONG, now_t) for f in folders}
+    hit = [a for a, rows in recent.items() if any(r["id"] in ids for r in rows)]
+    if hit:
+        return hit[0] if len(hit) == 1 else None
+    playing = [a for a, rows in recent.items()
+               if rows and rows[-1]["t"] >= now_t - LISTENER_ACTIVE and rows[-1].get("st") not in ("stopped", "expired")]
+    return playing[0] if len(playing) == 1 else None
+
+
+def heard(user, seconds=HEARD_SECONDS, now=None):
+    """Song ids this account started, played or reported in the last `seconds`."""
+    now_t = now or time.time()
+    return {r["id"] for r in _recent(_folder(user), now_t - seconds, now_t)}
 
 
 def has_live(user, start, end):

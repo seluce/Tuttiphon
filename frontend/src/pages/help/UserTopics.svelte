@@ -10,6 +10,7 @@
   import CompareCard from './CompareCard.svelte'
   import Ui from './Ui.svelte'
   import { t, translated } from '../../lib/i18n.svelte.js'
+  import { S } from '../../lib/state.svelte.js'
 
   export const USER_TOPICS = translated(() => [
     { id: 'start', icon: 'home', title: t('“For you” – your home page'), body: start, guides: ['mix', 'geschmack'] },
@@ -165,6 +166,9 @@
     <li>{@html t('<b>Private or family:</b> only your account sees private playlists. Everyone sees family playlists.')}</li>
     <li>{@html t('<b>Listening counts:</b> Tuttiphon uses what you listen to in Symfonium for your statistics, your taste and your mixes. Symfonium reports this to the server by itself.')}</li>
     <li>{@html t('<b>1 star:</b> rate a song you no longer want to hear with 1 star in Symfonium – then it no longer goes into your mixes.')}</li>
+    {#if S.status?.plugin}
+      <li>{@html t('<b>Radio and smart queue by sound:</b> in Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers → the server) and choose “Sonic Analysis” as the mode of the smart queue in the player. Then the next songs come from Tuttiphon and sound like what is playing – picked for you: without what you dislike or just heard, what you often skip comes later.')}</li>
+    {/if}
   </Bullets>
 {/snippet}
 

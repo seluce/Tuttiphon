@@ -195,11 +195,12 @@ class Navidrome:
             raise NavidromeError(_("Song not playable"))
         return resp
 
-    def cover_art(self, cover_id, size):
-        """Raw image (bytes, content type) – getCoverArt does not answer with JSON."""
+    def cover_art(self, cover_id, size=None):
+        """Raw image (bytes, content type) – getCoverArt does not answer with JSON. Without a size: the image as it is
+        (for a playlist: the uploaded file itself)."""
         salt = secrets.token_hex(8)
         query = {"u": self.user, "t": hashlib.md5((self._password + salt).encode()).hexdigest(), "s": salt,
-                 "v": "1.16.1", "c": CLIENT, "id": cover_id, "size": size}
+                 "v": "1.16.1", "c": CLIENT, "id": cover_id, **({"size": size} if size else {})}
         try:
             with urllib.request.urlopen(f"{self.url}/rest/getCoverArt?{urllib.parse.urlencode(query)}", timeout=30) as resp:
                 return resp.read(), resp.headers.get("Content-Type", "")
@@ -291,6 +292,10 @@ class NativeApi:
 
     def delete_playlist_image(self, playlist_id):
         return self._request("DELETE", f"/api/playlist/{playlist_id}/image")
+
+    def playlist_image(self, playlist_id):
+        """The image Navidrome has for a playlist, byte for byte as uploaded (getCoverArt without a size)."""
+        return Navidrome(self.url, self._user, self._password).cover_art(f"pl-{playlist_id}")[0]
 
 
 _sessions = {}

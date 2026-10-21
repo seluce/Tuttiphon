@@ -268,7 +268,7 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
-| `GET /api/status` | signed in | – | `env` (`url`, `webUrl`, `admin`, `adminOk`, `users[{name, ok, key, rejected}]`, `auth`, `adminPassword`, `publicUrl`, `lastfm`, `locked`), `deezer`, `steps`, `allSteps`, `daily`, `watch`, `paths`, `instance{docker, others[{host, docker, running}]}`, `navidrome{ok, version, scan}` or `{ok: false, error}` | only `navidrome{ok, version, scan}`, `env{users (own accounts only), auth, webUrl, lastfm}`, `daily`, `instance{docker, others: []}`; `steps`/`allSteps` empty |
+| `GET /api/status` | signed in | – | `env` (`url`, `webUrl`, `admin`, `adminOk`, `users[{name, ok, key, rejected}]`, `auth`, `adminPassword`, `publicUrl`, `lastfm`, `locked`), `deezer`, `steps`, `allSteps`, `daily`, `watch`, `paths`, `instance{docker, others[{host, docker, running}]}`, `navidrome{ok, version, scan}` or `{ok: false, error}`, `plugin` (bool: the Navidrome plugin has a key) | only `navidrome{ok, version, scan}`, `env{users (own accounts only), auth, webUrl, lastfm}`, `daily`, `instance{docker, others: []}`, `plugin`; `steps`/`allSteps` empty |
 | `GET /api/home` | signed in | – | `{"newAlbums", "favNew", "songs", "albums", "artists", "playlists", "personen"}` (numbers, `playlists` = active playlists of all people). Each album carries `fav`: by a favorite band of the signed-in person (administrators: of the default person and of their own account, `rules.favorite_artists()`); those from the last 45 days come first, `favNew` counts them | `fav` from one's own people |
 | `GET /api/library` | signed in | `refresh=1` reloads the library from Navidrome | Index: `artists[[name, songs, id]]`, `genres`, `albums`, `songs`, `suffix`, `mp3Albums`, `loved`, `played`, `similar`, `untagged`, `autoArtists`, `weltInfo`, `scenes`, `ratingsExact`, `ratingSource`, `deezer` | unfiltered |
 | `GET /api/welt` | signed in | `id` of the music world | `members`, `songs`, `covers`, `artists`, `memberList[{name, id, songs, auto}]`, `similar`, `playlists`, `excluded`, `scene`, `forMe` | `playlists` visible ones only; `forMe` always from one's own account |
@@ -599,7 +599,7 @@ an empty, unprintable or longer than 100 characters user, an empty song: `400`; 
 
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
-| `GET /api/plugin` | admin | – | `{"key": bool, "keyAt", "lastCall", "calls", "vectors", "live": {"lastEvent", "events", "accounts"}, "file": bool, "version"}` – `lastCall`/`calls` and `live` since Tuttiphon started (memory only), `file`: the plugin file is part of this installation |
+| `GET /api/plugin` | admin | – | `{"key": bool, "keyAt", "lastCall", "calls", "lastFor", "vectors", "live": {"lastEvent", "events", "accounts"}, "file": bool, "version"}` – `lastCall`/`calls` and `live` since Tuttiphon started (memory only), `lastFor`: the name of the person the last song answer was for (`null`: the family), `file`: the plugin file is part of this installation |
 | `POST /api/plugin/key` | admin | `{}` | `{"key": "tp_…"}` – a new key, shown once (only its SHA-256 is stored in `state/plugin_key.json`); the old one stops working |
 | `POST /api/plugin/key/remove` | admin | `{}` | `{"ok": true}` |
 | `GET /plugin/tuttiphon.ndp` | admin | – | the plugin as a download (`application/octet-stream` – with `application/zip` browsers save it as `tuttiphon.ndp.zip`; it is a zip inside all the same, as every `.ndp`); `404` if this installation has none |

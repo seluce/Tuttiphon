@@ -504,8 +504,10 @@ sound analysis, so the Docker image – without it, the plugin answers with the 
 5. **Symfonium:** in the settings of the Navidrome server (Settings → Media providers → the server), turn on “Use
    similar tracks for Radio Mix” – Instant Mix, song radio and the smart queue then come from Tuttiphon.
 
-Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix and “Plays from
-Navidrome” after a song (with the accounts). Problems: in
+Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix – with the person
+the answer was for, or “for the family” – and “Plays from Navidrome” after a song (with the accounts). The answers
+follow the one listening only with the plays: the plugin needs all users allowed
+([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Problems: in
 Navidrome's log lines with `plugin=tuttiphon` (more with `ND_PLUGINS_LOGLEVEL=debug`) – “Tuttiphon not reachable”
 (address, network between the containers), “Tuttiphon answered 401” (key: create a new one and enter it), “answered
 429” (too many wrong keys from this address – wait 10 minutes). “Last request” counts only Navidrome's questions, not
@@ -522,7 +524,9 @@ image workflow build it, the Dockerfile copies it to `/app/plugin/`, the workflo
 release. `tools/plugin-check.sh` (maintainers) runs the whole way end to end: test music made with ffmpeg, a throwaway
 Navidrome (`TUTTIPHON_NAVIDROME` or in `PATH`, port 4599) with the plugin, a throwaway Tuttiphon (port 8799) with
 made-up sound vectors, then `getSimilarSongs2`, `getSonicSimilarTracks`, `findSonicPath` and `getArtistInfo2` through
-Navidrome and a play (`scrobble`, `reportPlayback`) passed on – never the real Navidrome or the real data. The
+Navidrome and a play (`scrobble`, `reportPlayback`) passed on, then `getSimilarSongs2` for the song playing, which has
+to leave out the songs just heard (the answer for the one listening, also proving that Navidrome keeps no answer) –
+never the real Navidrome or the real data. The
 `.ndp` carries the licenses of the parts compiled into it (`LICENSES.txt`, `GPL-3.0.txt`).
 
 ## Backup

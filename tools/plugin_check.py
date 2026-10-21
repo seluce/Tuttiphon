@@ -9,7 +9,9 @@ throwaway folder – never the real Navidrome or the real data.
 4. questions to Navidrome's Subsonic API – getSimilarSongs2, getArtistInfo2, getSonicSimilarTracks, findSonicPath –
    whose answers have to come from Tuttiphon; plus Tuttiphon's endpoint directly (and a wrong key);
 5. plays through Navidrome (scrobble, reportPlayback): a song played, the next left after 5 seconds, the one after
-   played – Tuttiphon has to receive them, count the play and recognize the skip.
+   played – Tuttiphon has to receive them, count the play and recognize the skip;
+6. the answer for the one listening: getSimilarSongs2 for the song playing leaves out what was just heard (also
+   proves that Navidrome does not keep the family's answer).
 
   python3 tools/plugin_check.py --navidrome <navidrome binary> --plugin <tuttiphon.ndp> [--keep]
 """
@@ -217,6 +219,10 @@ def main():
         if by_id[similar[0]["id"]]["artist"] not in family:
             fail(f"getSimilarSongs2: the first song is not of the same sound: {similar[0].get('artist')}")
         say(f"✓ getSimilarSongs2 (Instant Mix): {len(similar)} songs, first {similar[0]['artist']} – {similar[0]['title']}")
+        a, b = [s for s in songs if s["artist"] == "Harfe"][:2]   # the songs played below
+        for_family = [x["id"] for x in subsonic("getSimilarSongs2", id=b["id"], count=10).get("similarSongs2", {}).get("song", [])]
+        if a["id"] not in for_family:
+            fail(f"getSimilarSongs2 for {b['title']}: {a['title']} of the same band is missing ({for_family})")
 
         sonic_tracks = subsonic("getSonicSimilarTracks", id=seed["id"], count=5)
         matches = next((v for k, v in sonic_tracks.items() if isinstance(v, (dict, list)) and k not in ("openSubsonic",)), None)
@@ -243,7 +249,6 @@ def main():
 
         # plays: song z is playing, then a starts and is left after 5 s, b starts and is played to the end (the first
         # song after a pause is never judged – so z first)
-        a, b = [s for s in songs if s["artist"] == "Harfe"][:2]
         z = next(s for s in songs if s["artist"] != "Harfe")
         subsonic("reportPlayback", mediaId=z["id"], mediaType="song", positionMs=100000, state="playing")
         time.sleep(1)
@@ -273,6 +278,13 @@ def main():
             fail(f"the play is not in the recap: {dict(counted)}")
         say(f"✓ plays through Navidrome: {len(evs)} events ({', '.join(kinds)}), the left song counts as skipped, "
             "the played one in the recap")
+
+        # the account is listening to b now: the answer is for its person – without a and z, heard just now
+        mine = [x["id"] for x in subsonic("getSimilarSongs2", id=b["id"], count=10).get("similarSongs2", {}).get("song", [])]
+        status, plugin_status = http(f"http://127.0.0.1:{TP_PORT}/api/plugin")
+        if {a["id"], z["id"]} & set(mine) or plugin_status.get("lastFor") != "Check":
+            fail(f"not answered for the one listening: {mine} for {plugin_status.get('lastFor')}")
+        say(f"✓ answered for the one listening ({plugin_status['lastFor']}): without the songs heard just now")
 
         status, plugin_status = http(f"http://127.0.0.1:{TP_PORT}/api/plugin")
         if status != 200 or not plugin_status.get("lastCall"):

@@ -175,7 +175,7 @@ class EndpointTest(unittest.TestCase):
             self.assertEqual(self.post({"event": "play", "user": USER, "id": "a"}, key), (200, {"ok": True}))
             self.assertEqual(self.post({"event": "play", "user": "fremd", "id": "a"}, key), (200, {"ok": False}))
         self.assertEqual(self.post({"event": "dance", "user": USER, "id": "a"}, key)[0], 400)
-        self.assertEqual(listen.status()["accounts"][-1:], [USER])
+        self.assertIn(USER, listen.status()["accounts"])
         status, _h, _c = request("POST", "/api/sonic/other", b"{}", headers={"Authorization": f"Bearer {key}"})
         self.assertIn(" 404 ", status)
 

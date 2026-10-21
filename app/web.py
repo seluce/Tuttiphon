@@ -235,7 +235,7 @@ def schedule_warm(delay=2.5):
 
 def api_status():
     from .version import VERSION
-    out = {**_status_full(), "version": VERSION}
+    out = {**_status_full(), "version": VERSION, "plugin": sonic.has_key()}
     m = auth.current()
     if m["role"] == "admin":
         return out
@@ -246,7 +246,7 @@ def api_status():
             "env": {"users": [u for u in env.get("users", []) if u["name"].lower() in own_users], "auth": env.get("auth"),
                     "webUrl": env.get("webUrl"), "lastfm": env.get("lastfm")},
             "steps": [], "allSteps": [], "daily": out.get("daily"), "instance": {"docker": out.get("instance", {}).get("docker"), "others": []},
-            "version": out["version"]}
+            "version": out["version"], "plugin": out["plugin"]}
 
 
 def api_changelog():
@@ -1589,7 +1589,7 @@ def api_cover_apply(body):
         for x in fresh["playlists"]:
             if x["id"] == p["id"]:
                 x["cover"] = {"style": style, "sig": sig, "nid": np["id"], "at": dt.date.today().isoformat(), "rev": int(time.time()),
-                              **({"img": img} if img else {})}
+                              "hash": covers.digest(data), **({"img": img} if img else {})}
     update_config(apply)
     return {"ok": True}
 

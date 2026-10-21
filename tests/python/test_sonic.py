@@ -170,6 +170,114 @@ class SonicTest(unittest.TestCase):
             sonic.answer(self.cfg, self.lib, "unknown", {})
 
 
+class ListenerTest(unittest.TestCase):
+    """The answer for whoever is listening (listen.listener()): their dislikes, without what they just heard or rated
+    1 star, skipped songs further down – the family's when that is unclear, kid-safe as for the family."""
+
+    def setUp(self):
+        reset()
+        self.addCleanup(reset)
+        self.clean()
+        self.addCleanup(self.clean)
+        self.cfg, self.lib = config(), library()
+        self.cfg["personen"][2]["dislikes"] = {"artists": ["Blech"], "genres": []}   # Niklas
+        write_vectors({s["id"]: vector(BANDS[s["artist"]], k) for k, s in enumerate(self.lib.songs)})
+
+    def clean(self):
+        import shutil
+        from app import listen, rueckblick
+        shutil.rmtree(rueckblick.PLAYS_DIR, ignore_errors=True)
+        listen._seen["pruned"].clear()
+        sonic._memo.clear()
+        sonic._stars.clear()
+
+    def play(self, user, sid, ago=0):
+        from app import listen
+        import time
+        self.assertTrue(listen.record(user, "report", sid, position=20, state="playing", player="phone", cfg=self.cfg,
+                                      now=time.time() - ago))
+
+    def ask(self, sid="Eisen-0", count=12):
+        out = sonic.answer(self.cfg, self.lib, "similar", {"id": sid, "count": str(count)})
+        return [x["id"] for x in out["songs"]], [x["artist"] for x in out["songs"]]
+
+    def test_for_the_one_listening(self):
+        family_ids, family_bands = self.ask()
+        self.assertIn("Blech", family_bands)
+        heard = family_ids[0]
+        self.play("niklas", heard, ago=3000)   # heard an hour ago
+        self.play("niklas", "Eisen-0")         # and now Eisen-0 – the smart queue asks about it
+        ids, bands = self.ask()
+        self.assertNotIn("Blech", bands)       # his dislike
+        self.assertNotIn(heard, ids)           # just heard
+        self.assertEqual(sonic.status()["lastFor"], "Niklas")
+        self.play("oma", "Harfe-0")            # someone else playing another song: still Niklas for Eisen-0
+        self.assertNotIn("Blech", self.ask()[1])
+        self.assertEqual(sonic.status()["lastFor"], "Niklas")
+
+    def test_unclear_is_for_the_family(self):
+        self.assertIn("Blech", self.ask()[1])
+        self.assertIsNone(sonic.status()["lastFor"])
+        self.play("niklas", "Stahl-0")         # the only one playing anything: his – also for another song
+        self.assertNotIn("Blech", self.ask()[1])
+        self.play("oma", "Harfe-0")            # two playing, neither Eisen-0: unclear
+        self.assertIn("Blech", self.ask()[1])
+        self.play("niklas", "Eisen-0")
+        self.play("oma", "Eisen-0")            # both on the same song: unclear
+        self.assertIn("Blech", self.ask()[1])
+        self.assertIsNone(sonic.status()["lastFor"])
+
+    def test_skipped_further_down_and_one_star_out(self):
+        from app import feedback
+        family = self.ask()[0]
+        self.lib = Library(self.lib.songs, ratings_exact=True, user="niklas")   # the stars of his account
+        rated = family[1]
+        next(x for x in self.lib.songs if x["id"] == rated)["userRating"] = 1   # 1 star by hand (no Deezer rank)
+        skipped = family[0]
+        self.play("niklas", "Eisen-0")
+        with mock.patch.object(feedback, "factors", lambda user, today=None: {skipped: 0.1}):
+            ids = self.ask()[0]
+        self.assertNotIn(rated, ids)
+        self.assertTrue(skipped not in ids or ids.index(skipped) > family.index(skipped))   # further down (or out)
+        with mock.patch.object(feedback, "factors", lambda user, today=None: {skipped: 0.1}):
+            self.cfg["settings"]["mixLearn"] = False   # "Mixes that learn" off: no skips
+            self.assertEqual(self.ask()[0].index(skipped), 0)
+
+    def test_stars_of_another_account_load_in_the_background(self):
+        from app import stats
+
+        class Now:   # the background thread right away
+            def __init__(self, target, daemon=None):
+                self.target = target
+
+            def start(self):
+                self.target()
+        theirs = Library([dict(x) for x in self.lib.songs], ratings_exact=True, user="oma")
+        theirs.songs[3]["userRating"] = 1
+        with mock.patch.object(sonic.threading, "Thread", Now), \
+                mock.patch.object(stats, "songs_for", lambda user, base: theirs):
+            self.assertEqual(sonic._rated_one(self.lib, "oma"), frozenset())   # loading
+            self.assertEqual(sonic._rated_one(self.lib, "Oma"), {theirs.songs[3]["id"]})
+
+    def test_kid_safe_stays(self):
+        self.lib.songs[1]["explicitStatus"] = "explicit"   # Eisen-1, the nearest of Eisen-0
+        self.cfg["personen"][1]["child"] = True            # Jonas
+        self.play("niklas", "Eisen-0")
+        ids = self.ask()[0]
+        self.assertEqual(sonic.status()["lastFor"], "Niklas")
+        self.assertNotIn("Eisen-1", ids)                    # someone listening could be a child – never on a guess
+        self.assertNotIn("Kita-0", ids)
+
+    def test_artist_and_album_radio(self):
+        self.play("niklas", "Eisen-2")
+        with mock.patch.object(classify, "radio_artists", lambda seeds, lib, limit=25: [seeds[0], "Stahl", "Blech"]):
+            bands = [x["artist"] for x in sonic.answer(self.cfg, self.lib, "artist", {"name": "Eisen", "count": "12"})["songs"]]
+        self.assertNotIn("Blech", bands)
+        ids = [x["id"] for x in sonic.answer(self.cfg, self.lib, "album", {"id": "al-Eisen-0", "count": "12"})["songs"]]
+        self.assertEqual(sonic.status()["lastFor"], "Niklas")
+        self.assertFalse({"Blech-0", "Eisen-2"} & set(ids))
+
+
 class KeyTest(unittest.TestCase):
     def setUp(self):
         sonic.remove_key()

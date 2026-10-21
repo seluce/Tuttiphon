@@ -6,10 +6,14 @@ Answers come from the sound vectors of the AI sound analysis (similar.py); a son
 (Last.fm's similar bands and genres, classify.radio_artists()) ordered by the features we measured. Songs are
 Navidrome's own ids, so the plugin can hand them on as they are.
 
-Navidrome does not say who is listening. So the songs come from the whole library as for the shared person: "All"
-(without the separate worlds such as children's music and audio plays – unless the song asked for is in one of them),
-without the shared person's dislikes, without live recordings and the like (settings.excludeTitles, minDuration) –
-and without explicit songs as soon as there is a child profile.
+Navidrome does not say who asks. So the songs come from the whole library as for the shared person: "All" (without
+the separate worlds such as children's music and audio plays – unless the song asked for is in one of them), without
+the shared person's dislikes, without live recordings and the like (settings.excludeTitles, minDuration) – and
+without explicit songs as soon as a profile is kid-safe. But Tuttiphon knows from the live plays (listen.py) who is
+playing what: if the song asked about (or a song of the band or album) is playing on exactly one account – or only
+one account is playing at all – the answer is for that person (_listener()): their "All" and dislikes, without what
+they heard in the last hours or rated 1 star by hand, songs they skip further down. Kid-safe stays as for the
+family – never loosened on a guess.
 
 The plugin signs in with its own key (Settings → Navidrome, card "Navidrome plugin"): only its SHA-256 is stored
 (state/plugin_key.json),
@@ -39,7 +43,11 @@ MAX_COUNT = 200        # never more songs per answer
 RADIO_BONUS = 0.1      # a band Last.fm counts as similar moves up this much (artist radio)
 _lock = threading.Lock()
 _memo = {}
-_seen = {"at": None, "calls": 0}   # the last call of the plugin (for the settings page)
+_seen = {"at": None, "calls": 0, "for": None}   # the last call of the plugin (for the settings page)
+_stars = {}   # account (lower case) -> (time, song ids rated 1 star by hand) – loaded in the background (_rated_one())
+STARS_AGE = 3600
+_FAMILY = (None, frozenset(), {})   # (person id, indices to leave out, {index: factor}): an answer for the family
+_last = threading.local()
 
 
 # ---------------------------------------------------------------------------- the plugin's key
@@ -65,6 +73,11 @@ def remove_key():
     KEY_FILE.unlink(missing_ok=True)
 
 
+def has_key():
+    """Is the plugin set up (a key created)?"""
+    return _stored() is not None
+
+
 def check_key(key):
     """Is this the plugin's key? (constant time)"""
     stored = _stored()
@@ -82,16 +95,16 @@ def status():
     """For the settings page: is there a key, when did the plugin last ask, how many songs have a sound vector."""
     stored = _stored()
     return {"key": bool(stored), "keyAt": (stored or {}).get("at"), "lastCall": _seen["at"], "calls": _seen["calls"],
-            "vectors": similar.count()}
+            "lastFor": _seen["for"], "vectors": similar.count()}
 
 
 # ---------------------------------------------------------------------------- the songs that may come
 
-def _view(cfg):
-    """The configuration as the plugin sees the library: the shared person – kid-safe as soon as any profile is a
-    child profile or has kid-safe mode on (Navidrome does not say who is listening). Without a shared person a stand-in
-    without dislikes. -> (configuration, person id)"""
-    default = cfg["settings"].get("defaultPerson")
+def _view(cfg, pid=None):
+    """The configuration as the plugin sees the library: the person listening (pid) or the shared person – kid-safe as
+    soon as any profile is a child profile or has kid-safe mode on. Without a shared person a stand-in without
+    dislikes. -> (configuration, person id)"""
+    default = pid or cfg["settings"].get("defaultPerson")
     clean = any(p.get("child") or p.get("clean") for p in cfg.get("personen", []))
     personen = [dict(p) for p in cfg.get("personen", [])]
     me = next((p for p in personen if p["id"] == default), None)
@@ -126,14 +139,14 @@ def _recall(kind, key):
         return _memo.get(kind, {}).get(key)
 
 
-def _pool(cfg, lib, worlds=()):
-    """Indices of the songs that may come: "All" for the shared person (minimum rating 0) – plus the separate worlds
-    `worlds` (those of the song asked for)."""
-    key = (ml.lib_key(lib), _cfg_key(cfg), tuple(sorted(worlds)))
+def _pool(cfg, lib, worlds=(), pid=None):
+    """Indices of the songs that may come: "All" for the person listening (pid) or the shared person (minimum rating
+    0) – plus the separate worlds `worlds` (those of the song asked for)."""
+    key = (ml.lib_key(lib), _cfg_key(cfg), tuple(sorted(worlds)), pid)
     hit = _recall("pool", key)
     if hit is not None:
         return hit
-    view, person = _view(cfg)
+    view, person = _view(cfg, pid)
     base = {"id": "_sonic", "person": person, "welt": rules.ALL, "stil": rules.ALL, "minRating": 0}
     ctx = rules.BuildContext(lib)
     ids = set(lib.match(rules.build_nsp(view, base, ctx)))
@@ -162,6 +175,72 @@ def _all_batch():
     with _lock:
         _memo["batch"] = (stamp, out)
     return out
+
+
+def _listener(cfg, ids):
+    """The person listening to one of these songs right now (listen.listener()) – the one person of that account;
+    None if that is unclear."""
+    from . import listen
+    from .config import slug
+    folder = listen.listener(ids)
+    if not folder:
+        return None
+    people = [p for p in cfg.get("personen", []) if p.get("user") and slug(p["user"]) == folder]
+    if len(people) != 1 or not listen.allowed(cfg, people[0]["user"]):
+        return None
+    return people[0]
+
+
+def _rated_one(lib, user):
+    """Song ids this account rated 1 star by hand (feedback.manual_dislikes) – from the song list of the account,
+    loaded in the background (it takes a while; until then none) and again after STARS_AGE."""
+    from . import feedback
+    if (getattr(lib, "user", None) or "").lower() == user.lower():
+        return feedback.manual_dislikes(lib, user)
+    low = user.lower()
+    with _lock:
+        hit = _stars.get(low)
+        load = not hit or time.time() - hit[0] > STARS_AGE
+        if load:
+            _stars[low] = (time.time(), hit[1] if hit else frozenset())   # loading – not again meanwhile
+
+    def fetch():
+        from . import stats
+        try:
+            got = frozenset(feedback.manual_dislikes(stats.songs_for(user, lib), user))
+        except Exception:   # noqa: BLE001 – no password for the account, Navidrome gone: no 1 stars then
+            return
+        with _lock:
+            _stars[low] = (time.time(), got)
+    if load:
+        threading.Thread(target=fetch, daemon=True).start()
+    return hit[1] if hit else frozenset()
+
+
+def _who(cfg, lib, ids, personal):
+    """For whom the answer is: (person id, indices to leave out, {index: factor}) of the person listening to one of
+    these song ids – what they heard in the last hours (listen.heard()) or rated 1 star by hand stays out, what they
+    skip comes further down (feedback.factors(), with "Mixes that learn" on). _FAMILY if not asked or unclear."""
+    _last.person = None
+    person = _listener(cfg, ids) if personal else None
+    if not person:
+        return _FAMILY
+    from . import feedback, listen
+    _last.person = person.get("name") or person["id"]
+    user = person["user"]
+    index = lib.index_of()
+    leave = frozenset(index[s] for s in listen.heard(user) | _rated_one(lib, user) if s in index)
+    factor = {}
+    if cfg["settings"].get("mixLearn", True):
+        factor = {index[s]: f for s, f in feedback.factors(user).items() if s in index}
+    return person["id"], leave, factor
+
+
+def _favour(scored, factor):
+    """Scores times the person's factors (skipped songs < 1), best first again."""
+    if not factor:
+        return scored
+    return sorted(((i, sc * factor.get(i, 1.0)) for i, sc in scored), key=lambda x: -x[1])
 
 
 def _closest(lib, vec, allowed, exclude=frozenset()):
@@ -276,24 +355,28 @@ def _clamp(count, default=50):
 
 # ---------------------------------------------------------------------------- answers
 
-def similar_songs(cfg, lib, song_id, count=50):
-    """Songs that sound like this one (Instant Mix, song radio): [(index, similarity 0–1)], most similar first."""
+def similar_songs(cfg, lib, song_id, count=50, personal=False):
+    """Songs that sound like this one (Instant Mix, song radio, the smart queue): [(index, similarity 0–1)], most
+    similar first. personal: for the person listening to it, if that is clear (_who())."""
     count = _clamp(count)
     i = lib.index_of().get(song_id)
     if i is None:
         return []
-    allowed = _pool(cfg, lib, _worlds_of(cfg, lib, [i]))
+    pid, leave, factor = _who(cfg, lib, {song_id}, personal)
+    allowed = _pool(cfg, lib, _worlds_of(cfg, lib, [i]), pid)
     key = (ml.lib_key(lib), _cfg_key(cfg), similar.stamp(), song_id, count)
-    hit = _recall("similar", key)
-    if hit is not None:
-        return hit
+    if pid is None:
+        hit = _recall("similar", key)
+        if hit is not None:
+            return hit
     idx = similar.index(lib)
-    out = _diverse(lib, _closest(lib, _sound(lib, idx, i), allowed, exclude={i}), count, seeds=[i])
+    scored = _favour(_closest(lib, _sound(lib, idx, i), allowed, exclude={i} | leave), factor)
+    out = _diverse(lib, scored, count, seeds=[i])
     if len(out) < count:   # no sound at all, or too few near ones: the radio fills up – below the real ones
-        have = {j for j, _sc in out} | {i}
+        have = {j for j, _sc in out} | {i} | leave
         low = out[-1][1] if out else 0.5
-        out = _diverse(lib, out + _radio(lib, i, allowed, have, count, below=low), count, seeds=[i])
-    return _remember("similar", key, out, keep=256)
+        out = _diverse(lib, out + _favour(_radio(lib, i, allowed, have, count, below=low), factor), count, seeds=[i])
+    return out if pid else _remember("similar", key, out, keep=256)
 
 
 def _artist_songs(lib, name=None, artist_id=None):
@@ -320,30 +403,34 @@ def _artist_songs(lib, name=None, artist_id=None):
     return found, mains.most_common(1)[0][0]
 
 
-def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50, exclude=frozenset()):
+def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50, exclude=frozenset(), personal=False, who=None):
     """Artist radio: songs that sound like the band – its own (up to a third), of bands that sound like it and of
     those Last.fm counts as similar (they move up by RADIO_BONUS, the similarity shown stays the sound's); without
-    vectors the radio's bands, shuffled by the day."""
+    vectors the radio's bands, shuffled by the day. personal / who: for the person listening to the band (_who())."""
     count = _clamp(count)
     own, artist = _artist_songs(lib, name, artist_id)
     if not own:
         return []
-    allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own))
+    pid, leave, factor = who or _who(cfg, lib, {lib.songs[i]["id"] for i in own}, personal)
+    exclude = set(exclude) | leave
+    allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own), pid)
     bands = set(classify.radio_artists([artist], lib, limit=25))
     idx = similar.index(lib)
     centre = idx.centroid(artist) if idx is not None else None
     if centre is not None:
-        ranked = sorted(_closest(lib, centre, allowed, exclude),
-                        key=lambda x: -(x[1] + (RADIO_BONUS if lib._main_artist(lib.songs[x[0]]) in bands else 0)))
+        scored = _favour(_closest(lib, centre, allowed, exclude), factor)
+        ranked = sorted(scored, key=lambda x: -(x[1] + (RADIO_BONUS if lib._main_artist(lib.songs[x[0]]) in bands else 0)))
         return _diverse(lib, ranked, count, own=artist)
     rnd = random.Random(f"{artist}|{dt.date.today()}")
     cands = [i for i in allowed if i not in exclude and lib._main_artist(lib.songs[i]) in bands]
     rnd.shuffle(cands)
-    return _diverse(lib, [(i, max(0.01, 0.5 - 0.49 * k / count)) for k, i in enumerate(cands)], count, own=artist)
+    scored = _favour([(i, max(0.01, 0.5 - 0.49 * k / count)) for k, i in enumerate(cands)], factor)
+    return _diverse(lib, scored, count, own=artist)
 
 
-def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50):
-    """Songs that sound like an album (its mean sound) – never from the album itself."""
+def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50, personal=False):
+    """Songs that sound like an album (its mean sound) – never from the album itself. personal: for the person
+    listening to it (_who())."""
     count = _clamp(count)
     songs = lib.songs
     own = list(_albums(lib).get(album_id, ())) if album_id else []
@@ -352,14 +439,16 @@ def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50):
                and (not artist or artist.lower() in ((s.get("displayAlbumArtist") or s.get("artist") or "").lower()))]
     if not own:
         return []
-    allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own))
+    who = _who(cfg, lib, {songs[i]["id"] for i in own}, personal)
+    pid, leave, factor = who
+    allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own), pid)
     idx = similar.index(lib)
     vec = similar.mean_unit([v for v in (idx.centered(i) for i in own) if v is not None]) if idx is not None else None
     if vec is None and idx is not None:
         vec = idx.centroid(lib._main_artist(songs[own[0]]))
     if vec is not None:
-        return _diverse(lib, _closest(lib, vec, allowed, exclude=set(own)), count, seeds=own)
-    return songs_like_artist(cfg, lib, name=lib._main_artist(songs[own[0]]), count=count, exclude=set(own))
+        return _diverse(lib, _favour(_closest(lib, vec, allowed, exclude=set(own) | leave), factor), count, seeds=own)
+    return songs_like_artist(cfg, lib, name=lib._main_artist(songs[own[0]]), count=count, exclude=set(own), who=who)
 
 
 def similar_artists(cfg, lib, name=None, artist_id=None, limit=20):
@@ -457,13 +546,15 @@ def answer(cfg, lib, what, query):
     with _lock:   # for the settings page: the last question (plays do not count here)
         _seen["at"] = dt.datetime.now().isoformat(timespec="seconds")
         _seen["calls"] += 1
+    _last.person = None
     if what == "similar":
-        out = {"songs": as_songs(lib, similar_songs(cfg, lib, query.get("id", ""), query.get("count", 50)))}
+        out = {"songs": as_songs(lib, similar_songs(cfg, lib, query.get("id", ""), query.get("count", 50), personal=True))}
     elif what == "artist":
-        out = {"songs": as_songs(lib, songs_like_artist(cfg, lib, query.get("name"), query.get("id"), query.get("count", 50)))}
+        out = {"songs": as_songs(lib, songs_like_artist(cfg, lib, query.get("name"), query.get("id"), query.get("count", 50),
+                                                        personal=True))}
     elif what == "album":
         out = {"songs": as_songs(lib, songs_like_album(cfg, lib, query.get("id"), query.get("name"), query.get("artist"),
-                                                       query.get("count", 50)))}
+                                                       query.get("count", 50), personal=True))}
     elif what == "artists":
         out = {"artists": [{"name": n, "id": a or ""} for n, a in similar_artists(cfg, lib, query.get("name"), query.get("id"),
                                                                                   query.get("count", 20))]}
@@ -471,5 +562,8 @@ def answer(cfg, lib, what, query):
         out = {"songs": as_songs(lib, path(cfg, lib, query.get("from", ""), query.get("to", ""), query.get("count", 25)))}
     else:
         raise KeyError(what)
+    if what in ("similar", "artist", "album"):   # whom the last song answer was for (None: the family)
+        with _lock:
+            _seen["for"] = getattr(_last, "person", None)
     out["ms"] = round((time.time() - started) * 1000)
     return out

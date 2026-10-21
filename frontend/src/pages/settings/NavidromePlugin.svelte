@@ -1,7 +1,7 @@
 <!--
   Settings → Navidrome → "Navidrome plugin": the plugin asks Tuttiphon for similar songs (Instant Mix, song and artist
-  radio, "similar songs" in Symfonium) and passes the plays on. Status from GET /api/plugin (key, the plugin's last
-  request, the last play received, sound vectors),
+  radio, the smart queue in Symfonium) and passes the plays on. Status from GET /api/plugin (key, the plugin's last
+  request and for whom it was answered, the last play received, sound vectors),
   key: POST /api/plugin/key (shown once) and /api/plugin/key/remove, download: /plugin/tuttiphon.ndp, the setup steps.
 -->
 <script>
@@ -92,7 +92,7 @@
       <span class={['pill whitespace-normal', st.live?.lastEvent && 'ok']}>{st.live?.lastEvent ? t('{when} · {accounts}', { when: relTime(st.live.lastEvent), accounts: st.live.accounts.join(', ') }) : t('none since Tuttiphon started')}</span>
     </Row>
     <Row label={t('Last request from Navidrome')} hint={st.lastCall ? t('{n} since Tuttiphon started', { n: fmt(st.calls) }) : ''}>
-      <span class={st.lastCall ? 'pill ok' : 'pill'}>{st.lastCall ? relTime(st.lastCall) : t('none since Tuttiphon started')}</span>
+      <span class={['pill whitespace-normal', st.lastCall && 'ok']}>{st.lastCall ? (st.lastFor ? t('{when} · for {name}', { when: relTime(st.lastCall), name: st.lastFor }) : t('{when} · for the family', { when: relTime(st.lastCall) })) : t('none since Tuttiphon started')}</span>
     </Row>
   {/if}
   <div class="set-row grid gap-2.5 py-3 border-t border-line">
@@ -120,7 +120,7 @@
       <li>{@html t('In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).')}</li>
     </ol>
   </div>
-  <div class="hint">{t('Navidrome does not say who is listening: the songs come from the whole library as for the family – children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.')}</div>
+  <div class="hint">{t('Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.')}</div>
 </Card>
 
 <style>

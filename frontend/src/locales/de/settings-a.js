@@ -347,9 +347,9 @@ export default {
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein, trage Adresse und Schlüssel ein und gib es für <b>alle Benutzer</b> frei (für die Wiedergaben). Am besten die Adresse im Heimnetz, z. B. <code>http://&lt;NAS&gt;:8765</code> – keine https-Adresse über einen Reverse Proxy, der Navidrome abweisen kann. Dieser Browser erreicht Tuttiphon unter <code>{address}</code>.',
   'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'Schalte in Symfonium für den Navidrome-Server <b>„Use similar tracks for Radio Mix“</b> ein (Einstellungen → Medienanbieter → der Server).',
-  'Navidrome does not say who is listening: the songs come from the whole library as for the family – children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
-    'Navidrome verrät nicht, wer gerade hört: Die Songs kommen aus der ganzen Bibliothek wie für die Familie – Kindermusik nur zu Kinderliedern, und ohne Songs mit derben Texten, sobald ein Profil Kinderschutz hat oder ein Kinderprofil ist.',
+    'Schalte in Symfonium für den Navidrome-Server <b>„Ähnliche Titel für Radio-Mix verwenden“</b> ein (Medienquellen verwalten → der Server).',
+  'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
+    'Navidrome verrät nicht, wer fragt. Läuft der Song gerade auf genau einem Konto – oder spielt nur ein Konto –, gilt die Antwort dieser Person: ohne ihre Abneigungen, ohne das, was sie gerade gehört oder mit 1 Stern bewertet hat; was sie oft überspringt, kommt später. Sonst gilt sie der Familie. Kindermusik nur zu Kinderliedern, und ohne Songs mit derben Texten, sobald ein Profil Kinderschutz hat oder ein Kinderprofil ist.',
   'Create a new key?': 'Neuen Schlüssel erzeugen?',
   'The old key stops working – enter the new one in Navidrome afterwards.':
     'Der alte Schlüssel gilt dann nicht mehr – trage danach den neuen in Navidrome ein.',
@@ -364,4 +364,8 @@ export default {
     'noch keine seit dem Start von Tuttiphon',
   'Nothing yet? Put the new plugin file into Navidrome, restart it and allow the plugin all users.':
     'Noch nichts? Lege die neue Plugin-Datei in Navidrome, starte es neu und gib das Plugin für alle Benutzer frei.',
+  '{when} · for {name}':
+    '{when} · für {name}',
+  '{when} · for the family':
+    '{when} · für die Familie',
 }

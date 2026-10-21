@@ -66,9 +66,11 @@ class KindTest(unittest.TestCase):
 
 @unittest.skipUnless(covers.HAVE_PIL, "needs Pillow")
 class AutoTest(unittest.TestCase):
-    def run_refresh(self, cfg, by_file, reported=None, dropped=None):
+    def run_refresh(self, cfg, by_file, reported=None, dropped=None, images=None):
         native = mock.Mock()
         native.playlists.return_value = [{"id": nid, "uploadedImage": img} for nid, img in (reported or {}).items()]
+        native.playlist_image.side_effect = lambda nid: images[nid] if images and isinstance(images[nid], bytes) \
+            else (_ for _ in ()).throw(OSError("gone"))
         with mock.patch.object(covers, "render", lambda *a: JPEG), \
                 mock.patch.object(covers, "signature", lambda *a: "sig1"), \
                 mock.patch.object(covers, "load_config", lambda: copy.deepcopy(cfg)):
@@ -106,6 +108,21 @@ class AutoTest(unittest.TestCase):
         self.assertEqual((n, calls), (2, []))   # nothing uploaded over it
         self.assertEqual(cfg["playlists"][0]["cover"]["style"], "navidrome")
         self.assertEqual(cfg["playlists"][1]["cover"]["style"], "none")
+
+    def test_same_name_another_image_stays(self):
+        """Navidrome names the image after the playlist – an image of the same type set by hand keeps the name, its
+        content tells."""
+        cfg = base_config()
+        ours = {"style": "format", "auto": True, "sig": "old", "img": "n_tuttiphon.jpeg", "hash": covers.digest(JPEG)}
+        cfg["playlists"] = [playlist("u", unheard=True, cover=dict(ours, nid="n-u")),
+                            playlist("k", unheard=True, cover=dict(ours, nid="n-k")),
+                            playlist("g", unheard=True, cover=dict(ours, nid="n-g"))]
+        by_file = {f"{x}.nsp": {"id": f"n-{x}", "uploadedImage": "n_tuttiphon.jpeg"} for x in "ukg"}
+        n, calls = self.run_refresh(cfg, by_file, images={"n-u": b"set by hand", "n-k": JPEG, "n-g": None})
+        self.assertEqual(cfg["playlists"][0]["cover"]["style"], "navidrome")   # not overwritten
+        self.assertEqual(sorted(c.args[0] for c in calls), ["n-g", "n-k"])     # still ours / unknown: renewed
+        self.assertEqual(cfg["playlists"][1]["cover"]["hash"], covers.digest(JPEG))
+        self.assertEqual(n, 3)
 
     def test_no_longer_a_format(self):
         cfg = base_config()

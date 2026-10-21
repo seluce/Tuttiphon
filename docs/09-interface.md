@@ -635,11 +635,12 @@ what the plugin does (Navidrome 0.64 or later); songs with a sound vector (`GET 
 while there are none); the key – “Create key” / “New key” (asks first: the old one stops working) and “Remove” (asks
 first, reminds to turn the plugin off in Navidrome) –; a new key appears once in a field with “Copy”; “Plays from
 Navidrome” (the last play received and the accounts, `live` from `GET /api/plugin`; while there is none a hint what to
-check); “Last request from Navidrome” (relative time, count since the start); both reloaded every 30 seconds while the
+check); “Last request from Navidrome” (relative time and for whom – a person or “for the family”, `lastFor`; count
+since the start); both reloaded every 30 seconds while the
 card is open. The setup steps: “Download the plugin” (only if the installation has the file, otherwise the GitHub
 release; not to unpack, keep the name), the agents lines for `navidrome.toml` and for docker-compose as read-only
 fields with “Copy” (Tuttiphon in front of Navidrome's defaults; the label above the field on the phone), the address as
-this browser reaches Tuttiphon, the Symfonium setting; below a note that Navidrome does not say who listens. “Copy”
+this browser reaches Tuttiphon, the Symfonium setting; below a note for whom the answers are (the one listening, otherwise the family). “Copy”
 uses the browser's clipboard with https or on localhost, otherwise a hidden text field.
 
 ### Settings → Playlists and Intelligence
@@ -781,7 +782,9 @@ Above it, administrators find the card “Setup assistant” ([Setup assistant](
   or `href(admin)` when it depends on the role), Getting started, expandable topics (`Topic`, with the matching guides
   as buttons), Questions & answers, Terms. The search reads the text of the topics from the page after rendering
   (`data-topic`); all words must occur. Interface buttons appear in the text as `<Ui icon>` – so you recognize them on
-  every device; there are no screenshots anymore. Topics name their guides in `guides`.
+  every device; there are no screenshots anymore. Topics name their guides in `guides`. The users' topic “Listening
+  in Symfonium” explains the two Symfonium settings for the plugin (radio mix with similar tracks, smart queue by
+  sonic analysis) only when the plugin is set up (`S.status.plugin`).
 - **(?) next to the page title** (`components/HelpLink.svelte`, mapping route → topic is there): opens the topic as a
   sheet (`pages/help/HelpSheet.svelte`) with the matching guides at the top; without a matching topic for the role – or
   if the help file cannot be loaded, e.g. after an update – it leads to the help.

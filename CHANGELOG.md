@@ -5,6 +5,22 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **The smart queue for whoever is listening.** Navidrome does not tell the plugin who asks – but Tuttiphon sees from
+  the plays who is playing what. If the song asked about is playing on exactly one account (or only one account is
+  playing), Instant Mix, song, artist and album radio and the smart queue in Symfonium answer for that person: without
+  their dislikes, without what they heard in the last three hours or rated 1 star, songs they often skip further down.
+  Otherwise the answer is for the family as before; kid-safe always stays as for the family. Settings → Navidrome
+  shows for whom the last answer was.
+- **Help for the family:** the help topic “Listening in Symfonium” explains the two Symfonium settings for the
+  plugin – similar tracks for the radio mix and the smart queue by sonic analysis – as soon as the plugin is set up.
+  The German texts now use Symfonium's German names for them.
+- **Covers set by hand in Navidrome stay – also of the same image type.** Navidrome names a playlist's image after
+  the playlist, so an image uploaded there by hand often kept the name of Tuttiphon's cover and was overwritten at the
+  next renewal. Tuttiphon now keeps a checksum of every cover it uploads and compares it with the image in Navidrome
+  before renewing. Works for covers uploaded from this version on.
+
 ## 1.5.0
 
 Every play now reaches Tuttiphon as it happens through the Navidrome plugin, and the plugin answers by sound also for
