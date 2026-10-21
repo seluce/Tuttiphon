@@ -47,6 +47,9 @@ RUN python3 app/ml_worker.py --download /app/models \
 COPY tuttiphon.py CHANGELOG.md LICENSE THIRD-PARTY-NOTICES.md ./
 COPY app ./app
 COPY --from=ui /src/web ./web
+# the Navidrome plugin to download in Settings → Navidrome (tools/build-plugin.sh – built by the release and by
+# GitHub Actions; a folder without it gives an image without it). LICENSE: so that the copy never comes up empty
+COPY LICENSE navidrome-plugin/dis[t] ./plugin/
 # Set permissions in the image itself: files copied to the NAS via a share often arrive readable only by their owner –
 # but the container runs as the "user:" from docker-compose.yaml (e.g. 1000:1000) and must be able to read everything
 RUN chmod -R a+rX /app \

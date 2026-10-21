@@ -51,6 +51,9 @@ npm run -s build >"$LOGS/build.log" 2>&1 \
 if grep -qi "warn" "$LOGS/build.log"; then
   echo "✕ Interface builds with warnings – see $LOGS/build.log"; exit 1
 fi
+PLUGIN=1
+tools/build-plugin.sh >"$LOGS/plugin.log" 2>&1 \
+  || { PLUGIN=0; echo "⚠ Navidrome plugin not built (Go/TinyGo missing?) – see $LOGS/plugin.log; the image will be without it"; }
 
 rm -rf "$TARGET"
 mkdir -p "$TARGET"
@@ -74,6 +77,9 @@ mkdir -p "$TARGET/app" "$TARGET/frontend"
 cp app/*.py app/*.json "$TARGET/app/"
 cp -r app/locales "$TARGET/app/"   # translations of the server texts – without them the server would speak English only
 cp -r frontend/. "$TARGET/frontend/"   # sources, svelte.config.js (runes) and README.md
+if [ "$PLUGIN" = 1 ]; then   # the built Navidrome plugin – the Dockerfile takes it into the image
+  mkdir -p "$TARGET/navidrome-plugin/dist" && cp navidrome-plugin/dist/tuttiphon.ndp "$TARGET/navidrome-plugin/dist/"
+fi
 find "$TARGET" \( -name "__pycache__" -o -name "node_modules" \) -prune -exec rm -rf {} +
 
 # ---- Data for the very first move (same selection as a backup: without cache, sign-ins, locks)

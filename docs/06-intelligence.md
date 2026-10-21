@@ -588,6 +588,7 @@ dimension. Rounding costs less than 0.0001 in the cosine.
 | Artist window | `soundsLike` in `GET /api/artist` (`classify.artist_profile()`): up to 8 bands with a cosine ≥ 0.35 (`SOUNDS_LIKE_MIN`) |
 | Classification | sound of the band against the sound of each music world ([Signals](#signals-and-match-rate)) |
 | Taste | [sound taste](#sound-taste-appsoundtastepy): a few typical sounds of what each account plays – mixes, “Your sound”, suggestions |
+| Navidrome | [the plugin](#for-navidrome-the-plugin-appsonicpy): Instant Mix, song and artist radio, similar artists, sound paths |
 
 ### Smooth transitions in mixes
 
@@ -611,6 +612,34 @@ or a key, `smooth()` returns `None` and `spread()` orders as before; the same in
 already written in this period keeps its order ([Playlists](04-playlists.md#selection)). Measured on 30 random mixes
 of 40 songs from the 177 songs above: energy jumps between neighbours 0.32 → 0.14, sound cosine of neighbours 0.0 →
 0.33, tempo cost 0.83 → 0.63, Camelot steps 2.4 → 1.8; 6 ms per mix.
+
+### For Navidrome: the plugin (`app/sonic.py`)
+
+The Tuttiphon plugin hands Navidrome's questions to `GET /api/sonic/…` ([API](03-api.md#navidrome-plugin)) – so
+Instant Mix, “similar songs”, song and artist radio in Navidrome and its apps (Symfonium, Feishin …) and the
+OpenSubsonic extension `sonicSimilarity` follow the sound of the own files.
+
+**What may come** (`_pool()`, cached per song list, configuration and worlds): Navidrome does not say who listens, so
+“All” as for the shared person – minimum rating 0, without the separate worlds, without its dislikes, without live
+recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon as any profile is a child profile
+(`_view()`). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
+lead to children's songs, a rock song never to an audio play.
+
+| Question | How |
+|---|---|
+| Similar songs (`similar`) | the 400 nearest songs by sound (`Index.neighbors()`, `NEIGHBORS`) within what may come; without a vector or too few: the radio of the band (`classify.radio_artists()`) ordered by `classify.rank_like()`, similarity falling from 0.5 |
+| Artist radio (`artist`) | every song by closeness to the band's mean sound (`Index.centroid()`, all at once with `similar.batch()`), + 0.1 for bands of its radio (`RADIO_BONUS`); the band itself up to a third of the songs; without vectors the radio's bands, shuffled by the day |
+| Album (`album`) | closeness to the mean sound of the album's songs, not from the album itself; without vectors like the artist radio of its band |
+| Similar bands (`artists`) | `classify.radio_artists()` (Last.fm and sound), never the band itself, with Navidrome's artist id |
+| Path (`path`) | from the start song to the end song in `count` steps: at step k the song nearest to the normalized point (1 − t)·a + t·b between the two centered sounds (t = k / (count − 1)), every song and recording once; both ends included |
+
+Every answer: at most `max(2, count / 12)` songs per band (the band asked for a quarter, the artist radio a third),
+every recording once (title without “(…)”/“[…]” + band), never the song asked for; similarity clamped to 0–1.
+A band is found by Navidrome's artist id or name among all artists and album artists of a song (Navidrome also asks
+for an artist who only takes part); it counts as the main artist of most of those songs (`_artist_songs()`).
+Measured on the development PC with a made-up library of 25,000 songs: the first answer after the song list changed
+about 1 s (what may come), then similar songs about 0.15 s (0.08 s for the same song again), an album 0.06 s, an
+artist radio 0.25 s, a path of 25 songs 0.2 s.
 
 ## Last.fm
 

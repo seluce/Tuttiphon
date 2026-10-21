@@ -1,10 +1,12 @@
-<!-- Settings → Navidrome: connection (address, admin account), passwords of the accounts, type of scan. -->
+<!-- Settings → Navidrome: connection (address, admin account), passwords of the accounts, type of scan, the Navidrome
+     plugin (NavidromePlugin.svelte). -->
 <script>
   import Icon from '../../components/Icon.svelte'
   import Seg from '../../components/Seg.svelte'
   import Card from './Card.svelte'
   import Row from './Row.svelte'
   import Connection from './Connection.svelte'
+  import NavidromePlugin from './NavidromePlugin.svelte'
   import { S, changed } from '../../lib/state.svelte.js'
   import { passwordModal } from '../../lib/account.js'
   import { t } from '../../lib/i18n.svelte.js'
@@ -40,3 +42,5 @@
     <Seg options={[['quick', t('Quick')], ['full', t('Full')]]} value={nav.scan || 'quick'} onchange={(v) => { nav.scan = v; changed() }} />
   </Row>
 </Card>
+
+<NavidromePlugin />

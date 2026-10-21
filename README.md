@@ -35,6 +35,8 @@ container – made for a NAS, local, no cloud, no GPU.
 - **Lyrics** – synced (`.lrc`) or plain (`.txt`), tidied up automatically, searchable by a line, with a kid-safe mode.
 - **Understanding the music** – tempo, key, mood, instruments, music styles and similar songs from a local AI
   analysis (Essentia).
+- **Instant Mix by sound** – with the Tuttiphon plugin for Navidrome, Instant Mix, song and artist radio and
+  “similar songs” in Symfonium and other apps follow the sound of your own files.
 - **For the whole family** – everyone signs in with their own Navidrome account and gets their own view; English and
   German; installable as an app.
 - **Housekeeping** – folder watch for new music, duplicates found by audio fingerprints, covers, even loudness,

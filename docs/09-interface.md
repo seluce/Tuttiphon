@@ -628,6 +628,15 @@ Whether stars given by hand are overwritten is set only here: permanently with �
 by hand” below “Check everything again” (card “In the full run”), which sends `overwrite_manual: true` with
 `deezer_mode: "full"` for this one run. The home page's Deezer card has no such switch.
 
+### Settings → Navidrome: “Navidrome plugin”
+
+The last card of Settings → Navidrome (`pages/settings/NavidromePlugin.svelte`, [Operations](08-operations.md#navidrome-plugin)):
+what the plugin does; songs with a sound fingerprint (`GET /api/plugin` → `vectors`, with a hint while there are none);
+the key – “Create key” / “New key” (asks first: the old one stops working) and “Remove” –; a new key appears once in a
+field with “Copy”; “Last request from Navidrome” (relative time, count since the start); the setup steps: “Download the
+plugin” (only if the installation has the file, otherwise the GitHub release), the line `ND_AGENTS=…` to copy, the
+address as this browser sees Tuttiphon, the Symfonium setting; below a note that Navidrome does not say who listens.
+
 ### Settings → Playlists and Intelligence
 
 - **Playlists**, card “Mixes that learn”: besides “Learn from listening” (`mixLearn`) the switch “Smooth transitions in

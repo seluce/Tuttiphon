@@ -44,3 +44,6 @@ CLAUDE.local.md
 dev.local.env
 # Working instructions for Claude Code – stay local, not part of the published project
 CLAUDE.md
+
+# Navidrome plugin: built by tools/build-plugin.sh
+/navidrome-plugin/dist/

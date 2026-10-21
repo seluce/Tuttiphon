@@ -183,6 +183,10 @@ The “Users” column in the tables below lists what the server leaves out for 
 | POST | `/api/cover/apply` | own | [Images & covers](#images--covers) |
 | POST | `/api/cover/remove` | own | [Images & covers](#images--covers) |
 | POST | `/api/cover/upload` | own | [Images & covers](#images--covers) |
+| GET | `/api/sonic/similar`, `/artist`, `/album`, `/artists`, `/path` | the plugin's key | [Navidrome plugin](#navidrome-plugin) |
+| GET | `/api/plugin` | admin | [Navidrome plugin](#navidrome-plugin) |
+| POST | `/api/plugin/key`, `/api/plugin/key/remove` | admin | [Navidrome plugin](#navidrome-plugin) |
+| GET | `/plugin/tuttiphon.ndp` | admin | [Navidrome plugin](#navidrome-plugin) |
 | GET | all other paths | public or signed in | [Static files](#static-files) |
 
 ## Session
@@ -563,3 +567,28 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
   here”; allowed are the styles from `covers.available_styles()`); playlist not in Navidrome yet → `400` “The
   playlist is not in Navidrome yet – apply first, then set the cover.”; no usable image → `400`.
   When covers are renewed automatically: [04 – Playlists](04-playlists.md).
+
+## Navidrome plugin
+
+The Tuttiphon plugin for Navidrome (`navidrome-plugin/`, [Operations](08-operations.md#navidrome-plugin)) asks these
+endpoints. They do not use a session: the plugin sends its own key as `Authorization: Bearer tp_…` – checked before
+the sign-in, also in setup mode; a wrong key counts toward a lockout like a password (30 per address, 100 altogether in
+10 minutes, `429` then). Without a key or with a wrong one: `401` “The key of the Navidrome plugin is wrong …”.
+Song ids are Navidrome's; what may come and how it is chosen: [Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy).
+
+| Endpoint | Parameters | Response |
+|---|---|---|
+| `GET /api/sonic/similar` | `id` (song), `count` (1–200, default 50) | `{"songs": [{"id", "title", "artist", "album", "durationMs", "similarity"}], "ms"}` – songs that sound like it (Instant Mix, song radio, `getSonicSimilarTracks`) |
+| `GET /api/sonic/artist` | `id` (artist) or `name`, `count` | `{"songs": …}` – artist radio |
+| `GET /api/sonic/album` | `id` (album) or `name` + `artist`, `count` | `{"songs": …}` – songs like the album, not from it |
+| `GET /api/sonic/artists` | `id` or `name`, `count` (default 20) | `{"artists": [{"id", "name"}], "ms"}` – similar bands, never the band itself |
+| `GET /api/sonic/path` | `from`, `to` (songs), `count` (2–200, default 25) | `{"songs": …}` – both ends included (`findSonicPath`); empty without sound vectors for both |
+
+Unknown song or band: an empty list. Another `<what>`: `400`.
+
+| Endpoint | Access | Parameters | Response |
+|---|---|---|---|
+| `GET /api/plugin` | admin | – | `{"key": bool, "keyAt", "lastCall", "calls", "vectors", "file": bool, "version"}` – `lastCall`/`calls` since Tuttiphon started (memory only), `file`: the plugin file is part of this installation |
+| `POST /api/plugin/key` | admin | `{}` | `{"key": "tp_…"}` – a new key, shown once (only its SHA-256 is stored in `state/plugin_key.json`); the old one stops working |
+| `POST /api/plugin/key/remove` | admin | `{}` | `{"ok": true}` |
+| `GET /plugin/tuttiphon.ndp` | admin | – | the plugin (`application/zip`, as a download); `404` if this installation has none |

@@ -16,7 +16,7 @@ from pathlib import Path
 from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import audio, auth, autowelten, i18n, backup, localadmin, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
+from . import audio, auth, autowelten, i18n, backup, localadmin, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, sonic, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
 from .i18n import N_, _, _s, _sn
 from .config import (CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, STATE_DIR,
                      WEB_DIR, ConfigDamaged, admin_password, env_var, environment, load_config, load_env, pass_key, paths, paths_info,
@@ -1627,6 +1627,22 @@ def api_cover_remove(body):
     return {"ok": True}
 
 
+def api_plugin_status(query=None):
+    """Settings → Navidrome plugin: key, the plugin's last request, sound vectors, whether the plugin file is here."""
+    from .version import VERSION
+    return {**sonic.status(), "file": bool(sonic.plugin_file()), "version": VERSION}
+
+
+def api_plugin_key(body):
+    """A new key for the plugin (shown once) – the old one stops working."""
+    return {"key": sonic.new_key()}
+
+
+def api_plugin_key_remove(body):
+    sonic.remove_key()
+    return {"ok": True}
+
+
 def api_task_status(query):
     st = {**RUNNER.status(int(query.get("since") or 0)), "auto": AUTO.state()}
     if auth.current()["role"] != "admin":   # users: only whether something is running – no log
@@ -1857,6 +1873,23 @@ class Handler(BaseHTTPRequestHandler):
         release(False)
         return True, result
 
+    def _sonic(self, path, query):
+        """A request of the Navidrome plugin (GET /api/sonic/<what>, sonic.py) – signed in with its own key
+        (Authorization: Bearer …) instead of a session; wrong keys count toward a lockout like passwords."""
+        ip, _https = self._client()
+        given = self.headers.get("Authorization") or ""
+        key = given[7:].strip() if given[:7].lower() == "bearer " else ""
+
+        def attempt():
+            if not sonic.check_key(key):
+                raise auth.LoginError(_("The key of the Navidrome plugin is wrong – create a new one under Settings → "
+                                        "Navidrome plugin."), counts=bool(key))
+            return True
+        ok, _r = self._limited(((f"plugin|{ip}", 30), ("plugin", 100)), _s("Navidrome plugin"), attempt)
+        if not ok:
+            return None
+        return self._json(sonic.answer(load_config(), CACHE.get(), path[len("/api/sonic/"):], query))
+
     def _session_cookie(self, user, https):
         cookie = f"tuttiphon={auth.make_token(user)}; Path=/; Max-Age={auth.SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax"
         if https:   # reached via https through a trusted reverse proxy: never send the cookie unencrypted
@@ -2006,6 +2039,7 @@ class Handler(BaseHTTPRequestHandler):
         "/api/task": api_task_status,
         "/api/stats": api_stats,
         "/api/cover/styles": api_cover_styles,
+        "/api/plugin": api_plugin_status,
         "/api/deezer/ranks": lambda q: api_deezer_ranks(),
         "/api/lyrics/stats": lambda q: lyrics.stats(),
         "/api/opus/info": lambda q: api_opus_info(q.get("refresh") == "1"),
@@ -2042,6 +2076,8 @@ class Handler(BaseHTTPRequestHandler):
         "/api/push/unsubscribe": api_push_unsubscribe,
         "/api/push/status": api_push_status,
         "/api/push/test": api_push_test,
+        "/api/plugin/key": api_plugin_key,
+        "/api/plugin/key/remove": api_plugin_key_remove,
     }
     PUT_ROUTES = {
         "/api/config": api_save_config,
@@ -2051,7 +2087,8 @@ class Handler(BaseHTTPRequestHandler):
     ADMIN_ONLY = {"/api/history", "/api/log", "/api/users", "/api/deezer/ranks", "/api/lyrics/stats", "/api/opus/info", "/api/intel",
                   "/api/accounts", "/api/takeover/preview", "/api/takeover", "/api/mapping", "/api/env/test", "/api/paths/check",
                   "/api/lastfm/test", "/api/task/cancel", "/api/env", "/api/backups", "/api/backups/now", "/api/backups/file",
-                  "/api/kinderschutz", "/api/pflege", "/api/liedtexte/update", "/api/welt/neu", "/api/admin-password"}   # i18n-ignore – routes; /api/task: status for everyone, api_task_start checks starting
+                  "/api/kinderschutz", "/api/pflege", "/api/liedtexte/update", "/api/welt/neu", "/api/admin-password",   # i18n-ignore – routes
+                  "/api/plugin", "/api/plugin/key", "/api/plugin/key/remove", "/plugin/tuttiphon.ndp"}   # i18n-ignore – routes; /api/task: status for everyone, api_task_start checks starting
 
     def _handle(self, method):
         url = urllib.parse.urlparse(self.path)
@@ -2083,6 +2120,8 @@ class Handler(BaseHTTPRequestHandler):
                 if self.headers.get("X-Tuttiphon") != "1":
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – only from the interface
                 return self._setup(setup)
+            if path.startswith("/api/sonic/") and method == "GET":   # the Navidrome plugin: its own key, no session
+                return self._sonic(path, query)
             clean = posixpath.normpath(urllib.parse.unquote(path))   # “/assets/../help/…” is not public
             public = clean in ("/login.html", "/favicon.svg", "/manifest.webmanifest", "/sw.js") or clean.startswith(("/icons/", "/assets/"))
             if path == "/api/logout" and method == "POST":
@@ -2118,6 +2157,12 @@ class Handler(BaseHTTPRequestHandler):
                         raise ValueError(_("Unknown cover style"))
                     data = covers.render(load_config(), CACHE.get(), p, style)
                     return self._send(data, "image/jpeg", headers={"Cache-Control": "no-store"})
+                if path == "/plugin/tuttiphon.ndp":   # the Navidrome plugin to download (admin only, see ADMIN_ONLY)
+                    file = sonic.plugin_file()
+                    if not file:
+                        return self._json({"error": _("The plugin file is not part of this installation.")}, 404)
+                    return self._send(read_bytes(file), "application/zip", headers={
+                        "Content-Disposition": 'attachment; filename="tuttiphon.ndp"', "Cache-Control": "no-store"})
                 if path == "/api/backups/file":   # download a backup (admin only, see ADMIN_ONLY)
                     file = backup.path_of(query.get("name", ""))
                     return self._send(read_bytes(file), "application/zip", headers={

@@ -25,6 +25,7 @@
     { id: 'aktualisieren', icon: 'star', title: t('Deezer stars'), body: aktualisieren, guides: ['aktualisieren'] },
     { id: 'lyrics', icon: 'music', title: t('Lyrics, lyrics search & kid-safe mode'), body: lyrics, guides: ['kinderschutz'] },
     { id: 'intel', icon: 'brain', title: t('Intelligence: sound, radio, classification'), body: intel },
+    { id: 'plugin', icon: 'puzzle', title: t('Navidrome plugin: Instant Mix by sound'), body: plugin },
     { id: 'watch', icon: 'folder-search', title: t('Process new music automatically'), body: watch, guides: ['aktualisieren'] },
     { id: 'docker', icon: 'server', title: t('Storage locations & Docker'), body: docker },
     { id: 'opus', icon: 'disc', title: t('Conversion: FLAC → Opus or AAC'), body: opus },
@@ -256,6 +257,17 @@
     <li>{@html t('<b>Albums without a cover</b> – Tuttiphon fetches them itself, see below. <b>Albums with gaps</b> in the track numbers, <b>very short files</b> under 20 seconds, <b>songs without a genre</b> and <b>MP3 below 128 kbit/s</b>.')}</li>
   </Bullets>
   <p>{@html t('<b>Missing covers:</b> for albums with no picture at all – no image file in the folder, none in the files – Tuttiphon fetches a cover from the Cover Art Archive via the MusicBrainz ID, otherwise from Deezer, and saves it as cover.jpg next to the music. This happens during “Update everything” and once a week in the time window of the night analysis. Existing pictures stay untouched, and new albums get two days so Lidarr can save its own cover; if Lidarr saves one later, Lidarr’s counts. Turn it off under <a class="link" href="#/einstellungen/bibliothek">Settings → Check library</a>.')}</p>
+{/snippet}
+
+{#snippet plugin()}
+  <p>{t('With the Tuttiphon plugin, Navidrome asks Tuttiphon for similar songs. Instant Mix in Navidrome, “similar songs”, song and artist radio in Symfonium and other apps then follow the sound of your own files – from the AI sound analysis, also for bands that Last.fm hardly knows.')}</p>
+  <Steps>
+    <li><span>{@html t('Under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a>, create a key in the card “Navidrome plugin” and download the plugin.')}</span></li>
+    <li><span>{@html t('Put <b>tuttiphon.ndp</b> into Navidrome’s plugins folder and add <code>ND_AGENTS=tuttiphon,lastfm,deezer</code> to Navidrome’s settings, then restart Navidrome.')}</span></li>
+    <li><span>{t('In Navidrome under Settings → Plugins, turn on “Tuttiphon” and enter Tuttiphon’s address and the key.')}</span></li>
+    <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server.')}</span></li>
+  </Steps>
+  <p>{t('Navidrome does not say who is listening – the songs come from the whole library as for the family, and with a child profile without explicit songs. The card shows when Navidrome last asked.')}</p>
 {/snippet}
 
 {#snippet benachrichtigungen()}

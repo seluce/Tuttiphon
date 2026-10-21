@@ -80,6 +80,10 @@ Every song is listened to – locally, at night, gently on a few cores:
   strings, brass …), how **easy to listen to** and how **engaging** a song is, **tempo and key**.
 - **Sounds alike**: from the sound of every song Tuttiphon finds similar songs and bands – for "more like this", the
   radio, "sounds like these bands", and to sort new bands into the right music world.
+- **Navidrome plugin**: with it, Navidrome asks Tuttiphon – Instant Mix, song and artist radio, "similar songs" and
+  related artists in Navidrome, Symfonium, Feishin and other apps follow the sound of your own files, also for bands
+  that Last.fm hardly knows; sound paths from one song to another for apps that support OpenSubsonic's
+  `sonicSimilarity`.
 - **Taste per person**: what someone plays, favors and rates – including how it sounds – shapes their suggestions.
 - Last.fm (optional, free key) adds similar bands and tags.
 

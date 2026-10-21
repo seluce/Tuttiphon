@@ -37,6 +37,19 @@ longer carry the license comments.
 The full license texts are in the image: for Debian packages in `/usr/share/doc/<package>/copyright`, for Python
 packages in `/usr/local/lib/python3.12/site-packages/<package>.dist-info/`.
 
+## In the Navidrome plugin
+
+`tuttiphon.ndp` (built from `navidrome-plugin/` with TinyGo, in the image under `/app/plugin/`) contains compiled code of:
+
+| Component | License |
+|---|---|
+| [Navidrome plugin development kit](https://github.com/navidrome/navidrome/tree/master/plugins/pdk/go) (`github.com/navidrome/navidrome/plugins/pdk/go`) | GPL-3.0 |
+| [Extism Go PDK](https://github.com/extism/go-pdk) (`github.com/extism/go-pdk`) | BSD-3-Clause |
+| Go and TinyGo runtime and standard library | BSD-3-Clause |
+
+The plugin as a whole is distributed under the AGPL-3.0 like Tuttiphon (GPL-3.0 code may be combined with it, both
+licenses section 13); its source is in `navidrome-plugin/`.
+
 ## AI models
 
 The AI sound analysis uses the Essentia models Discogs-EffNet and its classification heads (the list with checksums is

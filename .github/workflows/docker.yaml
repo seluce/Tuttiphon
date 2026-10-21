@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # the Navidrome plugin goes to the release as a file
   packages: write
 
 concurrency:
@@ -55,6 +55,18 @@ jobs:
             fi
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.27.3"
+          cache-dependency-path: navidrome-plugin/go.sum
+      - name: TinyGo (checked against its checksum)
+        run: |
+          curl -sSfL -o /tmp/tinygo.tar.gz https://github.com/tinygo-org/tinygo/releases/download/v0.43.0/tinygo0.43.0.linux-amd64.tar.gz
+          echo "ca9fc6d055e3889462dea4450a2e42a92242d88b5c362a7ec39bdb563413d78a  /tmp/tinygo.tar.gz" | sha256sum -c -
+          sudo tar -xzf /tmp/tinygo.tar.gz -C /opt
+          echo "/opt/tinygo/bin" >> "$GITHUB_PATH"
+      - name: Navidrome plugin (the image takes it along)
+        run: tools/build-plugin.sh
       - uses: docker/setup-buildx-action@v4
       - uses: docker/login-action@v4
         with:
@@ -72,3 +84,8 @@ jobs:
           tags: ${{ steps.tags.outputs.list }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Navidrome plugin to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" navidrome-plugin/dist/tuttiphon.ndp --clobber

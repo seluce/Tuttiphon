@@ -1,5 +1,6 @@
 # Checks every push and pull request: Python compiles, translations complete, Python tests, interface builds without
-# warnings, links in the handbook. The browser tests (npm run test:e2e) need a real Navidrome and stay local.
+# warnings, links in the handbook, the Navidrome plugin builds. The browser tests (npm run test:e2e) and the plugin
+# check against Navidrome (tools/plugin-check.sh) need more and stay local.
 name: CI
 
 on:
@@ -48,3 +49,17 @@ jobs:
         run: npm run test:py
       - name: Links in the handbook
         run: python3 tools/check-links.py
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.27.3"
+          cache-dependency-path: navidrome-plugin/go.sum
+      - name: TinyGo (checked against its checksum)
+        run: |
+          curl -sSfL -o /tmp/tinygo.tar.gz https://github.com/tinygo-org/tinygo/releases/download/v0.43.0/tinygo0.43.0.linux-amd64.tar.gz
+          echo "ca9fc6d055e3889462dea4450a2e42a92242d88b5c362a7ec39bdb563413d78a  /tmp/tinygo.tar.gz" | sha256sum -c -
+          sudo tar -xzf /tmp/tinygo.tar.gz -C /opt
+          echo "/opt/tinygo/bin" >> "$GITHUB_PATH"
+      - name: Navidrome plugin builds
+        run: |
+          (cd navidrome-plugin && go vet .)
+          tools/build-plugin.sh

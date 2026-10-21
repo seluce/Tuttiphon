@@ -318,4 +318,42 @@ export default {
   'You change the password of the local administrator under Settings → Users & permissions.': 'Das Passwort des lokalen Administrators änderst du unter Einstellungen → Benutzer & Rechte.',
   'New for you this week': 'Neu für dich diese Woche',
   'On Mondays to the person, if they have “Discovered for you” or “Album of the week”.': 'Montags an die Person, wenn sie „Entdeckt für dich“ oder „Album der Woche“ hat.',
+  'Navidrome plugin': 'Navidrome-Plugin',
+  'With the plugin, Navidrome asks Tuttiphon for similar songs: Instant Mix, song and artist radio and “similar songs” in Symfonium then follow the sound of your own music files – also for bands that other services hardly know.':
+    'Mit dem Plugin fragt Navidrome bei Tuttiphon nach ähnlichen Songs: Instant Mix, Song- und Künstler-Radio und „Ähnliche Titel“ in Symfonium richten sich dann nach dem Klang deiner eigenen Musikdateien – auch bei Bands, die andere Dienste kaum kennen.',
+  'Songs with a sound fingerprint': 'Songs mit Klang-Fingerabdruck',
+  'The AI sound analysis has not run yet – until then the plugin answers with similar bands from Last.fm and the genres.':
+    'Die KI-Klanganalyse ist noch nicht gelaufen – bis dahin antwortet das Plugin mit ähnlichen Bands aus Last.fm und den Genres.',
+  'Key': 'Schlüssel',
+  'Created {when}': 'Erstellt {when}',
+  'Navidrome signs in to Tuttiphon with it.': 'Damit meldet sich Navidrome bei Tuttiphon an.',
+  'New key': 'Neuer Schlüssel',
+  'Create key': 'Schlüssel erzeugen',
+  'Your key – shown only now:': 'Dein Schlüssel – wird nur jetzt angezeigt:',
+  'Copy': 'Kopieren',
+  'Copied': 'Kopiert',
+  'Select the text and copy it': 'Markiere den Text und kopiere ihn',
+  'Last request from Navidrome': 'Letzte Anfrage von Navidrome',
+  '{n} since Tuttiphon started': '{n} seit dem Start von Tuttiphon',
+  'none yet': 'noch keine',
+  'Setting it up': 'Einrichten',
+  'Download the plugin': 'Plugin herunterladen',
+  'Download <b>tuttiphon.ndp</b> from the release on <a class="link" href="https://github.com/seluce/tuttiphon/releases" target="_blank" rel="noopener">GitHub</a>.':
+    'Lade <b>tuttiphon.ndp</b> aus dem Release auf <a class="link" href="https://github.com/seluce/tuttiphon/releases" target="_blank" rel="noopener">GitHub</a> herunter.',
+  'Put it into Navidrome’s plugins folder – in the Navidrome container <code>/data/plugins</code> – and add to Navidrome’s settings (docker-compose):':
+    'Lege es in den Plugin-Ordner von Navidrome – im Navidrome-Container <code>/data/plugins</code> – und ergänze in den Einstellungen von Navidrome (docker-compose):',
+  'Restart Navidrome afterwards. Tuttiphon comes first – where it has no answer, Navidrome asks Last.fm and Deezer.':
+    'Starte Navidrome danach neu. Tuttiphon kommt zuerst – wo es keine Antwort hat, fragt Navidrome Last.fm und Deezer.',
+  'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon” and enter the address and the key. The address as Navidrome reaches Tuttiphon – from this browser it is <code>{address}</code>; inside Docker often the address of the NAS.':
+    'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein und trage Adresse und Schlüssel ein. Gemeint ist die Adresse, unter der Navidrome Tuttiphon erreicht – von diesem Browser aus ist es <code>{address}</code>; in Docker oft die Adresse des NAS.',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> in the settings of the Navidrome server.':
+    'Schalte in Symfonium in den Einstellungen des Navidrome-Servers <b>„Use similar tracks for Radio Mix“</b> ein.',
+  'Navidrome does not say who is listening: the songs come from the whole library as for the family. Children’s music only comes for children’s songs – and if there is a child profile, songs with explicit lyrics stay out.':
+    'Navidrome verrät nicht, wer gerade hört: Die Songs kommen aus der ganzen Bibliothek wie für die Familie. Kindermusik kommt nur zu Kinderliedern – und gibt es ein Kinderprofil, bleiben Songs mit derben Texten draußen.',
+  'Create a new key?': 'Neuen Schlüssel erzeugen?',
+  'The old key stops working – enter the new one in Navidrome afterwards.':
+    'Der alte Schlüssel gilt dann nicht mehr – trage danach den neuen in Navidrome ein.',
+  'Remove the key?': 'Schlüssel entfernen?',
+  'Navidrome then gets no more answers from Tuttiphon and uses its other sources again.':
+    'Navidrome bekommt dann keine Antworten mehr von Tuttiphon und nutzt wieder seine anderen Quellen.',
 }

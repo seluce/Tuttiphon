@@ -10,6 +10,7 @@
 !package.json
 !package-lock.json
 !vite.config.js
+!navidrome-plugin/dist
 app/__pycache__
 **/__pycache__
 **/node_modules

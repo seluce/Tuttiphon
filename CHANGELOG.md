@@ -5,6 +5,20 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## 1.4.0
+
+Navidrome and its apps now find similar songs by sound – with a plugin that asks Tuttiphon.
+
+- **Instant Mix by sound – the Tuttiphon plugin for Navidrome.** Navidrome asks Tuttiphon for similar songs and
+  artists: Instant Mix in Navidrome, “similar songs”, song and artist radio and related artists in Symfonium and other
+  apps then follow the sound of your own files from the AI sound analysis – also for bands that Last.fm hardly knows.
+  Apps with OpenSubsonic's `sonicSimilarity` also get sound paths from one song to another. Set up under Settings →
+  Navidrome → “Navidrome plugin”: create a key, download the plugin, put it into Navidrome's plugins folder, add
+  `ND_AGENTS=tuttiphon,lastfm,deezer` to Navidrome's settings, enter address and key in Navidrome. Needs Navidrome
+  0.64 or later. Navidrome does not say who is listening – the songs come from the whole library as for the family,
+  without explicit songs as soon as there is a child profile.
+- No changes to Tuttiphon's `docker-compose.yaml` needed (only Navidrome's, see above).
+
 ## 1.3.0
 
 A family library played by parents and children – each with their own taste – and covers that make the

@@ -59,6 +59,8 @@ import CircleQuestionMark from '@lucide/svelte/icons/circle-question-mark'
 import ChartColumn from '@lucide/svelte/icons/chart-column'
 import Dices from '@lucide/svelte/icons/dices'
 import Upload from '@lucide/svelte/icons/upload'
+import Download from '@lucide/svelte/icons/download'
+import Puzzle from '@lucide/svelte/icons/puzzle'
 import CircleCheck from '@lucide/svelte/icons/circle-check'
 import TrendingUp from '@lucide/svelte/icons/trending-up'
 import Palette from '@lucide/svelte/icons/palette'
@@ -129,7 +131,7 @@ export const ICONS = {
   music: Music, star: Star, shuffle: Shuffle, eye: Eye, 'eye-off': EyeOff, ban: Ban, lock: Lock, sun: Sun, moon: Moon,
   alert: TriangleAlert, undo: Undo2, disc: Disc, heart: Heart, list: List, grid: LayoutGrid, more: Ellipsis,
   inbox: Inbox, wand: WandSparkles, folder: Folder, image: ImageIcon, help: CircleQuestionMark, chart: ChartColumn,
-  dice: Dices, upload: Upload, 'check-circle': CircleCheck, trending: TrendingUp, palette: Palette, plug: Plug,
+  dice: Dices, upload: Upload, download: Download, puzzle: Puzzle, 'check-circle': CircleCheck, trending: TrendingUp, palette: Palette, plug: Plug,
   smartphone: Smartphone, info: Info, key: KeyRound, zap: Zap, mic: Mic, headphones: Headphones, sunrise: Sunrise,
   flag: Flag, calendar: Calendar, trophy: Trophy, eraser: Eraser, text: ScrollText, archive: Archive,
   'folder-search': FolderSearch, server: Server, shield: Shield, 'shield-check': ShieldCheck, bell: Bell, drive: HardDrive, route: Route, brain: Brain,

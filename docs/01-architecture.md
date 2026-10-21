@@ -254,6 +254,7 @@ run.
 | `classify.py` | merges features per song (`song_features()`), assigns bands to a music world (suggestions, automatic classification, `state/auto_assigned.json`), radio, “You’re still missing” |
 | `taste.py` | taste per account from plays, favorites and stars given by hand ([Intelligence](06-intelligence.md#taste-per-account-apptastepy)) |
 | `soundtaste.py` | sound taste per account: a few typical sounds of what the account plays, from the AI's sound vectors ([Intelligence](06-intelligence.md#sound-taste-appsoundtastepy)) |
+| `sonic.py` | answers for the Navidrome plugin – similar songs, artist radio, similar bands, sound paths – and its key ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)); the plugin itself (Go, built with TinyGo to WebAssembly) is in `navidrome-plugin/` ([Operations](08-operations.md#navidrome-plugin)) |
 | `stats.py` | listening statistics per account from the play counters |
 | `rueckblick.py` | daily counter states → “Played this week” and recap |
 | `backup.py` | built-in backup of the data folder as a ZIP ([Operations](08-operations.md#built-in-backup-appbackuppy)) |

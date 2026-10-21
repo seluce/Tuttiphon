@@ -469,6 +469,39 @@ Messages are sent as JSON to the server address (`{"topic", "title", "message", 
 topic on ntfy.sh can read it – so choose one that is hard to guess. For protected topics on your own
 server, enter the access token as `NTFY_TOKEN` in the `.env` or in `docker-compose.yaml` under `environment:`.
 
+## Navidrome plugin
+
+With the Tuttiphon plugin, Navidrome asks Tuttiphon for similar songs and similar artists: Instant Mix in Navidrome's
+web interface, “similar songs”, song and artist radio in Symfonium and other apps (`getSimilarSongs2`,
+`getArtistInfo2`) and the OpenSubsonic extension `sonicSimilarity` (`getSonicSimilarTracks`, `findSonicPath`) then
+follow the sound of the own files ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Needs
+Navidrome 0.64 or later (plugins, Instant Mix and the `sonicSimilarity` extension); the answers come from the AI
+sound analysis, so the Docker image – without it, the plugin answers with the radio (Last.fm, genres).
+
+1. **Key:** Settings → Navidrome → “Navidrome plugin” → “Create key” (shown once – copy it).
+2. **Plugin file:** “Download the plugin” there (`/plugin/tuttiphon.ndp`, part of the image) or `tuttiphon.ndp` from
+   the GitHub release. Put it into Navidrome's plugins folder – `<DataFolder>/plugins`, in the Navidrome container
+   usually `/data/plugins`.
+3. **Navidrome's settings** (its `docker-compose.yaml` or `navidrome.toml`): `ND_AGENTS=tuttiphon,lastfm,deezer` –
+   Tuttiphon first; where it has no answer (an empty list), Navidrome asks the next agent. Plugins are on by default
+   (`ND_PLUGINS_ENABLED=true`). Restart Navidrome.
+4. **In Navidrome:** Settings → Plugins → “Tuttiphon”: turn on, enter the address of Tuttiphon as Navidrome reaches it
+   (e.g. `http://<NAS>:8765` – not `localhost` unless both share a network) and the key.
+5. **Symfonium:** in the settings of the Navidrome server, turn on “Use similar tracks for Radio Mix”.
+
+Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix. Problems: in
+Navidrome's log lines with `plugin=tuttiphon` (more with `ND_PLUGINS_LOGLEVEL=debug`) – “Tuttiphon not reachable”
+(address, network between the containers), “Tuttiphon answered 401” (key: create a new one and enter it), “answered
+429” (too many wrong keys – wait 10 minutes).
+
+**Building it:** `tools/build-plugin.sh` (Go and TinyGo – in `PATH` or `TUTTIPHON_GO_TOOLS` in `dev.local.env`) writes
+`navidrome-plugin/dist/tuttiphon.ndp` (manifest with Tuttiphon's version + `plugin.wasm`); `npm run release` and the
+image workflow build it, the Dockerfile copies it to `/app/plugin/`, the workflow also attaches it to the GitHub
+release. `tools/plugin-check.sh` (maintainers) runs the whole way end to end: test music made with ffmpeg, a throwaway
+Navidrome (`TUTTIPHON_NAVIDROME` or in `PATH`, port 4599) with the plugin, a throwaway Tuttiphon (port 8799) with
+made-up sound vectors, then `getSimilarSongs2`, `getSonicSimilarTracks`, `findSonicPath` and `getArtistInfo2` through
+Navidrome – never the real Navidrome or the real data.
+
 ## Backup
 
 Only the data folder needs to be backed up. Tuttiphon recreates the playlist files in the music folder from
