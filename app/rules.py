@@ -462,18 +462,27 @@ def build_nsp(cfg, playlist, ctx=None):
             "limit": int(playlist.get("limit") or S.get("limit") or 100)}
 
 
+def kid_safe(cfg, playlist):
+    """Does kid-safe mode take songs out of this playlist? (its person or a member of “What everyone likes” has it on)"""
+    return any(x.get("clean") for x in [person_of(cfg, playlist) or {}] + together_of(cfg, playlist))
+
+
+def rude(cfg):
+    """-> function song -> does kid-safe mode take it out? Recognized by the lyrics (liedtext.py) or marked "explicit"
+    in the file – not the songs allowed by hand."""
+    from . import liedtext
+    allow = set((cfg["settings"].get("kinderschutz") or {}).get("allow", []))
+    found = liedtext.derb(allow)
+    return lambda s: s["id"] in found or (s.get("explicitStatus") in ("explicit", "e") and s["id"] not in allow)
+
+
 def clean_rules(cfg, rules, ctx):
     """Kid-safe mode: take songs with explicit lyrics (liedtext.py) out of the selection – as one rule per title,
     because Navidrome evaluates smart playlists itself and does not know the lyrics detection."""
     if ctx is None or ctx.lib is None:
         return []
-    from . import liedtext
-    allow = set((cfg["settings"].get("kinderschutz") or {}).get("allow", []))
-    rude = liedtext.derb(allow)
+    bad = rude(cfg)
     lib = ctx.lib
-
-    def bad(s):   # recognized by the lyrics – or marked "explicit" in the file
-        return s["id"] in rude or (s.get("explicitStatus") in ("explicit", "e") and s["id"] not in allow)
 
     # Pool without rules on stars, favorites and plays – Navidrome evaluates those with the person's account, here the
     # song list of another account would be used (an explicit favorite song of the child would otherwise slip through)

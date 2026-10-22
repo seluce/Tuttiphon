@@ -21,6 +21,22 @@ class DiscoverTest(unittest.TestCase):
         self.lib = Library([song(f"s{k}", artist=f"Gruppe {k % 40}", album=f"Album {k % 80}", genres=("Pop",), rating=4,
                                  plays=2 if k % 3 == 0 else 0) for k in range(400)])
 
+    def test_the_selection_stays_for_its_period(self):
+        """Discovered: what is played from it stays in it until the next edition – the file in Navidrome and the state
+        on the page stay the same; a song rated 1 star by hand since leaves it."""
+        p = {"id": "d", "person": "jonas", "welt": "*", "stil": "*", "type": "mix", "unheard": True,
+             "mix": {"size": 30, "perArtist": 2, "perAlbum": 1, "every": "week"}}
+        mixer.MIX_STATE.unlink(missing_ok=True)
+        self.addCleanup(mixer.MIX_STATE.unlink, missing_ok=True)
+        with mock.patch.object(mixer, "person_lib", lambda cfg, playlist, base: base), \
+                mock.patch.object(taste, "profile", lambda *a, **k: None):
+            first, _pool = mixer.pick(self.cfg, self.lib, p, {"all": []}, TODAY, keep=True)
+            played, rated = self.lib.songs[first[0]], self.lib.songs[first[1]]
+            played["playCount"] = 1                                  # heard from the mix meanwhile
+            with mock.patch.object(mixer, "_never", lambda base, plib, users: {rated["id"]}):
+                again, _pool = mixer.pick(self.cfg, self.lib, p, {"all": []}, TODAY)
+        self.assertEqual(again, [i for i in first if i != first[1]])
+
     def test_pick_takes_only_never_played_songs(self):
         p = {"id": "d", "person": "jonas", "welt": "*", "stil": "*", "type": "mix", "unheard": True,
              "mix": {"size": 30, "perArtist": 2, "perAlbum": 1, "every": "week"}}

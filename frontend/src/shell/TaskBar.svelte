@@ -1,8 +1,10 @@
 <!--
   Running task and applying to Navidrome.
   chip: small hint in the header while something is running.
-  otherwise: floating bar at the bottom ("Changes reach Navidrome in 8 s – Now"). The bar of a running task can be
-  put away (✕ or swiped aside) until that run ends – the chip in the header stays (a night analysis runs for hours).
+  otherwise: floating bar at the bottom. The bar of a running task can be put away (✕ or swiped aside) until that run
+  ends – the chip in the header stays (a night analysis runs for hours). Applying to Navidrome by itself (auto-apply,
+  a few seconds after a change) needs no bar – the change was confirmed already; without auto-apply the bar offers
+  “Apply”.
 -->
 <script>
   import Icon from '../components/Icon.svelte'
@@ -12,10 +14,12 @@
   import { smooth } from '../lib/motion.js'
 
   let { chip = false } = $props()
-  // Users only see applying to Navidrome (their changes) – no analysis or maintenance runs.
-  const task = $derived(isAdmin() || isApplyRun(S.task) ? S.task : null)
-  const n = $derived(pendingCount())
   const auto = $derived(S.config?.settings.autoApply !== false)
+  // Users only see applying to Navidrome (their changes) – no analysis or maintenance runs. With auto-apply the short
+  // applying run gets no bar, only the chip in the header while it runs.
+  const chipTask = $derived(isAdmin() || isApplyRun(S.task) ? S.task : null)
+  const task = $derived(isApplyRun(S.task) && auto ? null : chipTask)
+  const n = $derived(pendingCount())
 
   // the bar of a run put away: that run (its start time) – a later run brings it back, even unseen in between
   let awayRun = $state(null)
@@ -59,10 +63,10 @@
 </script>
 
 {#if chip}
-  {#if task?.running}
+  {#if chipTask?.running}
     <button type="button" class="inline-flex items-center gap-2 ml-auto px-3.5 py-[7px] rounded-full text-[.84rem] font-[650] bg-surface border border-accent/50 whitespace-nowrap text-text cursor-pointer"
-      data-task-chip aria-label={task.name || t('running …')} title={task.name || t('running …')}
-      onclick={() => (isAdmin() ? showProgress() : go('#/'))}><Icon name="refresh" size={16} class="animate-spin" /><span class="max-mobile:hidden">{task.name || t('running …')}</span></button>
+      data-task-chip aria-label={chipTask.name || t('running …')} title={chipTask.name || t('running …')}
+      onclick={() => (isAdmin() ? showProgress() : go('#/'))}><Icon name="refresh" size={16} class="animate-spin" /><span class="max-mobile:hidden">{chipTask.name || t('running …')}</span></button>
   {/if}
 {:else if task?.running}
   {#if !away}
@@ -76,10 +80,6 @@
       <button type="button" class="btn icon sm ghost shrink-0" aria-label={t('Close')} title={t('Close')} onclick={putAway}><Icon name="x" size={16} /></button>
     </div>
   {/if}
-{:else if S.auto?.waiting && n}
-  <div class="applybar"><Icon name="clock" size={18} class="shrink-0" /><span>{t('Changes follow after the running task')}</span></div>
-{:else if S.auto?.due != null}
-  <div class="applybar"><Icon name="clock" size={18} class="shrink-0" /><span>{t('Changes reach Navidrome in {n} s', { n: S.auto.due })}</span><button class="btn sm primary" onclick={applyNow}>{t('Now')}</button></div>
 {:else if n && !auto}
   <div class="applybar"><Icon name="alert" size={18} class="shrink-0" /><span>{tn(n, '{n} change not yet in Navidrome', '{n} changes not yet in Navidrome')}</span><button class="btn sm primary" onclick={applyNow}>{t('Apply')}</button></div>
 {/if}

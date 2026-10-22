@@ -185,10 +185,12 @@ def remember(cfg, playlist, lib, order, day, albums=None):
             pass
 
 
-def select(lib, ids, playlist, today=None, cfg=None, adjust=None, arrange=None):
+def select(lib, ids, playlist, today=None, cfg=None, adjust=None, arrange=None, keep=None):
     """List of song indices in playing order. adjust: song ID -> weight factor (learned skipping).
     arrange(lib, chosen) -> playing order or None: for a new selection instead of spread() (smooth transitions) – a
-    selection already written in this period keeps its order."""
+    selection already written in this period keeps its order. keep(song) -> may a song of that selection stay? It stays
+    the same for the whole period – what was played since (discovered), a star Deezer set anew or a sound measured
+    since do not change it; without keep only what is still in `ids`."""
     adjust = adjust or {}
     opt = options(playlist)
     day = period_start(opt.get("every", "day"), today)
@@ -196,7 +198,8 @@ def select(lib, ids, playlist, today=None, cfg=None, adjust=None, arrange=None):
         saved = _load_state().get(playlist.get("id"))
         if saved and saved.get("day") == day.isoformat() and saved.get("key") == settings_key(cfg, playlist):
             index, pool = lib.index_of(), set(ids)
-            order = [index[s] for s in saved.get("ids", []) if s in index and index[s] in pool]
+            order = [index[s] for s in saved.get("ids", []) if s in index
+                     and (keep(lib.songs[index[s]]) if keep else index[s] in pool)]
             if order:
                 return order
     seed = f"{day.isoformat()}|{playlist.get('id')}|{opt.get('salt', '')}"
@@ -614,7 +617,7 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
     pool = rules.apply_sound(cfg, plib, playlist, plib.match(nsp))   # sound vibes: only matching songs
     if playlist.get("unheard"):   # "Discovered for you": only what this account has never played
         pool = frozenset(unheard(plib, pool))
-    adjust = {}
+    adjust, never = {}, set()
     if cfg["settings"].get("mixLearn", True):   # learn from listening: skipped -> less often, 1 star by hand -> never
         person = rules.person_of(cfg, playlist) or {}   # none: a neutral view
         user = person.get("user")
@@ -654,7 +657,11 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
     calm = set(snd.get("moods", [])) & {"schlaf", "ruhig"}
     # smooth transitions – not where an arc sets the order (falling asleep, good morning)
     smoothly = cfg["settings"].get("smoothTransitions", True) and not rise and not calm
-    order = select(plib, pool, playlist, today, cfg, adjust, arrange=smooth if smoothly else None)
+    # the selection written in this period stays – only a song gone missing (converted, deleted), rated 1 star by hand
+    # since or one kid-safe mode takes out leaves it
+    bad = rules.rude(cfg) if rules.kid_safe(cfg, playlist) else None
+    keep = lambda s: not s.get("missing") and s["id"] not in never and not (bad and bad(s))   # noqa: E731
+    order = select(plib, pool, playlist, today, cfg, adjust, arrange=smooth if smoothly else None, keep=keep)
     if rise:   # Good morning: start calm, then livelier
         from .classify import song_features
         order = calm_down(plib, order, song_features(plib), rise=True)

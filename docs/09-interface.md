@@ -225,7 +225,10 @@ and (administrator) the history, and increments `S.done`.
 
 `shell/TaskBar.svelte` shows a small indicator at the top of the header while something is running, and a floating bar
 at the bottom (notice bar). Users only see apply runs (all steps are `playlists` or `scan`, `isApplyRun()`),
-no analysis or maintenance runs. The bar of a running task can be put away – with ✕ or swiped aside (it follows the
+no analysis or maintenance runs. With auto-apply on (`settings.autoApply`, the default) applying gets no bar – no
+countdown, not the short apply run itself; the change was confirmed already, it reaches Navidrome seconds later by
+itself; only the indicator in the header shows it while it runs. The number of changes not yet in Navidrome on
+“Playlists” in the navigation (`Nav.svelte`, `pendingCount()`) appears only with auto-apply off. The bar of a running task can be put away – with ✕ or swiped aside (it follows the
 finger; 90 px to the side or 40 px down) – until that run ends (`startedAt` of `GET /api/task`: a later run brings it
 back, even if the interface never saw a moment without a run); the indicator in the header stays and takes the
 keyboard focus. The bar shows the first thing that applies:
@@ -233,9 +236,7 @@ keyboard focus. The bar shows the first thing that applies:
 | State | Bar |
 |---|---|
 | a (visible) run is in progress | “<name> …”, for administrators with “Progress” (jumps to the live log on the home page) |
-| `S.auto.waiting` and playlists not yet applied | “Changes follow after the running task” |
-| `S.auto.due` set | “Changes reach Navidrome in N s” with “Now” (`applyNow()`) |
-| auto-apply off, playlists pending | “N change(s) not yet in Navidrome” with “Apply” |
+| auto-apply off, playlists pending | “N change(s) not yet in Navidrome” with “Apply” (`applyNow()`) |
 
 `applyNow()` first saves open changes and then calls `POST /api/apply/now` – if an analysis or similar is running,
 the server pauses it briefly for this ([Maintenance](05-maintenance.md#short-pause-for-an-apply-pause_for)). On the

@@ -500,12 +500,6 @@ export default {
     'en curso …',
   'Progress':
     'Progreso',
-  'Changes follow after the running task':
-    'Los cambios llegarán tras la tarea en curso',
-  'Changes reach Navidrome in {n} s':
-    'Los cambios llegan a Navidrome en {n} s',
-  'Now':
-    'Ahora',
   '{n} change not yet in Navidrome':
     '{n} cambio pendiente para Navidrome',
   '{n} changes not yet in Navidrome':

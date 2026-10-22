@@ -89,6 +89,21 @@ class ScoresTest(unittest.TestCase):
         self.assertIn("kinder", family["playlist"]["welt"])   # the parent's account plays it for the family
 
 
+class FavoriteWorldTest(unittest.TestCase):
+    def test_a_left_out_world_is_no_favorite_for_suggestions(self):
+        cfg = base_config()
+        cfg["personen"][1]["likes"]["welten"] = ["kinder"]   # once taken over from listening …
+
+        def worlds():
+            with mock.patch.object(taste, "profile", lambda *a, **k: None), \
+                    mock.patch("app.rueckblick.plays_between", lambda user, start, end: ({}, {})):
+                out = suggest.suggestions(cfg, library(), today=TODAY, only_person="jonas")
+            return {w for x in out if x.get("playlist") for w in rules.welt_ids(x["playlist"])}
+        self.assertIn("kinder", worlds())
+        cfg["personen"][1]["tasteExclude"] = ["kinder"]      # … then kept out of the taste
+        self.assertNotIn("kinder", worlds())                 # not even “for the season”
+
+
 class MorningTest(unittest.TestCase):
     def test_left_out_songs_do_not_make_a_morning(self):
         now = dt.datetime(2026, 10, 20, 12, 0)

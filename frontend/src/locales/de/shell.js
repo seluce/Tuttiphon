@@ -271,9 +271,6 @@ export default {
   // shell/TaskBar.svelte
   'running …': 'läuft …',
   'Progress': 'Fortschritt',
-  'Changes follow after the running task': 'Änderungen folgen nach der laufenden Aufgabe',
-  'Changes reach Navidrome in {n} s': 'Änderungen kommen in {n} s in Navidrome',
-  'Now': 'Jetzt',
   '{n} change not yet in Navidrome': '{n} Änderung noch nicht in Navidrome',
   '{n} changes not yet in Navidrome': '{n} Änderungen noch nicht in Navidrome',
   'Apply': 'Übernehmen',

@@ -5,6 +5,17 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **Fewer messages:** with automatic applying, changes reach Navidrome by themselves a few seconds later – without a
+  countdown bar and without a number on “Playlists”; both only appear when applying by hand.
+- **A mix stays the same until its next edition:** songs played from “Discovered” or stars Deezer set anew no longer
+  make it count as changed – that was the number on “Playlists” that did not go away. Only a song gone, rated 1 star
+  by hand or taken out by kid-safe mode leaves it.
+- **Music kept out of your taste is no favorite world:** no seasonal children's music suggestions for a parent who
+  plays it for the kids; in the profile, choosing a world as a favorite or keeping it out of the taste undoes the
+  other.
+
 ## 2.1.0
 
 - **The family's mixes learn from everyone:** play one on your own account and Tuttiphon recognizes it by its order

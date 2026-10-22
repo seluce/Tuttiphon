@@ -500,12 +500,6 @@ export default {
     'bezig …',
   'Progress':
     'Voortgang',
-  'Changes follow after the running task':
-    'Wijzigingen volgen na de lopende taak',
-  'Changes reach Navidrome in {n} s':
-    'Wijzigingen bereiken Navidrome over {n} s',
-  'Now':
-    'Nu',
   '{n} change not yet in Navidrome':
     '{n} wijziging nog niet in Navidrome',
   '{n} changes not yet in Navidrome':

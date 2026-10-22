@@ -47,7 +47,8 @@
       document.documentElement.style.removeProperty('--nav-h')
     }
   }
-  const pending = $derived(pendingCount())
+  // changes not yet in Navidrome – only without auto-apply (otherwise they get there by themselves, seconds later)
+  const pending = $derived(S.config?.settings.autoApply === false ? pendingCount() : 0)
   const moreOn = $derived(/^\/(person|profil|richtungen|einstellungen|verlauf|statistik|hilfe)/.test(route.path))
 
   function moreMenu() {

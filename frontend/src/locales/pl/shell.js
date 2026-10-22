@@ -495,12 +495,6 @@ export default {
     'trwa …',
   'Progress':
     'Postęp',
-  'Changes follow after the running task':
-    'Zmiany nastąpią po bieżącym zadaniu',
-  'Changes reach Navidrome in {n} s':
-    'Zmiany trafią do Navidrome za {n} s',
-  'Now':
-    'Teraz',
   '{n} change not yet in Navidrome':
     '{n} zmiana jeszcze nie w Navidrome',
   '{n} changes not yet in Navidrome': { few: '{n} zmiany jeszcze nie w Navidrome', many: '{n} zmian jeszcze nie w Navidrome' },

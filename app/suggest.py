@@ -353,10 +353,13 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         next_episode(person)   # also for a profile without favorites yet (a child listening to audio plays)
         likes = person.get("likes", {})
         prof = profiles.get(pid)
-        liked_w = [w for w in likes.get("welten", []) if w in welten]
+        # favorite worlds – not those the person keeps out of their taste (children's music played for the kids): they
+        # stay the family's (car ride, What everyone likes), but are no suggestion for the person
+        left_out = set(taste.excluded(person) or ())
+        fav_w = [w for w in likes.get("welten", []) if w in welten and w not in left_out]
         # favorite worlds recognized from listening (at least 8 % of what was played), at most three
-        heard_w = [w for w, share in (prof or {}).get("welten", []) if share >= 0.08 and w in welten and w not in liked_w][:3]
-        liked_w = liked_w + heard_w
+        heard_w = [w for w, share in (prof or {}).get("welten", []) if share >= 0.08 and w in welten and w not in fav_w][:3]
+        liked_w = fav_w + heard_w
         liked_s = set(likes.get("stile", []))
         if not liked_w and not liked_s and pid != family:
             k = f"likes|{pid}"
@@ -370,7 +373,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         core_worlds = (ranked + [w for w in liked_w if w not in ranked])[:2]
         for wid in liked_w:
             w = welten[wid]
-            base = 1.0 + (0.4 if wid in likes.get("welten", []) or wid in heard_w else 0)
+            base = 1.0 + (0.4 if wid in fav_w or wid in heard_w else 0)
             because = _("Played often") if wid in heard_w else None
             # mix and hits of the world
             add({"person": pid, "welt": wid, "stil": ALL}, base + 0.5, group=pid, because=because)
@@ -419,7 +422,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
 
         # Daily Mixes: one per favorite world, new every day, at most 3 per band
         for wid in liked_w:
-            if pid != family and wid not in likes.get("welten", []) and wid not in heard_w:
+            if pid != family and wid not in fav_w and wid not in heard_w:
                 continue
             w = welten[wid]
             add({"person": pid, "welt": wid, "stil": ALL, "type": "mix", "mix": {"size": 50, "perArtist": 3}},

@@ -1,6 +1,6 @@
 <!-- Music worlds that do not count for a person's taste (p.tasteExclude, changed directly) – e.g. the children's music
      that plays on a parent's account. Toggles for the separate worlds (children, audio plays …) and the ones already
-     left out; any other world can be added. -->
+     left out; any other world can be added. A world left out is no favorite world either (p.likes.welten). -->
 <script>
   import Icon from '../../components/Icon.svelte'
   import Glyph from '../../components/Glyph.svelte'
@@ -16,6 +16,7 @@
 
   function toggle(id) {
     p.tasteExclude = list.includes(id) ? list.filter((x) => x !== id) : [...list, id]
+    if (p.tasteExclude.includes(id) && p.likes?.welten?.includes(id)) p.likes.welten = p.likes.welten.filter((x) => x !== id)
     onchange()
   }
   function add(id) {

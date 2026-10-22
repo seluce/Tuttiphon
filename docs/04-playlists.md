@@ -651,7 +651,11 @@ at midnight – otherwise all mixes would be “changed” at night. With `daily
 `select()` returns the song indices in playback order:
 
 1. **Remembered selection.** If `state/mixes.json` contains the same period and the same
-   fingerprint (`settings_key()`) for this playlist, exactly that selection is used (without songs that are no longer in the pool).
+   fingerprint (`settings_key()`) for this playlist, exactly that selection is used – for the whole period: what was
+   played from it since (“Discovered”), a star Deezer set anew or a sound measured since do not change it; only a song
+   no longer in the library, rated 1 star by hand since (`_never()`) or taken out by kid-safe mode (`rules.rude()`, when
+   `rules.kid_safe()`) leaves it (`select(…, keep=…)`). So the file in Navidrome and the state on the page stay
+   “current” until the next edition.
    That way the mix stays stable over the period, and preview and Navidrome show the same thing.
 2. **Randomness with a fixed seed.** Seed `<period start>|<playlist ID>|<salt>`; every song gets its
    own random value from `sha1(seed|song ID)`. So a new album does not shift the whole selection.
@@ -957,7 +961,10 @@ those keep the person, so the family's “Discovered for us” or “Our sound�
 
 **Ideas per person** (based on `likes` and – for people with enough listening – the taste profile
 `taste.profile()`, see [Intelligence](06-intelligence.md#taste-per-account-apptastepy)). Favorite worlds are the
-`likes.welten` plus up to three worlds with at least 8 % of what was played. Every person gets the ideas of its own
+`likes.welten` plus up to three worlds with at least 8 % of what was played – never a world the person keeps out of
+their taste (`tasteExclude`, e.g. the children's music a parent plays for the kids): that one stays the family's (car
+ride, “What everyone likes”) but brings the person no suggestion, not even for the season. In the profile, choosing
+a world as a favorite takes it out of `tasteExclude` and keeping it out takes it off the favorites. Every person gets the ideas of its own
 account – the family too, from the plays on the family's account; the family comes first. Without favorite worlds
 and vibes, people other than the family only get the card “What does … like to listen to?”.
 
