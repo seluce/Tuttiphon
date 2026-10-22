@@ -59,7 +59,7 @@ def speaking(lang):
 @contextlib.contextmanager
 def reading_config():
     """While config.load_config() reads the file: a message from inside (a damaged or outdated file) must not read it
-    again for the server language – that would start over (migration backups included) until the stack runs out."""
+    again for the server language – that would start over until the stack runs out."""
     before = getattr(_local, "reading", False)
     _local.reading = True
     try:

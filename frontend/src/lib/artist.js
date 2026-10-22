@@ -1,5 +1,5 @@
 // Artists: sheet with picture, info, albums, similar bands – and "radio" (a mix of similar bands).
-import { S, defaultOwner, snapshot, changed } from './state.svelte.js'
+import { S, defaultOwner, isAdmin, snapshot, changed } from './state.svelte.js'
 import { openSheet, closeSheet, toast } from './overlay.svelte.js'
 import { go } from './router.svelte.js'
 import { uid, today } from './format.js'
@@ -12,11 +12,12 @@ export function openArtist(name) {
 }
 
 /** Create a "similar to …" radio as a mix (new every week) – or open the existing one. For your own person
- *  (administrators without one: the family's); without a person of your own, the welcome comes first. */
+ *  (administrators without one: the family's); without a person of your own, the welcome comes first – for
+ *  administrators when there is no person at all: adding one. */
 export function startRadio(name, person = defaultOwner()?.id) {
   const have = S.config.playlists.find((p) => p.person === person && p.radio?.seed?.length === 1 && p.radio.seed[0] === name && (p.status || 'aktiv') !== 'papierkorb')
   closeSheet()
-  if (!person) { go('#/willkommen'); return }
+  if (!person) { go(isAdmin() ? '#/person/neu' : '#/willkommen'); return }   // i18n-ignore: routes
   if (have) { go(`#/playlist/${encodeURIComponent(have.id)}`); return }
   snapshot()
   const id = uid(`radio-${name}`)

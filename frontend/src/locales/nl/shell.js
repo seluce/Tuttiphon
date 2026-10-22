@@ -4,6 +4,10 @@ export default {
     'Eerst een profiel',
   'The welcome assistant briefly asks what you like to listen to. After that, suggestions and mixes fit you.':
     'De welkomstassistent vraagt kort waar je graag naar luistert. Daarna passen suggesties en mixen bij jou.',
+  'First a person':
+    'Eerst een persoon',
+  'There is no person yet. Add one first – every playlist and every profile belongs to a person.':
+    'Er is nog geen persoon. Voeg er eerst een toe – elke playlist en elk profiel hoort bij een persoon.',
   'Bring everything up to date':
     'Alles up-to-date brengen',
   'Open the home page':
@@ -638,8 +642,6 @@ export default {
     'In het bestand <b>setup-code.txt</b> in de datamap van Tuttiphon – de map <code>config</code> naast docker-compose.yaml.',
   'Forgot the password?':
     'Wachtwoord vergeten?',
-  'Set in the browser: delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml). A few seconds later this page asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
-    'Ingesteld in de browser: verwijder het bestand <b>admin_password.json</b> in de map <code>state</code> van de datamap (<code>config/state</code> naast docker-compose.yaml). Een paar seconden later vraagt deze pagina om een nieuw wachtwoord – met een nieuwe installatiecode uit het logboek van de container. Al het andere blijft zoals het is.',
-  'Set in docker-compose.yaml: it is there as <code>TUTTIPHON_ADMIN_PASSWORD</code>.':
-    'Ingesteld in docker-compose.yaml: het staat daar als <code>TUTTIPHON_ADMIN_PASSWORD</code>.',
+  'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
+    'Verwijder het bestand <b>admin_password.json</b> in de map <code>state</code> van de datamap (<code>config/state</code> naast docker-compose.yaml) en laad deze pagina daarna opnieuw. Die vraagt dan om een nieuw wachtwoord – met een nieuwe installatiecode uit het logboek van de container. Al het andere blijft zoals het is.',
 }

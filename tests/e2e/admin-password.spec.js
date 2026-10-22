@@ -1,7 +1,6 @@
 // Password of the local administrator: the setup form of the first start on the sign-in page and changing it under
-// Settings → Users & permissions. The test copy has a password from its .env, so a first start and a password set in
-// the browser are played in the browser (page.route) – POST /api/setup and /api/admin-password are answered there,
-// nothing is written.
+// Settings → Users & permissions. The test copy already has a password, so the first start is played in the browser
+// (page.route) – POST /api/setup and /api/admin-password are answered there, nothing is written.
 import { test, expect } from '@playwright/test'
 import { login, visit } from './helpers.js'
 
@@ -45,23 +44,7 @@ test.describe('Administrator', () => {
   // the status is fetched again after saving – a request still under way when the test ends is no error
   test.afterEach(async ({ page }) => { await page.unrouteAll({ behavior: 'ignoreErrors' }) })
 
-  test('the password from docker-compose can only be changed there', async ({ page }) => {
-    await page.route((url) => url.pathname === '/api/status', async (route) => {
-      const res = await route.fetch()
-      const st = await res.json()
-      return route.fulfill({ response: res, json: { ...st, env: { ...st.env, adminPassword: 'env' } } })
-    })
-    expect(await visit(page, '#/einstellungen/benutzer')).toEqual([])
-    await expect(page.getByText('steht in docker-compose.yaml als TUTTIPHON_ADMIN_PASSWORD')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Passwort ändern' })).toHaveCount(0)
-  })
-
   test('a password set in the browser is changed with the current one', async ({ page }) => {
-    await page.route((url) => url.pathname === '/api/status', async (route) => {
-      const res = await route.fetch()
-      const st = await res.json()
-      return route.fulfill({ response: res, json: { ...st, env: { ...st.env, adminPassword: 'stored' } } })
-    })
     const sent = []
     await page.route('**/api/admin-password', (route) => {
       sent.push(route.request().postDataJSON())

@@ -26,7 +26,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from .config import STATE_DIR, read_text, write_atomic
+from .config import STATE_DIR, read_text, temp_copy, write_atomic
 from .i18n import _, _s, _sn
 
 STATE_FILE = STATE_DIR / "lautstaerke.json"
@@ -205,7 +205,7 @@ def write_tags(path, values, owner=None):
     """Write the values into a copy, check it, then replace the original. -> True or an error text."""
     import mutagen
     path = Path(path)
-    tmp = path.with_name(f".{path.name}.tuttiphon-rg.tmp")
+    tmp = None
     try:
         st = os.stat(path)
         if st.st_nlink > 1:
@@ -214,7 +214,7 @@ def write_tags(path, values, owner=None):
         if before is None:
             return _s("unknown format")
         length = before.info.length
-        shutil.copy2(path, tmp)
+        tmp = temp_copy(path, path, "tuttiphon-rg")   # a new file under a unique name – never through a link
         f = mutagen.File(str(tmp))
         _set(f, values)
         check = mutagen.File(str(tmp))
@@ -229,7 +229,8 @@ def write_tags(path, values, owner=None):
     except Exception as e:   # noqa: BLE001 – one file must not stop the run; the original stays
         return str(e) or type(e).__name__
     finally:
-        tmp.unlink(missing_ok=True)
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
 
 
 # ---------------------------------------------------------------------------- Run

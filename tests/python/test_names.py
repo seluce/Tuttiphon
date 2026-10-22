@@ -12,7 +12,7 @@ import unittest
 from http.server import ThreadingHTTPServer
 from unittest import mock
 
-from app import auth, backup, config, instances, playlists
+from app import backup, config, instances, playlists
 from tests.python.factory import base_config
 
 
@@ -27,22 +27,6 @@ class EnvironmentTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {"TUTTIPHON_MODELS": "/modelle"}):
             self.assertEqual(config.env_var("MODELS"), "/modelle")
         self.assertEqual(config.env_var("MODELS", "/standard"), "/standard")
-
-    def test_admin_password_from_the_environment_or_the_env_file(self):
-        with mock.patch.dict(os.environ, {"TUTTIPHON_ADMIN_PASSWORD": "aus-der-compose"}):
-            env.reset_caches()
-            self.assertEqual(config.admin_password(), "aus-der-compose")
-            self.assertTrue(auth.required())
-            self.assertIn("TUTTIPHON_ADMIN_PASSWORD", config.environment())
-        config.ENV_FILE.write_text("TUTTIPHON_ADMIN_PASSWORD=aus-der-datei\n")
-        env.reset_caches()
-        self.assertEqual(config.admin_password(), "aus-der-datei")
-
-    def test_placeholders_are_no_administrator_password(self):
-        from app import localadmin
-        for placeholder in config.PASSWORD_PLACEHOLDERS + ("kurz",):
-            with self.assertRaises(ValueError):
-                localadmin.set_password(placeholder)
 
 
 class PlaylistMarkerTest(unittest.TestCase):

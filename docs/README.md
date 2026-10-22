@@ -13,7 +13,7 @@ The handbook describes the current state of the code. Whoever changes something 
 | | Chapter | What it covers |
 |---|---|---|
 | 1 | [Architecture](01-architecture.md) | Navidrome, Tuttiphon and Symfonium; process and threads; modules; folders; command line |
-| 2 | [Data model](02-data-model.md) | `config.json` with all fields, migration, `.env`, `state/`, `logs/`, `backup/` |
+| 2 | [Data model](02-data-model.md) | `config.json` with all fields and its version, `.env`, `state/`, `logs/`, `backup/` |
 | 3 | [API](03-api.md) | all HTTP endpoints with permissions, parameters and responses |
 | 4 | [Playlists](04-playlists.md) | music world × vibe × person, rules, writing and syncing, takeover, mixes and how they learn from listening, suggestions, combined search, covers |
 | 5 | [Maintenance](05-maintenance.md) | runs and steps, short pause while applying, “Update everything”, Opus, lyrics, Deezer, scan with self-check, daily refresh, night analysis, folder watch |
@@ -44,7 +44,7 @@ The handbook describes the current state of the code. Whoever changes something 
 | Step | `flac`, `lyrics`, `analyse`, `playlists`, `scan`, `deezer` | one part of a run |
 | Update everything | `settings.pipeline` | the run with all configured steps |
 | Auto-apply | `settings.autoApply` | changed playlists go into Navidrome on their own after a short wait |
-| Short pause | `TaskRunner.pause_for()` | applying playlists briefly pauses a running Opus, lyrics, analysis or Deezer run; afterwards it continues as “… (continued)” |
+| Short pause | `TaskRunner.pause_for()` | applying playlists briefly pauses a running Opus, lyrics, cover, analysis or Deezer run; afterwards it continues as “… (continued)” |
 | Takeover | `takeover` | a hand-made `.nsp` is maintained by Tuttiphon and stays the same playlist |
 | Daily refresh | `settings.dailyAt`, `dailyMode` | daily run at the set time (default: write playlists and scan – this is when the mixes change); in addition, the play counters are saved once a day for the recap |
 | Night analysis | `settings.analysis.night` | nightly `analyse` run (default 01:00–05:00) that analyzes pending songs without a time limit – first the sound analysis, then the AI |
@@ -53,5 +53,5 @@ The handbook describes the current state of the code. Whoever changes something 
 | Self-check | `app/selfcheck.py` | after every scan: does Navidrome show as many songs per playlist as Tuttiphon expects? Deviations → “To review” |
 | Instance | `<playlist folder>/.tuttiphon/` | a running Tuttiphon – on the PC or in the Docker container; registration and run lock live in the shared playlist folder |
 | Administrator / user | `role: admin \| user` | role in Tuttiphon; users only see their own person's and the family's items |
-| Local administrator | `@notfall`, `app/localadmin.py` | Tuttiphon's own administrator account, also when Navidrome is not running: its password is set in the browser at the first start with a setup code from the server log (only a hash in `state/admin_password.json`) – or as `TUTTIPHON_ADMIN_PASSWORD` |
+| Local administrator | `@notfall`, `app/localadmin.py` | Tuttiphon's own administrator account, also when Navidrome is not running: its password is set in the browser at the first start with a setup code from the server log (only a hash in `state/admin_password.json`) |
 | Setup mode | `Handler.network`, `POST /api/setup` | a server on the network without an administrator password: sign-in required, the password is set with the one-time setup code from the server log and `setup-code.txt` |

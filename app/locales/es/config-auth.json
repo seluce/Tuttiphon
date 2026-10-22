@@ -68,7 +68,6 @@
  "Opus: parallel conversions": "Opus: conversiones simultáneas",
  "Settings: Opus/original unknown": "Ajustes: Opus/original desconocido",
  "Settings: Opus/source format unknown": "Ajustes: Opus/formato de origen desconocido",
- "Settings: the archive folder must be a folder inside the Navidrome folder (e.g. “Archiv”)": "Ajustes: la carpeta de archivo debe estar dentro de la carpeta de Navidrome (p. ej. «Archiv»)",
  "Settings: the archive folder must not be the music folder or inside it – the originals there would be converted again": "Ajustes: la carpeta de archivo no puede ser la carpeta de música ni estar dentro de ella – los originales se volverían a convertir",
  "Settings: the backup folder must not be inside state/ or backup/ of the data folder – every backup would contain the earlier ones": "Ajustes: la carpeta de copias de seguridad no puede estar dentro de state/ o backup/ de la carpeta de datos – cada copia contendría las anteriores",
  "Settings: please give the owner as UID:GID, e.g. 1000:1000": "Ajustes: indica el propietario como UID:GID, p. ej. 1000:1000",

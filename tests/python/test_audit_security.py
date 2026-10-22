@@ -5,13 +5,12 @@ from tests.python import env  # noqa: F401  (before app.*)
 import copy
 import os
 import unittest
-from unittest import mock
 
 from app import auth, config, liedtext, rules
 from app.rules import Library
 from tests.python.factory import base_config, song
 
-JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False}
+JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False}
 
 
 class PreviewTest(unittest.TestCase):
@@ -20,7 +19,7 @@ class PreviewTest(unittest.TestCase):
         self.cfg = base_config()
         config.save_config(self.cfg)
         auth.set_current(JONAS)
-        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": [], "persons": [], "local": False})
+        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": None, "persons": [], "local": False})
 
     def test_preview_only_for_own_person(self):
         from app import web

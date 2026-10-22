@@ -240,8 +240,6 @@ export default {
     'La password salvata non funziona più – probabilmente è stata cambiata in Navidrome. Inserisci quella nuova perché statistiche e stelle continuino a funzionare.',
   'Save new password':
     'Salva la nuova password',
-  'The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).':
-    'La password dell\'amministratore locale è impostata in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).',
   'The local administrator has no Navidrome account of its own.':
     'L\'amministratore locale non ha un proprio account Navidrome.',
   'Turned on':
@@ -450,12 +448,8 @@ export default {
     'Se molti brani di una band condividono il numero massimo di stelle, i più popolari ricevono una stella in più. Così Symfonium ordina correttamente i brani top. Ha effetto alla prossima esecuzione.',
   'Refresh every night':
     'Aggiorna ogni notte',
-  'Checks {n} songs on Deezer again every night in the time window of the night analysis, first those rated with the older, less accurate search. After that always the ones unchecked the longest – so the stars stay up to date.':
-    'Ogni notte, nella fascia oraria dell\'analisi notturna, ricontrolla {n} brani su Deezer, prima quelli valutati con la ricerca più vecchia e meno precisa. Poi sempre quelli non controllati da più tempo – così le stelle restano aggiornate.',
-  'Checked with the accurate search: {done} of {total} songs · {top} top tracks highlighted.':
-    'Controllati con la ricerca precisa: {done} di {total} brani · {top} brani top messi in risalto.',
-  'Checked with the accurate search: {done} of {total} songs.':
-    'Controllati con la ricerca precisa: {done} di {total} brani.',
+  'Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.':
+    'Ogni notte, nella fascia oraria dell\'analisi notturna, ricontrolla {n} brani su Deezer – sempre quelli non controllati da più tempo, così le stelle restano aggiornate.',
   'Who gets stars?':
     'Chi riceve le stelle?',
   'No accounts yet – create them under People first.':

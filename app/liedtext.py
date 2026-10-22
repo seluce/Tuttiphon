@@ -143,7 +143,7 @@ def _connect():
 def _open():
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(DB_FILE, timeout=30)
-    with _schema_lock:   # create or migrate the tables – never two at the same time
+    with _schema_lock:   # create the tables – never two at the same time
         try:
             con.execute("PRAGMA journal_mode=WAL")   # searches keep reading while reading in
         except sqlite3.Error:
@@ -151,14 +151,6 @@ def _open():
         con.execute("CREATE TABLE IF NOT EXISTS files(song TEXT PRIMARY KEY, src TEXT, stamp TEXT, rude INTEGER DEFAULT 0, lang TEXT)")
         con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS texts USING fts5(song UNINDEXED, text, "
                     "tokenize='unicode61 remove_diacritics 2')")
-        if "lang" not in {row[1] for row in con.execute("PRAGMA table_info(files)")}:   # index from version 0.5
-            try:
-                con.execute("ALTER TABLE files ADD COLUMN lang TEXT")
-            except sqlite3.OperationalError as e:   # another process was faster
-                if "duplicate column" not in str(e):
-                    raise
-            con.execute("UPDATE files SET stamp = '' WHERE src != 'embedded'")   # read again once, then with language
-            con.execute("UPDATE files SET src = '' WHERE src = 'embedded'")
         con.commit()
     return con
 

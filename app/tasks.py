@@ -176,7 +176,7 @@ class TaskRunner:
         self.lines = []
         self.seq = 0
         self.lock = threading.Lock()
-        self.start_lock = threading.Lock()
+        self.start_lock = threading.RLock()   # reentrant: a run in the foreground (CLI) ends inside start()
         self.stop = threading.Event()
         self.thread = None
         self.children = set()   # running subprocesses (e.g. ffmpeg) – ended when stopping
@@ -190,6 +190,7 @@ class TaskRunner:
         self._opts = {}
         self._pos = 0      # index of the running step (steps can appear twice, e.g. "scan")
         self._chain = []   # start one after another after the end: [(steps, opts, name), …] (pause for an apply)
+        self._ending = False   # the run is over and has taken its chain – a pause now would never be continued
 
     # ------------------------------------------------------------------ Log
     def log(self, text=""):
@@ -245,6 +246,7 @@ class TaskRunner:
 
     def _start(self, steps, background, name, lock, **opts):
         self.stop.clear()
+        self._ending = False
         self.steps = list(steps)
         if not name:
             if steps == pipeline():
@@ -274,7 +276,8 @@ class TaskRunner:
     def can_pause(self):
         """Can the current run be paused for an apply? (see pause_for)"""
         remaining = self.steps[self._pos:]
-        return self.running() and not self.stop.is_set() and not self._chain and bool(remaining) and set(remaining) <= PAUSABLE
+        return (self.running() and not self._ending and not self.stop.is_set() and not self._chain and bool(remaining)
+                and set(remaining) <= PAUSABLE)
 
     def pause_for(self, steps, name, **opts):
         """Pause a running task briefly, slip `steps` in between and continue the rest afterwards – e.g. so that playlist
@@ -285,7 +288,7 @@ class TaskRunner:
             if not self.can_pause():
                 return False
             remaining = self.steps[self._pos:]
-            continued = (self.name if self.name.endswith(("(continued)", "(fortgesetzt)"))   # i18n-ignore
+            continued = (self.name if english(self.name).endswith("(continued)")   # i18n-ignore – the English form
                          else _s("{name} (continued)", name=self.name))
             self._chain = [(list(steps), dict(opts), name), (remaining, dict(self._opts), continued)]
             self.log("")
@@ -339,7 +342,9 @@ class TaskRunner:
             done.set()
             lock.release()
             instances.heartbeat(running=False)
-            chain, self._chain = self._chain, []
+            with self.start_lock:   # together with pause_for: a pause either gets into this chain or is refused
+                self._ending = True
+                chain, self._chain = self._chain, []
             if chain:
                 self._continue(chain)
 
@@ -484,6 +489,7 @@ class TaskRunner:
             def apply(fresh):
                 made.extend(classify.auto_assign(fresh, lib, an.get("autoThreshold", 0.75), log=self.log))
             update_config(apply)
+            classify.remember(made)
             out["assigned"] = len(made)
             out["assignedBands"] = [[x["artist"], x["welt"]] for x in made][:20]
             self.log(_sn(len(made), "Classification: {n} band automatically assigned to a music world.",
@@ -495,6 +501,7 @@ class TaskRunner:
                     threshold = max(0.75, an.get("autoThreshold", 0.75))   # a stricter setting counts here too
                     made.extend(classify.auto_assign(fresh, lib, threshold, log=self.log, new_only=True))
                 update_config(apply_new)
+                classify.remember(made)
                 out["assigned"] = len(made)
                 out["assignedBands"] = [[x["artist"], x["welt"]] for x in made][:20]
             n = len([x for x in classify.suggestions(load_config(), lib) if x["score"] >= 0.6])

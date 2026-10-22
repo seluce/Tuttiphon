@@ -164,8 +164,7 @@ class SafetyTest(unittest.TestCase):
             self.assertTrue(config.archive_in_music(cfg), paths)
         cfg["settings"]["paths"] = {"archive": "Archiv"}
         config.validate_config(cfg)
-        cfg["settings"]["paths"] = {}
-        cfg["settings"]["opus"]["archiveDir"] = "Music/Archiv"   # older setting
+        cfg["settings"]["paths"] = {"archive": "Music/Archiv"}   # next to the music folder's parent: inside it
         with self.assertRaises(ValueError):
             config.validate_config(cfg)
         # saved like this before the check existed: other saves keep working (the conversion refuses to run)
@@ -197,7 +196,7 @@ class SafetyTest(unittest.TestCase):
         real = os.replace
 
         def failing(a, b):
-            if str(a).endswith(".m4a.part"):
+            if ".m4a.encode." in str(a):   # the new file into the place of the original
                 raise PermissionError(errno.EACCES, "Permission denied")
             return real(a, b)
         with mock.patch("app.opus.os.replace", side_effect=failing):

@@ -19,7 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from . import audio, auth, autowelten, i18n, backup, localadmin, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, sonic, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
 from .i18n import N_, _, _s, _sn
 from .config import (CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, STATE_DIR,
-                     WEB_DIR, ConfigDamaged, admin_password, env_var, environment, load_config, load_env, pass_key, paths, paths_info,
+                     WEB_DIR, ConfigDamaged, env_var, environment, load_config, load_env, pass_key, paths, paths_info,
                      normalize_persons, rating_users, read_bytes, read_text, save_env, save_from_ui, update_config, user_password,
                      weak_password, write_atomic)
 from .library import CACHE
@@ -75,7 +75,16 @@ def _memoized(name, fn, *extra):
 
 
 def users_ok(env, cfg):
+    """The accounts Deezer sets stars for -> {account: password stored?}"""
     return {u: bool(user_password(env, u)) for u in rating_users(env, cfg)}
+
+
+def accounts_ok(env, cfg):
+    """Every person's account and those Deezer sets stars for -> {account: password stored?}"""
+    names = {}
+    for u in [p["user"] for p in cfg.get("personen", [])] + rating_users(env, cfg):
+        names.setdefault(u.lower(), u)
+    return {u: bool(user_password(env, u)) for u in names.values()}
 
 
 def _web_address(value):
@@ -243,7 +252,7 @@ def api_status():
     if m["role"] == "admin":
         return out
     # users only see what concerns them – no server details, admin names or paths
-    own_users = {(p.get("user") or "").lower() for p in load_config()["personen"] if p["id"] in m["own"]}
+    own_users = {m["user"].lower()} if m["own"] else set()   # the account of the own person: the signed-in one
     env = out.get("env", {})
     return {"navidrome": {k: v for k, v in (out.get("navidrome") or {}).items() if k in ("ok", "version", "scan")},
             "env": {"users": [u for u in env.get("users", []) if u["name"].lower() in own_users], "auth": env.get("auth"),
@@ -253,9 +262,8 @@ def api_status():
 
 
 def api_changelog():
-    """CHANGELOG.md as a list: [{"version", "date", "unreleased", "items": [text, …], "levels": [0|1, …]}], newest
-    first. Headings "## <version>" (older ones "## <version> – <date>") and "## Unreleased" (changes of a build between
-    releases). A nested bullet ("  - …") is an item of its own with level 1 (it belongs to the item above it)."""
+    """CHANGELOG.md as a list: [{"version", "unreleased", "items": [text, …], "levels": [0|1, …]}], newest first.
+    Headings "## <version>" and "## Unreleased" (changes of a build between releases). A nested bullet ("  - …") is an item of its own with level 1 (it belongs to the item above it)."""
     from .config import ROOT
     try:
         text = read_text(ROOT / "CHANGELOG.md")
@@ -263,10 +271,9 @@ def api_changelog():
         return []
     out, cur = [], None
     for line in text.splitlines():
-        head = re.match(r"^##\s+(\S+)(?:\s+[–-]\s+(.+?))?\s*$", line)
+        head = re.match(r"^##\s+(\S+)\s*$", line)
         if head:
-            cur = {"version": head.group(1), "date": (head.group(2) or "").strip(),
-                   "unreleased": head.group(1).lower() == "unreleased", "items": [], "levels": []}
+            cur = {"version": head.group(1), "unreleased": head.group(1).lower() == "unreleased", "items": [], "levels": []}
             out.append(cur)
         elif cur and line.startswith("- "):
             cur["items"].append(line[2:].strip())
@@ -282,17 +289,19 @@ def api_changelog():
 def _status_full():
     env = load_env()
     cfg = load_config()
-    for u in rating_users(env, cfg):   # do the stored passwords still work? (background, at most every few hours)
+    accounts = accounts_ok(env, cfg)
+    for u in accounts:   # do the stored passwords still work? (background, at most every few hours)
         auth.check_password_soon(u, env)
+    stars = {u.lower() for u in rating_users(env, cfg)}
     out = {
         "env": {
             "url": env.get("NAV_URL"), "webUrl": nav_web_url(env),
             "admin": env.get("NAV_ADMIN_USER"), "adminOk": bool(env.get("NAV_ADMIN_PASS")),
-            # ok: a password is stored; rejected: Navidrome no longer accepts it (auth.password_rejected)
-            "users": [{"name": u, "ok": ok, "key": pass_key(u), "rejected": ok and auth.password_rejected(u)}
-                      for u, ok in users_ok(env, cfg).items()],
-            "auth": localadmin.configured(env),
-            "adminPassword": localadmin.source(env),   # env (docker-compose) · stored (set in the browser) · "" (none)
+            # every person's account – ok: a password is stored; rejected: Navidrome no longer accepts it
+            # (auth.password_rejected); stars: Deezer sets stars for it
+            "users": [{"name": u, "ok": ok, "key": pass_key(u), "rejected": ok and auth.password_rejected(u),
+                       "stars": u.lower() in stars} for u, ok in accounts.items()],
+            "auth": localadmin.configured(),   # the password of the local administrator is set: sign-in is on
             "publicUrl": env.get("NAV_PUBLIC_URL") or "",
             "lastfm": bool(env.get("LASTFM_API_KEY")),
             "ntfyToken": bool(env.get("NTFY_TOKEN")),
@@ -421,7 +430,7 @@ def api_playlists():
     cfg = load_config()
     by_id = {p["id"]: p for p in cfg["playlists"]}
     return {**out, "playlists": [x for x in out["playlists"] if x["id"] in by_id and auth.visible_playlist(by_id[x["id"]], cfg, m)],
-            "handmade": [], "orphans": []}
+            "handmade": [], "orphans": [], "navidromeError": bool(out.get("navidromeError"))}   # no server details
 
 
 # Summary lines (rules.summary) that reveal a person's likes and dislikes – hidden on someone else's playlist
@@ -443,7 +452,8 @@ def api_playlist(query):
         raise ValueError(_("Playlist not found"))
     res = rules.preview(cfg, lib, p, sample=25)
     res["own"] = auth.own_playlist(p)
-    if not res["own"] and auth.current()["role"] != "admin":   # someone else's playlist: the person's dislikes stay private
+    # not the own person's (someone else's, the family's – with its members): their dislikes stay private
+    if auth.current()["role"] != "admin" and p.get("person") != auth.current()["own"]:
         res.pop("nsp", None)
         res["summary"] = [x for x in res["summary"] if not _private_line(x)]
     st = next((x for x in api_playlists()["playlists"] if x["id"] == p["id"]), {})
@@ -464,14 +474,14 @@ def _preview_config(sent):
     cfg = dict(load_config())
     sent_persons = sent.get("personen") if isinstance(sent, dict) and isinstance(sent.get("personen"), list) else []
     mine = {}
-    for p in sent_persons:   # own people: only the fields they may save – id and account from the server
-        if isinstance(p, dict) and p.get("id") in m["own"]:
+    for p in sent_persons:   # the own person: only the fields it may save – id and account from the server
+        if isinstance(p, dict) and m["own"] and p.get("id") == m["own"]:
             server = next((x for x in cfg["personen"] if x["id"] == p["id"]), None)
             if server:
                 mine[p["id"]] = {**server, **{k: p[k] for k in auth.PERSON_FIELDS if k in p}}
                 if server.get("clean"):   # as when saving: only the administrator turns kid-safe mode off
                     mine[p["id"]]["clean"] = True
-    cfg["personen"] = [mine.get(p["id"], p) if p["id"] in m["own"] else p if p.get("family")
+    cfg["personen"] = [mine.get(p["id"], p) if p["id"] == m["own"] else p if p.get("family")
                        else {k: v for k, v in p.items() if k not in ("likes", "dislikes", "push")} for p in cfg["personen"]]
     return normalize_persons(cfg)
 
@@ -485,9 +495,15 @@ def _guard_preview(body, cfg):
         body["mix"]["size"] = max(5, min(500, int(body["mix"]["size"])))
     if m["role"] == "admin":
         return
-    _own_person(auth.person_id(body, cfg), write=True)
+    _own_person(body.get("person"), write=True)
     for k in auth.SERVER_PLAYLIST_FIELDS:
         body.pop(k, None)
+    # “What everyone likes”: only the members as saved – other people's taste and 1-star songs never on request
+    saved = next((x for x in cfg["playlists"] if x["id"] == body.get("id")), None) if body.get("id") else None
+    if saved and saved.get("together"):
+        body["together"] = saved["together"]
+    else:
+        body.pop("together", None)
 
 
 def api_preview(body):
@@ -505,7 +521,7 @@ def api_counts(body):
     ctx = BuildContext(lib)
     base = {k: body[k] for k in ("welt", "person", "hits", "minRating") if k in body}
     if auth.current()["role"] != "admin":
-        _own_person(auth.person_id(base, cfg))
+        _own_person(base.get("person"))
     out = {}
     for s in [{"id": ALL}] + cfg["stile"]:
         p = {**base, "stil": s["id"]}
@@ -660,10 +676,10 @@ def _song(lib, sid):
 
 
 def _child_filter(cfg):
-    """Kid-safe mode: if one of the account's own people has it on, rude songs are neither playable nor shown in the
-    song window. -> function song -> blocked? – worked out once per request (lists check thousands of songs)."""
+    """Kid-safe mode: if the account's person has it on, rude songs are neither playable nor shown in the song window.
+    -> function song -> blocked? – worked out once per request (lists check thousands of songs)."""
     m = auth.current()
-    if m["role"] == "admin" or not any(p.get("clean") for p in cfg["personen"] if p["id"] in m["own"]):
+    if m["role"] == "admin" or not any(p.get("clean") for p in cfg["personen"] if p["id"] == m["own"]):
         return lambda song: False
     allow = set((cfg["settings"].get("kinderschutz") or {}).get("allow", []))
     rude = liedtext.derb(allow)
@@ -1124,7 +1140,7 @@ def _default_person(cfg):
     the family's, otherwise the first person's. None for a user without a person (yet)."""
     m = auth.current()
     if m["own"]:
-        return m["own"][0]
+        return m["own"]
     if m["role"] != "admin":
         return None
     return auth.family_id(cfg) or next((p["id"] for p in cfg["personen"]), None)
@@ -1137,7 +1153,7 @@ def _own_person(pid, write=False):
     if m["role"] == "admin":
         return
     cfg = load_config()
-    allowed = auth.editable_persons(cfg, m) if write else set(m["own"]) | {auth.family_id(cfg)} - {None}
+    allowed = auth.editable_persons(cfg, m) if write else {m["own"], auth.family_id(cfg)} - {None}
     if pid not in allowed:
         raise PermissionError(_("This belongs to another account."))
 
@@ -1153,26 +1169,25 @@ def user_inbox(m):
     """"To review" for users: only what they can take care of themselves."""
     cfg = load_config()
     items = []
-    own = [p for p in cfg["personen"] if p["id"] in m["own"]]
+    own = next((p for p in cfg["personen"] if p["id"] == m["own"]), None)
     if not own:
         items.append({"key": "profil", "level": "warn", "title": _("Set up your profile"),
                       "text": _("A few questions about your taste in music – then there are matching playlists just for you."),
                       "actions": [{"label": _("Let’s go"), "do": "goto", "href": "#/willkommen"}]})
     def heard(p):   # does Tuttiphon already know the taste from listening? Then no likes by hand are needed
         try:
-            prof = taste.for_person(cfg, CACHE.get(), p) if p.get("user") else None
+            prof = taste.for_person(cfg, CACHE.get(), p)
         except Exception:   # noqa: BLE001 – without a password, or Navidrome briefly gone
             prof = None
         return bool(prof and prof.get("enough"))
-    for p in own:
-        likes = p.get("likes") or {}
-        if not likes.get("welten") and not likes.get("artists") and not heard(p):
-            fresh = not any(pl.get("person") == p["id"] for pl in cfg["playlists"])
-            items.append({"key": f"likes|{p['id']}", "level": "info", "title": _("What do you like to listen to?"),
-                          "text": _("Choose favorite worlds and bands – that makes the suggestions much better."),
-                          "actions": [{"label": _("Choose your taste"), "do": "goto",
-                                       "href": "#/willkommen" if fresh else f"#/person/{p['id']}"}]})
-    if own and not any(pl.get("person") in m["own"] and pl.get("status", "aktiv") == "aktiv" for pl in cfg["playlists"]):
+    likes = (own or {}).get("likes") or {}
+    if own and not likes.get("welten") and not likes.get("artists") and not heard(own):
+        fresh = not any(pl.get("person") == own["id"] for pl in cfg["playlists"])
+        items.append({"key": f"likes|{own['id']}", "level": "info", "title": _("What do you like to listen to?"),
+                      "text": _("Choose favorite worlds and bands – that makes the suggestions much better."),
+                      "actions": [{"label": _("Choose your taste"), "do": "goto",
+                                   "href": "#/willkommen" if fresh else f"#/person/{own['id']}"}]})
+    if own and not any(pl.get("person") == own["id"] and pl.get("status", "aktiv") == "aktiv" for pl in cfg["playlists"]):
         items.append({"key": "erste-playlist", "level": "info", "title": _("Your first playlist"),
                       "text": _("Under “Discover” there are ready-made suggestions for you – one click creates them."),
                       "actions": [{"label": _("View suggestions"), "do": "goto", "href": "#/entdecken"}]})
@@ -1182,8 +1197,8 @@ def user_inbox(m):
                                 "It stays on your NAS."),
                       "actions": [{"label": _("Turn on"), "do": "goto", "href": "#/einstellungen/konto"}]})
     try:   # tidying up: own playlists nobody listens to or that exist twice, a separate world shaping the taste
-        tidy = suggest.playlist_tidy_items(cfg, CACHE.get(), set(m["own"]), user=True) \
-            + suggest.taste_hints(cfg, CACHE.get(), set(m["own"]))
+        mine = {own["id"]} if own else set()
+        tidy = suggest.playlist_tidy_items(cfg, CACHE.get(), mine, user=True) + suggest.taste_hints(cfg, CACHE.get(), mine)
         for key, level, title, text, actions in tidy:
             items.append({"key": key, "level": level, "title": title, "text": text, "actions": actions})
     except Exception:   # noqa: BLE001 – “To review” must never fail because of this
@@ -1226,7 +1241,7 @@ def api_accounts():
         acc = (cfg.get("accounts") or {}).get(u["name"].lower(), {})
         out.append({"name": u["name"], "fullName": u["fullName"], "navidromeAdmin": u["admin"], "role": auth.role_of(u["name"], cfg),
                     "override": acc.get("role"), "lastLogin": acc.get("lastLogin"),
-                    "persons": auth.persons_of(u["name"], cfg),
+                    "person": auth.own_person(u["name"], cfg),
                     "family": (u["name"].lower() == auth.family_account(cfg)),
                     "passwordStored": bool(user_password(load_env(), u["name"])),
                     "passwordRejected": bool(user_password(load_env(), u["name"])) and auth.password_rejected(u["name"])})
@@ -1484,11 +1499,12 @@ def api_notify_test(body):
     who = (auth.current().get("user") or "").lower()
     if time.time() - _notify_tests.get(who, 0) < 30:
         raise ValueError(_("Please wait a moment – a test message has just gone out."))
+    _notify_tests[who] = time.time()   # every attempt counts – guessing other people's topics stays slow
     if body.get("topic") and not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", str(body["topic"])):
         raise ValueError(_("Please use only letters, digits, - and _ for the topic."))
     m = auth.current()
     if body.get("person"):
-        if m["role"] != "admin" and body["person"] not in m["own"]:   # the own topic only
+        if m["role"] != "admin" and body["person"] != m["own"]:   # the own topic only
             raise PermissionError(_("This belongs to another account."))
         person = next((p for p in cfg["personen"] if p["id"] == body["person"]), None)
         topic = body.get("topic") or (person or {}).get("push")
@@ -1498,7 +1514,7 @@ def api_notify_test(body):
             if not topic:
                 raise ValueError(_("No topic entered."))
             foreign = {(notify.settings(cfg).get("topic") or "").lower()} | {
-                (x.get("push") or "").lower() for x in cfg["personen"] if x["id"] not in m["own"]}
+                (x.get("push") or "").lower() for x in cfg["personen"] if x["id"] != m["own"]}
             if str(topic).lower() in foreign - {""}:
                 raise PermissionError(_("This topic belongs to someone else – please choose your own."))
     else:
@@ -1507,7 +1523,6 @@ def api_notify_test(body):
         topic = body.get("topic")
     if not notify.settings(cfg).get("enabled"):
         raise ValueError(_("Notifications are turned off."))
-    _notify_tests[who] = time.time()
     return notify.test(topic, cfg, fallback=m["role"] == "admin")
 
 
@@ -1699,9 +1714,15 @@ def api_plugin_key_remove(body):
 
 
 FAMILY_ACCOUNT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{1,39}")
+_family_lock = threading.Lock()   # one setup at a time – a double click must not create two accounts
 
 
 def api_family(body):
+    with _family_lock:
+        return _family(body)
+
+
+def _family(body):
     """Set up the family: Tuttiphon creates its Navidrome account (native API, random password – stored like any
     account password, so its stars, plays and recap work) and adds the entry {"family": true}. -> {"person", "account",
     "password"} – the password only now, for shared devices in Symfonium."""
@@ -1716,13 +1737,20 @@ def api_family(body):
         raise ValueError(_("Please choose an account name of 2 to 40 letters, digits, dots, hyphens or underscores."))
     if any((p.get("user") or "").lower() == account.lower() for p in cfg["personen"]):
         raise ValueError(_("“{account}” already belongs to a person – please choose another name.", account=account))
+    native = playlists.native_api(load_env())
+    try:
+        taken = [u.get("userName") or "" for u in native.users()]
+    except NavidromeError as e:
+        raise ValueError(_("Navidrome could not create the account: {error}", error=i18n.said(e))) from None
+    # the stored password goes to NAV_PASS_<ACCOUNT>: "anna.lena" and "anna-lena" would share it
+    if any(u.lower() == account.lower() or pass_key(u) == pass_key(account) for u in taken) \
+            or pass_key(account) in load_env():
+        raise ValueError(_("Navidrome already has an account “{account}” – please choose another name.",
+                           account=account))
     password = secrets.token_urlsafe(18)
     try:
-        playlists.native_api(load_env()).create_user(account, name, password)
+        native.create_user(account, name, password)
     except NavidromeError as e:
-        if "unique" in str(e):
-            raise ValueError(_("Navidrome already has an account “{account}” – please choose another name.",
-                               account=account)) from None
         raise ValueError(_("Navidrome could not create the account: {error}", error=i18n.said(e))) from None
     save_env({pass_key(account): password})
     auth.navidrome_users(force=True)
@@ -1730,6 +1758,8 @@ def api_family(body):
     pid = next(x for x in ["familie"] + [f"familie-{n}" for n in range(2, 100)] if x not in ids)   # i18n-ignore – id
 
     def add(c):
+        if auth.family_id(c):   # set up in between (another tab)
+            raise ValueError(_("There already is a family."))
         c["personen"].append({"id": pid, "name": name, "icon": "i:home", "user": account, "family": True, "clean": True,
                               "prefix": "", "likes": {"welten": [], "stile": [], "artists": []},
                               "dislikes": {"artists": [], "genres": []}})
@@ -1738,10 +1768,11 @@ def api_family(body):
             deezer["users"].append(account)   # Deezer stars for the family's account too (its rules use them)
     update_config(add)
     events.say(_s("Family set up: Navidrome account {account}", account=account))
-    try:   # its stars now (deezer._catch_up) – while a task runs, the next Deezer run catches up
-        RUNNER.start(["deezer"], deezer_mode="new")
-    except RuntimeError:
-        pass
+    if "deezer" in pipeline():   # its stars now (deezer._catch_up) – while a task runs, the next Deezer run catches up
+        try:
+            RUNNER.start(["deezer"], deezer_mode="new")
+        except RuntimeError:
+            pass
     return {"person": pid, "account": account, "password": password}
 
 
@@ -1907,15 +1938,13 @@ class Handler(BaseHTTPRequestHandler):
         return client_of(self.client_address[0], self.headers, trusted)
 
     def _admin(self):
-        """(source, plain): where the password of the local administrator comes from (localadmin.source()) and the
-        plain one from docker-compose/.env, if any – checked at most every 10 s. On the network without any: the setup
-        code is made sure of (and announced in the server log)."""
+        """Is the password of the local administrator set? Checked at most every 10 s. On the network without one: the
+        setup code is made sure of (and announced in the server log)."""
         at, state = Handler._pw_cache
         if time.time() - at > 10 or state is None:
-            env = load_env()
-            state = (localadmin.source(env), admin_password(env))
+            state = localadmin.configured()
             Handler._pw_cache = (time.time(), state)
-            if self.network and not state[0]:
+            if self.network and not state:
                 localadmin.setup_code()
         return state
 
@@ -2062,13 +2091,10 @@ class Handler(BaseHTTPRequestHandler):
         """Settings → Users & permissions: set or change the password of the local administrator (kept as a hash)."""
         body = self._body()
         ip, https = self._client()
-        src = localadmin.source()
-        if src == "env":
-            raise ValueError(_("The password of the local administrator is set in docker-compose.yaml – change it there."))
         password = body.get("password")
         if not isinstance(password, str) or weak_password(password):
             raise ValueError(_("The administrator password needs at least 8 characters."))
-        if src == "stored":   # changing it needs the current one – a forgotten one: see docs (delete the file)
+        if localadmin.configured():   # changing it needs the current one – a forgotten one: see docs (delete the file)
             def attempt():
                 if not localadmin.check(body.get("current")):
                     raise auth.LoginError(_("The current password is wrong."))
@@ -2151,7 +2177,6 @@ class Handler(BaseHTTPRequestHandler):
         "/api/welt/neu": api_welt_reset,   # i18n-ignore – route
         "/api/song/more": api_song_more,
         "/api/sound/catalog": lambda q: ml.sound_catalog(CACHE.get()),
-        "/api/instruments": lambda q: ml.sound_catalog(CACHE.get()),   # older name of the same catalog
         "/api/matrix": api_matrix,
         "/api/suggestions": api_suggestions,
         "/api/inbox": lambda q: api_inbox(),
@@ -2189,7 +2214,6 @@ class Handler(BaseHTTPRequestHandler):
         "/api/me/password": api_me_password,
         "/api/apply/now": lambda b: api_apply_now(),
         "/api/backups/now": lambda b: backup.create(log=lambda *_: None),
-        "/api/tour/seen": lambda b: (auth.mark_seen(auth.current()["user"], "tour"), {"ok": True})[1],   # only one's own account
         "/api/seen": lambda b: (auth.mark_seen(auth.current()["user"], str(b.get("what") or "")), {"ok": True})[1],
         "/api/rueckblick/keep": api_rueckblick_keep,
         "/api/liedtexte/update": api_liedtexte_update,
@@ -2219,18 +2243,13 @@ class Handler(BaseHTTPRequestHandler):
         path = url.path
         i18n.use(self.headers.get("X-Lang"))   # messages in the language of the interface (otherwise the server's)
         try:
-            src, plain = self._admin()
-            if self.network and plain and weak_password(plain):
-                # reachable on the network, but the password from docker-compose/.env is weak (e.g. edited while
-                # running): stay locked instead of letting anyone in with it
-                return self._json({"error": _("Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the "
-                                              "placeholder – please set at least 8 characters.")}, 503)
-            setup = self.network and not src   # on the network without a password: only the setup with the code
-            needs_login = bool(src) or setup
+            configured = self._admin()
+            setup = self.network and not configured   # on the network without a password: only the setup with the code
+            needs_login = configured or setup
             if not self._host_ok(needs_login):
                 return self._json({"error": _("Access only via 127.0.0.1 – or set an administrator password "
                                               "(Settings → Users & permissions).")}, 421)
-            auth.set_current({"user": None, "role": "none", "own": [], "persons": [], "local": False})
+            auth.set_current({"user": None, "role": "none", "own": None, "persons": [], "local": False})
             if path == "/api/login" and method == "POST":
                 if self.headers.get("X-Tuttiphon") != "1":
                     return self._json({"error": "forbidden"}, 403)   # i18n-ignore – sign-in only from the interface
@@ -2496,7 +2515,7 @@ def daily_loop():
             _safe(stats.purge)   # do not keep song lists of other accounts in memory permanently
             if not IN_DOCKER and any(o["docker"] for o in other_instances()):
                 continue   # the container on the NAS is in charge
-            _plays_snapshot_daily()
+            _safe(_plays_snapshot_daily)
             _safe(_backup_daily)   # only the instance in charge (not on the PC while a container is running)
             _safe(lambda: watch.check(RUNNER))   # folder watch (only when turned on)
             _safe(_night_analysis)

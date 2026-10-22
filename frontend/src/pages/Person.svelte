@@ -15,7 +15,7 @@
   const self = !isAdmin()   // users only edit their own profile
   // derived: after "Undo", S.config is a new object
   const p = $derived(id === 'neu' ? null : findPerson(id))   // i18n-ignore: route id
-  const mine = $derived(!self || (S.me?.own || []).includes(p?.id))
+  const mine = $derived(!self || (!!p && S.me?.own === p.id))
 
   $effect(() => {
     if (id === 'neu' && self) replace('#/willkommen')   // i18n-ignore: route id – replacing: "back" must not lead here again

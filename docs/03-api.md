@@ -37,8 +37,7 @@ How sign-in, roles and the filters for users work in detail is described in
 | invalid | not JSON, not an object or a broken `Content-Length` → `400 {"error": "invalid request"}` or `"invalid length"` |
 
 `GET` requests don't need the header. They don't change the configuration; some do fill caches or
-state files, though (e.g. `/api/rueckblick` records the current play counts, `/api/deezer/ranks` migrates old ranks once,
-`/img/…` stores images in the image cache, `/api/status` and `/api/inbox` create the shared folder
+state files, though (e.g. `/api/rueckblick` records the current play counts, `/img/…` stores images in the image cache, `/api/status` and `/api/inbox` create the shared folder
 `.tuttiphon/` if needed, a changed account list from Navidrome ends up in `state/navidrome_users.json`).
 
 ### Responses
@@ -68,7 +67,7 @@ All errors from routes come as `{"error": "<text>"}`; `_handle()` does the mappi
 | `421` | called via a foreign host name without an administrator password and not bound to a network address (`"Access only via 127.0.0.1 – or set an administrator password (Settings → Users & permissions)."`) |
 | `429` | sign-in lockout after too many failed attempts (per account and address, per address, per account; setup code; current password at `/api/admin-password`) |
 | `500` | any other exception – the answer only says `"Something went wrong – the details are in the server log."`; the server log shows “⚠ Error at <method> <path>: <type>: <text>” |
-| `503` | `PermissionError` from the file system (`"A file was not accessible just now – please try again in a moment."`); `index.html` is missing, i.e. the interface hasn't been built (plain text instead of JSON); bound to a network address while `TUTTIPHON_ADMIN_PASSWORD` is weak – for **every** request, before all other checks (`"Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the placeholder – please set at least 8 characters."`, [07](07-security.md#running-without-a-password)) |
+| `503` | `PermissionError` from the file system (`"A file was not accessible just now – please try again in a moment."`); `index.html` is missing, i.e. the interface hasn't been built (plain text instead of JSON) |
 
 `PermissionError` is also the class the file system raises for missing permissions (e.g. briefly on the
 NFS share). `_handle()` tells the two cases apart by `errno`: if an error number is set, the error comes from the
@@ -96,7 +95,7 @@ and `/assets/…` are reachable without a session. The check uses the normalized
 | Abbreviation | Meaning |
 |---|---|
 | public | reachable without a session |
-| signed in | any valid session (role `admin` or `user`). Without an administrator password (neither `TUTTIPHON_ADMIN_PASSWORD` nor one set in the browser) and bound to loopback, every access via localhost is a local admin; on the network that is setup mode, where only the public paths work until the setup ([07](07-security.md#setup-mode)). |
+| signed in | any valid session (role `admin` or `user`). Without an administrator password and bound to loopback, every access via localhost is a local admin; on the network that is setup mode, where only the public paths work until the setup ([07](07-security.md#setup-mode)). |
 | Admin | path is in `Handler.ADMIN_ONLY` → otherwise `403` |
 | Admin (function) | path is open to everyone, the function calls `auth.require_admin()` |
 | own | signed in, but only for one's own person – for reading also the family, for creating and saving the family's playlists unless `settings.familyEdit` is `admins` – or for the playlists one may change (`_own_person()`, `_own_playlist_id()`) – otherwise `403` |
@@ -114,7 +113,6 @@ The “Users” column in the tables below lists what the server leaves out for 
 | GET | `/api/me` | signed in | [Session](#session) |
 | POST | `/api/me/password` | signed in | [Session](#session) |
 | POST | `/api/seen` | signed in (own account only) | [Session](#session) |
-| POST | `/api/tour/seen` | signed in (own account only) | [Session](#session) |
 | GET | `/api/config` | signed in (filtered) | [Configuration](#configuration) |
 | PUT | `/api/config` | signed in (filtered) | [Configuration](#configuration) |
 | GET | `/api/status` | signed in (filtered) | [Library & status](#library--status) |
@@ -126,7 +124,6 @@ The “Users” column in the tables below lists what the server leaves out for 
 | GET | `/api/song` | signed in (filtered) | [Songs & listening in](#songs--listening-in) |
 | GET | `/api/song/more` | signed in | [Songs & listening in](#songs--listening-in) |
 | GET | `/api/sound/catalog` | signed in | [Songs & listening in](#songs--listening-in) |
-| GET | `/api/instruments` | signed in | [Songs & listening in](#songs--listening-in) |
 | GET | `/api/stream` | signed in | [Songs & listening in](#songs--listening-in) |
 | GET | `/api/playlists` | signed in (filtered) | [Playlists](#playlists) |
 | GET | `/api/playlist` | signed in (filtered) | [Playlists](#playlists) |
@@ -202,11 +199,10 @@ The “Users” column in the tables below lists what the server leaves out for 
 | `GET /api/me` | signed in | – | `{"user", "name", "fullName", "role", "local", "persons", "own", "notfall", "passwordStored", "passwordRejected", "tourSeen", "welcomeSeen"}` – `passwordRejected`: a password is stored, but Navidrome no longer accepts it ([07](07-security.md#turn-on-statistics--stars)); without sign-in (local): `{"user": null, "name": "", "role": "admin", "local": true, "persons", "own", "tourSeen", "welcomeSeen": true}` |
 | `POST /api/me/password` | signed in with a Navidrome account (not the local administrator, not local) | Body `{"password": "…"}` stores it, `{"password": null}` (or no field) forgets it | `{"ok": true}` |
 | `POST /api/seen` | signed in, affects only one's own account | Body `{"what": "tour"}` or `{"what": "welcome"}` | `{"ok": true}`; any other value → `400 "Unknown"` |
-| `POST /api/tour/seen` | signed in, own account only | – | `{"ok": true}` – older form of `{"what": "tour"}` |
 
-- `own` is the account's person – one person per Navidrome account: `[id]` or `[]` (none yet; `auth.persons_of()`,
-  never the family entry). `persons`: administrators all people, users their own (`= own`). The local administrator
-  has `own: []` and `persons` = all.
+- `own` is the account's person – one person per Navidrome account: its id or `null` (none yet;
+  `auth.own_person()`, never the family entry). `persons`: administrators all people, users `[own]` or `[]`. The
+  local administrator and the local access without sign-in have `own: null` and `persons` = all.
 - `POST /api/login` refuses the family's account (the account of the entry with `family: true`,
   `auth.family_account()`) with `401` “This is the family's account – it plays the family playlists on shared
   devices. Please sign in with your own account.” – after the password check, without counting toward the lockout;
@@ -274,22 +270,22 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
-| `GET /api/status` | signed in | – | `env` (`url`, `webUrl`, `admin`, `adminOk`, `users[{name, ok, key, rejected}]`, `auth`, `adminPassword`, `publicUrl`, `lastfm`, `locked`), `deezer`, `steps`, `allSteps`, `daily`, `watch`, `paths`, `instance{docker, others[{host, docker, running}]}`, `navidrome{ok, version, scan}` or `{ok: false, error}`, `plugin` (bool: the Navidrome plugin has a key and is in use – a request or a play since the start, or live plays of the last 30 days), `names` (`all`, `hits`, `everything`: the names the server language gives generated playlists – the interface names new ones the same way) | only `navidrome{ok, version, scan}`, `env{users (own accounts only), auth, webUrl, lastfm}`, `daily`, `instance{docker, others: []}`, `plugin`, `names`; `steps`/`allSteps` empty |
+| `GET /api/status` | signed in | – | `env` (`url`, `webUrl`, `admin`, `adminOk`, `users[{name, ok, key, rejected, stars}]`, `auth`, `publicUrl`, `lastfm`, `ntfyToken`, `locked`), `deezer`, `steps`, `allSteps`, `daily`, `watch`, `paths`, `instance{docker, others[{host, docker, running}]}`, `navidrome{ok, version, scan}` or `{ok: false, error}`, `plugin` (bool: the Navidrome plugin has a key and is in use – a request or a play since the start, or live plays of the last 30 days), `names` (`all`, `hits`, `everything`: the names the server language gives generated playlists – the interface names new ones the same way) | only `navidrome{ok, version, scan}`, `env{users (own accounts only), auth, webUrl, lastfm}`, `daily`, `instance{docker, others: []}`, `plugin`, `names`; `steps`/`allSteps` empty |
 | `GET /api/home` | signed in | – | `{"newAlbums", "favNew", "songs", "albums", "artists", "playlists", "personen"}` (numbers, `playlists` = active playlists of all people). Each album carries `fav`: by a favorite band of the signed-in account's person (administrators without one: the family's, otherwise the first person's – `web._default_person()`, `rules.favorite_artists()`); those from the last 45 days come first, `favNew` counts them | `fav` from one's own person |
 | `GET /api/library` | signed in | `refresh=1` reloads the library from Navidrome | Index: `artists[[name, songs, id]]`, `genres`, `albums`, `songs`, `suffix`, `mp3Albums`, `loved`, `played`, `similar`, `untagged`, `autoArtists`, `weltInfo`, `scenes`, `ratingsExact`, `ratingSource`, `deezer` | unfiltered |
 | `GET /api/welt` | signed in | `id` of the music world | `members`, `songs`, `covers`, `artists`, `memberList[{name, id, songs, auto}]`, `similar`, `playlists`, `excluded`, `scene`, `forMe` | `playlists` visible ones only; `forMe` always from one's own account |
 | `GET /api/welt/neu` | Admin | `id` of the music world | Preview for “Rebuild”: `name`, `icon` (from the scene), `before`, `after` (bands), `dropped`, `added`, `renamed[[old, new]]` – changes nothing; without a scene `400` | – |
 | `GET /api/artist` | signed in | `name` | `name`, `id`, `songs`, `albums`, `genres`, `welten[{id, state}]`, `stile`, `likedBy`, `dislikedBy`, `playlists`, `bio`, `similar`, `plays`, `tags`, `missing`, `sound`, `soundsLike`, `lastfm`, `scenes`, `rating`, `top` (the five most played songs as song rows, see [below](#songs--listening-in)) | `playlists` only visible active ones; `likedBy`/`dislikedBy` only one's own person; `top` without songs hidden by kid-safe mode |
 
-- `env.users` in `/api/status` are the accounts for which stars are set (`rating_users()`); `ok` means “password
-  stored”, `rejected` “stored, but Navidrome no longer accepts it” (checked in the background, at most every 6 hours;
-  unknown counts as `false`), `key` is the `.env` key. `locked` lists the keys the interface could otherwise set (`config.EDITABLE_ENV`,
+- `env.users` in `/api/status` lists every person's account plus the accounts Deezer sets stars for
+  (`web.accounts_ok()`, each name once, case-insensitive); `ok` means “password stored”, `rejected` “stored, but
+  Navidrome no longer accepts it” (checked in the background, at most every 6 hours; unknown counts as `false`), `key`
+  is the `.env` key, `stars` “Deezer sets stars for it” (`rating_users()`). `locked` lists the keys the interface could otherwise set (`config.EDITABLE_ENV`,
   see [below](#settings--credentials)) that are set non-empty in the environment – they take precedence over `.env`
   and can't be changed in the interface. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_BASE` …) don't appear.
   Passwords themselves are in no response. `auth`: the local administrator has a password, so sign-in is on
-  (`localadmin.configured()`); `adminPassword` says where it comes from (`localadmin.source()`): `"env"`
-  (`TUTTIPHON_ADMIN_PASSWORD` in `docker-compose.yaml` or `.env`), `"stored"` (set in the browser, a hash in
-  `state/admin_password.json`) or `""` (none) – Settings → Users & permissions shows the matching form.
+  (`localadmin.configured()`: a hash in `state/admin_password.json`) – Settings → Users & permissions shows the
+  matching form.
 - `instance.others` are the other instances that have checked in within the last 180 s – only other installations
   (`instances.others(foreign_only=True)`: announcements with the own installation ID from `state/install_id` don't
   count); `running` = a run is in progress there ([02](02-data-model.md#shared-folder-tuttiphon),
@@ -316,10 +312,10 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
-| `GET /api/playlists` | signed in | – | `playlists[{id, name, status, state, count, limit, describe, mix, topArtists, covers, navidrome, cover}]`, `navidromeError`, `orphans`, `handmade[{file, name}]`, `webUrl` | visible playlists only; `handmade` and `orphans` empty |
-| `GET /api/playlist` | signed in | `id` | preview (see below, 25 sample songs) plus `own`, `state`, `navidrome`, `webUrl`; for mixes, own playlists and administrators also `usage` (`feedback.usage()`: `every`, `periods`, `heard`, `songs`, `played`, `days`, `last` – or `null` without a finished, counted edition) | another person's playlist → `400 "Playlist not found"` (visible: their own person's and the family's); for a family playlist they may not change (`settings.familyEdit: "admins"`), `nsp` and the line “Never included: …” in `summary` are missing (the dislikes stay private) |
-| `POST /api/preview` | signed in | Body: a playlist definition (fields as in `config.json`), plus optionally `config` (the whole configuration instead of the stored one), `date` (`YYYY-MM-DD`, reference date), `sampleSize` (default 15) | preview | computed with the server state; from `config` only one's own person counts, other people (the family too) without `likes`/`dislikes` (`_preview_config()`); only for their own person and the family's when they may change its playlists (`_guard_preview()`) |
-| `POST /api/counts` | signed in | Body: `welt`, `person`, `hits`, `minRating`, optional `config` | `{"*": n, "<style-id>": n, …}` – song count per vibe | like `/api/preview` |
+| `GET /api/playlists` | signed in | – | `playlists[{id, name, status, state, count, limit, describe, mix, topArtists, covers, navidrome, cover}]`, `navidromeError`, `orphans`, `handmade[{file, name}]`, `webUrl` | visible playlists only; `handmade` and `orphans` empty; `navidromeError` only `true`/`false` |
+| `GET /api/playlist` | signed in | `id` | preview (see below, 25 sample songs) plus `own`, `state`, `navidrome`, `webUrl`; for mixes, own playlists and administrators also `usage` (`feedback.usage()`: `every`, `periods`, `heard`, `songs`, `played`, `days`, `last` – or `null` without a finished, counted edition) | another person's playlist → `400 "Playlist not found"` (visible: their own person's and the family's); for every playlist that is not their own person's – the family's too –, `nsp` and the private lines in `summary` (“Never included: …”, “New from the favorite bands …”, “Prefers what …”, `web.PRIVATE_SUMMARY`) are missing (dislikes, favorite bands and the members of the family mix stay private) |
+| `POST /api/preview` | signed in | Body: a playlist definition (fields as in `config.json`), plus optionally `config` (the whole configuration instead of the stored one), `date` (`YYYY-MM-DD`, reference date), `sampleSize` (default 15) | preview | computed with the server state; from `config` only one's own person counts, the family as stored, other people without `likes`/`dislikes`/`push` (`_preview_config()`); only for their own person and the family's when they may change its playlists (`_guard_preview()`); `together` only as saved for that playlist `id`, otherwise removed |
+| `POST /api/counts` | signed in | Body: `welt`, `person`, `hits`, `minRating`, optional `config` | `{"*": n, "<style-id>": n, …}` – song count per vibe | like `/api/preview` (their own person or the family); only `welt`, `person`, `hits`, `minRating` count, never `together` |
 | `POST /api/snapshot` | own | Body `{"id"}` | `{"name", "count"}` | own playlists only |
 | `POST /api/takeover/preview` | Admin | Body `{"file"}` (handmade `.nsp`) | `{"file", "name", "originalCount", "limit", "mapping"}` | – |
 | `POST /api/takeover` | Admin | Body `{"file", "mode", "person"}`, `mode` = `unveraendert` (default, keeps the original rules) or `baukasten` (maps them to music world × vibe); `person` = the owner – without it the signed-in administrator's own person, otherwise the family, otherwise the first person (`web._default_person()`) | `{"ok": true, "playlist": {…}}` | – |
@@ -329,8 +325,10 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
   `sample`, `summary`; for mixes additionally `pool` and `mix: true`.
 - `config` in `/api/preview` and `/api/counts` (`_preview_config()`): admins compute with the configuration sent
   along, i.e. including changes that haven't been saved yet. Users compute with the stored state;
-  from their `config` the server takes only their own person, other people enter the calculation without `likes` and `dislikes`
-  – so song counts reveal no preferences or dislikes of others.
+  from their `config` the server takes only their own person (the fields of `auth.PERSON_FIELDS`, a stored kid-safe
+  mode stays on), the family enters as stored, every other person without `likes`, `dislikes` and `push` – so song
+  counts reveal no preferences or dislikes of others. `_guard_preview()` keeps `together` only as saved for the
+  playlist `id` the request names: a user can't put other people into a family mix to query their taste.
 - `state` per playlist: `neu` (new), `aktuell` (up to date), `geändert` (changed), `scan`, `entfernen` (remove),
   `fehler` (error) – or, for playlists that aren't active, the status itself. `navidrome` is `{id, owner, public, songCount}`
   or `null`, `cover` `{style, v}` or `null`. Meaning of the states: [04 – Playlists](04-playlists.md).
@@ -349,7 +347,7 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 | `GET /api/missing` | own | optional `person` (default: the account's person; administrators without one: the family, otherwise the first person) | `{"seeds", "missing[{artist, score, because}]", "lastfm"}` | own person or the family |
 | `GET /api/taste` | signed in | `person` or `me=1` | `{available, enough, basis, artists, welten, moods, styles, disliked, sound, hasAccount}` – taste from plays, favorites and stars set by hand ([Intelligence](06-intelligence.md#taste-per-account-apptastepy)); `sound`: the [sound taste](06-intelligence.md#sound-taste-appsoundtastepy) is active | own person, the family or own account only |
 | `GET /api/search` | signed in | `q` (at least 2 characters, otherwise everything is empty) | `{songs, styles, moods, instruments, themes, combos, lyrics}` – songs by title, AI music styles with bands, moods with song count and matching sound vibe, AI instruments and themes with song count, combo suggestions as a mix, matches in the lyrics | `combos` with one's own person |
-| `GET /api/changelog` | signed in | – | sections from `CHANGELOG.md`: `[{version, date, items, levels}]`, newest first; file missing → `[]` | unfiltered (the interface shows them to administrators only) |
+| `GET /api/changelog` | signed in | – | sections from `CHANGELOG.md`: `[{version, unreleased, items, levels}]`, newest first; file missing → `[]` | unfiltered (the interface shows them to administrators only) |
 
 `level` is `info` or `warn`; `actions` describes buttons for the interface (`do`: `goto`, `edit`, `addToWelt`,
 `undoAssign`, `artist` (opens the band window of `artist`) …). The entries `auto|<band>` (“‘Band’ is now in World”, action `undoAssign` with `welt` and `artist`)
@@ -369,8 +367,8 @@ name bands that the classification assigned to a music world on its own within t
 | `lyrics` | up to 5 songs whose lyrics contain all the words (the last one also as a prefix), literal matches first, the same song on several albums only once: `{id, title, artist, album, artistId, line}` – `line` is the matching line (`liedtext.search()`). Only from two words on, or one word with at least five letters. If there is no index yet, the first search starts reading the lyrics in the background and `lyrics` stays empty |
 
 **`/api/changelog`** (`api_changelog()`) reads `CHANGELOG.md` from the program folder (`config.ROOT`, `/app` in the
-container): each heading `## <version>` (older ones with ` – <date>`, en dash or hyphen; `## Unreleased` with
-`"unreleased": true`, shown as “Not released yet”) starts a section, each line
+container): each heading `## <version>` (`## Unreleased` with `"unreleased": true`, shown as “Not released yet”)
+starts a section, each line
 `- …` is an item (level 0), an indented `  - …` is an item of its own with level 1 (it belongs to the item above it),
 other indented lines are appended to the previous item. `levels` runs parallel to `items`.
 
@@ -388,7 +386,7 @@ other indented lines are appended to the previous item. `levels` runs parallel t
 
 - `POST /api/task` cancels a scheduled auto-apply before starting. `/api/apply/now` starts the steps
   `playlists` + `scan` (“Apply playlists in Navidrome”). If a run is in progress whose remaining steps can all be
-  paused (`flac`, `lyrics`, `analyse`, `deezer`), it briefly halts that run with `RUNNER.pause_for()`: the response is
+  paused (`flac`, `lyrics`, `cover`, `analyse`, `deezer`), it briefly halts that run with `RUNNER.pause_for()`: the response is
   then the status of the still running, now pausing run; the apply starts right after it, and then
   the paused run continues as “… (continued)” ([05](05-maintenance.md#short-pause-for-an-apply-pause_for)).
   It cancels the auto-apply only once the run has actually started or the pause is queued – if the
@@ -435,14 +433,14 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `POST /api/paths/check` | Body `{"music", "playlists", "archive"}` (proposed locations) | per folder `{path, source, exists, writable}`, for `playlists` and `archive` additionally `insideMusic`; an archive that is the music folder or inside it → 400 with `error` |
 | `POST /api/lastfm/test` | Body optional `key` (otherwise the stored key) | `{"ok": true, "tags"}` or `{"ok": false, "error"}` |
 | `GET /api/users` | – | `[{name, admin, fullName}]` of the Navidrome accounts; Navidrome unreachable → `400 {"error"}` |
-| `GET /api/accounts` | – | `[{name, fullName, navidromeAdmin, role, override, lastLogin, persons, family, passwordStored, passwordRejected}]` – `persons`: the account's person (`[id]` or `[]`, `auth.persons_of()`), `family`: it is the family's account (its role is always `none`) |
+| `GET /api/accounts` | – | `[{name, fullName, navidromeAdmin, role, override, lastLogin, person, family, passwordStored, passwordRejected}]` – `person`: the id of the account's person or `null` (`auth.own_person()`), `family`: it is the family's account (its role is always `none`) |
 | `POST /api/family` | Body `{"name"?, "account"?}` | `{"person", "account", "password"}` – sets up the family (see below) |
 | `PUT /api/accounts` | Body `{"user", "role"}`, `role` = `admin`, `user`, `none` or `null` (remove the override) | `{"ok": true}` |
-| `POST /api/admin-password` | Body `{"current", "password"}` – `current` only needed when the password was set in the browser | `{"ok": true}`, for the local administrator itself (and on the PC without sign-in) with `Set-Cookie: tuttiphon=…` – see below |
+| `POST /api/admin-password` | Body `{"current", "password"}` – `current` only needed once a password is set | `{"ok": true}`, for the local administrator itself (and on the PC without sign-in) with `Set-Cookie: tuttiphon=…` – see below |
 | `GET /api/intel` | – | `{"lastfm", "audio", "ml", "classify", "stile", "moods", "fingerprints"}` – status of Last.fm, sound analysis, AI sound analysis, classification and audio fingerprints (see below) |
 | `GET /api/opus/info` | `refresh=1` searches anew instead of using the cache | `{"ffmpeg", "aac", "musicDir", "archiveDir", "pending", "sample"}` – `aac`: whether mutagen is available (needed for AAC) or with `error` |
 | `GET /api/lyrics/stats` | – | summary of the last lyrics run plus `lastRun`, `backlog` |
-| `GET /api/deezer/ranks` | – | `{"bucket", "counts", "notFound", "defaults"}` – rank distribution for the star levels |
+| `GET /api/deezer/ranks` | – | `{"bucket", "counts", "notFound", "total", "perNight", "defaults"}` – rank distribution for the star levels (`deezer.rank_histogram()`: songs per 10,000 ranks, not found on Deezer, all checked songs, songs the nightly refresh checks again) |
 | `GET /api/backups` | – | `{"enabled", "keep", "dir", "path", "exists", "writable", "items": [{name, size, time}], "last"}` – built-in backup |
 | `POST /api/backups/now` | – | `{"name", "size", "files"}` – back up now |
 | `GET /api/backups/file` | `name` (only `tuttiphon-sicherung-…zip` from the backup folder) | the ZIP file as a download (`Content-Disposition: attachment`); unknown name → `400` |
@@ -452,20 +450,18 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `POST /api/notify/test` | Body optional `topic`; with `person` for that person's topic | `{"ok": true}` or `{"ok": false, "error"}` – test message via ntfy |
 
 - `PUT /api/env` writes only the keys the interface may set via `save_env()` (`config.EDITABLE_ENV`: `NAV_URL`,
-  `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `LASTFM_API_KEY`,
-  `NTFY_TOKEN`). Empty string = unchanged, `null` = delete. Errors: `400 "Unknown key: …"` – also for
-  `TUTTIPHON_ADMIN_PASSWORD`, which goes through `/api/admin-password` –, `400` for line breaks/control characters.
+  `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `LASTFM_API_KEY`, `NTFY_TOKEN`). Empty string = unchanged, `null` = delete. Errors: `400 "Unknown key: …"`, `400` for line
+  breaks/control characters.
   Beforehand, `api_env_save()` checks: `NAV_URL` and `NAV_PUBLIC_URL` must start with `http://` or `https://` (`400`
   “Please enter the address with http:// or https:// …”; `null` deletes it). After that the library is reloaded.
   This endpoint doesn't check passwords for `NAV_PASS_*` – the interface does that beforehand with `/api/env/test`.
 - `POST /api/admin-password` (`Handler._admin_password()`, in `ADMIN_ONLY`, header `X-Tuttiphon` as for every
   `POST`) sets or changes the password of the [local administrator](07-security.md#local-administrator); only its hash
-  is stored. By source (`env.adminPassword`): `"env"` → `400` “The password of the local administrator is set in
-  docker-compose.yaml – change it there.”; `"stored"` → `current` must match, otherwise `400` “The current password is
+  is stored. Once a password is set (`env.auth`), `current` must match, otherwise `400` “The current password is
   wrong.” (`400` rather than `401`, so the interface doesn't jump to the sign-in; it counts under the lockout keys of
-  the local administrator, `u:@notfall|<address>`, `ip:<address>` and `u:@notfall`, then `429`); `""` (none yet: on
-  the PC without network binding, where there is no sign-in yet – or in setup mode for an administrator signed in with
-  a Navidrome account) → no current password needed, and from now on sign-in is required. A weak new password →
+  the local administrator, `u:@notfall|<address>`, `ip:<address>` and `u:@notfall`, then `429`). Without a password
+  (on the PC without network binding, where there is no sign-in yet – or in setup mode for an administrator signed in
+  with a Navidrome account) no current password is needed, and from now on sign-in is required. A weak new password →
   `400` “The administrator password needs at least 8 characters.” On success the server log says “The password of the
   local administrator was changed.”, all sessions of the local administrator end (`auth._notfall_mark()`), and if the
   caller is the local administrator or the PC without sign-in, the answer carries a new session cookie for `@notfall`
@@ -479,26 +475,35 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
   account its own admin role. Unknown role → `400`. The role `none` additionally ends all sessions of the account
   (`auth.end_sessions_of()`).
 - `POST /api/family` (`api_family()`, in `ADMIN_ONLY`) sets up the family – an entry with a Navidrome account of its
-  own ([02](02-data-model.md#personen)). `400` “There already is a family.” if there is one. `name`: spaces
+  own ([02](02-data-model.md#personen)). One setup at a time: `api_family()` runs `_family()` under `_family_lock`, so a
+  double click never creates two accounts. `400` “There already is a family.” if there is one. `name`: spaces
   collapsed, at most 60 characters, default “Family” in the server language (`config.FAMILY_NAME`). `account`:
   default the slug of the name (`config.slug()`); it must be 2–40 letters, digits, `.`, `-`, `_` (`FAMILY_ACCOUNT`) –
   otherwise `400` “Please choose an account name of 2 to 40 letters …” –, and no person may use it yet (`400` ““…”
-  already belongs to a person – please choose another name.”). Tuttiphon then creates the account as the Navidrome
-  administrator (`NativeApi.create_user()`: `POST /api/user` with `userName`, `name`, a random `password` from
-  `secrets.token_urlsafe(18)`, `isAdmin: false`); a name Navidrome already has → `400` “Navidrome already has an
-  account “…” – please choose another name.”, other errors `400` “Navidrome could not create the account: …”. The
+  already belongs to a person – please choose another name.”). Before creating anything, the server reads Navidrome's
+  accounts (`NativeApi.users()`) and refuses (`400` “Navidrome already has an account “…” – please choose another
+  name.”) a name Navidrome already has (case-insensitive), a name whose key for the stored password
+  (`config.pass_key()`) is the same as an existing account's (“anna.lena” and “anna-lena” would share
+  `NAV_PASS_ANNA_LENA`), and a name whose key is already in `.env`; if the list can't be read, `400` “Navidrome could
+  not create the account: …”. Tuttiphon then creates the account as the Navidrome administrator
+  (`NativeApi.create_user()`: `POST /api/user` with `userName`, `name`, a random `password` from
+  `secrets.token_urlsafe(18)`, `isAdmin: false`); errors `400` “Navidrome could not create the account: …”. The
   password goes to `.env` as `NAV_PASS_<ACCOUNT>` (so its stars, plays and recap work like any account's), the account
-  list is reloaded, and the entry is added: id `familie` (`familie-2` … if taken), `user` = the account, `family:
-  true`, `prefix: ""`, `icon: "i:home"`, `clean: true`, empty likes and dislikes; a list in `settings.deezer.users`
-  gets the account. The server log says “Family set up: Navidrome account …”, and a Deezer run (`deezer_mode: "new"`)
-  gives the new account the stars of the songs rated before (`deezer._catch_up()`; while a task runs, the next Deezer
-  run does it). Only this answer carries the password – shown once, for shared devices in Symfonium; nobody signs in
+  list is reloaded, and the entry is added inside `update_config()`, which checks once more that there is no family
+  yet (set up in another tab in between → `400` “There already is a family.”): id `familie` (`familie-2` … if taken),
+  `user` = the account, `family: true`, `prefix: ""`, `icon: "i:home"`, `clean: true`, empty likes and dislikes; a
+  list in `settings.deezer.users` gets the account. The server log says “Family set up: Navidrome account …”. If
+  `deezer` is part of “Update everything” (`tasks.pipeline()`), a Deezer run (`deezer_mode: "new"`) gives the new
+  account the stars of the songs rated before (`deezer._catch_up()`; while a task runs, the next Deezer run does
+  it). Only this answer carries the password – shown once, for shared devices in Symfonium; nobody signs in
   to Tuttiphon with it.
 - `POST /api/notify/test` is the only endpoint in this section that is also open to users – but only with
   `person` set to their own person (otherwise `403`) and only to that person's topic (`topic`
   or the stored one): the administrator's topic or one another person uses → `403`, no topic → `400 "No topic
   entered."` (no fallback to the administrator's); without `person` only for admins. If notifications are off, it
-  responds `400 "Notifications are turned off."`
+  responds `400 "Notifications are turned off."` At most one attempt per 30 seconds and account (`400` “Please wait a
+  moment – a test message has just gone out.”); the time is noted before the other checks, so a refused attempt
+  counts too.
 - `source` in `/api/paths/check`: `docker` (environment variable), `einstellung` (setting) or `standard` (default). Format of the entries in
   [`.env`](02-data-model.md#env--credentials) and [`accounts`](02-data-model.md#accounts).
 - `/api/intel`: `audio` = `audio.stats()` over the **merged** features (`classify.song_features()`: own
@@ -534,7 +539,6 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
 | `GET /api/song` | signed in | `id` (song ID) | song row with `track`, `suffix`, `albumId`, `lyrics` (text or `null`), `playlists[{id, name, mix}]` and – with the AI sound analysis – `key`, `camelot`, `keyStrength`, `bpmSource`, `instruments`, `themes` |
 | `GET /api/song/more` | signed in | `id` | `{"artist", "songs": [song row …]}` – up to 20 similar songs |
 | `GET /api/sound/catalog` | signed in | – | `{"available", "instruments": [{id, label, songs}], "themesAvailable", "themes": [{id, label, songs}]}` – the 40 instruments of the AI with label in the page's language and the number of songs of the library that clearly contain them, the same for the nine offered themes (songs in which the AI hears the theme); `available` / `themesAvailable` = the AI has recognized instruments / themes at all (`ml.sound_catalog()`) |
-| `GET /api/instruments` | signed in | – | the older name of `/api/sound/catalog`, same answer (it still has `available` and `instruments` as before) |
 | `GET /api/stream` | signed in | `id`, `f=mp3` for browsers without Opus | audio from Navidrome (`stream`), otherwise `400` |
 
 - **Song row** (`Library.describe()` + `rules._with_sound()`, also in `sample` of `/api/playlist`/`/api/preview` and

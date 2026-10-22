@@ -241,15 +241,30 @@ AUTO_FILE = STATE_DIR / "auto_assigned.json"   # {band lowercase: {"name", "welt
 NEW_DAYS = 45                                   # "new band": first song at most this many days in the library (like "New:" in "to review")
 
 
-def auto_log():
-    """Automatically classified bands. The older format (just a list of names) is read as well."""
+def auto_log(write=False):
+    """Automatically classified bands. write: read to be written again (remember) – briefly not readable (NAS): the
+    OSError goes on, and a damaged file is set aside (auto_assigned.defekt-<time>.json) instead of being overwritten:
+    otherwise bands taken out by hand would come back."""
     try:
         data = json.loads(read_text(AUTO_FILE))
-    except (OSError, ValueError):
+    except FileNotFoundError:
         return {}
-    if isinstance(data, list):
-        return {str(x).lower(): {"name": x} for x in data}
-    return data if isinstance(data, dict) else {}
+    except OSError:
+        if write:
+            raise
+        return {}
+    except ValueError:
+        data = None
+    if isinstance(data, dict):
+        return data
+    if write:
+        import os
+        from . import events
+        from .i18n import _s
+        broken = AUTO_FILE.with_name(f"auto_assigned.defekt-{dt.datetime.now():%Y%m%d-%H%M%S}.json")   # file name: data
+        os.replace(AUTO_FILE, broken)
+        events.say(_s("⚠ {file} was damaged – set aside as {name}.", file=AUTO_FILE.name, name=broken.name))
+    return {}
 
 
 def new_artists(lib, days=NEW_DAYS, today=None):
@@ -266,10 +281,11 @@ def new_artists(lib, days=NEW_DAYS, today=None):
 
 
 def auto_assign(cfg, lib, threshold=0.7, log=print, dry_run=False, new_only=False):
-    """Add confident matches straight to the music world. -> list of assignments
-    Each band at most once: whoever removes an automatically classified band again does not get it back.
-    new_only: only bands that are new in the library (Lidarr) – older ones stay suggestions under "to review"."""
-    done = auto_log()
+    """Add confident matches straight to the music world (cfg – inside update_config). -> list of assignments; once
+    the configuration is saved, remember() them. Each band at most once: whoever removes an automatically classified
+    band again does not get it back. new_only: only bands that are new in the library (Lidarr) – older ones stay
+    suggestions under "to review"."""
+    done = auto_log(write=not dry_run)
     fresh = new_artists(lib) if new_only else None
     made = []
     for s in suggestions(cfg, lib):
@@ -280,16 +296,20 @@ def auto_assign(cfg, lib, threshold=0.7, log=print, dry_run=False, new_only=Fals
             continue
         if not dry_run:
             w.setdefault("artists", []).append(s["artist"])
-            done[s["artist"].lower()] = {"name": s["artist"], "welt": w["id"], "score": s["score"],
-                                         "at": dt.datetime.now().isoformat(timespec="seconds")}
         made.append(s)
         log(f"  ✓ {s['artist']} → {w['name']} ({int(s['score'] * 100)} %, {s['why']})")
-    if made and not dry_run:
-        try:
-            write_atomic(AUTO_FILE, json.dumps(done, ensure_ascii=False))
-        except OSError:
-            pass
     return made
+
+
+def remember(made):
+    """After the configuration with the assignments is saved: each band at most once (state/auto_assigned.json)."""
+    if not made:
+        return
+    done = auto_log(write=True)
+    at = dt.datetime.now().isoformat(timespec="seconds")
+    for s in made:
+        done[s["artist"].lower()] = {"name": s["artist"], "welt": s["welt"], "score": s["score"], "at": at}
+    write_atomic(AUTO_FILE, json.dumps(done, ensure_ascii=False))
 
 
 def stil_suggestions(cfg, lib, limit=40):

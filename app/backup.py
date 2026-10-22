@@ -2,7 +2,7 @@
 
 * Once a day (from the time of the daily refresh on) and at the push of a button (Settings → Backup).
 * Contents: config.json, .env, state/ (without image cache, sessions, locks) and backup/ (backed-up original
-  playlists *.nsp/*.m3u and configurations before a migration config_v*.json). Not the logs (logs/) – they are only
+  playlists *.nsp/*.m3u). Not the logs (logs/) – they are only
   for reading up. Never earlier backups: nothing from the backup folder and no file named like a backup – otherwise
   a backup folder inside the data folder would make every ZIP contain all the earlier ones.
 * Location: settings.backup.dir – empty = <data folder>/sicherungen. Better a folder on another device (another disk,
@@ -33,8 +33,8 @@ SKIP_STATE = ("cache", "sessions.json", "task.lock", "install_id")
 # can be rebuilt at any time (lyrics index, file states for the folder watch, audio fingerprints – large, renewed at
 # night by themselves) or was put aside as broken
 SKIP_NAMES = re.compile(r"^(liedtexte\.db.*|watch_files\.json|fingerprints\.json)$|\.defekt-")
-# what belongs in backup/: backed-up original playlists and configurations from before a migration
-KEEP_BACKUP = re.compile(r"(\.nsp|\.m3u|^config_v\d+_.*\.json)$", re.I)
+# what belongs in backup/: backed-up original playlists
+KEEP_BACKUP = re.compile(r"\.(nsp|m3u)$", re.I)
 _items = {"key": None, "list": []}
 
 

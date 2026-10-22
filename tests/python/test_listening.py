@@ -9,8 +9,8 @@ from app import auth, config, liedtext, rules, web
 from app.rules import Library
 from tests.python.factory import base_config, song
 
-JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False}
-ADMIN = {"user": "niklas", "role": "admin", "own": [], "persons": [], "local": False}
+JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False}
+ADMIN = {"user": "niklas", "role": "admin", "own": None, "persons": [], "local": False}
 
 
 class SongTest(unittest.TestCase):
@@ -27,7 +27,7 @@ class SongTest(unittest.TestCase):
         p = mock.patch.object(web.CACHE, "get", return_value=self.lib)
         p.start()
         self.addCleanup(p.stop)
-        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": [], "persons": [], "local": False})
+        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": None, "persons": [], "local": False})
 
     def test_song_with_lyrics_and_visible_playlists(self):
         auth.set_current(JONAS)
@@ -90,7 +90,7 @@ class WorldResetTest(unittest.TestCase):
         config.save_config(cfg)
         lib = Library([song("a", artist="Band A"), song("h", artist="Handband"), song("l", artist="Lichterkinder")])
         auth.set_current(ADMIN)
-        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": [], "persons": [], "local": False})
+        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": None, "persons": [], "local": False})
         with mock.patch.object(web.CACHE, "get", return_value=lib), \
                 mock.patch.object(rules, "scene_members", return_value=["Band A", "Lichterkinder"]):
             d = web.api_welt_reset({"id": "kinder"})
@@ -114,7 +114,7 @@ class KidSafeListTest(unittest.TestCase):
         config.save_config(base_config())
         lib = Library([song("a1", "Böses Lied", artist="Band A")])
         auth.set_current(ADMIN)
-        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": [], "persons": [], "local": False})
+        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": None, "persons": [], "local": False})
         with mock.patch.object(web.CACHE, "get", return_value=lib), \
                 mock.patch.object(liedtext, "derb_details", return_value={"a1": [["fuck", 3]]}):
             d = web.api_kinderschutz({})

@@ -15,7 +15,7 @@ from app import albumcover, auth, classify, config, covers, liedtext, mixer, not
 from app.rules import BuildContext, Library
 from tests.python.factory import base_config, song
 
-JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False}
+JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False}
 
 
 class KidSafeTest(unittest.TestCase):
@@ -185,7 +185,7 @@ class NotifyTest(unittest.TestCase):
         cfg = base_config()
         cfg["settings"]["notify"] = {"enabled": True, "topic": "t"}
         with mock.patch.object(notify, "send", return_value=True) as send:
-            notify.after_run({"name": "Neue Musik", "results": {"flac": "ok", "scan": "abgebrochen"}}, cfg)
+            notify.after_run({"name": "Process new music", "results": {"flac": "ok", "scan": "abgebrochen"}}, cfg)
             self.assertEqual(send.call_count, 0)
             for _ in range(2):
                 notify.after_run({"name": "Nacht", "results": {"scan": "fehler"}}, cfg)

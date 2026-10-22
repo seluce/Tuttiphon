@@ -9,12 +9,12 @@ import unittest
 from collections import Counter
 from unittest import mock
 
-from app import auth, classify, config, liedtext, mixer, notify, pflege, rueckblick, rules, stats, suggest, taste
+from app import auth, classify, config, liedtext, mixer, notify, pflege, rueckblick, rules, suggest, taste
 from app.rules import Library, BuildContext
 from tests.python.factory import base_config, iso_days_ago, song
 
-ADMIN = {"user": "niklas", "role": "admin", "own": [], "local": False}
-JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "local": False}
+ADMIN = {"user": "niklas", "role": "admin", "own": None, "local": False}
+JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "local": False}
 
 
 class LyricsTest(unittest.TestCase):
@@ -154,13 +154,14 @@ class PlaylistKindsTest(unittest.TestCase):
 class PermissionsTest(unittest.TestCase):
     def test_what_everyone_likes_is_the_family_s(self):
         cfg = base_config()
+        cfg["playlists"] = [{"id": "t", "person": "familie", "welt": ["kinder"], "stil": "*", "type": "mix",
+                             "together": ["niklas", "oma", "familie", "gibtsnicht"]}]
         incoming = copy.deepcopy(cfg)
-        incoming["playlists"] = [{"id": "t", "person": "familie", "welt": ["kinder"], "stil": "*", "type": "mix",
-                                  "together": ["jonas", "niklas", "oma", "familie", "gibtsnicht"]},
-                                 {"id": "u", "person": "jonas", "welt": ["kinder"], "stil": "*", "type": "mix",
-                                  "together": ["jonas", "oma"]}]
+        incoming["playlists"][0]["together"] = ["jonas", "niklas", "oma"]
+        incoming["playlists"].append({"id": "u", "person": "jonas", "welt": ["kinder"], "stil": "*", "type": "mix",
+                                      "together": ["jonas", "oma"]})
         out = {p["id"]: p for p in auth.merge_user_changes(cfg, incoming, JONAS)["playlists"]}
-        self.assertEqual(out["t"]["together"], ["jonas", "niklas", "oma"])   # people – not the family, nobody unknown
+        self.assertEqual(out["t"]["together"], ["niklas", "oma", "jonas"])   # people – not the family, nobody unknown
         self.assertNotIn("together", out["u"])                              # a person's own playlist: no family mix
 
     def test_person_fields_clean_and_push(self):
@@ -231,7 +232,7 @@ class NotifyTest(unittest.TestCase):
 
     def test_after_run_respects_events(self):
         with mock.patch.object(notify, "send", return_value=True) as send:
-            notify.after_run({"name": "Neue Musik verarbeiten (2 Dateien)", "results": {"scan": "ok"},
+            notify.after_run({"name": "Process new music (2 files)", "results": {"scan": "ok"},
                               "summary": {"analyse": {"assignedBands": [["Band A", "kinder"]]}}}, self.cfg)
         titles = [c.args[1] for c in send.call_args_list]
         self.assertEqual(len(titles), 1)                       # new music is switched off

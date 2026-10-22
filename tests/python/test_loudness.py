@@ -3,7 +3,6 @@ in the test: the values are in there afterwards, the audio is bit-identical, oth
 The file tests need ffmpeg and mutagen (skipped otherwise)."""
 from tests.python import env  # noqa: F401  (before app.*)
 
-import hashlib
 import os
 import shutil
 import subprocess

@@ -30,7 +30,7 @@ SHARED = ROOT / "shared"
 for _d in (DATA, PLAYLISTS, ARCHIVE, SHARED):
     _d.mkdir(parents=True, exist_ok=True)
 
-_DROP = ("MUSIC_DIR", "PLAYLIST_DIR", "ARCHIVE_DIR", "RATING_USERS", "LASTFM_API_KEY", "NTFY_TOKEN")
+_DROP = ("MUSIC_DIR", "PLAYLIST_DIR", "ARCHIVE_DIR", "LASTFM_API_KEY", "NTFY_TOKEN")
 for _key in list(os.environ):
     if _key.startswith(("NAV_", "TUTTIPHON_")) or _key in _DROP:
         del os.environ[_key]

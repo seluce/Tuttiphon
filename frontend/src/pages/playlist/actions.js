@@ -1,7 +1,7 @@
 // Actions of the playlist page: change status, delete permanently, copy, keep this mix (smart playlists: save as a
 // fixed playlist), reshuffle, cover.
 // p is always the playlist from S.config (findPl) – changes to it redraw the page by themselves.
-import { S, defaultOwner, findPerson, canEdit, changed, snapshot } from '../../lib/state.svelte.js'
+import { S, defaultOwner, findPerson, canEdit, isAdmin, myPerson, changed, snapshot } from '../../lib/state.svelte.js'
 import { openSheet, toast, confirmDialog } from '../../lib/overlay.svelte.js'
 import { go } from '../../lib/router.svelte.js'
 import { api } from '../../lib/api.js'
@@ -75,6 +75,7 @@ export async function purgeAll(list) {
 }
 
 export function duplicate(p, d) {
+  if (!isAdmin() && !myPerson()) { go('#/willkommen'); return }   // an own profile first – the server keeps no playlists without one
   const copy = clone(p)
   delete copy.file; delete copy.takeover; delete copy.deletedAt; delete copy.cover
   copy.id = uid(p.id)

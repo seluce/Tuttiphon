@@ -78,6 +78,7 @@ class TestAutoAssignOnce(unittest.TestCase):
         guess = [{"artist": "Neue Band", "welt": wid, "score": 0.95, "why": "x", "songs": 5}]
         with mock.patch.object(classify, "suggestions", return_value=guess):
             first = classify.auto_assign(cfg, None, 0.7, log=lambda *_: None)
+            classify.remember(first)                          # the configuration is saved
             cfg["welten"][0]["artists"].remove("Neue Band")   # removed again by hand
             second = classify.auto_assign(cfg, None, 0.7, log=lambda *_: None)
         self.assertEqual((len(first), len(second)), (1, 0))
@@ -111,7 +112,7 @@ class TestWatchRetry(unittest.TestCase):
         old = time.time() - 600
         self.addCleanup(lambda: (new.unlink(missing_ok=True), watch.STATE_FILE.unlink(missing_ok=True),
                                  watch.FILES_FILE.unlink(missing_ok=True)))
-        watch.FILES_FILE.write_text("[]")
+        watch.FILES_FILE.write_text(json.dumps({"v": 2, "dirs": {}}))
         watch._save({"last": old - 60, "checked": 0})
 
         class Busy:
@@ -131,7 +132,7 @@ class TestWatchRetry(unittest.TestCase):
         # SETTLE < 0: the file just created counts as finished right away (ctime cannot be turned back in the test)
         with mock.patch.object(watch, "load_config", return_value=cfg), mock.patch.object(watch, "SETTLE", -30):
             self.assertIsNone(watch.check(runner))          # another run: remember nothing
-            self.assertEqual(json.loads(watch.FILES_FILE.read_text()), [])
+            self.assertEqual(json.loads(watch.FILES_FILE.read_text()), {"v": 2, "dirs": {}})
             self.assertEqual(watch.check(runner), 1)          # found again and started next time
         self.assertIn("Neue Band/Album/01 Lied.opus", watch._known())
 
@@ -164,7 +165,7 @@ class TestArchiveOtherVolume(unittest.TestCase):
         self.assertEqual([f.name for f in self.dst.parent.iterdir()], ["01 Lied.flac"])   # no temporary file
 
     def test_failed_copy_keeps_the_original_and_leaves_nothing(self):
-        with self.rename, mock.patch("shutil.copy2", side_effect=OSError(28, "No space left on device")):
+        with self.rename, mock.patch("shutil.copyfileobj", side_effect=OSError(28, "No space left on device")):
             with self.assertRaises(OSError):
                 self.opus.move_to_archive(self.src, self.dst)
         self.assertTrue(self.src.exists())
@@ -235,7 +236,7 @@ class TestComboSearch(unittest.TestCase):
         from app import auth, web
         cfg = base_config()
         cfg["stile"].append({"id": "ruhig-chill", "name": "Ruhig & Chill", "genres": ["Chill"]})
-        auth.set_current({"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False})
+        auth.set_current({"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False})
         with mock.patch.object(web.rules, "count", return_value=50):
             return web._search_combos(q, cfg, Library([song("s1")]))
 
@@ -263,7 +264,7 @@ class TestComboSearchEnglish(unittest.TestCase):
     def combos(self, q):
         from app import auth, web
         cfg = base_config()
-        auth.set_current({"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False})
+        auth.set_current({"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False})
         with mock.patch.object(web.rules, "count", return_value=50):
             return web._search_combos(q, cfg, Library([song("s1")]))
 

@@ -5,7 +5,8 @@
 #
 # Copies data/ to <work-dir>/data (only the first time), switches off auto-apply and folder watching
 # there, and starts Tuttiphon without schedules on 127.0.0.1:<port>.
-#   --auth        turn on sign-in (administrator password in the copy) and print session cookies:
+#   --auth        turn on sign-in (a random administrator password in the copy, as if set in the browser) and print
+#                 session cookies:
 #                 admin = local administrator, user = a user account (--user <account>, otherwise TUTTIPHON_TEST_USER
 #                 from dev.local.env, otherwise the first user account of the copied configuration)
 #   --web <dir>   own build folder (otherwise web/ in the project) – e.g. after `npx vite build --outDir <dir>`
@@ -65,18 +66,16 @@ def family(c):   # as POST /api/family, without the Navidrome account (the copy 
 config.update_config(family)
 PY
 fi
-# sign-in needs an administrator password – a random one for the copy
-if [ "$auth" = 1 ] && ! grep -qE '^TUTTIPHON_ADMIN_PASSWORD=.' "$data/.env" 2>/dev/null; then
-  printf '\nTUTTIPHON_ADMIN_PASSWORD=test-%s\n' "$(head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n')" >> "$data/.env"
-fi
 # TUTTIPHON_SHARED_DIR: instance registration and run lock in the work dir instead of the real playlist folder
 export TUTTIPHON_DATA="$data" TUTTIPHON_NO_SCHEDULER=1 TUTTIPHON_WEB="$web" \
        TUTTIPHON_SHARED_DIR="$(readlink -f "$work")/shared"
 [ -n "${TUTTIPHON_BASE:-}" ] && export TUTTIPHON_BASE
 if [ "$auth" = 1 ]; then
   python3 - "$user" <<'PY'
-import sys
-from app import auth, config
+import secrets, sys
+from app import auth, config, localadmin
+if not localadmin.configured():   # sign-in needs the local administrator's password – a random one for the copy
+    localadmin.set_password("test-" + secrets.token_hex(6))
 cfg = config.load_config()
 # the account for the "user" role: given, otherwise the first user account of the configuration
 user = sys.argv[1] or next((a for a, v in (cfg.get("accounts") or {}).items() if (v or {}).get("role") == "user"), "") \

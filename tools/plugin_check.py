@@ -38,7 +38,7 @@ ND_PORT, TP_PORT = 4599, 8799
 BANDS = {"Eisen": 0, "Stahl": 0, "Harfe": 1, "Dudel": 1, "Kita": 2, "Rassel": 2}   # band -> sound family
 PER_BAND = 2
 # nothing of a real setup reaches the throwaway servers – the same names tests/python/env.py removes
-DROP = ("NAV_", "TUTTIPHON_", "ND_", "MUSIC_DIR", "PLAYLIST_DIR", "ARCHIVE_DIR", "BACKUP_DIR", "RATING_USERS",
+DROP = ("NAV_", "TUTTIPHON_", "ND_", "MUSIC_DIR", "PLAYLIST_DIR", "ARCHIVE_DIR", "BACKUP_DIR",
         "LASTFM_API_KEY", "NTFY_TOKEN")
 
 

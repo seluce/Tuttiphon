@@ -2,7 +2,6 @@
   "version": 13,
   "settings": {
     "language": "en",
-    "playlistDir": "Music/00_SmartPlaylists",
     "filePrefix": "Auto – ",
     "namePattern": "{welt} · {stil}",
     "allName": "All",
@@ -116,7 +115,6 @@
         "flac"
       ],
       "original": "archive",
-      "archiveDir": "Archiv",
       "minAgeMinutes": 10,
       "owner": "",
       "jobs": 1

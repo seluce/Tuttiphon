@@ -322,8 +322,8 @@ export default {
     '¿Dónde encuentro el código de configuración?',
   'I forgot the password of the local administrator.':
     'Olvidé la contraseña del administrador local.',
-  'If it was set in the browser: delete the file admin_password.json in the folder state of the data folder (config/state next to docker-compose.yaml). A few seconds later the sign-in page asks for a new one – with a new setup code from the container log; everything else stays as it is. If it is set in docker-compose.yaml as TUTTIPHON_ADMIN_PASSWORD, look it up or change it there and recreate the container.':
-    'Si se definió en el navegador: elimina el archivo admin_password.json de la carpeta state dentro de la carpeta de datos (config/state junto a docker-compose.yaml). Unos segundos después, la página de inicio de sesión pide una nueva – con un código de configuración nuevo del registro del contenedor; todo lo demás se queda igual. Si está definida en docker-compose.yaml como TUTTIPHON_ADMIN_PASSWORD, consúltala o cámbiala allí y vuelve a crear el contenedor.',
+  'Delete the file admin_password.json in the folder state of the data folder (config/state next to docker-compose.yaml), then reload the sign-in page. It asks for a new one – with a new setup code from the container log; everything else stays as it is.':
+    'Elimina el archivo admin_password.json de la carpeta state dentro de la carpeta de datos (config/state junto a docker-compose.yaml) y luego recarga la página de inicio de sesión. Entonces pide una nueva – con un código de configuración nuevo del registro del contenedor; todo lo demás se queda igual.',
   'When you open Tuttiphon, you land on <a class="link" href="#/">For you</a>:':
     'Al abrir Tuttiphon llegas a <a class="link" href="#/">Para ti</a>:',
   '<b>Your mixes</b> – playlists that renew themselves daily, weekly or monthly.':

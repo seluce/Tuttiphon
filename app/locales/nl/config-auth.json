@@ -68,7 +68,6 @@
  "Opus: parallel conversions": "Opus: gelijktijdige conversies",
  "Settings: Opus/original unknown": "Instellingen: Opus/origineel onbekend",
  "Settings: Opus/source format unknown": "Instellingen: Opus/bronformaat onbekend",
- "Settings: the archive folder must be a folder inside the Navidrome folder (e.g. “Archiv”)": "Instellingen: de archiefmap moet een map in de Navidrome-map zijn (bijv. “Archiv”)",
  "Settings: the archive folder must not be the music folder or inside it – the originals there would be converted again": "Instellingen: de archiefmap mag niet de muziekmap zijn of erin liggen – de originelen daar zouden opnieuw worden geconverteerd",
  "Settings: the backup folder must not be inside state/ or backup/ of the data folder – every backup would contain the earlier ones": "Instellingen: de back-upmap mag niet in state/ of backup/ van de datamap liggen – elke back-up zou de eerdere bevatten",
  "Settings: please give the owner as UID:GID, e.g. 1000:1000": "Instellingen: geef de eigenaar op als UID:GID, bijv. 1000:1000",

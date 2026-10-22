@@ -4,6 +4,10 @@ export default {
     'D’abord un profil',
   'The welcome assistant briefly asks what you like to listen to. After that, suggestions and mixes fit you.':
     'L’assistant de bienvenue vous demande brièvement ce que vous aimez écouter. Ensuite, les suggestions et les mix vous correspondent.',
+  'First a person':
+    'D’abord une personne',
+  'There is no person yet. Add one first – every playlist and every profile belongs to a person.':
+    'Il n’y a encore aucune personne. Ajoutez-en d’abord une – chaque playlist et chaque profil appartient à une personne.',
   'Bring everything up to date':
     'Tout mettre à jour',
   'Open the home page':
@@ -638,8 +642,6 @@ export default {
     'Dans le fichier <b>setup-code.txt</b> du dossier de données de Tuttiphon – le dossier <code>config</code> à côté de docker-compose.yaml.',
   'Forgot the password?':
     'Mot de passe oublié ?',
-  'Set in the browser: delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml). A few seconds later this page asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
-    'Défini dans le navigateur : supprimez le fichier <b>admin_password.json</b> dans le dossier <code>state</code> du dossier de données (<code>config/state</code> à côté de docker-compose.yaml). Quelques secondes plus tard, cette page en demande un nouveau – avec un nouveau code de configuration tiré du journal du conteneur. Tout le reste reste tel quel.',
-  'Set in docker-compose.yaml: it is there as <code>TUTTIPHON_ADMIN_PASSWORD</code>.':
-    'Défini dans docker-compose.yaml : il s’y trouve sous <code>TUTTIPHON_ADMIN_PASSWORD</code>.',
+  'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
+    'Supprimez le fichier <b>admin_password.json</b> dans le dossier <code>state</code> du dossier de données (<code>config/state</code> à côté de docker-compose.yaml), puis rechargez cette page. Elle en demande alors un nouveau – avec un nouveau code de configuration tiré du journal du conteneur. Tout le reste reste tel quel.',
 }

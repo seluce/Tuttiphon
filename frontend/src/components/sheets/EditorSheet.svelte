@@ -27,8 +27,9 @@
   import SoundPicker from '../SoundPicker.svelte'
   import { narrowsLibrary } from '../../lib/sound.svelte.js'
   import { S, findPerson, outOfAll, weltIds, changed, snapshot, findStil, findWelt, soundOf, mixWording,
-    creatablePersons, defaultOwner, myPerson, isFamily } from '../../lib/state.svelte.js'
+    creatablePersons, defaultOwner, myPerson, isFamily, isAdmin } from '../../lib/state.svelte.js'
   import { toast, confirmDialog } from '../../lib/overlay.svelte.js'
+  import { go } from '../../lib/router.svelte.js'
   import { api } from '../../lib/api.js'
   import { fmt, plural, clone, uid, today, debounce } from '../../lib/format.js'
   import { SORTS, AUSWAHL, stilOptions, openEditor } from '../../lib/editor.js'
@@ -40,7 +41,9 @@
   function start(x) {
     const q = clone(x || {})
     q.id ??= uid('playlist')
-    q.person ??= defaultOwner()?.id
+    // owner: only someone you may create playlists for – otherwise the default owner, or the first one you may
+    const may = creatablePersons()
+    if (!may.some((o) => o.id === q.person)) q.person = (may.find((o) => o.id === defaultOwner()?.id) || may[0])?.id
     q.welt ??= '*'
     q.stil ??= '*'
     if (!q.rules) {
@@ -83,6 +86,8 @@
   const togetherOptions = $derived(S.config.personen.filter((x) => !x.family))
   /** For whom: the people you may create playlists for – “What everyone likes” stays with the family */
   const owners = $derived(ownerOrder(creatablePersons().filter((x) => !p.together || x.family)))
+  /** saved only for someone you may create playlists for */
+  const ownerOk = $derived(creatablePersons().some((x) => x.id === p.person))
   function toggleTogether(id) {
     const next = p.together.includes(id) ? p.together.filter((x) => x !== id) : [...p.together, id]
     if (next.length >= 2) p.together = next
@@ -98,10 +103,12 @@
 
   foot.save = doSave
   const fresh = untrack(() => isNew)   // “Create” or “Save” as when it was opened – in the current language
+  // a user without a person of their own creates playlists only after the welcome assistant (the server would drop them)
+  const needsProfile = $derived(fresh && !isAdmin() && !myPerson())
   $effect.pre(() => {
     foot.label = fresh ? t('Create playlist') : t('Save')
-    foot.disabled = invalid
-    foot.hint = hint
+    foot.disabled = invalid || (!ownerOk && !needsProfile)
+    foot.hint = ownerOk || needsProfile ? hint : t('There is no person yet. Add one first – every playlist and every profile belongs to a person.')
   })
 
   const set = (k, v) => {
@@ -174,6 +181,8 @@
   let saved = false
   function doSave() {
     if (saved) return   // double click
+    if (needsProfile) { closeSheet(); go('#/willkommen'); return }
+    if (!ownerOk) return
     if (isInvalid()) { hint = t('Please choose a music world or a vibe.'); return }
     if (p.stil && p.stil !== '*' && !findStil(p.stil)) { hint = t('This vibe no longer exists – please choose another one.'); return }
     if (weltIds(p).some((w) => !findWelt(w))) {

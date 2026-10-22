@@ -4,6 +4,10 @@ export default {
     'Primeiro, um perfil',
   'The welcome assistant briefly asks what you like to listen to. After that, suggestions and mixes fit you.':
     'O assistente de boas-vindas pergunta rapidamente o que gosta de ouvir. Depois disso, as sugestões e os mixes ficam à sua medida.',
+  'First a person':
+    'Primeiro uma pessoa',
+  'There is no person yet. Add one first – every playlist and every profile belongs to a person.':
+    'Ainda não existe nenhuma pessoa. Adicione primeiro uma – cada playlist e cada perfil pertence a uma pessoa.',
   'Bring everything up to date':
     'Pôr tudo em dia',
   'Open the home page':
@@ -638,8 +642,6 @@ export default {
     'No ficheiro <b>setup-code.txt</b> na pasta de dados do Tuttiphon – a pasta <code>config</code> ao lado do docker-compose.yaml.',
   'Forgot the password?':
     'Esqueceu-se da palavra-passe?',
-  'Set in the browser: delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml). A few seconds later this page asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
-    'Definida no navegador: elimine o ficheiro <b>admin_password.json</b> na pasta <code>state</code> da pasta de dados (<code>config/state</code> ao lado do docker-compose.yaml). Alguns segundos depois, esta página pede uma nova – com um novo código de configuração do registo do contentor. Tudo o resto fica como está.',
-  'Set in docker-compose.yaml: it is there as <code>TUTTIPHON_ADMIN_PASSWORD</code>.':
-    'Definida no docker-compose.yaml: está lá como <code>TUTTIPHON_ADMIN_PASSWORD</code>.',
+  'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
+    'Elimine o ficheiro <b>admin_password.json</b> na pasta <code>state</code> da pasta de dados (<code>config/state</code> ao lado do docker-compose.yaml) e depois recarregue esta página. Ela pede então uma nova – com um novo código de configuração do registo do contentor. Tudo o resto fica como está.',
 }

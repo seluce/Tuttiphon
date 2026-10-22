@@ -486,8 +486,6 @@ export default {
     'Oprócz kont Navidrome istnieje własny administrator Tuttiphon: wybierz „Administrator lokalny” na stronie logowania i wpisz jego hasło. Ma wszystkie uprawnienia i działa nawet wtedy, gdy Navidrome jest nieosiągalny.',
   'Not set up yet: Tuttiphon only asks for a sign-in once the local administrator has a password. Without it, Tuttiphon can only be reached from its own computer.':
     'Jeszcze nie skonfigurowano: Tuttiphon prosi o zalogowanie dopiero, gdy administrator lokalny ma hasło. Bez niego Tuttiphon jest dostępny tylko z własnego komputera.',
-  'Its password is set in docker-compose.yaml as TUTTIPHON_ADMIN_PASSWORD and can only be changed there.':
-    'Jego hasło jest ustawione w docker-compose.yaml jako TUTTIPHON_ADMIN_PASSWORD i można je zmienić tylko tam.',
   'Current password':
     'Obecne hasło',
   'New password':

@@ -91,7 +91,7 @@
   <Idea {admin} />
 {/snippet}
 
-<div class="page max-w-[920px]">
+<div class="page">
   <PageHead title={t('Help & guide')} eyebrow={t('Help')}>
     <p>{intro[0]}<Icon name="help" size={15} />{intro[1]}</p>
   </PageHead>
@@ -104,7 +104,7 @@
 
   {#if guideHits.length}
     <Section title={words.length ? t('Hands-on guides') : t('What would you like to do?')} icon="sparkles">
-      <div class="grid grid-cols-2 gap-3.5 max-mobile:grid-cols-1">
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-3.5">
         {#each guideHits as g (g.id)}<GuideCard {g} />{/each}
       </div>
     </Section>
@@ -115,7 +115,7 @@
   {/if}
 
   <Section title={t('Reference')} icon="list" class={topicHits ? '' : 'hidden'}>
-    <div class="grid gap-2.5">
+    <div class="grid gap-2.5 items-start min-[1300px]:grid-cols-2">
       {#each topics as tp (tp.id)}
         <Topic id={tp.id} icon={tp.icon} title={tp.title} guides={guidesOf(tp)} flash={flash === tp.id}
           hidden={!topicHit(tp)} open={words.length > 0 || !!open[tp.id]}
@@ -131,7 +131,7 @@
           {#each faqHits as [q, a] (q)}
             <details class="border-b border-line last:border-b-0 py-1" open={words.length > 0}>
               <summary class="cursor-pointer py-2.5 font-[650]">{q}</summary>
-              <p class="text-muted pb-3 leading-[1.6]">{a}</p>
+              <p class="text-muted pb-3 leading-[1.6] max-w-[100ch]">{a}</p>
             </details>
           {/each}
         </div>
@@ -145,7 +145,7 @@
         <dl class="card grid grid-cols-[max-content_minmax(0,1fr)] gap-x-[18px] gap-y-2 m-0 max-mobile:grid-cols-1 max-mobile:gap-0.5">
           {#each glossHits as [term, text] (term)}
             <dt class="font-bold">{term}</dt>
-            <dd class="text-muted m-0 leading-[1.6] max-mobile:mb-2.5">{text}</dd>
+            <dd class="text-muted m-0 leading-[1.6] max-w-[100ch] max-mobile:mb-2.5">{text}</dd>
           {/each}
         </dl>
       </Section>

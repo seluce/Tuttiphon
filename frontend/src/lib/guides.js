@@ -29,7 +29,10 @@ function context() {
   }
 }
 
-const noProfile = () => ({ go: '#/willkommen', title: t('First a profile'), text: t('The welcome assistant briefly asks what you like to listen to. After that, suggestions and mixes fit you.') })
+/** No profile to show: users get the welcome assistant – administrators (no person at all yet) adding a person */
+const noProfile = (admin) => (admin
+  ? { go: '#/person/neu', title: t('First a person'), text: t('There is no person yet. Add one first – every playlist and every profile belongs to a person.') }   // i18n-ignore: route
+  : { go: '#/willkommen', title: t('First a profile'), text: t('The welcome assistant briefly asks what you like to listen to. After that, suggestions and mixes fit you.') })
 
 export const GUIDES = translated(() => [
   {
@@ -99,7 +102,7 @@ export const GUIDES = translated(() => [
     title: t('Make suggestions better'),
     short: [t('Open my profile'), t('Add what was recognized with “+”'), t('Add favorites and dislikes')],
     keys: t('profile preferences favorites favorite bands favorite worlds recommendations taste listening'),
-    steps: (c) => !c.profile ? [noProfile()] : [
+    steps: (c) => !c.profile ? [noProfile(c.admin)] : [
       { go: c.profile, sel: ['[data-guide=taste]'], optional: true, title: c.admin ? t('From listening') : t('From your listening'),
         text: c.admin ? t('Tuttiphon recognizes from what is played in Symfonium which music people like. “+” turns it into a favorite.')
           : t('Tuttiphon recognizes from what you play in Symfonium which music you like. “+” turns it into a favorite.') },
@@ -124,7 +127,7 @@ export const GUIDES = translated(() => [
     short: [t('Band or genre under “Dislikes”'), t('Rate the song 1 star in Symfonium'), t('What you skip comes less often')],
     keys: t('hide block ban never dislike star skip annoying'),
     steps: (c) => [
-      ...(c.profile ? [{ go: c.profile, sel: ['[data-guide=dislikes]'], title: t('Dislikes'), text: t('Bands and genres here never end up in the playlists – whatever the music world or mood.') }] : [noProfile()]),
+      ...(c.profile ? [{ go: c.profile, sel: ['[data-guide=dislikes]'], title: t('Dislikes'), text: t('Bands and genres here never end up in the playlists – whatever the music world or mood.') }] : [noProfile(c.admin)]),
       { title: t('Single songs'), text: t('Rate a song 1 star in Symfonium. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.') },
     ],
   },
@@ -147,7 +150,7 @@ export const GUIDES = translated(() => [
     title: t('Turn on kid-safe mode'),
     short: [t('Open the profile'), t('“Leave out songs with explicit lyrics”'), t('Applies to all playlists and mixes')],
     keys: t('kids rude swear words explicit parental clean lyrics'),
-    steps: (c) => !c.profile ? [noProfile()] : [
+    steps: (c) => !c.profile ? [noProfile(c.admin)] : [
       { go: c.profile, sel: ['[data-guide=kinderschutz]'], title: t('Kid-safe mode'),
         text: c.admin ? t('Turn it on per person – for a child, or for the family when the kids listen to its playlists. Detected from the lyrics.')
           : t('Turn it on, and songs with explicit lyrics stay out of all your playlists and mixes. Detected from the lyrics.') },
@@ -164,7 +167,7 @@ export const GUIDES = translated(() => [
     steps: (c) => c.admin ? [
       { go: '#/einstellungen/benachrichtigungen', sel: ['[data-guide=notify]'], title: t('Turn on'), text: t('Turn on notifications and tap “Turn on for this device” on the phone. Alternatively it also works via ntfy.') },
       { title: t('For everyone'), text: t('Each person turns on their devices in the profile under “To your phone” and gets news from their favorite bands, what is new for them each Monday and their monthly recap there.') },
-    ] : !c.profile ? [noProfile()] : [
+    ] : !c.profile ? [noProfile(c.admin)] : [
       { go: c.profile, sel: ['[data-guide=push]'], title: t('On this device'), text: t('Open Tuttiphon on the phone, tap “Turn on for this device” and allow notifications.') },
       { title: t('Done'), text: t('Then news from your favorite bands, what is new for you each Monday and your monthly recap come to your phone. If you prefer the ntfy app, open “Or via the ntfy app” below and enter a topic.') },
     ],

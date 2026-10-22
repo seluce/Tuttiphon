@@ -240,8 +240,6 @@ export default {
     'Le mot de passe enregistré ne fonctionne plus – il a probablement été changé dans Navidrome. Saisissez le nouveau pour que vos statistiques et vos étoiles continuent de fonctionner.',
   'Save new password':
     'Enregistrer le nouveau mot de passe',
-  'The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).':
-    'Le mot de passe de l’administrateur local est défini dans docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).',
   'The local administrator has no Navidrome account of its own.':
     'L’administrateur local n’a pas de compte Navidrome à lui.',
   'Turned on':
@@ -450,12 +448,8 @@ export default {
     'Si de nombreux titres d’un groupe partagent le plus grand nombre d’étoiles, les plus populaires reçoivent une étoile de plus. Ainsi, Symfonium trie correctement les titres phares. Prend effet à la prochaine exécution.',
   'Refresh every night':
     'Actualiser chaque nuit',
-  'Checks {n} songs on Deezer again every night in the time window of the night analysis, first those rated with the older, less accurate search. After that always the ones unchecked the longest – so the stars stay up to date.':
-    'Revérifie chaque nuit {n} titres sur Deezer dans la plage horaire de l’analyse nocturne, d’abord ceux notés avec l’ancienne recherche, moins précise. Ensuite, toujours ceux qui n’ont pas été vérifiés depuis le plus longtemps – ainsi les étoiles restent à jour.',
-  'Checked with the accurate search: {done} of {total} songs · {top} top tracks highlighted.':
-    'Vérifiés avec la recherche précise : {done} titres sur {total} · {top} titres phares mis en avant.',
-  'Checked with the accurate search: {done} of {total} songs.':
-    'Vérifiés avec la recherche précise : {done} titres sur {total}.',
+  'Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.':
+    'Revérifie chaque nuit {n} titres sur Deezer dans la plage horaire de l’analyse nocturne – toujours ceux qui n’ont pas été vérifiés depuis le plus longtemps, ainsi les étoiles restent à jour.',
   'Who gets stars?':
     'Qui reçoit des étoiles ?',
   'No accounts yet – create them under People first.':

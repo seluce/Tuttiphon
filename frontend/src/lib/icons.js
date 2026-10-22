@@ -161,23 +161,12 @@ export const MOTIFS = ['teddy', 'baby', 'swords', 'tree', 'clover', 'skull', 'gh
   'footprints', 'bed', 'moon', 'sun', 'flower', 'leaf', 'snowflake', 'xmas', 'calendar', 'star', 'heart', 'new', 'repeat', 'home', 'user',
   'users', 'smile', 'cat', 'crown', 'rocket', 'sparkles', 'globe', 'compass', 'trophy', 'flame']
 
-/** Older data still contains emojis – they are mapped to matching icons. */
-export const EMOJI_ICON = {
-  '🧸': 'teddy', '⚔️': 'swords', '⚔': 'swords', '🌲': 'tree', '☘️': 'clover', '☘': 'clover', '🤘': 'skull', '🦇': 'ghost', '💃': 'party',
-  '🎤': 'mic', '🎙️': 'mic', '🎪': 'tent', '🇩🇪': 'flag', '🎧': 'headphones', '🎸': 'guitar', '🎹': 'piano', '🎻': 'notes', '🎼': 'notes',
-  '🌙': 'moon', '🪩': 'disco', '⚡': 'zap', '🎮': 'gamepad', '🪕': 'campfire', '🎷': 'waves', '🌴': 'palm', '🎺': 'party', '🕺': 'footprints',
-  '😴': 'bed', '☀️': 'sun', '☀': 'sun', '🐣': 'flower', '🏮': 'leaf', '🍂': 'leaf', '🎃': 'ghost', '❄️': 'snowflake', '❄': 'snowflake',
-  '🎄': 'xmas', '🗓️': 'calendar', '📻': 'radio', '📼': 'cassette', '💿': 'disc', '📀': 'player', '📱': 'smartphone', '⭐': 'star',
-  '❤️': 'heart', '❤': 'heart', '🆕': 'new', '🔁': 'repeat', '🏠': 'home', '🎵': 'music', '🎶': 'music', '🙂': 'smile', '👶': 'baby',
-  '🐱': 'cat', '👑': 'crown', '🚀': 'rocket', '🌍': 'globe', '🔀': 'sparkles', '✨': 'sparkles', '🔥': 'flame',
-}
-
 /**
- * Which icon does a value show? "i:teddy" → teddy, icon name → the same, old emoji → mapped.
+ * Which icon does a value show? "i:teddy" → teddy, icon name → the same.
  * Returns null if there is no icon (then the value is shown as text/emoji).
  */
 export function glyphName(value) {
   if (typeof value !== 'string' || !value) return null
-  const name = value.startsWith('i:') ? value.slice(2) : hasIcon(value) ? value : EMOJI_ICON[value]
+  const name = value.startsWith('i:') ? value.slice(2) : value
   return name && hasIcon(name) ? name : null
 }

@@ -16,7 +16,7 @@ import re
 import shutil
 
 from . import mixer, rules
-from .config import (BACKUP_DIR, MARKER, STATE_DIR, load_config, paths, plain_playlist_file, read_text, slug,
+from .config import (BACKUP_DIR, DEFAULT_PLAYLIST_DIR, MARKER, STATE_DIR, load_config, paths, plain_playlist_file, read_text, slug,
                      write_atomic)
 from .i18n import N_, _, _s
 from .navidrome import Navidrome, NavidromeError, native_session
@@ -26,8 +26,6 @@ MANAGED_FILE = STATE_DIR / "managed_playlists.json"
 MONTHS = [N_("Jan"), N_("Feb"), N_("Mar"), N_("Apr"), N_("May"), N_("Jun"), N_("Jul"), N_("Aug"), N_("Sep"),
           N_("Oct"), N_("Nov"), N_("Dec")]
 
-
-DEFAULT_PLAYLIST_DIR = "00_SmartPlaylists"
 
 
 def playlist_dir(cfg):
@@ -54,13 +52,24 @@ def read_nsp(path):
 
 
 def load_managed():
+    """The files Tuttiphon wrote: {"current": {file: playlist id}, "ever": [file, …]}. Briefly not readable (NAS): the
+    OSError stops the run – an empty list would make the own files look foreign. A damaged one is set aside
+    (managed_playlists.defekt-<time>.json)."""
     try:
         data = json.loads(read_text(MANAGED_FILE))
-    except (FileNotFoundError, ValueError):
+    except FileNotFoundError:
         data = {}
-    if "current" not in data:   # old format {file: name}
-        data = {"current": {f: None for f in data}, "ever": sorted(data)}
-    return data
+    except ValueError:
+        from . import events
+        broken = MANAGED_FILE.with_name(f"managed_playlists.defekt-{dt.datetime.now():%Y%m%d-%H%M%S}.json")   # file name: data
+        os.replace(MANAGED_FILE, broken)
+        events.say(_s("⚠ {file} was damaged – set aside as {name}.", file=MANAGED_FILE.name, name=broken.name))
+        data = {}
+    data = data if isinstance(data, dict) else {}
+    current = data.get("current") if isinstance(data.get("current"), dict) else {}
+    ever = data.get("ever") if isinstance(data.get("ever"), list) else []
+    return {"current": {f: v for f, v in current.items() if isinstance(f, str)},
+            "ever": [f for f in ever if isinstance(f, str)]}
 
 
 def save_managed(data):

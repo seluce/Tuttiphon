@@ -45,7 +45,7 @@ frontend/
 | `state.svelte.js` | shared state `S`, saving/undo, loading, runs (see below) |
 | `overlay.svelte.js` | side sheet, dialog, toast (`openSheet`, `modal`, `confirmDialog`, `toast`) |
 | `router.svelte.js` | hash router: `route`, `go()`, `rerender()`, `params()`, `syncRoute()` |
-| `icons.js` | icon names → Lucide; motifs for music worlds/vibes/people; old emojis → icon |
+| `icons.js` | icon names → Lucide; motifs for music worlds/vibes/people; `glyphName()` (`i:<name>` or an icon name → icon) |
 | `playlist.js` | `plName()`, `plEmoji()`, `plDescribe()`, states `STATE` |
 | `format.js` | numbers, times, `uid()`, `slug()`, gradients for placeholders |
 | `theme.js` | theme light/dark/system (`localStorage` `tuttiphon-theme`) |
@@ -113,7 +113,7 @@ link) replaces it, so “back” afterwards leads to the page before. The steps 
 | Route | Page | Who |
 |---|---|---|
 | `#/` | `Start.svelte` (administrator) or `Home.svelte` (“For you”) | everyone |
-| `#/willkommen` | `Welcome.svelte` – assistant that creates the person of an account without one | everyone with a Navidrome account |
+| `#/willkommen` | `Welcome.svelte` – assistant that creates the person of an account without one | everyone with a Navidrome account; the local administrator (no Navidrome account) is sent on to `#/personen` |
 | `#/einrichtung` | `Setup.svelte` – setup assistant, see [Setup assistant](#setup-assistant) | administrator |
 | `#/playlists`, `#/playlist/<id>` | overview, detail page | everyone (users: their own + the family's) |
 | `#/neu?person=…&welt=…&stil=…&type=…&step=…` (from the search also `mood=…`, `instr=…`, `theme=…`, `name=…`, `every=day\|week\|month`) | `Wizard.svelte` – see [Assistant](#assistant-new-playlist) | everyone |
@@ -165,7 +165,7 @@ boundary is drawn by the server, which doesn't send admin data to users in the f
 
 | Field | Source | Kind |
 |---|---|---|
-| `S.me` | `/api/me` | who is signed in, role, own person (`own`: `[id]` or `[]`) |
+| `S.me` | `/api/me` | who is signed in, role, own person (`own`: its id or `null`) |
 | `S.config` | `/api/config` | **deeply reactive** – pages change objects directly |
 | `S.status`, `S.library`, `S.pl`, `S.history` | `/api/status`, `/api/library`, `/api/playlists`, `/api/history` | only ever replaced as a whole |
 | `S.task`, `S.auto`, `S.running`, `S.logLines` | `/api/task` | current run, auto-apply, live log |
@@ -190,8 +190,9 @@ code isn't empty, the password has at least 8 characters and both are the same; 
 sign-in. As long as Navidrome is not connected (`{"navidrome": false}`), it opens straight as the local administrator
 with a hint and without the switch to the normal sign-in. In both cases the setup assistant takes over after signing
 in. In the mode of the local administrator, “Forgot the password?” (a `<details>`) explains the reset: delete
-`config/state/admin_password.json` (then the setup with a new code follows), or look it up in `docker-compose.yaml`
-when it comes from there. The help has the same two answers in the administrators' questions (`help/texts.js`).
+`config/state/admin_password.json`, then reload the page – it then asks for a new password with a new setup code from
+the container log; everything else stays. The help has the same answer in the
+administrators' questions (`help/texts.js`).
 
 **Undo.** Before a change `snapshot()`, afterwards `toast('…', { undo: true })`. The button restores the previous state,
 closes open overlays (which would otherwise keep working on old objects) and saves. The toast disappears by
@@ -292,16 +293,16 @@ sections by `settings.start.sections` ([Data model](02-data-model.md#home-page))
 | Header | date, greeting with first name, number of own playlists and mixes, songs in the library; “New playlist”, “Discover”. Without own playlists, a sentence about what will appear here |
 | Next steps | only if there are any: entries from `GET /api/inbox` (profile, preferences – only as long as Tuttiphon doesn't already know the taste from listening, `taste.profile()` with `enough` –, first playlist, password); “later” adds them to `ignored`. Without an own playlist, “Your first playlist” is left out – “Let’s go” covers that |
 | Let’s go | only without an own playlist, instead of “Your mixes” and “Your own playlists”: a sentence about mixes and up to three mix suggestions to tap – no buttons of its own, “New playlist” and “Discover” are in the header |
-| Your mixes | as soon as there are own playlists: the own mixes (`TodayRow`); without a mix, a row with mix suggestions and “Create your own mix” |
-| Discovered for you | up to 6 suggestions for your own person and – if you may create them – the family (`GET /api/suggestions`, without hidden and shared ones) as `pages/home/IdeaCard.svelte`; without suggestions the section is left out |
+| Your mixes | as soon as there are own playlists: the active mixes of your own person only – not the family's, those are under “Family playlists” (`TodayRow`); without a mix, a row with mix suggestions and “Create your own mix” |
+| Discovered for you | up to 6 suggestions for your own person (`GET /api/suggestions`, without hidden and shared ones) as `pages/home/IdeaCard.svelte`; without suggestions the section is left out |
 | Your week | recap of the week for the own person (`GET /api/rueckblick`). Left out without an own person and without a password as long as “Next steps” shows “Turn on statistics & stars”; otherwise “Turn on stats” there |
 | Your playlists | the active playlists of your own person – only if there are any |
 | Family playlists | the family's active playlists – only if there are any: “For the whole family – everyone hears them in Symfonium”, and either “you can change them here too” (`canEdit()`) or “With “Copy for me” you get your own version” (`settings.familyEdit: "admins"`) |
 | New in your library | new albums (`GET /api/home`); albums by favorite bands from the last 45 days first, with the “Favorite band” badge (`AlbumCard`, field `fav`) – the same on the administrators' home page |
 | How it works | tip cards, only as long as there is no own playlist – your taste, Symfonium, and “Who sees what”: your playlists are just for you, the family playlists are for everyone |
 
-The mix suggestions in “Let’s go” and “Your mixes” (`mixIdeas`, up to three) leave out the ones “Discovered for you”
-already shows as a card – no suggestion appears twice. Links to whole lists read “See all →” (“Discovered for you” →
+The mix suggestions in “Let’s go” and “Your mixes” (`mixIdeas`, up to three, for your own person) leave out the ones
+“Discovered for you” already shows as a card – no suggestion appears twice. Links to whole lists read “See all →” (“Discovered for you” →
 `#/entdecken`, “Your playlists” → `#/playlists`).
 
 **The administrators' home page** (`Start.svelte`): “Today for you” shows the mixes (`TodayRow`); without a mix, one
@@ -320,7 +321,9 @@ and already offers “Rate now” for the new songs (note `deezer-…`).
 
 `pages/Discover.svelte` (`#/entdecken`): ready-made suggestions per person, new music worlds, “You might also like –
 not in your library yet” (administrators: “You might still be missing”, `discover/Missing.svelte`) and, folded, the
-table of all music world × vibe combinations (`discover/Matrix.svelte`, computed only when first unfolded).
+table of all music world × vibe combinations (`discover/Matrix.svelte`, computed only when first unfolded; a tap on a
+cell opens the editor for a new playlist of `defaultOwner()` – a user without a person of their own goes to the
+welcome assistant instead).
 
 **Person filter** (administrators, as soon as there is more than one person): a row All | you | the family | the
 other people (`ownerOrder()` in `lib/playlist.js`). It starts on `defaultOwner()` – your own person, otherwise the
@@ -395,7 +398,9 @@ band and cover to the Media Session (lock screen and headphone buttons on the ph
 The **song window** (`components/sheets/SongSheet.svelte`, `openSong(track)`) shows the row from the list right away
 and loads the rest from `GET /api/song`: cover, title, band (opens the band window), album, year, length; “Play”
 or “Pause”; “More like this” (`GET /api/song/more`) – similar songs play after this one (`continueWith()`), the list
-is shown in the window, “Keep as radio mix” creates a radio of the band (`startRadio()`); tempo with its source (`bpmSource`: “96 BPM · AI” or
+is shown in the window, “Keep as radio mix” creates a radio of the band (`startRadio()` in `lib/artist.js`: for
+`defaultOwner()`, or opens the existing one; without anyone to create it for, users go to the welcome assistant and an
+administrator – when there is no person at all – to “Add person”, `#/person/neu`); tempo with its source (`bpmSource`: “96 BPM · AI” or
 “· measured”, the tooltip says more), key with its Camelot code (`keyName()`: “A minor · 8A”, German “a-Moll · 8A”; with
 a `keyStrength` below 0.5 – mixes ignore such keys – “· uncertain”), moods, genres and, in a line of their own,
 “Instruments: …” and “Themes: …” with the labels from the server – each only if the song has it;
@@ -449,7 +454,7 @@ One person per Navidrome account; the family is an optional person with an accou
   a dashed card **“Set up the family”** explains that Tuttiphon creates a Navidrome account for the family, that its
   playlists are for everyone and that shared devices (car, kitchen tablet) can play them in Symfonium.
 - Then **one card per person** (account, number of active playlists, password stored or missing, favorite worlds) and
-  the dashed card “Add person”. No default pill, no public/private.
+  the dashed card “Add person”.
 
 **Set up the family** (`pages/personen/FamilySetup.svelte`, a sheet): name (prefilled with the translated “Family”)
 and account name (follows the name – letters without accents, digits, `.`, `_`, `-` – until it is edited). “Set up the
@@ -459,8 +464,8 @@ Symfonium; nobody signs in to Tuttiphon with it – and reloads the configuratio
 
 **Add person** (`pages/personen/NewPerson.svelte`, `#/person/neu`): Who? (name, icon, color) → Navidrome (only accounts
 without a person – never the family's; “Every Navidrome account already has a person.” otherwise, with a link to
-Navidrome; optional password with “Test”; name prefix) → favorite worlds → vibes → matching playlists. There is no
-visibility step. Users on `#/person/neu` go to the welcome assistant instead.
+Navidrome; optional password with “Test”; name prefix) → favorite worlds → vibes → matching playlists. Users on
+`#/person/neu` go to the welcome assistant instead.
 
 ### Profile
 
@@ -470,10 +475,10 @@ visibility step. Users on `#/person/neu` go to the welcome assistant instead.
    (“Playlists only for you”, for others “Playlists private”, for the family “Playlists for everyone”), the pill “Child
    profile”, for the own profile “Statistics on” or “Turn on statistics” (→ Settings → My account), for others
    “Password stored” or “Password missing – enter it”; “New playlist” and “Suggestions”.
-2. **From your listening** (`TasteCard`, only with a Navidrome account – see below).
+2. **From your listening** (`TasteCard`, see below).
 3. **What you like to hear** (in the administrator's view of a person: “Preferences”): favorite music worlds as compact toggles like the vibes
-   (`LikedWelten` with `compact`), favorite vibes (`StilToggles`), favorite bands (`ArtistChips`); with a Navidrome
-   account and while the plugin is in use (`status.plugin`) also “New songs in the queue” (`Seg`: Never / Now and
+   (`LikedWelten` with `compact`), favorite vibes (`StilToggles`), favorite bands (`ArtistChips`); while the plugin
+   is in use (`status.plugin`) also “New songs in the queue” (`Seg`: Never / Now and
    then / Often = `newEvery` 0 / 5 / 3, missing counts as 5).
 4. **Dislikes**: bands and “Genre contains”.
 5. **Kid-safe mode** and **To your phone** side by side (see below).
@@ -481,14 +486,14 @@ visibility step. Users on `#/person/neu` go to the welcome assistant instead.
    current one –, for the family its account with a hint instead (for everyone, shared devices, nobody signs in to
    Tuttiphon with it); “Delete person” / “Delete family”: the confirmation says how many playlists are deleted too –
    for the family also that its Navidrome account stays and can be removed in Navidrome –; the playlists go, members
-   of “What everyone likes” lose the person, “Undo” in the toast) next to the folded **Appearance** (name, icon, color
-   – rarely changed). There is no default person and no visibility per person any more.
+   of “What everyone likes” lose the person, a list in `deezer.users` loses the account (`dropStars()`), “Undo” in the
+   toast) next to the folded **Appearance** (name, icon, color
+   – rarely changed).
 7. The person's playlists.
 
 ### Profile: “From your listening”
 
-`components/TasteCard.svelte` is in the profile (`pages/personen/Profile.svelte`) of every person with a Navidrome
-account and loads `GET /api/taste?person=…` (prop `me`: `?me=1`). With enough listening: music worlds with bars and
+`components/TasteCard.svelte` is in the profile (`pages/personen/Profile.svelte`) of every person and loads `GET /api/taste?person=…` (prop `me`: `?me=1`). With enough listening: music worlds with bars and
 share – per world “+ Remember” (as a favorite world; afterwards “✓ Favorite world”) –, the most-played bands as chips
 (“+” adds one as a favorite band, tapping the name opens the band window), moods and styles. “Add all” next to the
 heading (on the phone below the text) adds worlds from 8% and the five most-played bands to `likes`; it is only shown
@@ -496,7 +501,8 @@ while something of that is still missing. For the own person addressed as “you
 “From <name>’s listening”. With a [sound taste](06-intelligence.md#sound-taste-appsoundtastepy) (`sound: true`) the
 explanation below the heading ends with “Also learns from the sound of what you play.” (others: “… of what <name>
 plays.”). With too little listening a hint; without a stored password a hint as well (own profile:
-“Turn on →” to Settings → My account); without an account nothing.
+“Turn on →” to Settings → My account); with `me` and no account (`hasAccount: false`, the local administrator)
+nothing.
 
 Below it, for every person except the family, the card **“Not part of your taste”**
 (`pages/personen/TasteExclude.svelte`, others: “Not part of <name>’s taste”): toggles for the separate music worlds
@@ -507,7 +513,8 @@ others; a world picked there stays visible after switching it off, until the pag
 ### Profile: kid-safe mode and “To your phone”
 
 Under “Dislikes” there are two cards: **Kid-safe mode** turns on `person.clean` (“Leave out songs with explicit
-lyrics”), **To your phone** – only if `settings.notify.enabled`, not for the family (nobody signs in with its account) – shows `components/PushDevice.svelte` in your own profile
+lyrics”) – for users the switch is locked once it is on (`cleanLocked`; the text says the administrator can turn it
+off), as the server keeps a stored `clean: true` anyway –, **To your phone** – only if `settings.notify.enabled`, not for the family (nobody signs in with its account) – shows `components/PushDevice.svelte` in your own profile
 (turn this device on and off, “Send test”) and below it, collapsed, “Or via the ntfy app”: your own
 ntfy topic `person.push` with “Send test” (`POST /api/notify/test` with `person`). Another person's profile shows
 only the ntfy topic, because everyone registers their devices themselves. Administrators find a second switch in
@@ -529,7 +536,7 @@ are buttons:
 | one you may change (`canEdit()`), active | “Edit”, for mixes (not recaps) “Reshuffle” | Cover, Pause playlist, “Keep this mix” (mix) or “Save as fixed playlist” (smart playlist) – both `snapshotMix()` → `POST /api/snapshot` ([Playlists](04-playlists.md#keep-this-mix-snapshot)) –, Duplicate, Open in Navidrome, Move to trash |
 | one you may change, paused | “Reactivate”, “Edit”, trash icon | – |
 | in the trash | “Restore”, “Delete permanently” | – |
-| the family's while only administrators may change it (`settings.familyEdit: "admins"`) | “Copy for me”, “Open in Navidrome”; a note: “Only administrators change the family’s playlists – with “Copy for me” you get your own version.” | – |
+| the family's while only administrators may change it (`settings.familyEdit: "admins"`) | “Copy for me” (`duplicate()`: the copy belongs to `defaultOwner()`; a user without a person of their own goes to the welcome assistant first), “Open in Navidrome”; a note: “Only administrators change the family’s playlists – with “Copy for me” you get your own version.” | – |
 
 For mixes with `usage` (playlists you may change, administrators) the page shows the card **“Is it listened to?”** next to “How
 it is made”: “Listened to on 5 of the last 12 days – 18 % of their songs played.” (weeks, months accordingly), the last
@@ -559,7 +566,9 @@ Family. Paused playlists and the trash list only those you may change (`canEdit(
 
 ### Assistant: “New playlist”
 
-`pages/Wizard.svelte` (`#/neu`): for whom (only when `creatablePersons()` offers more than one – administrators everyone,
+`pages/Wizard.svelte` (`#/neu`): a user without a person of their own is sent on to the welcome assistant right away
+(`replace('#/willkommen')`; “Create playlist” would lead there too) – the server keeps no playlists without one. Then:
+for whom (only when `creatablePersons()` offers more than one – administrators everyone,
 users their own person and the family unless `settings.familyEdit` is `admins`; the header then says “four steps”
 instead of “three”; without a choice the owner is `defaultOwner()`) → music world → vibe → finishing touches with the
 preview (`pages/wizard/StepFinish.svelte`); “Create playlist” saves it with `source: "assistent"` and
@@ -598,6 +607,10 @@ for you”, and with
 new?” instead of music world and vibe, for `together` instead of the type the choice of whose taste counts (“What
 everyone likes – whose taste counts?”: the people other than the family, at least two – only on a playlist of the
 family).
+
+A user without a person of their own who opens the editor for a new playlist (e.g. from the music world × vibe table)
+gets “Create playlist” all the same; it closes the sheet and leads to the welcome assistant – the server would drop the
+playlist (`needsProfile`).
 
 **For whom?** (`EditorSheet`, only when `creatablePersons()` offers more than one person): the owner, with a hint –
 the family: “For the whole family – everyone sees it in Navidrome and Symfonium” plus who may change it
@@ -654,8 +667,7 @@ Every entry has an icon and a short description (Conversion: “FLAC → Opus”
 
 - **Signed in**: picture, name, “Navidrome account “<user>” · <role>” and “Sign out” with the logout icon; below it a
   hint that the password is changed in Navidrome. For the local administrator the role line reads “Local administrator
-  with all rights” and the hint says that its password is changed under Settings → Users & permissions – or, with
-  `env.adminPassword` `"env"`, that it is set in `docker-compose.yaml` (`TUTTIPHON_ADMIN_PASSWORD`).
+  with all rights” and the hint says that its password is changed under Settings → Users & permissions.
   With sign-in turned off, a card “Sign-in” explains instead that it turns on once the local administrator has a
   password, with a link to Settings → Users & permissions.
 - **Statistics & stars**: without a stored password, a password field and “Turn on” (`POST /api/me/password`, verified
@@ -673,13 +685,13 @@ such, without a role to choose (nobody signs in with it). The role texts: users 
 own playlists and profile and listen to the family playlists – and change them unless only administrators may. Below
 it **“Family playlists – who may change them?”**: `Seg` “Everyone” / “Administrators only” →
 `settings.familyEdit`, then `changed()`. Then the card “Local administrator” – with sign-in on, how to sign in as local administrator; without, that sign-in
-starts once it has a password. Below it `pages/settings/AdminPassword.svelte`, by `env.adminPassword`:
+starts once it has a password. Below it `pages/settings/AdminPassword.svelte`, by `env.auth`:
 
-| Source | Shows |
+| State | Shows |
 |---|---|
-| `"env"` | only a note that the password is set in `docker-compose.yaml` as `TUTTIPHON_ADMIN_PASSWORD` and can only be changed there |
-| `"stored"` | “Current password”, “New password”, “Repeat password”, button “Change password”; a hint that only a fingerprint is kept and how to reset a forgotten one (delete `admin_password.json`, then the setup code) |
-| `""` (none yet, e.g. the PC without sign-in) | “Password of the local administrator”, “Repeat password”, button “Set password”; the hint that everyone then signs in |
+| set (`env.auth` true) | “Current password”, “New password”, “Repeat password”, button “Change password”; a hint that only a fingerprint is kept and how to reset a forgotten one (delete `admin_password.json`, then the setup code) |
+| not set (e.g. the PC without sign-in) | “Password of the local administrator”, “Repeat password”, button “Set password”; the hint that everyone then signs in |
+| status not loaded yet (or it failed) | the fields and the button disabled – until `S.status.env` is there it is unknown whether a password is set, so the card never offers “Set password” where one exists |
 
 The form checks beforehand (current password entered, at least 8 characters, both the same), then sends
 `POST /api/admin-password`. After a change a toast “Password changed ✓” appears and the status is reloaded; after
@@ -687,6 +699,14 @@ setting the first password the page reloads – sign-in is on from then on, and 
 browser in as local administrator.
 
 ### Settings → Deezer stars
+
+`pages/settings/Deezer.svelte`. “From popularity to stars”: the five rank levels and, from `GET /api/deezer/ranks`, how
+the songs with a known Deezer rank spread over the star counts with these levels; while no song has a rank yet, only
+“No numbers yet – they appear with the first run.”, without bars. “Who gets stars?” has one switch per account from
+`starAccounts()` (`pages/personen/shared.js`): every person's account – the family's too – plus accounts still in
+`deezer.users` without a person, so a switched-off one can be switched on again; an account without a stored password
+(`S.status.env.users[].ok`) shows a lock. Switching one (`toggleStars()`) turns `deezer.users` into a list; deleting a
+person removes their account from such a list (`dropStars()` in `Profile.svelte`). The setup step uses the same switches.
 
 Whether stars given by hand are overwritten is set only here: permanently with “Overwrite stars given by hand” (card
 “Who gets stars?”, `deezer.overwriteManual`) or – while that is off – once with the switch “also overwrite stars given
@@ -758,7 +778,7 @@ one card (`pages/settings/Card.svelte`) with a short explanation and the rows of
 | Conversion (`setup/StepConvert.svelte`) | Off / Opus (“smallest files, ideal for Android”, with `bitrate`) / AAC (“for iPhone, iPad and Mac”, with `aacBitrate`); when on: what is converted (the lossless files in the music folder – the first run everything, then new ones) and the check of equal length, files waiting (`GET /api/opus/info`), the original: to the archive (with path and state of the archive folder from `S.status.paths.archive`: reachable, read-only, missing), keep, delete (asks first and shows a warning) | `opus.enabled`, `codec`, `original` |
 | Lyrics (`setup/StepLyrics.svelte`) | search on/off; with search: also plain text, LRCLIB and NetEase (at least one stays on), replace plain text later; delete duplicate `.txt` | `lyrics.fetch`, `savePlain`, `providers`, `upgradePlain`, `cleanup` |
 | Understand music (`setup/StepMusic.svelte`) | sound analysis on/off; AI only when `GET /api/intel` reports it as available, otherwise one note – the server's reason (`ml.reason`, e.g. Essentia or the models missing) or “not installed here – part of the Docker image”; the depth tiles with their time estimate (`pages/settings/Depth.svelte` with its own `onchange`); audio fingerprints (with a note without `fpcalc`); night analysis with its time window (start ≠ end; the nightly Deezer refresh and the weekly cover search run in it too) | `analysis.enabled`, `ml`, `depth`, `fingerprints`, `night` |
-| Deezer stars (`setup/StepDeezer.svelte`) | why (top tracks in Symfonium, “Only the hits”), on/off, whose accounts (`S.status.env.users`), stars given by hand: keep (default) or overwrite (with a warning) | step `deezer` in `pipeline`, `deezer.users`, `deezer.overwriteManual`; only when the switch was changed also `deezer.refresh` and `watch.deezer` |
+| Deezer stars (`setup/StepDeezer.svelte`) | why (top tracks in Symfonium, “Only the hits”), on/off, “Who gets stars?” (every person's account, `starAccounts()` as in Settings → Deezer stars; a lock for one without a password from `S.status.env.users`), stars given by hand: keep (default) or overwrite (with a warning) | step `deezer` in `pipeline`, `deezer.users`, `deezer.overwriteManual`; only when the switch was changed also `deezer.refresh` and `watch.deezer` |
 | Automation (`setup/StepAutomation.svelte`) | daily refresh off / playlists / everything with its time, folder watch with its interval | `dailyMode`, `dailyAt`, `watch.enabled`, `watch.interval` |
 | Summary (`setup/StepSummary.svelte`) | one row per step with “Change”, the switch “Start the first run now” (only with a connection; lists the steps that will run) | – |
 
@@ -806,7 +826,7 @@ Above it, administrators find the card “Setup assistant” ([Setup assistant](
   bars (`.stepper`) that don't fit scroll sideways instead of wrapping; `showChosen` keeps the chosen option in view
   ([Attachments](#attachments)).
 - **Icons** via `<Icon name>`; music worlds, vibes and people store their icon as `"i:name"` in
-  `config.json` – `<Glyph value>` shows it (older emojis are translated). If a name is missing, it is added as a Lucide import
+  `config.json` – `<Glyph value>` shows it (`i:<name>` or an icon name; anything else as text). If a name is missing, it is added as a Lucide import
   in `lib/icons.js`; new motifs also go into `MOTIFS`.
 
 ## App, tour, help
@@ -841,17 +861,22 @@ Above it, administrators find the card “Setup assistant” ([Setup assistant](
   above or, on the phone, at the bottom edge. `reset: true` rebuilds the step's page even when it is already open (the
   assistant then starts from scratch instead of in a half-filled draft). `optional: true` skips a step without a
   target; a required target that doesn't appear shows the hint centered. A tap on the highlighted target ends the guide and triggers the target.
-  Guides don't count as a seen tour. The targets carry `data-guide="…"` (`taste`, `likes`, `dislikes`,
+  Guides don't count as a seen tour. A guide that needs a profile (taste, likes, dislikes …) has, without one, a
+  single step instead (`noProfile()`): users without a person of their own to the welcome assistant (“First a
+  profile”), an administrator – when there is no person at all; otherwise `defaultOwner()` stands in – to “Add person”
+  (“First a person”). The targets carry `data-guide="…"` (`taste`, `likes`, `dislikes`,
   `sichtbar`, `pl-actions`, `anlegen`, `vorschlag`, `update`, `welt-neu`, `person-neu`, in the settings via
   `<Card guide>`: `rechte`, `passwoerter`, `schritte`, `watch`, `statistik`, `einfuehrung`, `notify`, `kinderschutz-liste`;
   in the profile `kinderschutz`, `push`) or existing classes
   (`.stepper`, `.pick`, `.wiz-foot`, `.g-pl .pcard`, `.g-welt .wcard`). Anyone rebuilding these places keeps the anchors.
-- **Help**: `pages/Help.svelte` with the contents in `pages/help/` (one version each for administrators and users):
-  search, “What would you like to do?” (`GuideCard` per guide: three short steps, “Show me”, “Jump right in” – `href`,
-  or `href(admin)` when it depends on the role), Getting started, expandable topics (`Topic`, with the matching guides
-  as buttons), Questions & answers, Terms. The search reads the text of the topics from the page after rendering
+- **Help**: `pages/Help.svelte` with the contents in `pages/help/` (one version each for administrators and users),
+  across the full page width like the other pages: search, “What would you like to do?” (`GuideCard` per guide in
+  columns – `auto-fill`, each at least 340 px –: three short steps, “Show me”, “Jump right in” – `href`, or
+  `href(admin)` when it depends on the role), Getting started, the reference with expandable topics (`Topic`, with the
+  matching guides as buttons; two columns from 1300 px), Questions & answers, Terms – answers and terms at most 100
+  characters wide (`max-w-[100ch]`). The search reads the text of the topics from the page after rendering
   (`data-topic`); all words must occur. Interface buttons appear in the text as `<Ui icon>` – so you recognize them on
-  every device; there are no screenshots anymore. Topics name their guides in `guides`. The users' topic “Listening
+  every device, without screenshots. Topics name their guides in `guides`. The users' topic “Listening
   in Symfonium” explains the two Symfonium settings for the plugin (radio mix with similar tracks, smart queue by
   sonic analysis) only when the plugin is set up (`S.status.plugin`).
 - **(?) next to the page title** (`components/HelpLink.svelte`, mapping route → topic is there): opens the topic as a
@@ -868,7 +893,7 @@ Both appear only once per account – on all devices and under every address. Th
 |---|---|---|
 | Code | `lib/tour.svelte.js`, `components/Tour.svelte` | `pages/Welcome.svelte` (`#/willkommen`), tip cards in `pages/welcome/TipCards.svelte` |
 | for whom | administrators (`ADMIN_STEPS`) and users with a profile (`USER_STEPS`) | anyone signed in with a Navidrome account whose account has no person yet (administrators only until they finished or left it once), and users whose person has no preferences and no playlists of its own (`needsWelcome()` in `App.svelte`) |
-| starts | 1.5 s after the app starts, not on `#/willkommen` (`startTour()`) | when the app starts, via redirect, not from `#/hilfe…` |
+| starts | 1.5 s after the app starts, not on `#/willkommen` (`startTour()`) | when the app starts, via redirect, not from `#/hilfe…`; also when a user without a person of their own wants to create a playlist – the assistant (`#/neu`), the editor, “Copy for me”, the music world × vibe table, “Create as mix” in the search, “Daily Mix” and “Like” of a music world, the artist radio; never for the local administrator (`Welcome.svelte` sends it on to `#/personen`) |
 | skipped if | `S.me.tourSeen` or `tuttiphon-tour:<account>` | `S.me.welcomeSeen` or `tuttiphon-welcome:<account>` – without a profile it comes anyway |
 | finished by | the end or “Skip” (`endTour()` → `{what: "tour"}`) | “Create N playlists” or “Continue without playlists” in the Playlists step (`finish()`) or – only with an existing profile – “Later – look around first” on the first page; both call `remember()` → `{what: "welcome"}` |
 | again | Settings → My account (`startTour(true)`, jumps to `#/` first) | via `#/willkommen` (e.g. “Create profile” in the profile and under Settings → My account, as long as there is no profile) |
@@ -888,7 +913,7 @@ and in the Favorite bands step the up to 12 most-played bands come first. In the
 |---|---|
 | `npm run test:py` | Python tests for `app/` (`tests/python/`, `unittest` from the standard library): rules and local evaluation, mixes, configuration and `.env`, sign-in and permissions, backup, run lock and instances, lyrics/folder watch, conversion to Opus and AAC with real files generated in the test, mix learning, self-check, AI sound analysis (without Essentia, with a simulated analysis process). They run in a fresh temp folder (`tests/python/env.py`, import it before any `app.*`), without network and without the NAS; tests marked with `@unittest.expectedFailure` describe known deviations |
 | `npm run build` | must complete without warnings (Svelte reports, among other things, accessibility issues and misused runes) |
-| `tools/testserver.sh <port> <folder> [--auth] [--web <build>]` | test server with a **copy** of `data/`, auto-apply and folder watch off, no schedules. `--auth` turns on sign-in (adds a random `TUTTIPHON_ADMIN_PASSWORD` to the copy's `.env` if that line is missing – it only checks this name) and prints session cookies for the local administrator and a user account (`--user <account>`) |
+| `tools/testserver.sh <port> <folder> [--auth] [--web <build>] [--family]` | test server with a **copy** of `data/` (or of `TUTTIPHON_TEST_DATA`), auto-apply and folder watch off, no schedules; `--family` adds a family entry to the copy's configuration (e2e). `--auth` turns on sign-in (gives the copy a random administrator password with `localadmin.set_password()` if it has none yet) and prints session cookies for the local administrator and a user account (`--user <account>`) |
 | `node tools/screens.mjs --base … --out … [--cookie tuttiphon=…] [--mobile \| --mobile-small] [--light] [--text] [--fresh] [--lang en] '#/…'` | screenshots and console errors per page (`--mobile-small`: a small phone, 360 × 740 – narrow layouts break there first). Without `--fresh` the script sets the browser markers `tuttiphon-tour:<account>`/`tuttiphon-welcome:<account>` so that tour and welcome don't get in the way; with `--fresh` it leaves them out – but both only appear if the account is also not listed in `state/seen.json` of the data copy |
 | `npm run test:e2e` | Playwright: every page as administrator and as a user, computer and phone (Pixel 7), without JavaScript or console errors; sign-in page; redirect without a session (`pages.spec.js`); help: guides with page changes, Esc, the sheet behind the (?), search, jumping to a topic (`help.spec.js`); what the AI sound analysis adds – key, tempo source, instruments and themes in the song window, bands that sound alike, instruments and themes in the search, the assistant and the sound editor, a vibe that stands for a theme, smooth transitions, fingerprints and “Same recording twice” – with the server's answers extended in the browser (`page.route`), because the test copy usually has no AI results (`ai-sound.spec.js`); the setup assistant – redirect of a new installation only for administrators and once per session, all steps without saving before “Finish”, “Skip setup”, locked without a connection, the entry under Settings → General – with a new installation played in the browser and every write answered there (`setup-assistant.spec.js`) |
 
@@ -913,8 +938,9 @@ trigger credentials, accounts, covers or takeovers – that would go to the real
 4. Add the route to `tests/e2e/pages.spec.js`.
 
 **New setting**
-1. Default value in `app/default_config.json` and – if existing configurations need it – a migration in
-   `app/config.py` ([Data model](02-data-model.md)).
+1. Default value in `app/default_config.json` – `load_config()` adds it to existing configurations. A change that
+   existing configurations can't take as they are means raising `CONFIG_VERSION`, and that needs a conversion in
+   `config._read()` – there is none ([Data model](02-data-model.md#version-and-damaged-files)).
 2. Input in the matching section under `pages/settings/` with `Row`, `Toggle`, `NumInput` …; change, then `changed()`.
 
 **New endpoint**: create it in the server and secure it ([Security](07-security.md), [API](03-api.md)),

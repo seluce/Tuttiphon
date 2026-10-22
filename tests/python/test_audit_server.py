@@ -22,8 +22,8 @@ from app.library import Library
 from app.rules import BuildContext
 from tests.python.factory import base_config, random_songs, song
 
-JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False}
-NOBODY = {"user": None, "role": "none", "own": [], "persons": [], "local": False}
+JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False}
+NOBODY = {"user": None, "role": "none", "own": None, "persons": [], "local": False}
 
 
 def save(cfg):
@@ -178,8 +178,8 @@ class BrokenPlaylistTest(unittest.TestCase):
                 mock.patch.object(web.images, "artist_info", lambda aid: {}), \
                 mock.patch.object(web.playlists, "native_api", side_effect=web.NavidromeError("offline")), \
                 contextlib.redirect_stdout(io.StringIO()):
-            for m in ({"user": "niklas", "role": "admin", "own": ["niklas"], "persons": [], "local": False},
-                      {"user": "oma", "role": "user", "own": ["oma"], "persons": ["oma"], "local": False}):
+            for m in ({"user": "niklas", "role": "admin", "own": "niklas", "persons": [], "local": False},
+                      {"user": "oma", "role": "user", "own": "oma", "persons": ["oma"], "local": False}):
                 auth.set_current(m)
                 self.addCleanup(auth.set_current, NOBODY)
                 web._memo.clear()
@@ -254,7 +254,7 @@ class LoginLockoutTest(unittest.TestCase):
 
 
 class QuotaTest(unittest.TestCase):
-    """M2: an account can create at most MAX_USER_PLAYLISTS playlists and MAX_USER_PERSONS profiles."""
+    """M2: an account can create at most MAX_USER_PLAYLISTS playlists and only its own one profile."""
 
     def setUp(self):
         save(base_config())
@@ -360,6 +360,9 @@ class NotifyTestTest(unittest.TestCase):
             with self.assertRaises(PermissionError):
                 web.api_notify_test({"person": "jonas", "topic": topic})
         self.assertEqual(self.sent, [])
+        with self.assertRaises(ValueError):   # every attempt counts – guessing other people's topics stays slow
+            web.api_notify_test({"person": "jonas", "topic": "jonas-own"})
+        web._notify_tests.clear()
         web.api_notify_test({"person": "jonas", "topic": "jonas-own"})
         self.assertEqual(self.sent, ["jonas-own"])
 
@@ -400,18 +403,18 @@ class ResponsesTest(unittest.TestCase):
         self.assertIn("secret", log.getvalue())   # the details are in the server log
 
     def test_changelog_nested_bullets(self):
-        text = "# Changes\n\n## 1.0 – 2026-10-17\n\n- Top item\n  continued\n- Group:\n  - first sub\n    continued\n  - second sub\n"
+        text = "# Changes\n\n## 1.0\n\n- Top item\n  continued\n- Group:\n  - first sub\n    continued\n  - second sub\n"
         with mock.patch.object(web, "read_text", lambda path: text):
             out = web.api_changelog()
         self.assertEqual(out[0]["items"], ["Top item continued", "Group:", "first sub continued", "second sub"])
         self.assertEqual(out[0]["levels"], [0, 0, 1, 1])
 
-    def test_changelog_without_dates_and_unreleased(self):
-        text = "# Changes\n\n## Unreleased\n\n- New\n\n## 1.1.0\n\n- Feature\n\n## 1.0 – 2026-10-17\n\n- Old\n"
+    def test_changelog_unreleased(self):
+        text = "# Changes\n\n## Unreleased\n\n- New\n\n## 1.1.0\n\n- Feature\n\n## 1.0\n\n- Old\n"
         with mock.patch.object(web, "read_text", lambda path: text):
             out = web.api_changelog()
-        self.assertEqual([(v["version"], v["date"], v["unreleased"]) for v in out],
-                         [("Unreleased", "", True), ("1.1.0", "", False), ("1.0", "2026-10-17", False)])
+        self.assertEqual([(v["version"], v["unreleased"]) for v in out],
+                         [("Unreleased", True), ("1.1.0", False), ("1.0", False)])
         self.assertEqual(out[1]["items"], ["Feature"])
 
 
@@ -675,19 +678,28 @@ class ConfigFileTest(unittest.TestCase):
         self.assertEqual(out.getvalue().count("keeps working"), 1)
         self.assertTrue(list(config.DATA_DIR.glob("config.defekt-*.json")))
 
+    def test_gone_while_running(self):
+        """config.json deleted or moved while running: the last good state stays – the template would have no
+        playlists, and the next run would remove them all from Navidrome."""
+        cfg = base_config()
+        cfg["playlists"] = [{"id": "p1", "person": "jonas", "welt": "*", "stil": "80er"}]
+        save(cfg)
+        good = config.load_config()
+        config.CONFIG_FILE.unlink()
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(config.load_config(), good)
+            self.assertEqual(config.load_config(), good)
+        self.assertEqual(out.getvalue().count("is gone"), 1)
+        self.assertFalse(config.CONFIG_FILE.exists())               # not the template
+        config.update_config(lambda c: None)                        # the next save writes it again
+        self.assertEqual([p["id"] for p in config.load_config()["playlists"]], ["p1"])
+
     def test_bom_and_null_lists(self):
         cfg = base_config()
         cfg["ignored"] = None
         config.CONFIG_FILE.write_text("﻿" + json.dumps(cfg), encoding="utf-8")
         env.reset_caches()
         self.assertEqual(config.load_config()["ignored"], [])
-
-    def test_migration_backups_unique(self):
-        env.clear_dir(config.BACKUP_DIR)
-        config._migration_backup(9, "a")
-        config._migration_backup(9, "b")
-        self.assertEqual(sorted(p.read_text() for p in config.BACKUP_DIR.glob("config_v9_*.json")), ["a", "b"])
-
 
 class SettingsValidationTest(unittest.TestCase):
     """Config M4/L5: wrong types are a ValueError (400), not a crash; the name pattern only knows {welt} and {stil};
@@ -747,13 +759,9 @@ class SuggestionNamesTest(unittest.TestCase):
         i18n.use("en")
         self.addCleanup(i18n.use, None)
         out = suggest.suggestions(cfg, Library(songs), only_person="jonas")
-        named = [s for s in out if (s.get("playlist") or {}).get("name")]
-        self.assertTrue(named)
-        for s in named:
-            self.assertNotEqual(s["playlist"]["name"], s["title"], s["key"])
-        sorts = next(s for s in named if "Querbeet" in s["playlist"]["name"])
-        self.assertEqual(sorts["playlist"]["name"], "Jonas’ Querbeet")
-        self.assertEqual(sorts["title"], "Jonas’s All Sorts")
+        named = {s["playlist"]["name"]: s["title"] for s in out if (s.get("playlist") or {}).get("name")}
+        self.assertEqual(named["Jonas · Querbeet"], "Jonas · All Sorts")   # the name in Navidrome, the card's title
+        self.assertEqual(named["Jonas · Neu dazugekommen"], "Jonas · Newly added")
 
 
 if __name__ == "__main__":

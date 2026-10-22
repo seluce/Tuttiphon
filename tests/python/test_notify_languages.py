@@ -18,7 +18,7 @@ class NotifyLanguageTest(unittest.TestCase):
         sent = []
         with mock.patch.object(i18n, "server_lang", lambda: "fr"):
             name = i18n._sn(3, "Process new music ({n} file)", "Process new music ({n} files)")
-            self.assertFalse(str(name).startswith(notify.NEW_MUSIC_RUNS))   # French – the English form tells
+            self.assertFalse(str(name).startswith(notify.NEW_MUSIC_RUN))   # French – the English form tells
             with mock.patch.object(notify, "deliver", lambda make, *a, **k: sent.append(make()) or True):
                 notify.after_run({"name": name, "results": {"flac": "ok", "playlists": "ok"}, "summary": {}}, self.cfg)
         self.assertEqual(len(sent), 1)

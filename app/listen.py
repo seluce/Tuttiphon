@@ -30,9 +30,9 @@ import json
 import os
 import threading
 import time
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
-from .config import read_text
+from .config import read_bytes
 from .i18n import _
 
 KEEP_DAYS = 120
@@ -45,6 +45,7 @@ LISTENER_SONG = 900       # the song asked about played on exactly one account t
 LISTENER_ACTIVE = 600     # otherwise: the one account playing anything right now (its last event this recent)
 HEARD_SECONDS = 3 * 3600  # what the listener heard this recently does not come again at once (sonic.py)
 STEER_SECONDS = 900       # skips this recent steer the smart queue (moment(), sonic._steer())
+DAYS_CACHED = 32          # day files kept parsed – the ones used last (the newest days of the accounts playing)
 KINDS = ("start", "play", "report")
 STATES = ("starting", "playing", "paused", "stopped", "expired")
 _lock = threading.Lock()
@@ -52,7 +53,9 @@ _seen = {"at": None, "events": 0, "accounts": set(), "pruned": {}}
 _versions = defaultdict(int)   # per account: changes with every event kept (for caches)
 _active = {}                   # account (lower case) -> (time, state) of its last event – also of accounts whose plays
                                # are not kept (memory only): they count as playing in listener()
-_days = {}                     # path -> ((size, mtime), rows) – a day file is parsed again only when it changed
+_days = OrderedDict()          # path -> ((size, mtime), rows), the DAYS_CACHED used last – parsed again only when
+                               # the file changed (summary() keeps its results per day, the older days need no rows)
+_days_lock = threading.Lock()
 _summary_days = {}             # (account folder, day) -> (signature of the day files, (skips, plays)) – summary()
 
 
@@ -185,7 +188,12 @@ def _prune(user, now_t):
     for path in _folder(user).glob("live-*.jsonl"):
         if path.stem[5:] < cutoff:
             path.unlink(missing_ok=True)
-            _days.pop(str(path), None)
+            _forget(path)
+
+
+def _forget(path):
+    with _days_lock:
+        _days.pop(str(path), None)
 
 
 def played_lately(days, now=None):
@@ -203,34 +211,41 @@ def prune_all(now=None):
     for path in PLAYS_DIR.glob("*/live-*.jsonl"):
         if path.stem[5:] < cutoff:
             path.unlink(missing_ok=True)
-            _days.pop(str(path), None)
+            _forget(path)
 
 
 def _rows(path):
-    """The events of one day file – parsed again only when the file changed."""
+    """The events of one day file – parsed again only when the file changed (kept for the DAYS_CACHED files used
+    last). A broken line – cut off while writing, a damaged byte – is left out, the rest of the day stays."""
     try:
         st = path.stat()
     except OSError:
         return []
-    sig = (st.st_size, st.st_mtime_ns)
-    hit = _days.get(str(path))
+    key, sig = str(path), (st.st_size, st.st_mtime_ns)
+    with _days_lock:
+        hit = _days.get(key)
+        if hit:
+            _days.move_to_end(key)
     if hit and hit[0] == sig:
         return hit[1]
     try:
-        text = read_text(path)
+        data = read_bytes(path)
     except OSError:
         return hit[1] if hit else []
     rows = []
-    for line in text.splitlines():
+    for line in data.splitlines():
         try:
-            row = json.loads(line)
-        except ValueError:
-            continue   # a line cut off while writing
-        if isinstance(row, dict) and isinstance(row.get("t"), int) and row.get("k") in KINDS and row.get("id"):
+            row = json.loads(line.decode("utf-8"))
+        except ValueError:   # cut off while writing, a damaged byte (UnicodeDecodeError)
+            continue
+        if isinstance(row, dict) and isinstance(row.get("t"), int) and row.get("k") in KINDS \
+                and isinstance(row.get("id"), str) and row["id"]:
             rows.append(row)
-    if len(_days) > 2000:
-        _days.clear()
-    _days[str(path)] = (sig, rows)
+    with _days_lock:
+        _days[key] = (sig, rows)
+        _days.move_to_end(key)
+        while len(_days) > DAYS_CACHED:
+            _days.popitem(last=False)
     return rows
 
 
@@ -267,9 +282,12 @@ def moments(user, since):
 
 
 def _recent(folder, since, now_t):
-    """The events of one account folder from `since` to `now_t` (Unix seconds), oldest first."""
-    days = sorted({_local(since).date().isoformat(), _local(now_t).date().isoformat()})
-    rows = [r for d in days for r in _rows(folder / f"live-{d}.jsonl") if since <= r["t"] <= now_t]
+    """The events of one account folder from `since` to `now_t` (Unix seconds), oldest first – every day in between."""
+    rows = []
+    day, last = _local(since).date(), _local(now_t).date()
+    while day <= last:
+        rows.extend(r for r in _rows(folder / f"live-{day.isoformat()}.jsonl") if since <= r["t"] <= now_t)
+        day += dt.timedelta(days=1)
     rows.sort(key=lambda r: r["t"])
     return rows
 

@@ -5,7 +5,6 @@ import base64
 import copy
 import datetime as dt
 import json
-import os
 import stat
 import unittest
 from unittest import mock
@@ -14,8 +13,8 @@ from app import auth, config
 from app.navidrome import NavidromeError
 from tests.python.factory import base_config
 
-JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "local": False}
-ADMIN = {"user": "niklas", "role": "admin", "own": ["niklas"], "local": False}
+JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "local": False}
+ADMIN = {"user": "niklas", "role": "admin", "own": "niklas", "local": False}
 NAV_USERS = [{"name": "niklas", "admin": True, "fullName": "Niklas Test"},
              {"name": "Jonas", "admin": False, "fullName": "Jonas Test"},
              {"name": "oma", "admin": False, "fullName": "Oma"}]
@@ -46,15 +45,6 @@ class TestTokens(unittest.TestCase):
         self.assertEqual(auth.read_token(token), "Jonas")
         for path in (auth.SESSIONS_FILE, auth.STATE_DIR / "secret"):
             self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600, path)
-
-    def test_local_administrator_session_ends_with_password_change(self):
-        with mock.patch.dict(os.environ, {"TUTTIPHON_ADMIN_PASSWORD": "erstes-passwort"}):
-            env.reset_caches()
-            token = auth.make_token(auth.NOTFALL)
-            self.assertEqual(auth.read_token(token), auth.NOTFALL)
-        with mock.patch.dict(os.environ, {"TUTTIPHON_ADMIN_PASSWORD": "neues-passwort"}):
-            env.reset_caches()
-            self.assertIsNone(auth.read_token(token))
 
     def test_end_sessions_of_account(self):
         jonas, other = auth.make_token("Jonas"), auth.make_token("niklas")
@@ -173,8 +163,8 @@ class TestVisibility(unittest.TestCase):
         self.assertTrue(auth.own_playlist(self.by_id["pf"], ADMIN, self.cfg))
 
     def test_one_person_per_account_and_no_sign_in_for_the_family(self):
-        self.assertEqual(auth.persons_of("JONAS", self.cfg), ["jonas"])
-        self.assertEqual(auth.persons_of("familie", self.cfg), [])     # the family is nobody's own person
+        self.assertEqual(auth.own_person("JONAS", self.cfg), "jonas")
+        self.assertIsNone(auth.own_person("familie", self.cfg))     # the family is nobody's own person
         self.assertEqual(auth.family_account(self.cfg), "familie")
         with mock.patch.object(auth, "navidrome_users", lambda force=False: USERS + [
                 {"name": "familie", "admin": False, "fullName": "Familie"}]):
@@ -258,7 +248,7 @@ class TestMergeUserChanges(unittest.TestCase):
     def test_one_own_person_for_an_account_without_one(self):
         self.incoming["personen"].append({"id": "jonas-kind", "name": "Jonas Kind", "user": "Jonas"})
         self.assertNotIn("jonas-kind", self.persons(self.merged()))   # Jonas has his person already
-        mia = {"user": "mia", "role": "user", "own": [], "local": False}
+        mia = {"user": "mia", "role": "user", "own": None, "local": False}
         incoming = copy.deepcopy(auth.view_config(self.current, mia))
         incoming["personen"] += [
             {"id": "fremd", "name": "Fremd", "user": "niklas"},

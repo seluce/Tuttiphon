@@ -6,20 +6,14 @@
   import Card from '../settings/Card.svelte'
   import Row from '../settings/Row.svelte'
   import Choice from './Choice.svelte'
-  import { S } from '../../lib/state.svelte.js'
   import { t } from '../../lib/i18n.svelte.js'
+  import { pwOk, starAccounts, getsStars, toggleStars } from '../personen/shared.js'
 
   let { d } = $props()
   const dz = $derived(d.deezer)
 
-  const users = $derived((S.status?.env?.users || []).map((u) => u.name))
-  const chosen = $derived(dz.users ?? users)
-  function toggleUser(u) {
-    const cur = new Set(dz.users ?? users)
-    if (cur.has(u)) cur.delete(u)
-    else cur.add(u)
-    dz.users = [...cur]
-  }
+  // every person's account – also those switched off, so they can be switched on again
+  const users = $derived(starAccounts(dz))
 </script>
 
 <Card title={t('Star ratings from Deezer')} icon="star">
@@ -32,7 +26,8 @@
       {#if users.length}
         <div class="toggles">
           {#each users as u (u)}
-            <button class={['toggle', chosen.includes(u) && 'on']} onclick={() => toggleUser(u)}>{u}</button>
+            <button class={['toggle', getsStars(dz, u) && 'on']} aria-pressed={getsStars(dz, u)} onclick={() => toggleStars(dz, u)}
+              title={pwOk(u) === false ? t('Password missing') : undefined}>{u}{#if pwOk(u) === false}<Icon name="lock" size={13} />{/if}</button>
           {/each}
         </div>
       {:else}

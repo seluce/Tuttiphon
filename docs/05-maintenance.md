@@ -95,7 +95,8 @@ if not a single one is written, the result is `fehler`.
 
 ### Lock against concurrent runs
 
-Within one process, `start_lock` + `running()` prevent a second run. Across process and machine boundaries (PC via NFS
+Within one process, `start_lock` (a `threading.RLock` – reentrant, because a run in the foreground on the command line
+ends inside `start()`) + `running()` prevent a second run. Across process and machine boundaries (PC via NFS
 and Docker container on the NAS, or `tuttiphon.py run` next to the server), `_InstanceLock` ensures that only one
 instance works at a time. `TaskRunner.start()` acquires the lock before the run thread starts:
 
@@ -168,41 +169,41 @@ result `abgebrochen`, as do all following ones.
 So that changed playlists do not wait for hours for an analysis or a Deezer full check, a run can pause briefly for an
 apply. `TaskRunner.pause_for(steps, name, **opts)` pauses the running run, runs `steps` in between and then continues
 with the rest. Only steps that pick up where they left off at the next start may be paused (`PAUSABLE` = `flac`,
-`lyrics`, `analyse`, `deezer`): Opus converts the remaining files, lyrics and Deezer skip what has already been
-searched or rated, sound analysis and AI know their finished songs from `state/audio.json` and `state/ml.json`.
+`lyrics`, `cover`, `analyse`, `deezer`): Opus converts the remaining files, lyrics and Deezer skip what has already been
+searched or rated, covers are fetched for what is still missing, sound analysis and AI know their finished songs from
+`state/audio.json` and `state/ml.json`.
 
-`pause_for()` checks under `start_lock` and returns `False` (nothing happens) if
+`pause_for()` checks under `start_lock` (`can_pause()`) and returns `False` (nothing happens) if
 
-- no run is in progress, the run is already being canceled (`stop` set) or a pause is already queued (`_chain` not
-  empty),
-- the open steps – the running one and all not yet started, i.e. all without an entry in `results` – are not **all**
-  in `PAUSABLE`. A run that still has `playlists` or `scan` ahead of it writes the changes anyway and is waited for.
+- no run is in progress, the run is already ending (`_ending`, see below), is already being canceled (`stop` set) or a
+  pause is already queued (`_chain` not empty),
+- the open steps – the running one and all after it in the step list (`steps[_pos:]`, `_pos` = position of the running
+  step, so a step that occurs twice counts by its position) – are not **all** in `PAUSABLE`. A run that still has
+  `playlists` or `scan` ahead of it writes the changes anyway and is waited for.
 
 Otherwise it queues two runs in `_chain` – `(steps, opts, name)` and `(open steps, options of the running run,
-“<name> (continued)”)`; if the name already ends in “(continued)”, it stays as it is –, writes “⏸ Short pause for
-“<name>” – this run continues afterwards.” to the log and calls `cancel()`. The paused run ends as after “Cancel”
-(running and open steps `abgebrochen`, its own history entry). At the end of `_run()` it hands `_chain` over to
-`_continue()`: a separate thread waits for the run thread to end and starts the queued runs one after another via
-`start()`, each only after the previous one has ended. If a start fails (`RuntimeError`, e.g. another instance or
-another trigger was faster), it retries up to 30 times at 2 s intervals; after that it gives up, and the following
-queued runs are dropped too.
+“<name> (continued)”)`; if the English form of the name (`i18n.english()`) already ends in “(continued)”, it stays as it
+is –, writes “⏸ Short pause for “<name>” – this run continues afterwards.” to the log and calls `cancel()`. The paused
+run ends as after “Cancel” (running and open steps `abgebrochen`, its own history entry). At the end of `_run()` – after
+the instance lock is released – it takes `_chain` under `start_lock` and sets `_ending` at the same time, so a pause
+either gets into this chain or is refused; it never lands in a chain nobody continues. `_start()` resets `_ending` for
+the next run. `_continue()` then gets the chain: a separate thread waits for the run thread to end and starts the
+queued runs one after another via `start()`, each only after the previous one has ended. If a start fails
+(`RuntimeError`, e.g. another instance or another trigger was faster), it retries up to 180 times at 10 s intervals
+(up to half an hour); after that it logs “⚠ “<name>” could not be continued – the next run catches up.”, and the
+following queued runs are dropped too.
 
 | Run | When pausable |
 |---|---|
 | Night analysis and all runs that consist only of `flac`, `lyrics`, `analyse`, `deezer` | always |
 | “Update everything”, daily refresh `alles` (with all steps) | only in the last step `deezer` – before that, `playlists` and `scan` are still pending |
-| Folder watch | only once the first `scan` is done and no `playlists` is pending: without classification during `analyse` and `deezer`, with classification (second `playlists` + `scan`) during the second `scan` (if `deezer` follows) and during `deezer` |
+| Folder watch | only once the first `scan` is done and no `playlists` or `scan` is pending: without classification during `analyse` and `deezer`, with classification (second `playlists` + `scan`) only during `deezer` |
 | `playlists` + `scan` (applies, daily refresh `playlists`) | never |
 
 The continuation gets the same options as the paused run (for the night analysis the same `night_until`, for the folder
 watch the same file lists). Time limits (`budgetMinutes` etc.) start afresh in the continuation. Callers are
 `AutoApply._fire()` and `POST /api/apply/now`, both with `["playlists", "scan"]`.
 
-Known deviation: `pause_for()` determines the open steps by the names in `results`. If a step occurs twice (folder
-watch: `scan` before and after `analyse`), the second `scan` no longer counts as open as soon as the first has a
-result. If this second scan is running and `deezer` still follows, the run therefore counts as pausable: the scan is
-canceled (sync, covers and self-check are dropped in this run), the inserted apply scans and syncs by itself
-afterwards, and the continuation consists only of `deezer`.
 
 ### History and log files
 
@@ -345,14 +346,16 @@ For each file (`convert()`), in parallel with `settings.opus.jobs` threads:
 
 ```shell
 # Opus
-ffmpeg -nostdin -v error -y -i <source> -map 0:a:0 -c:a libopus -b:a <bitrate>k -f opus <folder>/.<file>.opus.part
+ffmpeg -nostdin -v error -y -i <source> -map 0:a:0 -c:a libopus -b:a <bitrate>k -f opus <folder>/.<file>.opus.encode.<random>.part
 # AAC
 ffmpeg -nostdin -v error -y -i <source> -map 0:a:0 -map_metadata -1 -c:a aac -b:a <aacBitrate>k -movflags +faststart \
-       -f ipod <folder>/.<file>.m4a.part
+       -f ipod <folder>/.<file>.m4a.encode.<random>.part
 ```
 
-- The target is `<name>.opus` or `<name>.m4a` in the same folder. ffmpeg first writes to the hidden temporary file
-  `.<file>.<ext>.part` – with the source's full file name (`.Song.flac.opus.part`), so two sources never share it.
+- The target is `<name>.opus` or `<name>.m4a` in the same folder. ffmpeg first writes to a hidden temporary file that
+  `config.new_temp()` creates beforehand as a new, empty file under a unique name: `.<file>.<ext>.encode.<random>.part`
+  with the source's full file name (`.Song.flac.opus.encode.3f9a…part`), created with `O_EXCL | O_NOFOLLOW` (never
+  into an existing file or through a link someone put into the album folder); ffmpeg then writes into it (`-y`).
 - **Complete?** With `-v error`, ffmpeg prints only errors; any message while converting (a cut-off WAV, a damaged
   FLAC frame) counts as failure, even if ffmpeg ends with exit code 0. Then `verify()` decodes the new file
   completely (`ffmpeg -i <new> -map 0:a:0 -ac 1 -ar 8000 -f u8 -`, counting the samples) and compares that with the
@@ -389,8 +392,8 @@ ffmpeg -nostdin -v error -y -i <source> -map 0:a:0 -map_metadata -1 -c:a aac -b:
   `.jpeg`, `.png`, `.webp`) and all songs in the folder belong to the same album (`single_album()`: the same `album`
   tag – or none at all – according to `ffprobe`, remembered per folder for the run). A folder of singles or a mixed
   folder gets no common image. JPEG becomes `cover.jpg`, PNG becomes `cover.png`, other formats are not saved. The
-  image goes into a hidden temporary file, which is renamed only if no other cover image has appeared in the
-  meantime; permissions `0644`, owner as below. Existing cover files stay as they are.
+  image goes into a hidden temporary file (`config.new_temp()`: `.cover.jpg.cover.<random>.part`, a new file, never
+  through a link), which is renamed only if no other cover image has appeared in the meantime; permissions `0644`, owner as below. Existing cover files stay as they are.
 - The ffmpeg process of the conversion is registered with the runner and terminated on cancel.
 - `opus.RECENT` remembers every newly created file (path → time); the folder watch therefore does not mistake it for
   new music.
@@ -414,12 +417,12 @@ end the log says “Done: N converted, M errors.”, the history `{"converted": 
 
 | `settings.opus.original` | What happens |
 |---|---|
-| `archive` (default) | move to `<archive>/<same relative folder>/<file>` (`move_to_archive()`: rename on the same volume; on another one a hidden copy, size checked, renamed, then the original deleted with a few attempts); never overwrites anything (see the checks above) |
+| `archive` (default) | move to `<archive>/<same relative folder>/<file>` (`move_to_archive()`: rename on the same volume; on another one a hidden copy – `config.temp_copy()`: a new file `.<file>.copy.<random>.part` with `O_EXCL \| O_NOFOLLOW`, times and permission bits of the original –, size checked, renamed, then the original deleted with a few attempts); never overwrites anything (see the checks above) |
 | `keep` | the original stays next to the new file; later runs skip it as long as the file with the target extension is next to it |
 | `delete` | the original is deleted |
 
 The archive folder is `paths()["archive"]`: `ARCHIVE_DIR` from the environment, otherwise `settings.paths.archive`,
-otherwise `settings.opus.archiveDir`, otherwise `Archiv`; relative paths are relative to the **parent** folder of the
+otherwise `Archiv`; relative paths are relative to the **parent** folder of the
 music folder. It must lie outside the music folder: the settings refuse an archive that is the music folder or inside
 it (`config.archive_in_music()`, also `POST /api/paths/check`), and the step does not run with such a folder from
 `docker-compose.yaml` either. The archive folder itself must exist; only the subfolders below it are created.
@@ -438,15 +441,14 @@ it (`config.archive_in_music()`, also `POST /api/paths/check`), and the step doe
 
 | Key | Default | Allowed | Meaning |
 |---|---|---|---|
-| `enabled` | `false` | | step on/off (installations from before configuration version 10 keep `true`) |
+| `enabled` | `false` | | step on/off |
 | `codec` | `"opus"` | `opus`, `aac` | target format |
 | `bitrate` | `160` | 48–320 | kbit/s for Opus (libopus) |
 | `aacBitrate` | `224` | 64–320 | kbit/s for AAC (ffmpeg's built-in encoder `aac`) |
 | `formats` | `["flac"]` | `flac`, `wav`, `aiff`, `ape`, `wv`, `alac` | source formats |
 | `original` | `"archive"` | `archive`, `keep`, `delete` | what happens to the original |
-| `archiveDir` | `"Archiv"` | relative, without `..` | archive folder if neither `ARCHIVE_DIR` nor `settings.paths.archive` is set |
 | `minAgeMinutes` | `10` | 0–1440 | waiting time after the last change to a file (not for files from the folder watch) |
-| `owner` | `""` | `UID:GID` or empty | owner of new files and archive folders; empty = the user Tuttiphon runs as (installations from before 0.17.1 keep `"1000:10"`) |
+| `owner` | `""` | `UID:GID` or empty | owner of new files and archive folders; empty = the user Tuttiphon runs as |
 | `jobs` | `1` | 1–8 | simultaneous conversions |
 
 ## Step `lyrics`: Find & tidy up lyrics
@@ -574,7 +576,7 @@ runs once a week in the night analysis (`albumcover.due()`: `state/covers.json` 
    (e.g. on the PC), it skips itself without a message in the log; Settings → Intelligence shows the reason.
 4. **Classification** according to `settings.analysis.classify`: `auto` puts all bands at or above `autoThreshold`
    directly into a music world (via `update_config()`; each band at most once, remembered in
-   `state/auto_assigned.json`). `suggest`, with `settings.analysis.autoNew` (default on), directly assigns only **new**
+   `state/auto_assigned.json` by `classify.remember()` only after the configuration has been saved). `suggest`, with `settings.analysis.autoNew` (default on), directly assigns only **new**
    bands – first song in the library for at most 30 days, e.g. from Lidarr – at or above `max(0.75, autoThreshold)`
    (`auto_assign(…, new_only=True)`) and reports “Classification: N new band(s) classified automatically, M confident
    suggestions – …”, or without hits only the number of confident suggestions (0.6 or more). `off` does nothing. Each
@@ -703,9 +705,9 @@ ones, if they have at least 80 % of the rank of the leader and there are still s
 The same title on several albums counts as one song. A pass at the end of every run adjusts only the stars that change
 as a result (mode `top`, without asking Deezer, without a new check date); manually set stars stay as always.
 
-**Refresh** (mode `refresh`, `settings.deezer.refresh`): every night, re-check `REFRESH_PER_RUN` = 1,500 songs – first
-those rated with the old search (`v` missing), then those not checked for the longest time. This way everything has
-been checked once with the exact search after about two weeks; after that the ranks stay current.
+**Refresh** (mode `refresh`, `settings.deezer.refresh`): every night, re-check `REFRESH_PER_RUN` = 1,500 songs – those
+not checked for the longest time first (`refresh_order()`, by `t`). A library of 20,000 songs is checked through in
+about two weeks; this way the ranks stay current.
 
 Requests are throttled to `settings.deezer.rate` per second (default 9; Deezer allows 50 in 5 s). Network errors and
 error responses (e.g. quota exceeded) are retried up to six times with increasing pauses; after that the step aborts
@@ -770,10 +772,14 @@ in the next run.
 `config.rating_users()` determines the accounts:
 
 1. `settings.deezer.users`, if it contains a list (account names),
-2. otherwise `RATING_USERS` (comma-separated) from `.env` or the environment,
-3. otherwise all Navidrome accounts that are entered as `user` for a person.
+2. otherwise all Navidrome accounts that are entered as `user` for a person.
 
-The same list is used by the status (`GET /api/status`, `env.users`) and the “Passwords missing” notice in “To review”.
+The list lives only in the configuration – neither `.env` nor the environment sets it. Settings → Deezer and the setup
+step show “Who gets stars?” with every person's account (the family's too) plus accounts still in the list without a
+person (`starAccounts()` in `frontend/src/pages/personen/shared.js`); switching one on or off turns `deezer.users` into
+a list (`toggleStars()`), and deleting a person removes their account from such a list (`dropStars()`). The same list
+is used by the “Passwords missing” notice in “To review”; `env.users` in `GET /api/status` lists every person's account
+plus these, with `stars` for the ones Deezer rates.
 An account's password comes from `NAV_PASS_<ACCOUNT>` (uppercase, special characters → `_`), for the admin account from
 `NAV_ADMIN_PASS` – see [02-data-model.md](02-data-model.md) and [07-security.md](07-security.md). If a password is
 missing, the log refers to Settings → Navidrome.
@@ -786,8 +792,8 @@ missing, the log refers to Settings → Navidrome.
  "lastRun": "12.10.2026 05:40", "lastFull": "01.10.2026 22:10", "full": {"started": 1760240000, "total": 22400}}
 ```
 
-`r` rank (`null` = not found), `s` stars, `t` time of the check, `u` last set stars per account, `v` 2 = checked with
-the exact search, `i` ISRC (if found that way), `b` 1 = one extra star as a top track. Full description in
+`r` rank (`null` = not found), `s` stars, `t` time of the check, `u` last set stars per account, `i` ISRC (if found
+that way), `b` 1 = one extra star as a top track. Full description in
 [02-data-model.md](02-data-model.md).
 
 ### Settings `settings.deezer`
@@ -815,7 +821,9 @@ sound analysis and AI – at night until the end of the window, otherwise with `
    and the album peak is the maximum (`album_loudness()`; off with `loudness.album: false`).
 3. **Write:** `REPLAYGAIN_TRACK_GAIN` = −18 LUFS − loudness (“-8.20 dB”), `…_PEAK` linear, likewise for the album –
    as a Vorbis comment (Opus, Ogg, FLAC), ID3 `TXXX` (MP3) or iTunes field (M4A), with mutagen, never re-encoded.
-   `write_tags()` first copies the file next to itself (`.<name>.tuttiphon-rg.tmp`), writes into the copy, verifies it
+   `write_tags()` first copies the file next to itself (`config.temp_copy()`: a new hidden file
+   `.<name>.tuttiphon-rg.<random>.part` with `O_EXCL | O_NOFOLLOW` – never into an existing file or through a link),
+   writes into the copy, verifies it
    (values readable, same length), gives it the permissions and the owner of the original (if the owner cannot be
    set – no root –, `settings.opus.owner` like for new files) and then replaces the original in one step. ID3 keeps
    its version (v2.3 stays v2.3). Tested on copies of real files: audio bit-identical, all other tags unchanged. If a
@@ -977,7 +985,8 @@ and in the container. `check()` is called every minute from `daily_loop()`:
    So if only permissions or tags of existing files change (new `ctime`), no run for the whole library starts.
    Hidden files and `@`/`#`/`.` folders do not count, nor do `.opus` files that Tuttiphon itself created in this process
    (`opus.RECENT`; `check()` removes entries older than 24 h before looking) – they count as known.
-5. If `state/watch_files.json` did not exist yet or was unreadable, this look only records – nothing counts as new.
+5. If `state/watch_files.json` did not exist yet, was unreadable or malformed (`_load_files()`), this look only
+   records like the first look – nothing counts as new.
    `check()` writes the folder states only once nothing new was found or the run for the new files has started – and
    only if something has changed.
 6. If there are new files, a run “Process new music (N files)” starts with `deezer_mode: "new"`, the whole file list

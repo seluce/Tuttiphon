@@ -169,7 +169,7 @@
     const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 2500))
     idle(() => { for (const [name, load] of Object.entries(PAGES)) if (isAdmin() || !ADMIN_PAGES.includes(name)) preload(load) })
     // tour on the very first visit – not over an assistant (the setup assistant starts it when it is done)
-    if ((isAdmin() || S.me.own.length) && !/^#\/(willkommen|einrichtung)/.test(location.hash)) setTimeout(() => startTour(), 1500)
+    if ((isAdmin() || S.me.own) && !/^#\/(willkommen|einrichtung)/.test(location.hash)) setTimeout(() => startTour(), 1500)
   }
   init()
 

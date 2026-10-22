@@ -125,15 +125,6 @@
  "Self-check: {checked} playlists checked, {skipped} skipped without the owner's stars – all as expected.": "Autokontrola: sprawdzone playlisty: {checked}, pominięte bez gwiazdek właściciela: {skipped} – wszystko zgodnie z oczekiwaniami.",
  "Self-check: {checked} playlists checked – {problems} differ.": "Autokontrola: sprawdzone playlisty: {checked} – różnice: {problems}.",
  "Self-check: {checked} playlists checked – all as expected.": "Autokontrola: sprawdzone playlisty: {checked} – wszystko zgodnie z oczekiwaniami.",
- "from docker-compose.yaml/environment": "z docker-compose.yaml/środowiska",
- "from the .env in the data folder": "z pliku .env w folderze danych",
- "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is still the placeholder “{placeholder}” ({source}).": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD to wciąż symbol zastępczy „{placeholder}” ({source}).",
- "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} character ({source}).": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD ma tylko {n} znak ({source}).",
- "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} characters ({source}).": {
-  "few": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD ma tylko {n} znaki ({source}).",
-  "many": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD ma tylko {n} znaków ({source})."
- },
- "⚠ Tuttiphon is reachable on the network, but the administrator password is too short or still the placeholder!": "⚠ Tuttiphon jest dostępny w sieci, ale hasło administratora jest za krótkie albo to wciąż symbol zastępczy!",
  "(Startup overview not possible: {error})": "(Przegląd przy starcie niemożliwy: {error})",
  "Ready – port {port}": "Gotowe – port {port}",
  "Tuttiphon is running at {url}  (Ctrl+C quits)": "Tuttiphon działa pod {url}  (Ctrl+C kończy)",
@@ -144,16 +135,16 @@
   "few": "Tylko nowa muzyka: {n} piosenki.",
   "many": "Tylko nowa muzyka: {n} piosenek."
  },
- "Please enter your own password with at least 8 characters in docker-compose.yaml (or remove the line and set the password in the browser) and restart.": "Wpisz w docker-compose.yaml własne hasło z co najmniej 8 znakami (albo usuń ten wiersz i ustaw hasło w przeglądarce) i uruchom ponownie.",
  "⚠ Without an administrator password there is no login – Tuttiphon then only answers requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.": "⚠ Bez hasła administratora nie ma logowania – Tuttiphon odpowiada wtedy tylko na zapytania przez 127.0.0.1/localhost i nazwy w TUTTIPHON_HOSTS.",
- "Good morning, {name}": "Dzień dobry, {name}",
  "{minutes} minutes every morning, for the usual listening on weekdays around {time} – starts calm, gets livelier and sounds like the mornings.": "{minutes} min każdego ranka, na zwykłe słuchanie w dni robocze ok. {time} – zaczyna spokojnie, robi się żywiej i brzmi jak poranki.",
  "{minutes} minutes every morning, for the usual listening around {time} – starts calm, gets livelier and sounds like the mornings.": "{minutes} min każdego ranka, na zwykłe słuchanie ok. {time} – zaczyna spokojnie, robi się żywiej i brzmi jak poranki.",
  "Discovered for us": "Odkryte dla nas",
- "Discovered for {name}": "Odkryte · {name}",
+ "Daily Mix": "Daily Mix",
+ "Discoveries": "Odkrycia",
+ "Sound": "Brzmienie",
+ "All Sorts": "Misz-masz",
  "30 songs from the library that this account has never played, picked to fit the taste – new every Monday.": "30 piosenek z biblioteki, których to konto nigdy nie odtwarzało, dobranych do gustu – nowe w każdy poniedziałek.",
  "Our album of the week": "Nasz album tygodnia",
- "Album of the week for {name}": "Album tygodnia · {name}",
  "One whole album a week that this account has never played – by a favorite band or in its sound, in album order.": "Jeden cały album tygodniowo, którego to konto nigdy nie odtwarzało – ulubionego zespołu albo w jego brzmieniu, w kolejności z albumu.",
  "“{world}” counts for {name}’s taste": "„{world}” liczy się do gustu osoby {name}",
  "{pct} % of what this account plays is from “{world}”. If that plays for someone else, keep it out of the taste – then discoveries, album of the week and own sound follow the person’s own music. The family playlists keep it.": "{pct}% tego, czego słucha to konto, pochodzi z „{world}”. Jeśli to gra dla kogoś innego, wyłącz to z gustu – wtedy odkrycia, album tygodnia i własne brzmienie kierują się własną muzyką tej osoby. Playlisty rodziny to zachowują.",
@@ -170,6 +161,5 @@
   "many": "{name}: {n} piosenek, których jeszcze nie znasz"
  },
  "Next episode": "Następny odcinek",
- "Next episode for {name}": "Następny odcinek · {name}",
  "For every audio play series this account listens to, the episode that comes next – new every day, the series heard last first.": "Dla każdej serii słuchowisk, której słucha to konto, kolejny odcinek – codziennie nowy, najpierw ostatnio słuchane serie."
 }

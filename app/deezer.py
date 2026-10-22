@@ -3,18 +3,17 @@
 Remembers in state/deezer.json which songs have been rated already.
   new     only new songs (seconds)
   missing try again the songs not found on Deezer so far
-  refresh the songs unchecked the longest (first those rated with the old search) – at night in small portions
+  refresh the songs unchecked the longest – at night in small portions
   full    check all songs again – resumable: when stopped, the next run continues where it left off
   recalc  recalculate stars from the saved ranks (after the levels changed) – without asking Deezer
 Stars changed by hand stay, unless overwriting them is explicitly allowed.
 The levels (rank -> stars) can be adjusted under Settings → Deezer stars; the default levels come from dztnr
 (github.com/scatolo/dztnr).
 
-Search (version 2, entry "v": 2): a hit only counts if band and title match (spellings, bracketed additions and
-"feat." are tolerated) – before, the search took the most popular of the first three hits, no matter by whom. If the
+Search: a hit only counts if band and title match (spellings, bracketed additions and "feat." are tolerated). If the
 search finds nothing, the file's MusicBrainz ID (from Lidarr) leads via MusicBrainz to the ISRC and thus exactly to the
-song on Deezer ("i"). If a song got stars with the old search and the new one does not find it, it loses them again
-(only if they still come from Tuttiphon).
+song on Deezer ("i"). A song that had stars and is not found any more loses them again (only if they still come from
+Tuttiphon).
 Top tracks ("b"): if many songs of a band share its highest star count, up to three clearly most popular ones get one
 star more – otherwise Symfonium could not tell them apart from the rest (settings.deezer.topBoost).
 """
@@ -65,7 +64,7 @@ def settings(cfg=None):
 def rank_histogram():
     """For the settings: how many songs have which rank (buckets of 10,000)."""
     buckets = [0] * 101
-    not_found = verified = top = 0
+    not_found = 0
     entries = load_state().get("songs", {})
     for e in entries.values():
         r = e.get("r")
@@ -73,10 +72,7 @@ def rank_histogram():
             buckets[min(100, int(r) // 10000)] += 1
         elif "r" in e:
             not_found += 1
-        verified += (e.get("v") or 1) >= 2
-        top += bool(e.get("b"))
-    return {"bucket": 10000, "counts": buckets, "notFound": not_found, "total": len(entries), "verified": verified,
-            "top": top, "perNight": REFRESH_PER_RUN}
+    return {"bucket": 10000, "counts": buckets, "notFound": not_found, "total": len(entries), "perNight": REFRESH_PER_RUN}
 
 
 class DeezerClient:
@@ -503,9 +499,8 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
 
 
 def refresh_order(songs, entries):
-    """Refresh: first what is still rated with the old search, then what has been unchecked the longest."""
-    return sorted((s for s in songs if s["id"] in entries),
-                  key=lambda s: ((entries[s["id"]].get("v") or 1) >= 2, entries[s["id"]].get("t") or 0))
+    """Refresh: what has been unchecked the longest first."""
+    return sorted((s for s in songs if s["id"] in entries), key=lambda s: entries[s["id"]].get("t") or 0)
 
 
 def _stars(rank, thresholds, boost):
@@ -544,8 +539,7 @@ def _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, 
     boost = song["id"] in boosted
     stars = _stars(rank, thresholds, boost) if rank else None
     prev = entries.get(song["id"], {})
-    entry = {"r": rank, "s": stars, "t": prev.get("t") if mode == "top" else int(time.time()), "u": dict(prev.get("u", {})),
-             "v": 2 if mode not in ("recalc", "top") else prev.get("v", 1)}
+    entry = {"r": rank, "s": stars, "t": prev.get("t") if mode == "top" else int(time.time()), "u": dict(prev.get("u", {}))}
     if isrc or prev.get("i"):
         entry["i"] = isrc or prev["i"]
     if boost:
@@ -558,7 +552,7 @@ def _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, 
     if stars is None:
         result["notFound"] += 1
         log(_s("  ?? {artist} – {title} (not found on Deezer)", artist=artist, title=song.get("title")))
-        if prev.get("s"):   # wrongly matched by the old search: remove the stars Tuttiphon set
+        if prev.get("s"):   # not found (any more): remove the stars Tuttiphon set
             for user, (nav, current) in users.items():
                 cur = current.get(song["id"], 0) or 0
                 last_set = prev.get("u", {}).get(user)

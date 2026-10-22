@@ -96,7 +96,7 @@ class EpisodeTest(unittest.TestCase):
         got = [x for x in suggest.suggestions(self.cfg, self.lib, only_person="jonas") if x.get("playlist", {}).get("episodes")]
         self.assertEqual(len(got), 1)
         self.assertEqual((got[0]["count"], got[0]["playlist"]["welt"], got[0]["name"]),
-                         (1, ["hoerspiel"], "Next episode for Jonas"))
+                         (1, ["hoerspiel"], "Jonas · Next episode"))
         cfg = {**self.cfg, "playlists": [{**self.p, "status": "aktiv"}]}
         config.validate_config(cfg)
         with self.assertRaises(ValueError):

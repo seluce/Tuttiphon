@@ -1,4 +1,4 @@
-"""Paths, credentials (.env) and the configuration (config.json) including migration."""
+"""Paths, credentials (.env) and the configuration (config.json)."""
 import copy
 import datetime as dt
 import json
@@ -6,6 +6,7 @@ import math
 import os
 import re
 import secrets
+import shutil
 import string
 import threading
 from pathlib import Path
@@ -14,25 +15,16 @@ from .i18n import LANGS, N_, _, _s, reading_config
 
 ROOT = Path(__file__).resolve().parent.parent      # program: the project folder (/app in the container)
 PREFIX = "TUTTIPHON_"   # own environment variables
-# Password of the local administrator (sign-in without Navidrome, turns on sign-in)
-ADMIN_PASSWORD = "TUTTIPHON_ADMIN_PASSWORD"
-# placeholder in the template – with it the container refuses to start on the network
-PASSWORD_PLACEHOLDERS = ("change-me",)
 
 
 def weak_password(pw):
-    """Too short (< 8 characters) or a template placeholder (in any spelling)."""
-    return not isinstance(pw, str) or len(pw) < 8 or pw.strip().lower() in PASSWORD_PLACEHOLDERS
+    """Too short for the password of the local administrator (< 8 characters)."""
+    return not isinstance(pw, str) or len(pw) < 8
 
 
 def env_var(name, default=None):
     """Environment variable TUTTIPHON_<name>, otherwise default."""
     return os.environ.get(PREFIX + name) or default
-
-
-def admin_password(env=None):
-    """Password of the local administrator ('' = none, then there is no sign-in)."""
-    return (env if env is not None else load_env()).get(ADMIN_PASSWORD) or ""
 
 
 # Data (configuration, credentials, state, logs, backups) – never in Git:
@@ -49,6 +41,7 @@ LOG_DIR = DATA_DIR / "logs"
 BACKUP_DIR = DATA_DIR / "backup"
 # Built interface (npm run build → web/). TUTTIPHON_WEB only for tests with their own build folder.
 WEB_DIR = Path(env_var("WEB") or ROOT / "web")
+DEFAULT_PLAYLIST_DIR = "00_SmartPlaylists"   # in the music folder
 # Storage locations: environment (docker-compose) > settings > default
 PATH_ENV = {"music": "MUSIC_DIR", "playlists": "PLAYLIST_DIR", "archive": "ARCHIVE_DIR"}
 
@@ -93,6 +86,27 @@ def write_atomic(path, data, mode=None):
         raise
     finally:
         os.close(fd)
+
+
+def new_temp(near, tag, mode=0o600):
+    """A new hidden file next to `near` under a unique name – created with O_EXCL and O_NOFOLLOW: never into an
+    existing file or through a link someone put there (album folders on a shared music folder). -> (path, open fd)."""
+    near = Path(near)
+    tmp = near.with_name(f".{near.name}.{tag}.{secrets.token_hex(6)}.part")
+    return tmp, os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), mode)
+
+
+def temp_copy(src, near, tag):
+    """A copy of src as a new hidden file next to `near` (new_temp), with src's times and permission bits. -> path"""
+    tmp, fd = new_temp(near, tag)
+    try:
+        with open(src, "rb") as fin, os.fdopen(fd, "wb") as fout:
+            shutil.copyfileobj(fin, fout, 1 << 20)
+        shutil.copystat(src, tmp, follow_symlinks=False)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
+    return tmp
 
 
 def read_bytes(path, attempts=4):
@@ -163,7 +177,7 @@ def environment():
     """Credentials and switches from the environment (docker-compose).
     Empty variables (e.g. NAV_ADMIN_PASS: "" in docker-compose) do not count: they do not override the .env."""
     return {k: v for k, v in os.environ.items() if v.strip() and (
-        k.startswith(("NAV_", PREFIX)) or k in ("RATING_USERS", "LASTFM_API_KEY", "NTFY_TOKEN"))}
+        k.startswith(("NAV_", PREFIX)) or k in ("LASTFM_API_KEY", "NTFY_TOKEN"))}
 
 
 def _load_env_files():
@@ -202,13 +216,9 @@ def paths(cfg=None):
     m = os.environ.get("MUSIC_DIR") or conf.get("music")
     # relative path: to the Navidrome folder (not to the working directory of the process)
     music = (Path(m) if os.path.isabs(m) else BASE / m) if m else BASE / "Music"
-    pl = os.environ.get("PLAYLIST_DIR") or conf.get("playlists")
-    if pl:
-        playlists = Path(pl) if os.path.isabs(pl) else music / pl
-    else:   # default: in the music folder (older setting "Music/…" relative to the Navidrome folder)
-        legacy = st.get("playlistDir") or "Music/00_SmartPlaylists"
-        playlists = music / legacy[6:] if legacy.startswith("Music/") else BASE / legacy
-    ar = os.environ.get("ARCHIVE_DIR") or conf.get("archive") or (st.get("opus") or {}).get("archiveDir") or "Archiv"
+    pl = os.environ.get("PLAYLIST_DIR") or conf.get("playlists") or DEFAULT_PLAYLIST_DIR
+    playlists = Path(pl) if os.path.isabs(pl) else music / pl
+    ar = os.environ.get("ARCHIVE_DIR") or conf.get("archive") or "Archiv"
     archive = Path(ar) if os.path.isabs(ar) else music.parent / ar
     return {"music": music, "playlists": playlists, "archive": archive}
 
@@ -252,25 +262,17 @@ def user_password(env, user):
 
 
 def rating_users(env, cfg=None):
-    """Whom Deezer sets stars for: the setting (Deezer stars → accounts), otherwise RATING_USERS from .env, otherwise
-    all Navidrome users of the people."""
+    """Whom Deezer sets stars for: the setting (Deezer stars → accounts), otherwise every person's account."""
     cfg = cfg or load_config()
     chosen = (cfg["settings"].get("deezer") or {}).get("users")
     if isinstance(chosen, list):
         return [u for u in chosen if isinstance(u, str) and u]
-    if env.get("RATING_USERS"):
-        return [u.strip() for u in env["RATING_USERS"].split(",") if u.strip()]
-    users = []
-    for person in cfg.get("personen", []):
-        u = person.get("user")
-        if u and u.lower() not in [x.lower() for x in users]:
-            users.append(u)
-    return users
+    return [p["user"] for p in cfg.get("personen", [])]   # one person per account
 
 
 # keys of the .env the interface may set (everything else only through docker-compose/the environment)
-EDITABLE_ENV = re.compile(r"^(NAV_URL|NAV_PUBLIC_URL|NAV_ADMIN_USER|NAV_ADMIN_PASS|NAV_PASS_\w+|RATING_USERS|"
-                          r"LASTFM_API_KEY|NTFY_TOKEN)$")
+EDITABLE_ENV = re.compile(r"^(NAV_URL|NAV_PUBLIC_URL|NAV_ADMIN_USER|NAV_ADMIN_PASS|NAV_PASS_\w+|LASTFM_API_KEY|"
+                          r"NTFY_TOKEN)$")
 
 
 def save_env(updates):
@@ -329,7 +331,7 @@ class ConfigDamaged(ValueError):
 
 
 class ConfigOutdated(ConfigDamaged):
-    """config.json of an earlier version does not fit this one – nothing is converted, Tuttiphon does not start."""
+    """config.json of a version before CONFIG_VERSION – nothing is converted, Tuttiphon does not start."""
 
 
 def _finite_or_none(text):
@@ -363,16 +365,6 @@ def _parse_config(text):
     return cfg
 
 
-def _migration_backup(version, text):
-    """Back up config.json before a migration – a unique name (two migrations in the same second keep both)."""
-    BACKUP_DIR.mkdir(exist_ok=True)
-    stem = f"config_v{version}_{dt.datetime.now():%Y%m%d_%H%M%S}"
-    path, n = BACKUP_DIR / f"{stem}.json", 2
-    while path.exists():
-        path, n = BACKUP_DIR / f"{stem}_{n}.json", n + 1
-    write_atomic(path, text)   # with write_atomic (otherwise possibly permissions 000 on the NAS share)
-
-
 def _damaged(key, error):
     """config.json became unreadable while Tuttiphon is running: keep working with the last good state (it is
     written back with the next save) – keep a copy of the damaged file and say so once in the server log."""
@@ -392,13 +384,28 @@ def _damaged(key, error):
                   file=CONFIG_FILE, error=error, copy=copy_name or "–"))
 
 
+def _gone():
+    """config.json vanished while Tuttiphon is running (deleted, moved, the share briefly empty): keep working with the
+    last good state – the template would mean no playlists, and the next run would remove them all from Navidrome. Said
+    once in the server log; the next save writes the file again."""
+    if _cfg_cache.get("damaged") == "gone":
+        return
+    _cfg_cache["damaged"] = "gone"
+    from . import events
+    events.say(_s("⚠ The configuration {file} is gone – Tuttiphon keeps working with the last good state and writes it "
+                  "back with the next save.", file=CONFIG_FILE))
+
+
 def load_config():
     """The configuration – kept in memory until config.json changes. Always returns a copy.
     A damaged config.json: ConfigDamaged before the first good state (serve() refuses to start with a clear
-    message instead of silently starting over), afterwards the last good state stays (see _damaged). A migrated one
-    must fit the rules of this version (validate_config) – otherwise ConfigOutdated and the file stays as it was."""
+    message instead of silently starting over), afterwards the last good state stays (see _damaged) – also when the file
+    is gone (_gone). One of a version before CONFIG_VERSION: ConfigOutdated (see _read)."""
     with _lock:
         if not CONFIG_FILE.exists():
+            if _cfg_cache["cfg"] is not None:   # gone while running: never start over with the template
+                _gone()
+                return copy.deepcopy(_cfg_cache["cfg"])
             write_atomic(CONFIG_FILE, read_text(DEFAULT_CONFIG_FILE))
         key = _stamp(CONFIG_FILE)
         if _cfg_cache["cfg"] is not None and _cfg_cache.get("damaged") == key:
@@ -410,26 +417,15 @@ def load_config():
 
 
 def _read(key):
-    """load_config(): read config.json (key: its stamp), migrate it if it is older, keep it in _cfg_cache."""
+    """load_config(): read config.json (key: its stamp) and keep it in _cfg_cache. A configuration of a version before
+    CONFIG_VERSION is not converted: ConfigOutdated – Tuttiphon does not start and the file stays as it is."""
     try:
-        text = read_text(CONFIG_FILE)
-        cfg = _parse_config(text)
+        cfg = _parse_config(read_text(CONFIG_FILE))
         if cfg.get("version", 1) < CONFIG_VERSION:
-            version = cfg.get("version", 1)
-            try:
-                cfg = migrate(cfg)
-            except (KeyError, TypeError, AttributeError, IndexError, ValueError) as e:
-                raise ConfigDamaged(_s("migration failed: {error}", error=f"{type(e).__name__}: {e}")) from None
-            try:   # say, one person per Navidrome account (v13): what does not fit is not converted
-                validate_config(_complete(copy.deepcopy(cfg)))
-            except ValueError as e:
-                raise ConfigOutdated(_s(
-                    "The configuration {file} is from an earlier version and does not fit this one: {error}. "
-                    "Tuttiphon does not start and has changed nothing – please put this right in the earlier "
-                    "version first (see the changelog), then update again.", file=CONFIG_FILE, error=e)) from None
-            _migration_backup(version, text)   # only now: what fails leaves config.json as it was (a restart loop too)
-            _write(cfg)
-            key = _stamp(CONFIG_FILE)
+            raise ConfigOutdated(_s(
+                "The configuration {file} is from a version before Tuttiphon 2.0 and cannot be read by this one. "
+                "Tuttiphon does not start and has changed nothing – move the file away to start with a new setup.",
+                file=CONFIG_FILE))
     except ConfigDamaged as e:
         if _cfg_cache["cfg"] is not None:
             _damaged(key, e)
@@ -439,7 +435,7 @@ def _read(key):
         raise ConfigDamaged(_s(
             "The configuration {file} is damaged and cannot be read ({error}). Tuttiphon does not start, so "
             "that nothing gets overwritten – please correct the file or replace it with a backup "
-            "(backup/config_v*.json or config.json from a tuttiphon-sicherung-*.zip), then start again.",
+            "(config.json from a tuttiphon-sicherung-*.zip), then start again.",
             file=CONFIG_FILE, error=e)) from None
     _cfg_cache.update(key=key, cfg=_complete(cfg), damaged=None)
 
@@ -615,6 +611,12 @@ def _validate_config(cfg):
     for key in ("welten", "stile", "playlists", "settings", "personen"):
         if key not in cfg:
             raise ValueError(_("config: '{key}' is missing", key=key))
+    # what load_config would refuse after a restart must not be saved in the first place
+    if type(cfg.get("version")) is not int or cfg["version"] != CONFIG_VERSION:
+        raise ValueError(_("config: {kind} invalid", kind="version"))
+    for key in ("dismissed", "ignored"):
+        if key in cfg and not (isinstance(cfg[key], list) and all(isinstance(x, str) for x in cfg[key])):
+            raise ValueError(_("config: {kind} invalid", kind=key))
     for kind in ("welten", "stile", "personen", "playlists"):
         ids = [x.get("id") for x in cfg[kind]]
         if any(not i for i in ids) or len(ids) != len(set(ids)):
@@ -784,7 +786,7 @@ def _validate_types(cfg):
             raise ValueError(_("config: person '{id}': the topic for notifications may only contain letters, digits, - and _",
                                id=p['id']))
         new = p.get("newEvery")   # never played songs in the smart queue: every n-th song (sonic.NEW_CHOICES), 0 = none
-        if new is not None and (isinstance(new, bool) or new not in (0, 3, 5)):
+        if new is not None and (type(new) is not int or new not in (0, 3, 5)):   # 3.0 would break range()
             raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key="newEvery"))
         te = p.get("tasteExclude")   # music worlds that do not count for the person's taste (ids; unknown ones are ignored)
         if te is not None and (not strs(te) or len(te) > 50 or any(long(x, 100) for x in te)):
@@ -809,7 +811,7 @@ def _validate_types(cfg):
                 raise ValueError(_("config: playlist '{id}': {key} must be a list of names", id=p['id'], key=k))
             if long(p.get(k), 300):
                 raise ValueError(_("config: playlist '{id}': {key} is too long", id=p['id'], key=k))
-        for k in ("public", "hits", "yearRound"):
+        for k in ("hits", "yearRound"):
             if p.get(k) is not None and not isinstance(p[k], bool):
                 raise ValueError(_("config: playlist '{id}': {key} invalid", id=p['id'], key=k))
         w = p.get("welt")
@@ -976,9 +978,6 @@ def _validate_settings(st):
         raise ValueError(_("Settings: Opus/original unknown"))
     if not all(f in ("flac", "wav", "aiff", "ape", "wv", "alac") for f in op.get("formats", ["flac"])):
         raise ValueError(_("Settings: Opus/source format unknown"))
-    arch = str(op.get("archiveDir") or "Archiv")
-    if arch.startswith("/") or ".." in arch.replace("\\", "/").split("/"):
-        raise ValueError(_("Settings: the archive folder must be a folder inside the Navidrome folder (e.g. “Archiv”)"))
     if op.get("owner") and not re.fullmatch(r"\d+:\d+", str(op["owner"])):
         raise ValueError(_("Settings: please give the owner as UID:GID, e.g. 1000:1000"))
     for key, value in (st.get("paths") or {}).items():
@@ -1023,139 +1022,7 @@ def _validate_settings(st):
 FAMILY_NAME = N_("Family")       # name of a new family entry (server language; follows a language switch)
 FAMILY_EDIT = ("all", "admins")  # settings.familyEdit: who may create, change and delete the family's playlists
 
-# For migrating very old configurations (v1 had no people yet): a neutral person „Familie“ (stored data)
-DEFAULT_PERSONEN = [
-    {"id": "familie", "name": "Familie", "icon": "i:home", "user": "", "public": True, "prefix": "",
-     "likes": {"welten": [], "stile": [], "artists": []}, "dislikes": {"artists": [], "genres": []}},
-]
-WELT_SCENES = {"kinder": "kinder", "mittelalter": "mittelalter", "northern": "nordic", "deutsch": "deutsch-indie",
-               "indie": "indie-folk", "crossover": "crossover"}
-
 
 def slug(text):
     s = re.sub(r"[^\w]+", "-", text.lower()).strip("-")
     return s or "x"
-
-
-EMOJI_ICON = {"🧸": "teddy", "⚔️": "swords", "⚔": "swords", "🌲": "tree", "☘️": "clover", "☘": "clover", "🤘": "skull", "🦇": "ghost", "💃": "party", "🎤": "mic", "🎙️": "mic", "🎪": "tent", "🇩🇪": "flag", "🎧": "headphones", "🎸": "guitar", "🎹": "piano", "🎻": "notes", "🎼": "notes", "🌙": "moon", "🪩": "disco", "⚡": "zap", "🎮": "gamepad", "🪕": "campfire", "🎷": "waves", "🌴": "palm", "🎺": "party", "🕺": "footprints", "😴": "bed", "☀️": "sun", "☀": "sun", "🐣": "flower", "🏮": "leaf", "🍂": "leaf", "🎃": "ghost", "❄️": "snowflake", "❄": "snowflake", "🎄": "xmas", "🗓️": "calendar", "📻": "radio", "📼": "cassette", "💿": "disc", "📀": "player", "📱": "smartphone", "⭐": "star", "❤️": "heart", "❤": "heart", "🆕": "new", "🔁": "repeat", "🏠": "home", "🎵": "music", "🎶": "music", "🙂": "smile", "👶": "baby", "🐱": "cat", "👑": "crown", "🚀": "rocket", "🌍": "globe", "🔀": "sparkles", "✨": "sparkles", "🔥": "flame"}
-
-
-def migrate(cfg):
-    """v1 -> v2: people, scene link, stable playlist files, status instead of deleting. Later versions below.
-    Names and values written here are stored data (German, as in the old configurations)."""
-    version = cfg.get("version", 1)
-    if version < 2:
-        cfg.setdefault("personen", copy.deepcopy(DEFAULT_PERSONEN))
-        cfg.setdefault("dismissed", [])
-        cfg.setdefault("ignored", [])
-        cfg["settings"].setdefault("defaultPerson", "familie")
-        for w in cfg["welten"]:
-            w.setdefault("scene", WELT_SCENES.get(w["id"]))
-            w.setdefault("autoScene", bool(w.get("scene")))
-            w.setdefault("excludedArtists", [])
-            if w["id"] == "kinder":   # Mo-Do is 90s eurodance, not children's music
-                w["artists"] = [a for a in w["artists"] if a != "Mo‐Do"]
-        try:
-            managed = json.loads((STATE_DIR / "managed_playlists.json").read_text(encoding="utf-8"))
-        except (FileNotFoundError, ValueError):
-            managed = {}
-        by_name = {name: f for f, name in managed.items()} if all(isinstance(v, str) for v in managed.values()) else {}
-        today = dt.date.today().isoformat()
-        used = set()
-        for p in cfg["playlists"]:
-            base = slug(f"{p['welt']}-{p['stil']}".replace("*", "alle"))   # i18n-ignore
-            pid, n = base, 2
-            while pid in used:
-                pid, n = f"{base}-{n}", n + 1
-            used.add(pid)
-            p.setdefault("id", pid)
-            p.setdefault("person", "familie")
-            p.setdefault("status", "aktiv")
-            p.setdefault("created", today)
-            name = _v1_name(cfg, p)
-            if name in by_name:
-                p.setdefault("file", by_name[name])
-        cfg["version"] = 2
-    if version < 3:   # v3: emojis -> uniform SVG icons ("i:name")
-        for kind in ("welten", "stile", "personen"):
-            for x in cfg.get(kind, []):
-                if isinstance(x.get("icon"), str) and x["icon"] in EMOJI_ICON:
-                    x["icon"] = "i:" + EMOJI_ICON[x["icon"]]
-        cfg["version"] = 3
-    if version < 4:   # v4: sound vibes and the step "understand the music"
-        have = {s["id"] for s in cfg.get("stile", [])}
-        cfg["stile"] += [copy.deepcopy(s) for s in default_config()["stile"] if s.get("group") == "Klang" and s["id"] not in have]
-        pipe = cfg.get("settings", {}).get("pipeline")
-        if isinstance(pipe, list) and "analyse" not in pipe:
-            pipe.insert(pipe.index("lyrics") + 1 if "lyrics" in pipe else 0, "analyse")
-        cfg["version"] = 4
-    if version < 5:   # v5: step “fetch missing covers”, vibe “Guten Morgen”
-        pipe = cfg.get("settings", {}).get("pipeline")
-        if isinstance(pipe, list) and "cover" not in pipe:
-            pipe.insert(pipe.index("lyrics") + 1 if "lyrics" in pipe else 0, "cover")
-        have = {s["id"] for s in cfg.get("stile", [])}
-        cfg["stile"] += [copy.deepcopy(s) for s in default_config()["stile"] if s["id"] in ("klang-morgen",) and s["id"] not in have]
-        cfg["version"] = 5
-    if version < 6:   # v6: language of the server – existing installations speak German (new ones: English)
-        cfg.setdefault("settings", {}).setdefault("language", "de")
-        cfg["version"] = 6
-    if version < 7:   # v7: the vibes added by v4/v5 came with their English name – also in German installations
-        cfg["version"] = 7
-    if version < 8:   # v8: “Niklas’ Mix” is no mix but a smart playlist – it becomes “Niklas’ Querbeet” (“Mix” only for mixes)
-        from .suggest import rename_all_sorts   # here, not at the top: suggest imports rules, which imports config
-        rename_all_sorts(cfg, cfg.get("settings", {}).get("language") or "en")
-        cfg["version"] = 8
-    if version < 9:   # v9: sound vibes “In the background” and “For listening closely” (AI: approachable, engaging)
-        # only these two (whoever deleted another delivered vibe keeps it deleted); before v4 the v4 step added them
-        have = {s["id"] for s in cfg.get("stile", [])}
-        cfg["stile"] += [copy.deepcopy(s) for s in default_config()["stile"]
-                         if s["id"] in ("klang-hintergrund", "klang-zuhoeren") and s["id"] not in have]
-        cfg["version"] = 9
-    if version < 10:   # v10: setup assistant on the first start – an existing installation counts as set up
-        st = cfg.setdefault("settings", {})
-        st["setup"] = {**(st["setup"] if isinstance(st.get("setup"), dict) else {}), "done": True}
-        # defaults that new installations no longer have keep their earlier value here (until someone changes them):
-        # conversion was on – with originals moved to the archive
-        if not isinstance(st.get("opus"), dict):
-            st["opus"] = {}
-        st["opus"].setdefault("enabled", True)
-        cfg["version"] = 10
-    if version < 11:   # v11: new files no longer get the owner 1000:10 by default (empty = the user Tuttiphon runs as)
-        st = cfg.setdefault("settings", {})
-        if not isinstance(st.get("opus"), dict):
-            st["opus"] = {}
-        st["opus"].setdefault("owner", "1000:10")   # an existing installation keeps what it had
-        cfg["version"] = 11
-    if version < 12:   # v12: the weekly "new for you" notification – on like the other events (shown as a switch)
-        st = cfg.setdefault("settings", {})
-        if not isinstance(st.get("notify"), dict):
-            st["notify"] = {}
-        if not isinstance(st["notify"].get("events"), dict):
-            st["notify"]["events"] = {}
-        st["notify"]["events"].setdefault("weekly", True)
-        cfg["version"] = 12
-    if version < 13:   # v13: one person per Navidrome account, the family an entry with an account of its own –
-        # nothing is converted (load_config refuses what does not fit); only the settings that are gone are removed
-        st = cfg.setdefault("settings", {})
-        st.pop("defaultPerson", None)
-        st.pop("public", None)
-        for p in cfg.get("personen", []):
-            if isinstance(p, dict):
-                p.pop("public", None)
-        cfg["version"] = 13
-    if version < CONFIG_VERSION:   # whatever a stage added gets its name in the server language (chosen names stay)
-        localize_defaults(cfg, cfg.get("settings", {}).get("language") or "en")
-    return cfg
-
-
-def _v1_name(cfg, p):
-    """Name of a playlist in a v1 configuration – to find its file again (data, not translated)."""
-    if p.get("name"):
-        return p["name"]
-    welt = next((w for w in cfg["welten"] if w["id"] == p["welt"]), None)
-    stil = next((s for s in cfg["stile"] if s["id"] == p["stil"]), None)
-    if welt is None:
-        return stil["name"] if stil else "?"
-    if stil is None:
-        return f"{welt['name']} · Mix"
-    return cfg["settings"]["namePattern"].format(welt=welt["name"], stil=stil["name"])

@@ -13,7 +13,7 @@ from app.rules import BuildContext, Library, build_nsp
 from tests.python.factory import base_config, song
 
 TODAY = dt.date(2026, 10, 20)
-JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "local": False}
+JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "local": False}
 
 
 def setup():

@@ -85,8 +85,6 @@ class TranslateToolTest(unittest.TestCase):
         keys = self.tool.plural_keys(self.root)
         self.assertIn("Mix · {n} matching songs, new every week", keys)   # tn(n, '…, …', '…, …')
         self.assertIn("{n} playlists written, {removed} removed", keys)
-        self.assertIn("Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} "
-                      "characters ({source}).", keys)   # tuttiphon.py counts too
         self.assertNotIn(" new every week'", "".join(keys))   # no piece of a text cut at its comma
 
     def test_missing_only_and_a_new_language(self):

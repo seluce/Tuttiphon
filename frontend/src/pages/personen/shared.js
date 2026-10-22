@@ -36,3 +36,30 @@ export function toggleIn(arr, id) {
   if (i >= 0) arr.splice(i, 1)
   else arr.push(id)
 }
+
+/* Deezer stars per account (settings.deezer.users: a list of accounts – without one, every person's account) */
+const sameAccount = (a, b) => String(a).toLowerCase() === String(b).toLowerCase()
+
+/** Accounts for “Who gets stars?”: every person's account (the family's too) and accounts still chosen without a
+ *  person – so each one can be switched on and off. */
+export function starAccounts(dz) {
+  const out = []
+  for (const u of [...S.config.personen.map((p) => p.user), ...(Array.isArray(dz?.users) ? dz.users : [])]) {
+    if (typeof u === 'string' && u && !out.some((x) => sameAccount(x, u))) out.push(u)
+  }
+  return out
+}
+
+/** Does Deezer set stars for this account? */
+export const getsStars = (dz, user) => (Array.isArray(dz?.users) ? dz.users : starAccounts(dz)).some((u) => sameAccount(u, user))
+
+/** Switch Deezer stars for an account on or off – from then on dz.users is a list. */
+export function toggleStars(dz, user) {
+  const cur = Array.isArray(dz.users) ? dz.users : starAccounts(dz)
+  dz.users = getsStars(dz, user) ? cur.filter((u) => !sameAccount(u, user)) : [...cur, user]
+}
+
+/** An account goes away (its person is deleted): Deezer no longer rates it – only if there is a list of accounts. */
+export function dropStars(dz, user) {
+  if (user && Array.isArray(dz?.users)) dz.users = dz.users.filter((u) => !sameAccount(u, user))
+}

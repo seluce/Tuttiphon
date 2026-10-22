@@ -124,7 +124,7 @@ export default {
   'Under “Via ntfy”, enter your own topic and {test}.': 'Unter „Über ntfy“ ein eigenes Thema eintragen und {test}.',
   'Send test': 'Test senden',
   '<b>Restoring</b> works by hand:': '<b>Wiederherstellen</b> geht von Hand:',
-  'Everyone in the family can sign in with their own <b>Navidrome account</b> – with the same name and password as in Symfonium. Tuttiphon checks the password directly with Navidrome; there are no separate passwords.': 'Jede:r in der Familie kann sich mit dem eigenen <b>Navidrome-Konto</b> anmelden – mit demselben Namen und Passwort wie in Symfonium. Tuttiphon prüft das Passwort direkt bei Navidrome; eigene Passwörter gibt es nicht.',
+  'Everyone in the family can sign in with their own <b>Navidrome account</b> – with the same name and password as in Symfonium. Tuttiphon checks the password directly with Navidrome; there are no separate passwords.': 'Jeder in der Familie kann sich mit dem eigenen <b>Navidrome-Konto</b> anmelden – mit demselben Namen und Passwort wie in Symfonium. Tuttiphon prüft das Passwort direkt bei Navidrome; eigene Passwörter gibt es nicht.',
   '<b>Administrator</b> – sees and changes everything. Default for Navidrome admins such as root.': '<b>Administrator</b> – sieht und ändert alles. Standard für Navidrome-Admins wie root.',
   '<b>No access</b> – cannot sign in to Tuttiphon; Navidrome and Symfonium keep working.': '<b>Kein Zugang</b> – kann sich in Tuttiphon nicht anmelden; Navidrome und Symfonium gehen weiter.',
   'Make it reachable via https through a reverse proxy such as nginx – then Tuttiphon can also be installed as an app.': 'Über einen Reverse-Proxy wie nginx per https erreichbar machen – dann lässt sich Tuttiphon auch als App installieren.',

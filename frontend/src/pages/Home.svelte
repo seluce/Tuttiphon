@@ -26,8 +26,8 @@
 
   const isActive = (p) => (p.status || 'aktiv') === 'aktiv'
   const me = $derived(S.me || {})
-  const own = $derived(new Set(me.own || []))
-  const mine = $derived(S.config.playlists.filter((p) => own.has(p.person) && isActive(p)))
+  const own = $derived(me.own || null)   // the own person's id
+  const mine = $derived(S.config.playlists.filter((p) => own && p.person === own && isActive(p)))
   const family = $derived(S.config.playlists.filter((p) => isFamily(p.person) && isActive(p)))
   const familyEditable = $derived((S.config.settings.familyEdit || 'all') === 'all')
   const mixes = $derived(mine.filter((p) => p.type === 'mix'))
@@ -45,9 +45,9 @@
 
   /* --- Suggestions */
   let sgError = $state(null)
-  const ideas = $derived((cache.sg || []).filter((x) => x.playlist && own.has(x.person) && !S.config.dismissed.includes(x.key) && !x.shared).slice(0, 6))
-  // one-tap mixes – only those "Discovered for you" doesn't already show as a card
-  const mixIdeas = $derived((cache.sg || []).filter((x) => x.playlist?.type === 'mix' && !S.config.dismissed.includes(x.key) && !ideas.includes(x)).slice(0, 3))
+  const ideas = $derived((cache.sg || []).filter((x) => x.playlist && own && x.person === own && !S.config.dismissed.includes(x.key) && !x.shared).slice(0, 6))
+  // one-tap mixes for your own person – only those "Discovered for you" doesn't already show as a card
+  const mixIdeas = $derived((cache.sg || []).filter((x) => x.playlist?.type === 'mix' && own && x.person === own && !S.config.dismissed.includes(x.key) && !ideas.includes(x)).slice(0, 3))
   function take(s) {
     accept(s)
     cache.sg = cache.sg.filter((x) => x !== s)

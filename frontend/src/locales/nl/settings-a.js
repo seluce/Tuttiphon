@@ -240,8 +240,6 @@ export default {
     'Het opgeslagen wachtwoord werkt niet meer – waarschijnlijk is het in Navidrome gewijzigd. Voer het nieuwe in, zodat je statistieken en sterren blijven werken.',
   'Save new password':
     'Nieuw wachtwoord opslaan',
-  'The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).':
-    'Het wachtwoord van de lokale beheerder is ingesteld in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).',
   'The local administrator has no Navidrome account of its own.':
     'De lokale beheerder heeft geen eigen Navidrome-account.',
   'Turned on':
@@ -450,12 +448,8 @@ export default {
     'Delen veel nummers van een band het hoogste aantal sterren, dan krijgen de populairste er één ster bij. Zo sorteert Symfonium de toptracks goed. Werkt vanaf de volgende run.',
   'Refresh every night':
     'Elke nacht verversen',
-  'Checks {n} songs on Deezer again every night in the time window of the night analysis, first those rated with the older, less accurate search. After that always the ones unchecked the longest – so the stars stay up to date.':
-    'Controleert elke nacht {n} nummers opnieuw op Deezer in het tijdvenster van de nachtanalyse, eerst die met de oudere, minder nauwkeurige zoekfunctie zijn beoordeeld. Daarna steeds de nummers die het langst niet zijn gecontroleerd – zo blijven de sterren up-to-date.',
-  'Checked with the accurate search: {done} of {total} songs · {top} top tracks highlighted.':
-    'Gecontroleerd met de nauwkeurige zoekfunctie: {done} van {total} nummers · {top} toptracks benadrukt.',
-  'Checked with the accurate search: {done} of {total} songs.':
-    'Gecontroleerd met de nauwkeurige zoekfunctie: {done} van {total} nummers.',
+  'Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.':
+    'Controleert elke nacht {n} nummers opnieuw op Deezer in het tijdvenster van de nachtanalyse – steeds de nummers die het langst niet zijn gecontroleerd, zo blijven de sterren up-to-date.',
   'Who gets stars?':
     'Wie krijgt sterren?',
   'No accounts yet – create them under People first.':

@@ -59,7 +59,7 @@
       <!-- rebuilt on every load (key = object): shows the saved role even if changing it failed -->
       <div class="grid gap-2">
         {#each list as u (u)}
-          {@const person = u.persons.map(findPerson).find(Boolean)}
+          {@const person = u.person ? findPerson(u.person) : null}
           {@const mine = isMe(u)}
           <div class="member-row flex-wrap">
             {#if person}
@@ -91,10 +91,15 @@
 </Card>
 
 <Card title={t('Local administrator')} icon="shield">
-  <p class="muted small">{env.auth
-    ? t('Besides the Navidrome accounts there is Tuttiphon’s own administrator: choose “Local administrator” on the sign-in page and enter its password. It has all rights and works even when Navidrome cannot be reached.')
-    : t('Not set up yet: Tuttiphon only asks for a sign-in once the local administrator has a password. Without it, Tuttiphon can only be reached from its own computer.')}</p>
-  <AdminPassword />
+  {#if !S.status?.env}
+    <!-- status not loaded yet (or it failed): whether a password is set is unknown -->
+    <div class="skel h-[140px]"></div>
+  {:else}
+    <p class="muted small">{env.auth
+      ? t('Besides the Navidrome accounts there is Tuttiphon’s own administrator: choose “Local administrator” on the sign-in page and enter its password. It has all rights and works even when Navidrome cannot be reached.')
+      : t('Not set up yet: Tuttiphon only asks for a sign-in once the local administrator has a password. Without it, Tuttiphon can only be reached from its own computer.')}</p>
+    <AdminPassword />
+  {/if}
 </Card>
 
 <style>

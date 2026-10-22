@@ -157,7 +157,7 @@ class SonicTest(unittest.TestCase):
             cfg["personen"][1][flag] = True
             sonic._memo.clear()
             self.assertNotIn("Eisen-1", [s["id"] for s in sonic.as_songs(self.lib, sonic.similar_songs(cfg, self.lib, "Eisen-0", 12))])
-        cfg["settings"]["defaultPerson"] = None   # also without a shared person
+        cfg["personen"] = [x for x in cfg["personen"] if not x.get("family")]   # also without a family
         sonic._memo.clear()
         self.assertNotIn("Eisen-1", [s["id"] for s in sonic.as_songs(self.lib, sonic.similar_songs(cfg, self.lib, "Eisen-0", 12))])
 
@@ -322,8 +322,9 @@ class ListenerTest(unittest.TestCase):
 
     def test_never_played_songs_come_in(self):
         """Every 5th song one the account has never played (the person's "newEvery") – the smart queue, which takes
-        the first song of each answer, gets one every 5 songs."""
-        new = {"Stahl-3", "Stahl-4", "Stahl-5", "Harfe-3", "Harfe-4", "Harfe-5", "Dudel-5", "Flöte-5"}
+        the first song of each answer, gets one every 5 songs – only ones that sound alike (the folk songs are too far
+        from metal to come in)."""
+        new = {"Stahl-3", "Stahl-4", "Stahl-5", "Eisen-5", "Harfe-3", "Harfe-4", "Harfe-5", "Dudel-5", "Flöte-5"}
         folder = rueckblick._dir("niklas")
         folder.mkdir(parents=True, exist_ok=True)
         (folder / "first.json").write_text(json.dumps({s["id"]: "2026-10-01" for s in self.lib.songs

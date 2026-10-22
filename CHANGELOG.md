@@ -5,6 +5,45 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **Your formats in line with your playlists:** Good morning, Album of the week, Daily Mix and the other formats
+  Tuttiphon makes for a person start with the person's prefix like all their other playlists – “Anna · Good morning”
+  instead of “Good morning, Anna”. The family keeps “Our …”. Playlists you already have keep their name until you
+  change it.
+- **Help as wide as the other pages:** the guides side by side, the reference in two columns on large screens.
+- **Suggestions, more reliable:** Discovered, Good morning, Sound, Album of the week and the other formats made from
+  someone's own listening are offered to every person even when the family has its own; Discoveries appear next to the
+  Daily Mix; a format you already have is not offered again when its worlds change; deleting the vibe “Newly added” no
+  longer breaks the suggestions.
+- **If config.json disappears while Tuttiphon runs** (deleted, moved, the share briefly empty), it keeps working with the
+  last state and writes the file again – instead of starting over empty, which would have removed every playlist from
+  Navidrome with the next run.
+- **What everyone likes:** users can only add or remove themselves; the members' dislikes no longer show in the
+  playlist's rules.
+- **Set up the family:** the account name is checked in Navidrome first (also names that would share a stored
+  password, like “anna.lena” and “anna-lena”), a double click never creates two accounts, and Deezer only starts if it
+  is part of “Update everything”.
+- **Smart queue and Instant Mix:** a never-played song only comes in when it fits – no far-away song any more, and the
+  similarities after it stay right; a short answer is filled up with fitting songs instead of leaving the rest to
+  Navidrome (whose picks ignore kid-safe mode and dislikes); when Tuttiphon only guesses who is listening, the family's
+  kid-safe mode stays on; yesterday's plays count as heard; one damaged byte in the play history no longer breaks an
+  account's answers; the song path is much faster and the play history needs less memory.
+- **Deezer → Who gets stars:** every person's account can be switched on and off again; deleting a person takes them
+  off the list.
+- **Small fixes:** a user without a profile is led to the welcome assistant instead of creating playlists that vanish;
+  kid-safe mode stays locked once a user turns it on; “Forgot the password?” says to reload the page; test messages at
+  most every 30 seconds per account; damaged state files of Tuttiphon are set aside instead of being reset;
+  conversion, archive and loudness tags use temporary files with unique names; the old `RATING_USERS` setting is gone
+  (Settings → Deezer decides).
+- **The administrator password only in the browser:** `TUTTIPHON_ADMIN_PASSWORD` is gone – the password of the local
+  administrator is set with the setup code at the first start and changed under Settings → Users & permissions. Remove
+  the line from docker-compose.yaml.
+- **Cleaned up:** what only existed for configurations and files of versions before 2.0 is gone – such a configuration
+  is not read (Tuttiphon does not start and changes nothing). The old settings for the playlist folder and the archive
+  are gone too: Settings → Storage locations decides (by default the playlists in `00_SmartPlaylists` of the music
+  folder, the archive in `Archiv` next to it).
+
 ## 2.0.0
 
 - **One person per Navidrome account – the family on its own:** every account has exactly one person now; there is no

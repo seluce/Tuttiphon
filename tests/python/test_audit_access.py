@@ -1,6 +1,5 @@
-"""Findings of the 0.16 audit: the administrator password cannot be deleted by an empty value, placeholders in any
-spelling, on the network never without a password (now: the setup with the code instead), sign-in only from the
-interface, the sign-in lock per account and address, trusted reverse proxies, links in the shared folder are not
+"""Findings of the 0.16 audit: a too short administrator password is refused, on the network never without a
+password (the setup with the code instead), sign-in only from the interface, the sign-in lock per account and address, trusted reverse proxies, links in the shared folder are not
 followed."""
 from tests.python import env  # noqa: F401  (before app.*)
 
@@ -18,14 +17,19 @@ from app import auth, config, instances, localadmin, tasks, web
 
 
 @contextlib.contextmanager
-def admin_env(pw):
-    """TUTTIPHON_ADMIN_PASSWORD in the environment for the duration ("" = none)."""
-    with mock.patch.dict(os.environ, {"TUTTIPHON_ADMIN_PASSWORD": pw}):
-        env.reset_caches()
-        try:
-            yield
-        finally:
-            env.reset_caches()
+def admin_password(pw):
+    """The password of the local administrator for the duration ("" = none)."""
+    def clear():
+        localadmin.HASH_FILE.unlink(missing_ok=True)
+        localadmin._cache.update(key=None, hash="")
+        web.Handler._pw_cache = (0.0, None)
+    clear()
+    if pw:
+        localadmin.set_password(pw)
+    try:
+        yield
+    finally:
+        clear()
 
 
 class TestAdminPassword(unittest.TestCase):
@@ -42,24 +46,12 @@ class TestAdminPassword(unittest.TestCase):
             config.ENV_FILE.write_text(self.env_before)
         env.reset_caches()
 
-    def test_the_interface_cannot_write_it_into_the_env_file(self):
-        config.ENV_FILE.write_text("TUTTIPHON_ADMIN_PASSWORD=erstes-passwort\n")   # by hand: still counts
-        env.reset_caches()
-        config.save_env({"NAV_URL": "http://nav.test"})
-        env.reset_caches()
-        self.assertEqual(config.admin_password(), "erstes-passwort")
-        self.assertTrue(auth.required())
-        for value in ("", "zweites-passwort", None):   # set in the browser as a hash instead (POST /api/admin-password)
-            with self.assertRaises(ValueError):
-                config.save_env({"TUTTIPHON_ADMIN_PASSWORD": value})
-        self.assertEqual(config.ENV_FILE.read_text().count("TUTTIPHON_ADMIN_PASSWORD="), 1)
-
-    def test_placeholders_in_any_spelling(self):
-        for pw in ("change-me", "Change-Me", " CHANGE-ME ", "kurz", "", None, 5):
+    def test_too_short(self):
+        for pw in ("kurz", "1234567", "", None, 5):
             self.assertTrue(config.weak_password(pw), pw)
         self.assertFalse(config.weak_password("ein-gutes-passwort"))
         with self.assertRaises(ValueError):
-            localadmin.set_password("Change-Me")
+            localadmin.set_password("kurz")
         self.assertFalse(localadmin.HASH_FILE.exists())
 
 
@@ -100,24 +92,22 @@ class TestServer(unittest.TestCase):
     def test_on_the_network_never_without_a_password(self):
         web.Handler.network = True
         self.addCleanup(localadmin.CODE_FILE.unlink, missing_ok=True)
-        with admin_env(""):   # none at all: waiting for the setup – everything needs a sign-in, the page asks for the code
+        with admin_password(""):   # none at all: waiting for the setup – everything needs a sign-in, the page asks for the code
             self.assertEqual(self.request("GET", "/api/status")[0], 401)
             status, data, _ = self.request("GET", "/api/login")
             self.assertEqual((status, json.loads(data)["setup"]), (200, True))
             self.assertTrue(localadmin.CODE_FILE.exists())
-        with admin_env("Change-Me"):   # the placeholder from docker-compose: locked
-            self.assertEqual(self.request("GET", "/api/status")[0], 503)
-        with admin_env("ein-gutes-passwort"):
+        with admin_password("ein-gutes-passwort"):
             self.assertEqual(self.request("GET", "/api/status")[0], 401)   # sign-in required, not open
             self.assertFalse(json.loads(self.request("GET", "/api/login")[1])["setup"])
         web.Handler.network = False
-        with admin_env(""):
+        with admin_password(""):
             self.assertEqual(self.request("GET", "/api/status")[0], 200)   # only on the PC: local without sign-in
             self.assertFalse(json.loads(self.request("GET", "/api/login")[1])["setup"])
 
     def test_sign_in_page_learns_whether_navidrome_is_connected(self):
         # public, before signing in: until address and admin access are there, only the local administrator gets in
-        with admin_env("ein-gutes-passwort"):
+        with admin_password("ein-gutes-passwort"):
             with mock.patch.object(web, "load_env", return_value={"NAV_URL": "http://nav.test"}):
                 status, data, _ = self.request("GET", "/api/login")
                 self.assertEqual((status, json.loads(data)), (200, {"setup": False, "navidrome": False}))
@@ -129,7 +119,7 @@ class TestServer(unittest.TestCase):
             self.assertEqual(self.request("GET", "/api/status")[0], 401)   # everything else still needs a sign-in
 
     def test_sign_in_only_from_the_interface(self):
-        with admin_env("ein-gutes-passwort"):
+        with admin_password("ein-gutes-passwort"):
             status, _, _ = self.request("POST", "/api/login", {"username": "", "password": "falsch-falsch"})
             self.assertEqual(status, 403)
             with mock.patch.object(web.time, "sleep"):

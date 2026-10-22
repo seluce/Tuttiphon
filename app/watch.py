@@ -42,16 +42,15 @@ def _save(data):
 
 
 def _load_files():
-    """-> (known paths or None, folder states or None). Also reads the older form (only a list of the paths)."""
+    """-> (known paths or None, folder states or None)."""
     try:
         data = json.loads(read_text(FILES_FILE))
     except (OSError, ValueError):
         return None, None
-    if isinstance(data, list):
-        return set(data), None
     dirs = data.get("dirs") if isinstance(data, dict) else None
-    if not isinstance(dirs, dict):
-        return None, None
+    if not isinstance(dirs, dict) or not all(isinstance(e, list) and len(e) == 3 and isinstance(e[1], list)
+                                             and isinstance(e[2], list) for e in dirs.values()):
+        return None, None   # damaged: like the first look – the next check writes it anew
     return _paths(dirs), dirs
 
 

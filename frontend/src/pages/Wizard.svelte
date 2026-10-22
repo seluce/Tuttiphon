@@ -4,6 +4,7 @@
   mood=ruhig,…, instr=piano,… and theme=film,… (a mix by sound: moods, instruments and themes of the AI – next to a
   sound vibe's own ranges) and name=… (suggested name).
   Phone: the music worlds as compact cards in two columns.
+  A user without a person of their own goes to the welcome assistant first.
 -->
 <script>
   import { loadMyTaste, byRelevance } from '../lib/taste.svelte.js'
@@ -15,10 +16,10 @@
   import PersonAvatar from '../components/PersonAvatar.svelte'
   import StepFinish from './wizard/StepFinish.svelte'
   import { showChosen } from '../components/Seg.svelte'
-  import { S, findPerson, findWelt, findStil, outOfAll, weltIds, soundOf, creatablePersons, defaultOwner, myPerson, snapshot, changed, MOODS } from '../lib/state.svelte.js'
+  import { S, findPerson, findWelt, findStil, outOfAll, weltIds, soundOf, creatablePersons, defaultOwner, myPerson, isAdmin, snapshot, changed, MOODS } from '../lib/state.svelte.js'
   import { ownerOrder } from '../lib/playlist.js'
   import { toast } from '../lib/overlay.svelte.js'
-  import { go } from '../lib/router.svelte.js'
+  import { go, replace } from '../lib/router.svelte.js'
   import { api } from '../lib/api.js'
   import { fmt, uid, today, plural } from '../lib/format.js'
   import { GROUP_LABEL } from '../lib/richtungen.js'
@@ -34,6 +35,14 @@
   const persons = ownerOrder(creatablePersons())
   const single = persons.length <= 1   // only one choice -> skip "For whom?"
   const first = single ? 1 : 0
+  /** owner when none is chosen: the default owner if you may create for them, otherwise the first one you may */
+  const fallbackOwner = () => (persons.find((p) => p.id === defaultOwner()?.id) || persons[0])?.id
+
+  // a user without a person of their own creates playlists only after the welcome assistant (the server would drop them)
+  const noPerson = $derived(!isAdmin() && !myPerson())
+  $effect(() => {
+    if (noPerson) untrack(() => replace('#/willkommen'))   // replacing: "back" must not lead here again
+  })
 
   /** Before the finishing touches: sound vibes exist only as a mix; artist lists for editing. */
   function prepareFinish(x) {
@@ -46,13 +55,13 @@
   const start = untrack(() => {
     const params = new URLSearchParams(query)
     const welt = params.get('welt')
-    const x = { person: params.get('person') || defaultOwner()?.id, welt: welt ? (welt.includes(',') ? welt.split(',') : welt) : [], stil: params.get('stil') || '*', id: uid('playlist') }
+    const x = { person: params.get('person') || fallbackOwner(), welt: welt ? (welt.includes(',') ? welt.split(',') : welt) : [], stil: params.get('stil') || '*', id: uid('playlist') }
     const every = ['day', 'week', 'month'].includes(params.get('every')) ? params.get('every') : null   // i18n-ignore: stored values
     if (params.get('type') === 'mix') {
       x.type = 'mix'
       if (every) x.mix = { size: 40, perArtist: 3, every }
     }
-    if (!persons.some((p) => p.id === x.person)) x.person = defaultOwner()?.id
+    if (!persons.some((p) => p.id === x.person)) x.person = fallbackOwner()
     const okWelten = weltIds(x).filter((w) => findWelt(w))
     x.welt = okWelten.length === 1 ? okWelten[0] : okWelten
     if (x.stil !== '*' && !findStil(x.stil)) x.stil = '*'
@@ -140,6 +149,12 @@
   let created = false
   function create() {
     if (created || !valid) return   // double click
+    if (noPerson) { go('#/willkommen'); return }
+    if (!creatablePersons().some((p) => p.id === d.person)) {   // nobody you may create it for
+      toast(t('There is no person yet. Add one first – every playlist and every profile belongs to a person.'),
+        { error: true, action: { label: t('Add person'), run: () => go('#/person/neu') } })   // i18n-ignore: route
+      return
+    }
     if (d.stil !== '*' && !findStil(d.stil)) { toast(t('This vibe no longer exists – please choose another one.'), { error: true }); show(2); return }
     created = true
     snapshot()
@@ -163,95 +178,97 @@
   </button>
 {/snippet}
 
-<div class="page max-w-[1100px]">
-  <PageHead title={t('New playlist')} eyebrow={t('Assistant')}
-    sub={single ? t('In three short steps – you always see which songs you get.') : t('In four short steps – you always see which songs you get.')} />
+{#if !noPerson}
+  <div class="page max-w-[1100px]">
+    <PageHead title={t('New playlist')} eyebrow={t('Assistant')}
+      sub={single ? t('In three short steps – you always see which songs you get.') : t('In four short steps – you always see which songs you get.')} />
 
-  <div class="stepper" {@attach showChosen(step)}>
-    {#each STEPS as label, i (i)}
-      {#if i >= first}
-        <button class:on={i === step} class:done={i < step} onclick={() => { if (i <= 2 || valid) show(i) }}>
-          <span class="n">{i < step ? '✓' : i + 1 - first}</span>{label}
-        </button>
-      {/if}
-    {/each}
-  </div>
-
-  <div>
-    {#if step === 0}
-      <div class="pick g-cards grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
-        {#each persons as p (p.id)}
-          <button class="pickcard person" class:on={d.person === p.id} onclick={() => { d.person = p.id; counts = null; show(1) }}>
-            {@render check()}
-            <PersonAvatar {p} size={72} />
-            <h3>{p.name}</h3>
-            <div class="muted small">{p.family ? t('visible to everyone') : p.id === myPerson()?.id ? t('only for you') : t('private for {user}', { user: p.user })}</div>
-            {#if p.likes?.welten?.length}
-              <div class="tiny muted">{t('likes {list}', { list: p.likes.welten.map((w) => findWelt(w)?.name).filter(Boolean).join(', ') })}</div>
-            {/if}
+    <div class="stepper" {@attach showChosen(step)}>
+      {#each STEPS as label, i (i)}
+        {#if i >= first}
+          <button class:on={i === step} class:done={i < step} onclick={() => { if (i <= 2 || valid) show(i) }}>
+            <span class="n">{i < step ? '✓' : i + 1 - first}</span>{label}
           </button>
-        {/each}
-      </div>
-    {:else if step === 1}
-      <p class="muted mb-4">{t('Who should play? Choose one or more music worlds – or “All” for the whole library.')}</p>
-      <div class="pick g-cards worlds max-mobile:grid-cols-2 max-mobile:gap-2.5">
-        <button class="pickcard" class:on={!ids.length} onclick={() => { d.welt = []; counts = null }}>
-          {@render check()}
-          <div class="collage" style:background={'var(--grad)'}>
-            <div class="on-top"><span class="ico"><Glyph value="globe" size={28} /></span><h3>{t('All')}</h3></div>
-          </div>
-          <div class="pbody">
-            <b>{t('The whole library')}</b>
-            {#if separate.length || !child}
-              <span class="muted small">{separate.length ? tn(separate.length, 'without the world “{list}”', 'without the worlds “{list}”', { list: separate.join(', ') }) : t('without separate worlds')}</span>
-            {/if}
-          </div>
-        </button>
-        {#each sorted as w (w.id)}
-          {@const wi = info[w.id]}
-          <button class="pickcard" class:on={ids.includes(w.id)} onclick={() => toggleWelt(w.id)}>
+        {/if}
+      {/each}
+    </div>
+
+    <div>
+      {#if step === 0}
+        <div class="pick g-cards grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+          {#each persons as p (p.id)}
+            <button class="pickcard person" class:on={d.person === p.id} onclick={() => { d.person = p.id; counts = null; show(1) }}>
+              {@render check()}
+              <PersonAvatar {p} size={72} />
+              <h3>{p.name}</h3>
+              <div class="muted small">{p.family ? t('visible to everyone') : p.id === myPerson()?.id ? t('only for you') : t('private for {user}', { user: p.user })}</div>
+              {#if p.likes?.welten?.length}
+                <div class="tiny muted">{t('likes {list}', { list: p.likes.welten.map((w) => findWelt(w)?.name).filter(Boolean).join(', ') })}</div>
+              {/if}
+            </button>
+          {/each}
+        </div>
+      {:else if step === 1}
+        <p class="muted mb-4">{t('Who should play? Choose one or more music worlds – or “All” for the whole library.')}</p>
+        <div class="pick g-cards worlds max-mobile:grid-cols-2 max-mobile:gap-2.5">
+          <button class="pickcard" class:on={!ids.length} onclick={() => { d.welt = []; counts = null }}>
             {@render check()}
-            <Collage artists={wi?.artists || []} icon={w.icon} title={w.name} />
+            <div class="collage" style:background={'var(--grad)'}>
+              <div class="on-top"><span class="ico"><Glyph value="globe" size={28} /></span><h3>{t('All')}</h3></div>
+            </div>
             <div class="pbody">
-              <b class="hidden max-mobile:block leading-tight">{w.name}</b>
-              <b class="max-mobile:hidden">{plural(wi?.members || 0, 'band', 'bands')} · {plural(wi?.songs || 0, 'song', 'songs')}</b>
-              <span class="hidden max-mobile:block muted small">{plural(wi?.songs || 0, 'song', 'songs')}</span>
-              <span class="muted small ell max-mobile:hidden">{(wi?.artists || []).slice(0, 3).map((a) => a[0]).join(', ')}</span>
-              {#if liked.has(w.id)}<span class="pill acc justify-self-start">♥ {t('Favorite world')}</span>{/if}
+              <b>{t('The whole library')}</b>
+              {#if separate.length || !child}
+                <span class="muted small">{separate.length ? tn(separate.length, 'without the world “{list}”', 'without the worlds “{list}”', { list: separate.join(', ') }) : t('without separate worlds')}</span>
+              {/if}
             </div>
           </button>
-        {/each}
-      </div>
-    {:else if step === 2}
-      {@const c = counts || {}}
-      <p class="muted mb-4">{t('What should play? The numbers show how many songs match each one.')}</p>
-      <div class="grid gap-[22px]">
-        {#if ids.length}<div class="toggles">{@render opt('*', t('Everything from the music world'), c['*'])}</div>{/if}
-        {#each stilGroups as [g, st] (g)}
-          <div class="field">
-            <span class="lbl">{GROUP_LABEL[g] ?? g}</span>
-            <div class="toggles">{#each st as s (s.id)}{@render opt(s.id, s.name, c[s.id], s.icon)}{/each}</div>
-          </div>
-        {/each}
-      </div>
-    {:else}
-      <StepFinish {d} />
-    {/if}
-  </div>
+          {#each sorted as w (w.id)}
+            {@const wi = info[w.id]}
+            <button class="pickcard" class:on={ids.includes(w.id)} onclick={() => toggleWelt(w.id)}>
+              {@render check()}
+              <Collage artists={wi?.artists || []} icon={w.icon} title={w.name} />
+              <div class="pbody">
+                <b class="hidden max-mobile:block leading-tight">{w.name}</b>
+                <b class="max-mobile:hidden">{plural(wi?.members || 0, 'band', 'bands')} · {plural(wi?.songs || 0, 'song', 'songs')}</b>
+                <span class="hidden max-mobile:block muted small">{plural(wi?.songs || 0, 'song', 'songs')}</span>
+                <span class="muted small ell max-mobile:hidden">{(wi?.artists || []).slice(0, 3).map((a) => a[0]).join(', ')}</span>
+                {#if liked.has(w.id)}<span class="pill acc justify-self-start">♥ {t('Favorite world')}</span>{/if}
+              </div>
+            </button>
+          {/each}
+        </div>
+      {:else if step === 2}
+        {@const c = counts || {}}
+        <p class="muted mb-4">{t('What should play? The numbers show how many songs match each one.')}</p>
+        <div class="grid gap-[22px]">
+          {#if ids.length}<div class="toggles">{@render opt('*', t('Everything from the music world'), c['*'])}</div>{/if}
+          {#each stilGroups as [g, st] (g)}
+            <div class="field">
+              <span class="lbl">{GROUP_LABEL[g] ?? g}</span>
+              <div class="toggles">{#each st as s (s.id)}{@render opt(s.id, s.name, c[s.id], s.icon)}{/each}</div>
+            </div>
+          {/each}
+        </div>
+      {:else}
+        <StepFinish {d} />
+      {/if}
+    </div>
 
-  <div class="wiz-foot">
-    {#if step > first}
-      <button class="btn" onclick={() => show(step - 1)}><Icon name="left" size={16} />{t('Back')}</button>
-    {:else}
-      <a class="btn ghost" href="#/playlists">{t('Cancel')}</a>
-    {/if}
-    {#if step < 3}
-      <button class="btn primary" disabled={step === 2 && !valid} onclick={() => show(step + 1)}>{t('Next')}<Icon name="right" size={16} /></button>
-    {:else}
-      <button class="btn primary lg" disabled={!valid} onclick={create}><Icon name="check" size={18} />{t('Create playlist')}</button>
-    {/if}
+    <div class="wiz-foot">
+      {#if step > first}
+        <button class="btn" onclick={() => show(step - 1)}><Icon name="left" size={16} />{t('Back')}</button>
+      {:else}
+        <a class="btn ghost" href="#/playlists">{t('Cancel')}</a>
+      {/if}
+      {#if step < 3}
+        <button class="btn primary" disabled={step === 2 && !valid} onclick={() => show(step + 1)}>{t('Next')}<Icon name="right" size={16} /></button>
+      {:else}
+        <button class="btn primary lg" disabled={!valid} onclick={create}><Icon name="check" size={18} />{t('Create playlist')}</button>
+      {/if}
+    </div>
   </div>
-</div>
+{/if}
 
 <style>
   /* phone: two compact columns – small picture with the icon, name and song count below it */

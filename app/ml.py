@@ -545,7 +545,7 @@ def theme_catalog(lib=None):
 
 
 def sound_catalog(lib=None):
-    """GET /api/sound/catalog (and the older /api/instruments): instruments and themes of the AI with labels in the
+    """GET /api/sound/catalog: instruments and themes of the AI with labels in the
     request's language and song counts. available / themesAvailable: the AI has recognized instruments / themes."""
     th = theme_catalog(lib)
     return {**instrument_catalog(lib), "themes": th["themes"], "themesAvailable": th["available"]}

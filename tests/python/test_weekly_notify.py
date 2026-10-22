@@ -1,9 +1,7 @@
 """The weekly "New for you this week" notification: on Monday per person with "Discovered for you" or "Album of the
-week", from the selections written for this week, once per week – the devices of the person's account once;
-configuration v12 turns the event on."""
+week", from the selections written for this week, once per week – the devices of the person's account once."""
 from tests.python import env  # noqa: F401  (before app.*)
 
-import copy
 import datetime as dt
 import unittest
 from unittest import mock
@@ -63,15 +61,6 @@ class WeeklyTest(unittest.TestCase):
         self.cfg["playlists"][0]["mix"]["every"] = "day"   # a daily "Discovered": not "this week"
         self.run_on(MONDAY)
         self.assertNotIn("Entdeckt", self.devices[0][1])
-
-    def test_migration_turns_the_event_on(self):
-        old = copy.deepcopy(base_config())
-        old["version"] = 11
-        old["settings"]["notify"] = {"enabled": True, "events": {"favorites": False}}
-        new = config.migrate(old)
-        self.assertEqual(new["version"], config.CONFIG_VERSION)
-        self.assertEqual(new["settings"]["notify"]["events"], {"favorites": False, "weekly": True})
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,10 +1,8 @@
-"""Version 0.7: fetching missing covers, tidying up playlists (season, unused, duplicate), good-morning and car-ride mix,
-migrating the configuration to version 5. No network, no real data."""
+"""Version 0.7: fetching missing covers, tidying up playlists (season, unused, duplicate), good-morning and car-ride mix.
+No network, no real data."""
 from tests.python import env  # noqa: F401  (before app.*)
 
-import copy
 import datetime as dt
-import json
 import unittest
 from collections import Counter
 from unittest import mock
@@ -65,24 +63,6 @@ class MorningTest(unittest.TestCase):
         lib = Library([song(f"s{k}", artist=f"Band {k}") for k in range(4)])
         feats = {k: {"arousal": a} for k, a in enumerate((0.7, 0.2, 0.5, 0.3))}
         self.assertEqual(mixer.calm_down(lib, [0, 1, 2, 3], feats, rise=True), [1, 3, 2, 0])
-
-    def test_migration_v5(self):
-        cfg = copy.deepcopy(config.default_config())
-        cfg["version"] = 4
-        cfg["settings"]["pipeline"] = ["flac", "lyrics", "analyse", "playlists", "scan"]
-        cfg["stile"] = [s for s in cfg["stile"] if s["id"] != "klang-morgen"]
-        cfg = config.migrate(cfg)
-        self.assertEqual(cfg["settings"]["pipeline"][:3], ["flac", "lyrics", "cover"])
-        self.assertTrue(any(s["id"] == "klang-morgen" and s.get("arc") == "rise" for s in cfg["stile"]))
-        self.assertEqual(cfg["version"], config.CONFIG_VERSION)
-
-    def test_migration_v6_keeps_existing_installs_german(self):
-        cfg = copy.deepcopy(config.default_config())
-        cfg["version"] = 5
-        cfg["settings"].pop("language", None)
-        self.assertEqual(config.migrate(cfg)["settings"]["language"], "de")       # existing installation: German
-        self.assertEqual(config.default_config()["settings"]["language"], "en")   # new installation: English
-
 
 class CoverTest(unittest.TestCase):
     def setUp(self):

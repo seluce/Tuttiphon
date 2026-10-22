@@ -24,8 +24,8 @@ from .i18n import _, _s, _sn, english, speaking
 SENT_FILE = STATE_DIR / "notified.json"
 EVENTS = ("failed", "newMusic", "autoAssigned", "favorites", "review", "weekly")
 _lock = threading.RLock()   # reentrant: once() may call once() again inside a delivery
-# Names of the runs the folder watch starts for new music (watch.py) – German in older history entries
-NEW_MUSIC_RUNS = ("Neue Musik", "Process new music")   # i18n-ignore
+# Name of the runs the folder watch starts for new music (watch.py), in its English form
+NEW_MUSIC_RUN = "Process new music"   # i18n-ignore
 
 
 def settings(cfg=None):
@@ -144,14 +144,14 @@ def after_run(entry, cfg=None):
     results = entry.get("results") or {}
     steps = [s for s, r in results.items() if r == "fehler"]   # i18n-ignore – a state, not a text
     titled = lambda: [_s(STEP_TITLES[s]) if s in STEP_TITLES else s for s in steps]   # noqa: E731  i18n-ignore – N_ titles, in the reader's language
-    failed = titled()   # in the server language – part of the "failed|…" key (German as before)
+    failed = titled()   # in the server language – part of the "failed|…" key
     name = entry.get("name") or _s("Run")
     if failed and wants(cfg, "failed"):   # the same error at most once a day (the night runs repeat themselves)
         once(f"failed|{dt.date.today()}|{'+'.join(sorted(failed))}",
              lambda: to_admin(lambda: (_s("Tuttiphon: {name} failed", name=name), _s("Errors in: {steps}", steps=", ".join(titled()))),
                               ("warning",), "#/verlauf"))
     done = bool(results) and all(r in ("ok", "warnung") for r in results.values())   # cancelled is not done
-    if (str(name).startswith(NEW_MUSIC_RUNS) or english(name).startswith(NEW_MUSIC_RUNS)) and done and wants(cfg, "newMusic"):
+    if english(name).startswith(NEW_MUSIC_RUN) and done and wants(cfg, "newMusic"):
         to_admin(lambda: (_s("Tuttiphon: New music has arrived"), _s("{name} – done, playlists are up to date.", name=name)),
                  ("headphones",), "#/")
     welten = (entry.get("summary") or {}).get("welten") or []
@@ -204,12 +204,11 @@ def _favorites(cfg, lib, ctx, person, topic, today):
 
         def go(make=make, album=album):
             ok = bool(topic) and send(topic, *_in(_lang_of(person), make), ("cd",), "#/", cfg)
-            account = (person.get("user") or "").lower()
-            if account:   # the devices of the account: once per album
-                from . import webpush
-                ok = once(f"favpush|{account}|{album['id']}",
-                          lambda: webpush.send_to(None, None, "#/", accounts=[account], tag=f"fav-{album['id']}",
-                                                  make=make)) or ok
+            account = person["user"].lower()   # the devices of the account: once per album
+            from . import webpush
+            ok = once(f"favpush|{account}|{album['id']}",
+                      lambda: webpush.send_to(None, None, "#/", accounts=[account], tag=f"fav-{album['id']}",
+                                              make=make)) or ok
             return ok
         sent += once(f"fav|{person['id']}|{album['id']}", go)
     return sent
@@ -218,7 +217,7 @@ def _favorites(cfg, lib, ctx, person, topic, today):
 def _review(cfg, lib, person, topic, today):
     from . import rules
     from .mixer import mix_day
-    mine = [p for p in cfg["playlists"] if p.get("review") and _of(cfg, p) == person["id"]
+    mine = [p for p in cfg["playlists"] if p.get("review") and p.get("person") == person["id"]
             and p.get("status", "aktiv") == "aktiv" and (p["review"].get("period") or "month") == "month"]
     if not mine:
         return 0
@@ -234,11 +233,6 @@ def _review(cfg, lib, person, topic, today):
                       ("calendar",), f"#/playlist/{p['id']}", cfg, person, topic, tag=f"review-{p['id']}")
 
 
-def _of(cfg, playlist):
-    """Id of the person a playlist is for."""
-    return playlist.get("person")
-
-
 def _to_person(key, device_key, make, tags, path, cfg, person, topic, tag):
     """A message to one person: their ntfy topic once per `key`, the devices of their account once per `device_key`
     ("{account}" filled in). make: function -> (title, text), in each reader's language. -> 1/0"""
@@ -246,10 +240,9 @@ def _to_person(key, device_key, make, tags, path, cfg, person, topic, tag):
 
     def go():
         ok = bool(topic) and send(topic, *_in(_lang_of(person), make), tags, path, cfg)
-        account = (person.get("user") or "").lower()
-        if account:
-            ok = once(device_key.format(account=account),
-                      lambda: webpush.send_to(None, None, path, accounts=[account], tag=tag, make=make)) or ok
+        account = person["user"].lower()
+        ok = once(device_key.format(account=account),
+                  lambda: webpush.send_to(None, None, path, accounts=[account], tag=tag, make=make)) or ok
         return ok
     return int(once(key, go))
 
@@ -258,7 +251,7 @@ def _weekly_parts(cfg, lib, person, start, state, index):
     """What is new for a person this week: [(playlist, text)] – "Discovered for you" first, then the album of the week,
     each only if it renews weekly and was written for this week. The texts are functions (in the reader's language)."""
     from . import mixer, rules
-    mine = [p for p in cfg["playlists"] if _of(cfg, p) == person["id"] and p.get("status", "aktiv") == "aktiv"
+    mine = [p for p in cfg["playlists"] if p.get("person") == person["id"] and p.get("status", "aktiv") == "aktiv"
             and (p.get("unheard") or p.get("album")) and mixer.options(p).get("every") == "week"]
     out = []
     for p in sorted(mine, key=lambda p: not p.get("unheard")):
@@ -280,8 +273,8 @@ def _weekly_parts(cfg, lib, person, start, state, index):
 
 def _weekly(cfg, lib, person, topic, today):
     """Monday: what is new for the person this week – "Discovered for you" and the album of the week, as written for
-    this week (state/mixes.json). Once per person and week; the devices of an account once per week with what is new
-    for all its people. Not later in the week (e.g. when first set up)."""
+    this week (state/mixes.json). Once per person and week, the devices of its account too. Not later in the week
+    (e.g. when first set up)."""
     from . import mixer, webpush
     day = mixer.mix_day()
     if day.weekday() > 1:   # Monday, Tuesday as a fallback if the Monday run did not happen
@@ -293,15 +286,14 @@ def _weekly(cfg, lib, person, topic, today):
     if not parts:
         return 0
     year, week, _wd = start.isocalendar()
-    account = (person.get("user") or "").lower()
+    account = person["user"].lower()
 
     def go():
         ok = bool(topic) and send(topic, *_in(_lang_of(person), lambda: (_s("New for you this week"),
                                                                           " · ".join(t() for _p, t in parts))),
                                   ("sparkles",), f"#/playlist/{parts[0][0]['id']}", cfg)
-        if account:   # the devices of the account (one person per account)
-            ok = once(f"weeklypush|{account}|{year}-{week}", lambda: webpush.send_to(
-                None, None, f"#/playlist/{parts[0][0]['id']}", accounts=[account], tag=f"weekly-{account}",
-                make=lambda: (_s("New for you this week"), " · ".join(t() for _p, t in parts)))) or ok
+        ok = once(f"weeklypush|{account}|{year}-{week}", lambda: webpush.send_to(   # the devices of the account
+            None, None, f"#/playlist/{parts[0][0]['id']}", accounts=[account], tag=f"weekly-{account}",
+            make=lambda: (_s("New for you this week"), " · ".join(t() for _p, t in parts)))) or ok
         return ok
     return int(once(f"weekly|{person['id']}|{year}-{week}", go))

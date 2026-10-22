@@ -1,11 +1,9 @@
 """Password of the local administrator (Tuttiphon's own administrator, internally "@notfall").
 
-Two sources – the environment wins:
-* TUTTIPHON_ADMIN_PASSWORD in the environment (docker-compose.yaml) or in <data>/.env – plain text, optional.
-* Set in the browser: at the first start or later under Settings → Users & permissions. Only a hash is kept
-  (state/admin_password.json, scrypt), never the password itself.
+Set in the browser: at the first start or later under Settings → Users & permissions. Only a hash is kept
+(state/admin_password.json, scrypt), never the password itself.
 
-On the network Tuttiphon never runs without it. As long as neither exists, it waits for its setup: a one-time setup
+On the network Tuttiphon never runs without it. As long as there is none, it waits for its setup: a one-time setup
 code in the server log and in <data>/setup-code.txt proves that whoever sets the password has access to the server –
 otherwise the first stranger to open the page would become administrator.
 """
@@ -18,7 +16,7 @@ import threading
 import time
 
 from . import events
-from .config import DATA_DIR, STATE_DIR, admin_password, load_env, read_text, weak_password, write_atomic
+from .config import DATA_DIR, STATE_DIR, read_text, weak_password, write_atomic
 from .i18n import _, _s
 
 HASH_FILE = STATE_DIR / "admin_password.json"
@@ -87,40 +85,29 @@ def stored_hash():
     return _cache["hash"]
 
 
-def source(env=None):
-    """Where the password comes from: "env" (docker-compose/.env), "stored" (set in the browser) or "" (none)."""
-    if admin_password(env if env is not None else load_env()):
-        return "env"
-    return "stored" if stored_hash() else ""
+def configured():
+    """Is the password of the local administrator set?"""
+    return bool(stored_hash())
 
 
-def configured(env=None):
-    return bool(source(env))
-
-
-def check(password, env=None):
-    """Is this the password of the local administrator? (constant time; False without a password)"""
+def check(password):
+    """Is this the password of the local administrator? (False without a password)"""
     if not isinstance(password, str) or not password:
         return False
-    plain = admin_password(env if env is not None else load_env())
-    if plain:
-        return hmac.compare_digest(password.encode("utf-8"), plain.encode("utf-8"))
     stored = stored_hash()
     return bool(stored) and verify_hash(password, stored)
 
 
-def identity(env=None):
+def identity():
     """Changes whenever the password changes – the sessions of the local administrator are tied to it."""
-    plain = admin_password(env if env is not None else load_env())
-    return ("env:" + plain) if plain else ("hash:" + stored_hash()) if stored_hash() else ""
+    stored = stored_hash()
+    return "hash:" + stored if stored else ""
 
 
 def set_password(password):
     """Keep the hash of a new password (set in the browser). Ends the setup: the setup code is deleted."""
     if weak_password(password):
         raise ValueError(_("The administrator password needs at least 8 characters."))
-    if source() == "env":
-        raise ValueError(_("The password of the local administrator is set in docker-compose.yaml – change it there."))
     with _lock:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
         write_atomic(HASH_FILE, json.dumps({"hash": make_hash(password), "at": int(time.time())}), mode=0o600)
@@ -130,13 +117,6 @@ def set_password(password):
         except FileNotFoundError:
             pass
 
-
-def changed_at():
-    try:
-        data = json.loads(read_text(HASH_FILE))
-        return int(data.get("at") or 0) or None
-    except (OSError, ValueError, TypeError, AttributeError):
-        return None
 
 
 # ---------------------------------------------------------------------------- setup code

@@ -109,7 +109,7 @@ class SuggestionTest(unittest.TestCase):
     def test_good_morning_only_with_the_habit(self):
         got = self.keys(self.INFO)
         s = next(v for k, v in got.items() if "daytime:morning" in k)
-        self.assertEqual((s["title"], s["playlist"]["name"]), ("Guten Morgen, Jonas", "Guten Morgen, Jonas"))
+        self.assertEqual((s["title"], s["playlist"]["name"]), ("Jonas · Guten Morgen", "Jonas · Guten Morgen"))
         self.assertEqual(s["playlist"]["mix"]["minutes"], 25)
         self.assertIn("werktags gegen 6:45 Uhr", s["why"])
         self.assertEqual(s["because"], "Aus dem Hören")

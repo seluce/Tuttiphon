@@ -1,7 +1,7 @@
 # Data model
 
 This chapter describes everything Tuttiphon stores permanently: the configuration `config.json` with every field, its
-migration, the credentials in `.env`, the files in `state/`, `logs/` and `backup/`, and the shared folder
+version, the credentials in `.env`, the files in `state/`, `logs/` and `backup/`, and the shared folder
 `.tuttiphon/` of the instances. For each item it states
 who writes a field (the interface or only the server), which values are valid and what happens when a file is deleted.
 How the values take effect is described in the topic chapters – [Playlists](04-playlists.md), [Maintenance](05-maintenance.md),
@@ -35,11 +35,11 @@ data/                      (in the container: /config)
 ├── setup-code.txt         one-time setup code, only while there is no administrator password (600, not in backups)
 ├── state/                 state, tracking files and caches
 ├── logs/                  one log per run
-└── backup/                originals of overwritten playlist files, backups before a migration
+└── backup/                originals of overwritten playlist files
 ```
 
 `setup-code.txt` (`localadmin.CODE_FILE`) exists only while a server on the network waits for its setup – no
-`TUTTIPHON_ADMIN_PASSWORD` and no `state/admin_password.json` ([Security](07-security.md#setup-mode)): the code as
+`state/admin_password.json` ([Security](07-security.md#setup-mode)): the code as
 `XXXX-XXXX`, the same until the password is set, then deleted. It lies outside `state/` and is therefore never part of
 a backup.
 
@@ -52,11 +52,11 @@ In addition, there is a folder outside the data folder that all instances share:
 
 | Key | Type | Content | Written by |
 |---|---|---|---|
-| `version` | number | format version, currently `13` (`CONFIG_VERSION`) | server (template, migration); the interface sends the value back unchanged |
-| `settings` | object | all settings, see [settings](#settings) | interface (Settings); server only during migration |
+| `version` | number | format version, currently `13` (`CONFIG_VERSION`) | server (template); the interface sends the value back unchanged |
+| `settings` | object | all settings, see [settings](#settings) | interface (Settings); the server sets `language` at the setup of a new installation and adds the family's account to `deezer.users` (`POST /api/family`) |
 | `personen` | list | people, see [personen](#personen) | interface; users only their own |
 | `welten` | list | music worlds, see [welten](#welten) | interface; server adds `artists` during automatic classification |
-| `stile` | list | vibes, see [stile](#stile) | interface; server during migration |
+| `stile` | list | vibes, see [stile](#stile) | interface |
 | `playlists` | list | playlists, see [playlists](#playlists) | interface; server creates taken-over playlists and maintains `file`, `takeover`, `cover` |
 | `dismissed` | list | suggestions hidden by administrators | interface |
 | `dismissedAt` | object | key from `dismissed` → day it was hidden | server (`config.stamp_dismissed()` on save) |
@@ -102,22 +102,20 @@ save.
 
 | Key | Type | Default | Meaning | Validation |
 |---|---|---|---|---|
-| `setup.done` | boolean | `false` (existing installations after the migration to v10: `true`) | the setup assistant ran or was skipped. While `false`, an administrator is led to `#/einrichtung` once per browser session after signing in ([Interface](09-interface.md#setup-assistant)) | yes/no |
-| `setup.at` | string | – | day of “Finish” or “Skip setup” (`YYYY-MM-DD`); missing when the migration marked an existing installation as set up | `YYYY-MM-DD` |
+| `setup.done` | boolean | `false` | the setup assistant ran or was skipped. While `false`, an administrator is led to `#/einrichtung` once per browser session after signing in ([Interface](09-interface.md#setup-assistant)) | yes/no |
+| `setup.at` | string | – | day of “Finish” or “Skip setup” (`YYYY-MM-DD`) | `YYYY-MM-DD` |
 
-**Safe defaults for new installations.** Since v10 a new installation converts nothing until someone chooses it:
-`opus.enabled` is `false` in the template (before: `true`, with the originals moved to the archive). The other
-defaults were checked for the same reason and stay: `lyrics.fetch` and `covers.enabled` only add files next to the
-music, `lyrics.cleanup`/`upgradePlain` only replace or delete a `.txt` next to an `.lrc` of the same name, the
-analysis only reads, Deezer leaves stars given by hand alone (`deezer.overwriteManual: false`), the folder watch and
-`loudness.enabled` (writes into the music files) were already off. Existing installations keep their behavior –
-the migration to v10 writes the value they had ([Version and migration](#version-and-migration)).
+**Safe defaults for new installations.** A new installation converts nothing until someone chooses it: `opus.enabled`
+is `false` in the template. The other defaults that are on change no music file: `lyrics.fetch` and `covers.enabled`
+only add files next to the music, `lyrics.cleanup`/`upgradePlain` only replace or delete a `.txt` next to an `.lrc`
+of the same name, the analysis only reads, Deezer leaves stars given by hand alone (`deezer.overwriteManual: false`);
+the folder watch and `loudness.enabled` (writes into the music files) are off.
 
 #### Language
 
 | Key | Type | Default | Meaning | Validation |
 |---|---|---|---|---|
-| `language` | string | `"en"` (existing installations after the migration to v6: `"de"`) | Server language: run logs, notifications, names and descriptions that Tuttiphon assigns itself (`i18n._s()`); the server log (`docker logs`) is always English. Messages to the interface follow the language of the request (header `X-Lang`). A switch also renames the bundled vibes, the family entry (`config.FAMILY_NAME`, “Family”) and `allName`, as long as they still carry their bundled name (`config.localize_defaults()`). A new installation takes the language of the first administrator in the setup (`POST /api/setup`); notifications to devices follow each device's language (`push.json`), a person's ntfy topic that of their account's devices, the administrators' topic the server language | one of `en`, `de`, `fr`, `nl`, `es`, `it`, `pt`, `pl` (`i18n.LANGS`) – otherwise `400` “Settings: unknown language” |
+| `language` | string | `"en"` | Server language: run logs, notifications, names and descriptions that Tuttiphon assigns itself (`i18n._s()`); the server log (`docker logs`) is always English. Messages to the interface follow the language of the request (header `X-Lang`). A switch also renames the bundled vibes, the family entry (`config.FAMILY_NAME`, “Family”) and `allName`, as long as they still carry their bundled name (`config.localize_defaults()`). A new installation takes the language of the first administrator in the setup (`POST /api/setup`); notifications to devices follow each device's language (`push.json`), a person's ntfy topic that of their account's devices, the administrators' topic the server language | one of `en`, `de`, `fr`, `nl`, `es`, `it`, `pt`, `pl` (`i18n.LANGS`) – otherwise `400` “Settings: unknown language” |
 
 Each device stores the interface language itself (`localStorage` `tuttiphon-lang`, Settings → General → Language);
 without a choice, the browser language applies.
@@ -137,7 +135,6 @@ without a choice, the browser language applies.
 | `excludeTitles` | list | live, unplugged, instrumental, karaoke and playback markers | title keywords that are left out of every playlist (list of strings) |
 | `mixLearn` | boolean | `true` | mixes learn from listening (Settings → Playlists, “Mixes that learn”): skipped songs come up less often, songs rated 1 star by hand not at all anymore ([Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy)). The mix history is kept even with `false` |
 | `smoothTransitions` | boolean | `true` | mixes in an order where one song leads into the next: similar sound, close tempo, compatible key, similar energy (`mixer.smooth()`, [Intelligence](06-intelligence.md#smooth-transitions-in-mixes)). Needs the AI sound analysis; without sound vectors or keys, and in mixes with an arc (falling asleep, good morning), the order stays as before. A change applies from the next mix period |
-| `playlistDir` | string | `"Music/00_SmartPlaylists"` | only a fallback for the playlist folder if neither `PLAYLIST_DIR` nor `paths.playlists` is set (if the value starts with `Music/`, the rest is relative to the music folder, otherwise relative to `BASE`) |
 
 #### Automation
 
@@ -173,15 +170,15 @@ without a choice, the browser language applies.
 | `paths.archive` | string | `""` | archive for originals; relative = relative to the folder above the music folder |
 
 Empty means default. Only these three keys are allowed; relative paths must not contain `..`. The archive must not
-be the music folder or lie inside it (also when it comes from `opus.archiveDir`).
+be the music folder or lie inside it.
 `paths()` resolves the folders in this order (environment beats setting beats default); the rules for
 relative paths apply equally to the environment variable and the setting:
 
 | Folder | 1. Environment | 2. Setting | 3. Default |
 |---|---|---|---|
 | Music | `MUSIC_DIR` | `paths.music` | `BASE/Music` |
-| Playlists | `PLAYLIST_DIR` | `paths.playlists` | from `playlistDir`, i.e. `<music>/00_SmartPlaylists` |
-| Archive | `ARCHIVE_DIR` | `paths.archive` | `opus.archiveDir`, otherwise `Archiv` next to the music folder |
+| Playlists | `PLAYLIST_DIR` | `paths.playlists` | `<music>/00_SmartPlaylists` (`config.DEFAULT_PLAYLIST_DIR`) |
+| Archive | `ARCHIVE_DIR` | `paths.archive` | `Archiv` next to the music folder |
 
 If the playlist folder is not inside the music folder, `playlists.playlist_dir()` writes to
 `<music>/00_SmartPlaylists` instead – Navidrome reads playlists only from there.
@@ -191,7 +188,7 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 | Key | Type | Default | Meaning | Validation |
 |---|---|---|---|---|
 | `deezer.thresholds` | list | `[10000, 100000, 300000, 600000, 850000]` | rank levels: below `thresholds[k]` a song gets `k` stars, from the last value on 5 | five ascending integers ≥ 0 |
-| `deezer.users` | list or `null` | `null` | accounts for which stars are set; `null` = `RATING_USERS`, otherwise every `user` of the people (`rating_users()`). `POST /api/family` adds the family's account to a list (its smart playlists use its stars) | list of strings |
+| `deezer.users` | list or `null` | `null` | accounts for which stars are set; `null` = every `user` of the people (`rating_users()`). The interface writes a list as soon as an account is switched on or off under “Who gets stars?”; deleting a person removes their account from a list, `POST /api/family` adds the family's account to one (its smart playlists use its stars) | list of strings |
 | `deezer.overwriteManual` | boolean | `false` | also overwrite stars changed by hand | – |
 | `deezer.pipelineMode` | string | `"new"` | mode of the `deezer` step if the run doesn't specify its own: `new` (new songs) or `missing` (new songs **and** songs not found so far; the step then runs in mode `both`) | one of the two values |
 | `deezer.topBoost` | boolean | `true` | one star more for the top songs of each band when too many songs would otherwise share the highest star count | – |
@@ -218,15 +215,14 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 
 | Key | Type | Default | Meaning | Validation |
 |---|---|---|---|---|
-| `opus.enabled` | boolean | `false` (until v9 `true`; existing installations keep their value, see migration 9 → 10) | the `flac` step converts | – |
+| `opus.enabled` | boolean | `false` | the `flac` step converts | – |
 | `opus.formats` | list | `["flac"]` | source formats: `flac`, `wav`, `aiff`, `ape`, `wv`, `alac` | only these |
 | `opus.codec` | string | `"opus"` | target format: `opus` (`.opus`) or `aac` (`.m4a`, for Apple devices) | one of the two values |
 | `opus.bitrate` | number (kbit/s) | `160` | Opus bitrate | 48–320 |
 | `opus.aacBitrate` | number (kbit/s) | `224` | AAC bitrate | 64–320 |
 | `opus.original` | string | `"archive"` | what happens to the original afterwards: `archive`, `keep` or `delete` | one of the three values |
-| `opus.archiveDir` | string | `"Archiv"` | fallback for the archive folder (see Storage locations) | relative, without `..` |
 | `opus.minAgeMinutes` | number | `10` | newer files are left alone | 0–1440 |
-| `opus.owner` | string | `""` | `UID:GID` for new Opus/AAC files and archive folders (`chown`, if permitted); empty = the user Tuttiphon runs as. Installations from before 0.17.1 keep `"1000:10"` (migration 10 → 11) | empty or pattern `number:number` |
+| `opus.owner` | string | `""` | `UID:GID` for new Opus/AAC files and archive folders (`chown`, if permitted); empty = the user Tuttiphon runs as | empty or pattern `number:number` |
 | `opus.jobs` | number | `1` | concurrent conversions | 1–8 |
 
 #### Intelligence
@@ -276,8 +272,8 @@ person too, with an account Tuttiphon created for it.
 | `name` | string | display name |
 | `icon` | string | icon as `i:<name>` (e.g. `i:home`) |
 | `color` | string | avatar color (interface only; without a value, the interface computes one from the `id`) |
-| `user` | string | **required** – Navidrome account, unique among the people (case-insensitive): owner of the playlists, whose stars, favorites and plays count; maps the account to its person (`auth.persons_of()`) |
-| `family` | boolean | `true` = the family entry, at most one. Its account belongs to Tuttiphon (`POST /api/family` creates it; nobody signs in to Tuttiphon with it, shared devices can use it in Symfonium). Its playlists are for everyone: public in Navidrome (`rules.build_nsp()`) and visible to every account in Tuttiphon (`auth.visible_playlist()`); only its playlists can be “What everyone likes” (`together`); the names of its formats say “Our …”. Never a child profile. Only administrators change the entry |
+| `user` | string | **required** – Navidrome account, unique among the people (case-insensitive): owner of the playlists, whose stars, favorites and plays count; maps the account to its person (`auth.own_person()`) |
+| `family` | boolean | `true` = the family entry, at most one. Its account belongs to Tuttiphon (`POST /api/family` creates it; nobody signs in to Tuttiphon with it, shared devices can use it in Symfonium). Its playlists are for everyone: public in Navidrome (`rules.build_nsp()`) and visible to every account in Tuttiphon (`auth.visible_playlist()`); only its playlists can be “What everyone likes” (`together`); the names of its formats speak of “us” (“Our sound”, “Discovered for us”). Never a child profile. Only administrators change the entry |
 | `prefix` | string | is put in front of the playlist names, e.g. `"Anna · "` (the family: `""`) |
 | `likes.welten` / `likes.stile` / `likes.artists` | lists | favorite worlds, vibes and bands: basis for suggestions, radio and “You’re still missing” |
 | `dislikes.artists` / `dislikes.genres` | lists | dislikes: left out of every playlist of this person |
@@ -285,11 +281,10 @@ person too, with an account Tuttiphon created for it.
 | `push` | string | own ntfy topic for notifications (`[A-Za-z0-9_-]{1,64}`): news from the favorite bands, new for you this week, monthly recap ([Operations](08-operations.md#notifications)); other accounts never see it. Notifications via the app need no topic – there the account's devices count (`state/push.json`) |
 | `child` | boolean | child profile – only the administrator sets it: the children's music belongs to the whole library for this person ([Playlists](04-playlists.md#music-world-welt)), kid-safe mode is always on (`config.normalize_persons()` sets `clean` when loading and saving), `tasteExclude` has no effect, no card or hint to keep children's music out of the taste. Never on the family |
 | `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. The family playlists keep them ([Intelligence](06-intelligence.md#taste-per-person)). No effect on a child profile; the interface does not offer it for the family. Users set it for their own person; ids of worlds that no longer exist are removed when the configuration is loaded or saved |
-| `newEvery` | number | never played songs in the plugin's answers (smart queue, Instant Mix, song and artist radio in Symfonium): every n-th song one the account has never played – `0` never, `5` now and then, `3` often; missing = 5 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Users set it for their own person (Profile → “New songs in the queue”, only while the plugin is in use); validation: `0`, `3` or `5` |
+| `newEvery` | number | never played songs in the plugin's answers (smart queue, Instant Mix, song and artist radio in Symfonium): every n-th song one the account has never played – `0` never, `5` now and then, `3` often; missing = 5 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Users set it for their own person (Profile → “New songs in the queue”, only while the plugin is in use); validation: the integer `0`, `3` or `5` (not `3.0`) |
 
-There is no visibility per person: a person's
-playlists are private – only their account sees them in Navidrome, in Tuttiphon the account and the administrators –,
-the family's are for everyone.
+A person's playlists are private – only their account sees them in Navidrome, in Tuttiphon the account and the
+administrators –, the family's are for everyone.
 
 `validate_config()` checks the people (`_validate_persons()`): every person needs a non-empty `user` (“needs a
 Navidrome account”), an account belongs to at most one person (case-insensitive), at most one person has `family:
@@ -362,14 +357,13 @@ installation gets them from its own collection. Deleting or unlinking a world wi
 | `instruments` | list of instrument IDs of the AI (`ml.INSTRUMENTS`: `piano`, `acousticguitar`, `electricguitar`, `violin`, `strings` … – 40 in all) – a song matches if at least one of them is clearly in it (strength ≥ 0.2); only songs the AI has analyzed with version 2. A playlist whose own filter requires instruments may be “All × Everything” |
 | `themes` | list of theme IDs of the AI (`ml.THEMES`: `christmas`, `film`, `epic`, `dark`, `love`, `romantic`, `ballad`, `summer`, `space`) – a song matches if the AI hears at least one of them (strength from the theme's threshold, `ml.THEME_PRESENT`); every song the AI has analyzed has themes. A playlist whose own filter requires themes may be “All × Everything”; with `christmas` it may contain the songs the vibe `weihnachten` hides elsewhere ([Intelligence](06-intelligence.md#themes)) |
 
-`validate_config()` ignores other keys (a feature of a newer version after going back to an older one – the filter
-`audio.matches()` only looks at the known ones, so saving keeps working); ranges need two numbers (no `true`/`false`,
+`validate_config()` ignores other keys (the filter `audio.matches()` only looks at the known ones, so saving keeps
+working); ranges need two numbers (no `true`/`false`,
 no endless values) with `from ≤ to` (`approachable` and `engaging` also within 0–1).
 
-The template brings seven sound vibes (group `Klang`): `klang-schlaf` “Falling asleep” (`moods: ["schlaf"]`),
+The template brings nine sound vibes (group `Klang`): `klang-schlaf` “Falling asleep” (`moods: ["schlaf"]`),
 `klang-morgen` “Good morning”, `klang-ruhig` “Calm & gentle”, `klang-gute-laune` “Good mood”, `klang-tanzbar`
-“Danceable”, `klang-toben` “Running wild”, `klang-power` “Full power” – and, from version 9 on, two with the AI's
-values: `klang-hintergrund` “In the background” (`approachable [0.6, 1]`, `engaging [0, 0.6]`, `arousal [0, 0.55]`:
+“Danceable”, `klang-toben` “Running wild”, `klang-power` “Full power” – and two with the AI's values: `klang-hintergrund` “In the background” (`approachable [0.6, 1]`, `engaging [0, 0.6]`, `arousal [0, 0.55]`:
 easy to listen to, not demanding attention, not wound up) and `klang-zuhoeren` “For listening closely” (`engaging
 [0.75, 1]`, `dance [0, 0.55]` – without the dance floor, whose songs score the highest engagement in our library).
 
@@ -384,7 +378,7 @@ unchanged (`rules`). The interface's playlist editor removes empty fields instea
 |---|---|---|---|---|
 | `id` | string | – | unique, not `*` | interface, takeover |
 | `name` | string | – | custom name; without it, the name is built from prefix, music world and vibe (`rules.playlist_name()`) | interface |
-| `person` | string | – (required) | the person the playlist belongs to – it must exist (`_validate_owners()`); there is no fallback any more. Its account owns the playlist in Navidrome; the family's playlists are public there | interface, takeover |
+| `person` | string | – (required) | the person the playlist belongs to – it must exist (`_validate_owners()`). Its account owns the playlist in Navidrome; the family's playlists are public there | interface, takeover |
 | `status` | string | `aktiv` | `aktiv` (active), `pausiert` (paused) or `papierkorb` (trash); only active playlists are in Navidrome | interface |
 | `created` | date | – | creation date (`YYYY-MM-DD`); not evaluated | interface, takeover |
 | `source` | string | – | origin: `assistent`, `vorschlag`, `willkommen`, `radio`, `statistik`, `tabelle`, `eigene`, `handgemacht`; not evaluated | interface, takeover |
@@ -406,7 +400,7 @@ unchanged (`rules`). The interface's playlist editor removes empty fields instea
 
 In addition, `validate_config()` checks the types (`_validate_types()`): `name`, `file`, `person`, `stil`, `sort`, `icon`,
 `color`, `status`, `source`, `created`, `sortRaw`, `originalName` must be strings, `excludeArtists`, `addArtists`,
-`excludeTitles` lists of strings, `public` (no longer read), `hits` and `yearRound` booleans, `welt` a string or a list of strings, `rules` a list,
+`excludeTitles` lists of strings, `hits` and `yearRound` booleans, `welt` a string or a list of strings, `rules` a list,
 `rulesExtra` and `takeover` objects, `mix.flavor` a string; `name` at most 120 characters, `color` as for people.
 Otherwise a wrong type would make writing all playlists fail. A playlist stored before with a value that can't be
 built is left out when writing (its file stays) and shows `state: "fehler"` – it never stops the others.
@@ -450,7 +444,7 @@ mix: `type: "mix"` and, if `mix` is missing, `{"size": 40, "perArtist": 3, "ever
 | Field | Type | Meaning | Validation |
 |---|---|---|---|
 | `fav` | object | “New from your favorite bands”: `{days}` – what the person's favorite bands added in the last `days` days; `rules.favorite_artists()` determines the bands | `days` 7–365, default 60 |
-| `together` | list | family mix “What everyone likes”: people whose taste counts equally; everyone's dislikes and 1-star songs apply | at least two known people, and only on a playlist of the family (`_validate_owners()`); members are people other than the family – `auth.merge_user_changes()` drops the family and unknown ids, and the field on a playlist of anyone else |
+| `together` | list | family mix “What everyone likes”: people whose taste counts equally; everyone's dislikes and 1-star songs apply | at least two known people, and only on a playlist of the family (`_validate_owners()`); members are people other than the family – `auth.merge_user_changes()` drops the family and unknown ids, and the field on a playlist of anyone else; a user only adds or removes themselves (the other members stay as saved, a new playlist of a user gets no other members) |
 | `album` | boolean | `true`: “Album of the week” – one whole album the person's account has never played, by its taste, in album order, new every period (`mixer.album_order()`); “All × Everything” is allowed | only `true`, mix only |
 | `episodes` | boolean | `true`: “Next episode” – for every audio play series the person's account listened to lately the episode that comes next, new every day (`mixer.episode_order()`, [Playlists](04-playlists.md#playlists-from-listening)); `welt`: the audio play worlds | only `true`, mix only |
 | `unheard` | boolean | `true`: “Discovered for you” – only songs the person's account has never played, the taste decides (`mixer.unheard()`); “All × Everything” is allowed | only `true`, mix only |
@@ -520,7 +514,7 @@ those in `accounts.<account>`; `/api/config` delivers each person their own unde
 
 | List | Keys (examples) |
 |---|---|
-| `dismissed` – suggestions (`suggest.key_of()`) | `<person>\|<welt>\|<stil>\|<hits>[\|mix][\|radio:<bands>]`, e.g. `familie\|kinder\|*\|` or `familie\|kinder\|*\|\|mix`; several worlds joined with `+`; also `likes\|<person>` and `scene\|<scene>` |
+| `dismissed` – suggestions (`suggest.key_of()`) | `<person>\|<welt>\|<stil>\|<hits>[\|mix][\|radio:<bands>]` plus the marks of special formats (`\|fav`, `\|review:<period>`, `\|together`, `\|sound`, `\|daytime:<when>`, `\|unheard`, `\|album`, `\|episodes`) and `\|flavor:<flavor>` of a mix, e.g. `familie\|kinder\|*\|` or `familie\|kinder\|*\|\|mix\|flavor:ausgewogen`; two or more worlds as `favorites`; good morning, “What everyone likes” and the car ride with world `*`; also `likes\|<person>` and `scene\|<scene>` |
 | `ignored` – notices under “To review” | administrators: `cred`, `deezer-<n>`, `hand\|<file>`, `new\|<band>`, `class\|<band>`, `scenes-<n>`, `check\|<playlist>\|<songs in Navidrome>`, `low\|<playlist>\|<n>`, `gone\|<welt>\|<n>`, `untagged-<n>`; users: `profil`, `likes\|<person>`, `erste-playlist`, `passwort` |
 
 Keys containing a number reappear as soon as the number changes. Hidden suggestions come back after
@@ -529,54 +523,41 @@ runs dry; `scene|<scene>` (a deleted music world) stays. The server stamps the d
 keys keep theirs, new ones get the current day, vanished ones drop out – whatever the interface sends under `dismissedAt`
 doesn't count. “Show again” under Discover and under My account empties the list except for `scene|…`.
 
-### Version and migration
+### Version and damaged files
 
-`load_config()` compares `version` (if missing: 1) with `CONFIG_VERSION`. If it is older, it calls `migrate()`; the
-result must fit the rules of this version (`validate_config()`). Only then it backs up `config.json` with
-`write_atomic()` to `backup/config_v<old>_<YYYYMMDD_HHMMSS>.json` (a second one in the same second gets `_2`, `_3` …)
-and writes the result back. An older configuration that does not fit – say, two people on one Navidrome account
-(v13) – is **not converted**: `load_config()` raises `ConfigOutdated` (a `ConfigDamaged`), `web.serve()` refuses to
-start with a clear message (“… is from an earlier version and does not fit this one: … please put this right in the
-earlier version first”), and `config.json` stays exactly as it was – no backup either, so a container that restarts
-again and again does not fill `backup/`. While `load_config()` reads the file, messages from inside use the last known
-server language (`i18n.reading_config()`), so they never read the file again.
+`version` is the format version of the configuration, currently `13` (`CONFIG_VERSION`); the template carries it and
+the interface sends it back unchanged. `load_config()` reads the file in `config._read()` and converts nothing: a
+`config.json` with a lower `version` (missing counts as 1) is from a version before Tuttiphon 2.0 – `_read()` raises
+`ConfigOutdated` (a `ConfigDamaged`), and `web.serve()` refuses to start with the message “The configuration … is from
+a version before Tuttiphon 2.0 and cannot be read by this one. Tuttiphon does not start and has changed nothing – move
+the file away to start with a new setup.” The file stays exactly as it was, and nothing is written. Without
+`config.json`, the next start begins with the template and the setup assistant. If `config.json` vanishes while
+Tuttiphon is running (deleted, moved, the share briefly empty), it keeps working with the last good state from memory –
+the template would mean no playlists, and the next run would remove them all from Navidrome –, says so once in the
+server log (`config._gone()`: “⚠ The configuration … is gone – Tuttiphon keeps working with the last good state and
+writes it back with the next save.”), and the next save writes the file again. Raising `CONFIG_VERSION` needs a
+conversion in `config._read()` – there is none. While `load_config()` reads the file, messages from inside use the last known server
+language (`i18n.reading_config()`), so they never read the file again.
 
-A **damaged** `config.json` (no valid JSON, not an object, `settings`/lists or `version` of the wrong type, a
-migration that fails) is never replaced silently: before the first good state `load_config()` raises
-`ConfigDamaged` – `web.serve()` then refuses to start with a clear message (“… is damaged and cannot be read …
-please correct the file or replace it with a backup”). If the file becomes damaged while Tuttiphon is running, it keeps
-working with the last good state from memory, copies the damaged file to `config.defekt-<YYYYMMDD-HHMMSS>.json`
-next to it, says so once in the server log and writes the good state back with the next save. A byte order mark
-(editor) and `null` for `settings` or a list are accepted; `NaN`/`Infinity` (an endless number an older version let
-through) is read as `null`, so the value falls back to its default and `GET /api/config` stays valid JSON.
-`migrate()` works through the stages in order:
-
-| Stage | Changes |
-|---|---|
-| 1 → 2 | people introduced (default `DEFAULT_PERSONEN`), `dismissed`/`ignored` created, `settings.defaultPerson = "familie"`. Music worlds get `scene` (fixed mapping `WELT_SCENES`), `autoScene` and `excludedArtists`; in the world `kinder`, a known wrong entry is removed. Playlists get an `id` (from world and vibe, `*` → `alle`), `person: "familie"`, `status: "aktiv"`, `created` and – via the name from the old format of `state/managed_playlists.json` – their existing file as `file` |
-| 2 → 3 | emoji icons of music worlds, vibes and people become `i:<name>` (table `EMOJI_ICON`) |
-| 3 → 4 | the sound vibes (group `Klang`) from the template are added where their `id` is missing; the `analyse` step is inserted into `settings.pipeline` after `lyrics` (otherwise at the front) |
-| 4 → 5 | the `cover` step is inserted into `settings.pipeline` after `lyrics`; the sound vibe “Good morning” is added |
-| 5 → 6 | `settings.language` is added: existing installations get `"de"` (new ones start with `"en"` from the template) |
-| 6 → 7 | no new fields: the sound vibes added by 3 → 4 and 4 → 5 came with their English names, also in German installations |
-| 7 → 8 | “Mix” only for real mixes: a smart playlist that still carries the name an earlier suggestion gave it – “<name>’s mix” or “<Name> Mix” (German), no vibe, no `type: "mix"` – is renamed to “<name>’s All Sorts” / “<Name> Querbeet” in the server language (`suggest.rename_all_sorts()`); names someone typed stay, `file` stays (same playlist in Navidrome) |
-| 8 → 9 | the sound vibes “In the background” (`klang-hintergrund`) and “For listening closely” (`klang-zuhoeren`) from the template are added where their `id` is missing – only these two, so a delivered vibe someone deleted earlier stays deleted; a configuration at version 9 is not migrated again, so whoever deletes the two later keeps them deleted |
-| 9 → 10 | setup assistant: an existing installation counts as set up – `settings.setup.done = true` (other keys in `setup` stay, no `at`). Defaults that changed for new installations keep their earlier effective value: if `settings.opus.enabled` is missing, it becomes `true` (before `_fill()` could bring the new default `false`); an explicit value stays |
-| 10 → 11 | new files no longer get the owner `1000:10` by default (new installations: empty = the user Tuttiphon runs as). If `settings.opus.owner` is missing, it becomes `"1000:10"` – an existing installation keeps its earlier behavior; an explicit value stays |
-| 11 → 12 | the weekly notification “New for you this week”: `settings.notify.events.weekly = true` where it is missing (a missing `notify` or `events` object is created); an explicit value stays |
-| 12 → 13 | one person per Navidrome account, the family an entry with an account of its own – **nothing is converted**: `settings.defaultPerson`, `settings.public` and `public` of every person are removed (gone without a replacement); everything else must already fit (every person has an account of their own, every playlist an existing `person`, `together` only on the family's playlists), otherwise Tuttiphon does not start (`ConfigOutdated`, above). The changelog says what to do in the earlier version first |
-
-After the last stage, `migrate()` calls `localize_defaults()` with `settings.language`: whatever a stage added gets its
-name in the server language, and bundled vibes, the family entry and `allName` that still carry a bundled name in
-another language follow it too. Names someone chose stay as they are.
+A **damaged** `config.json` (no valid JSON, not an object, `settings`/lists or `version` of the wrong type) is never
+replaced silently: before the first good state `load_config()` raises `ConfigDamaged` – `web.serve()` then refuses to
+start with a clear message (“… is damaged and cannot be read … please correct the file or replace it with a backup
+(config.json from a tuttiphon-sicherung-*.zip), then start again.”). If the file becomes damaged – or gets a lower
+`version` – while Tuttiphon is running, it keeps working with the last good state from memory, copies the damaged file
+to `config.defekt-<YYYYMMDD-HHMMSS>.json` next to it, says so once in the server log and writes the good state back
+with the next save. A byte order mark (editor) and `null` for `settings` or a list are accepted; `NaN`/`Infinity` (an
+endless number, e.g. edited by hand) is read as `null`, so the value falls back to its default and `GET /api/config`
+stays valid JSON.
 
 ### Loading and saving
 
 **Loading – `load_config()`**
-- If `config.json` is missing, it is created from `app/default_config.json`.
+- If `config.json` is missing before the first good state, it is created from `app/default_config.json`; if it is
+  missing after that, the last good state stays ([above](#version-and-damaged-files)) and nothing is written.
 - The configuration read stays in memory until the file's modification time or size changes; each call
   gets a deep copy and may modify it freely.
-- After reading: migration (if needed), `_fill()` of the settings, creating missing lists (see above).
+- After reading: the version check ([above](#version-and-damaged-files)), `_fill()` of the settings, creating missing
+  lists (see above), the people normalized (`normalize_persons()`).
   `validate_config()` doesn't run on load – a file broken by hand editing is only noticed on the next
   save.
 
@@ -587,10 +568,11 @@ another language follow it too. Names someone chose stay as they are.
 | `save_config(cfg)` | `validate_config()`, then `_write()` – JSON with indent 2, umlauts and other non-ASCII characters unescaped, trailing newline |
 | `update_config(fn)` | load fresh, apply `fn(cfg)`, save – all under one lock. This is how the server writes its own changes (`file`, `takeover`, `cover`, newly taken-over playlists, `accounts`, automatically classified bands) |
 | `save_from_ui(incoming, keep_accounts)` | configuration from the interface, all under the lock: load the current state; if `incoming` is a function, it builds the new configuration from a copy of this state (this is how users save); then `merge_server_fields()`, `normalize_playlists()` and `save_config()` |
-| `write_atomic(path, data, mode)` | create the temporary file `.<name>.<pid>.<thread>.<random>.tmp` right away with the target permissions (`os.open(…, mode)` with `O_EXCL \| O_NOFOLLOW`, default `664`), write it, set the permissions explicitly once more, then replace, and set them once more after the rename (NAS share). The permissions are always set with `fchmod` on the open file, never via the path – in a shared folder someone could have put a link there in the meantime. Used for `config.json`, `.env` (`600`), the migration backup, the files in `state/` (except appending to `history.jsonl`), the files in `.tuttiphon/`, and playlist and lyrics files on the NAS share |
+| `write_atomic(path, data, mode)` | create the temporary file `.<name>.<pid>.<thread>.<random>.tmp` right away with the target permissions (`os.open(…, mode)` with `O_EXCL \| O_NOFOLLOW`, default `664`), write it, set the permissions explicitly once more, then replace, and set them once more after the rename (NAS share). The permissions are always set with `fchmod` on the open file, never via the path – in a shared folder someone could have put a link there in the meantime. Used for `config.json`, `.env` (`600`), the files in `state/` (except appending to `history.jsonl`), the files in `.tuttiphon/`, and playlist and lyrics files on the NAS share |
 
-`validate_config()` checks: required keys `welten`, `stile`, `playlists`, `settings`, `personen`; unique,
-non-empty IDs (not `*`) per list; the field types of people and playlists (`_validate_types()`, see above);
+`validate_config()` checks: required keys `welten`, `stile`, `playlists`, `settings`, `personen`; `version` an
+integer equal to `CONFIG_VERSION` (what `load_config()` would refuse after a restart is never saved); `dismissed` and
+`ignored`, if present, lists of strings; unique, non-empty IDs (not `*`) per list; the field types of people and playlists (`_validate_types()`, see above);
 references from playlists to music worlds, vibes and people; the value ranges from the tables above; roles in
 `accounts`. On an error, nothing is written and the request
 ends with status 400.
@@ -629,7 +611,8 @@ flowchart TD
   create for it (welcome assistant; `user` is set to their account) –, the playlists they may edit
   (`auth.editable_persons()`: their own person's, and the family's unless `settings.familyEdit` is `admins`; create,
   change, delete – without `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName`, which only the server and
-  administrators set; `together` only on the family's playlists) and `dismissed`/`ignored` into
+  administrators set; `together` only on the family's playlists, and there a user only adds or removes themselves – the
+  other members stay as saved, a new playlist of a user gets no other members) and `dismissed`/`ignored` into
   `accounts.<account>`. `user`, `family` and `child` are never taken from a user (only the administrator sets them),
   and kid-safe mode once on stays on. The song preview for users
   (`web._preview_config()`) keeps `clean` from the server as well. Settings, music worlds, vibes and other people's playlists
@@ -646,7 +629,7 @@ is dropped, then exactly one pair of matching quotes (`"…"` or `'…'`) around
 | Rank | Source | What is read from it |
 |---|---|---|
 | 1 (weaker) | `.env` in the data folder | all keys with a non-empty value |
-| 2 (stronger) | environment variables of the process (e.g. from docker-compose) | all that start with `NAV_` or `TUTTIPHON_`, plus `RATING_USERS`, `LASTFM_API_KEY` and `NTFY_TOKEN` – only with content: an empty (or whitespace-only) variable, such as `NAV_ADMIN_PASS: ""` in docker-compose, doesn't override the file |
+| 2 (stronger) | environment variables of the process (e.g. from docker-compose) | all that start with `NAV_` or `TUTTIPHON_`, plus `LASTFM_API_KEY` and `NTFY_TOKEN` – only with content: an empty (or whitespace-only) variable, such as `NAV_ADMIN_PASS: ""` in docker-compose, doesn't override the file |
 
 Afterwards, trailing `/` are removed from `NAV_URL`. The result stays in memory until the file changes
 (modification time, size). `/api/status` reports under `env.locked` which of the keys the interface may
@@ -661,8 +644,6 @@ locks these fields. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) ar
 | `NAV_PUBLIC_URL` | address for “Open in Navidrome” links; empty = `NAV_URL` | Settings → Navidrome, environment |
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | admin access: song list, scan, playlist sync, accounts, covers | Settings → Navidrome, environment |
 | `NAV_PASS_<ACCOUNT>` | password of a Navidrome account (for stars, personal statistics, mixes from the person's perspective, exact preview). The family's account gets a random password from `POST /api/family` (shown once, for shared devices in Symfonium), so its stars, plays and recap work like any account's | administrators: password dialog (e.g. Settings → Navidrome), “New person” assistant; users: Settings → My account (`/api/me/password`); sign-in with “Turn on statistics & stars” (not for the admin account); the family's: `POST /api/family` |
-| `RATING_USERS` | accounts for Deezer stars, comma-separated; applies only if `settings.deezer.users` is not set | by hand, environment |
-| `TUTTIPHON_ADMIN_PASSWORD` | optional: password of the [local administrator](07-security.md#local-administrator) in plain text; if it is set, Tuttiphon requires sign-in, and it wins over a password set in the browser (`state/admin_password.json`, see [admin_password.json](#admin_passwordjson)). On the network it must not be weak (`config.weak_password()`): at least 8 characters and not the placeholder (`config.PASSWORD_PLACEHOLDERS`: `change-me`), compared without surrounding spaces and in lowercase; otherwise the start fails and a running server stays locked ([Security](07-security.md#running-without-a-password)). Read via `config.admin_password()` | environment (docker-compose), by hand – not via `PUT /api/env` (“Unknown key”) |
 | `NTFY_TOKEN` | access token for protected topics on your own ntfy server; `/api/status` only reports whether one exists (`env.ntfyToken`) | by hand, environment |
 | `TUTTIPHON_HOSTS` | additional host names, comma-separated, through which Tuttiphon is reachable without a password (otherwise only `127.0.0.1`, `localhost`, `::1`) | by hand, environment |
 | `TUTTIPHON_TRUSTED_PROXIES` | reverse proxies whose `X-Forwarded-For` and `X-Forwarded-Proto` count: addresses or networks, comma-separated (e.g. `172.16.0.0/12`). Then the sign-in lockout counts each person's own address, and sign-ins via https get the `Secure` cookie ([Security](07-security.md#client-address)) | by hand, environment |
@@ -675,15 +656,17 @@ locks these fields. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) ar
 **`user_password(env, user)`:** first `NAV_PASS_<ACCOUNT>`; if the account is the admin (`NAV_ADMIN_USER`,
 case-insensitive), then `NAV_ADMIN_PASS`.
 
-**`rating_users(env, cfg)`:** `settings.deezer.users` if it is a list (only non-empty strings); otherwise
-`RATING_USERS`; otherwise the `user` of all people (without duplicates, case-insensitive). The same list is used by
-the `deezer` step, the notice “Passwords missing” under “To review” and `env.users` in `/api/status`.
+**`rating_users(env, cfg)`:** `settings.deezer.users` if it is a list (only non-empty strings); otherwise the `user`
+of every person (one person per account). It is set only in the configuration, never from `.env` or the environment.
+The same list is used by the `deezer` step and the notice “Passwords missing” under “To review”; `env.users` in
+`/api/status` lists every person's account plus these (`web.accounts_ok()`), each with `stars`.
 
 ### Writing – `save_env()`
 
 - allowed keys (`config.EDITABLE_ENV`): `NAV_URL`, `NAV_PUBLIC_URL`, `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_…`,
-  `RATING_USERS`, `LASTFM_API_KEY`, `NTFY_TOKEN` – the server rejects others (also `TUTTIPHON_ADMIN_PASSWORD`: a
-  password set in the browser goes to `state/admin_password.json` as a hash, a hand-written line stays untouched);
+  `LASTFM_API_KEY`, `NTFY_TOKEN` – the server rejects others (“Unknown key”); the password of the
+  local administrator never goes to `.env` – it is set in the browser and kept as a hash in
+  `state/admin_password.json` ([admin_password.json](#admin_passwordjson));
 - empty string: skipped – the value stays unchanged; otherwise only printable text without line breaks;
 - `null` deletes only a real line `KEY=…`; a commented-out template `# KEY=…` stays;
 - setting replaces the real line; if there is none, a commented-out template is replaced, otherwise the line is appended;
@@ -728,7 +711,7 @@ environment and in `.env` ([Keys](#keys)).
 | `navidrome_users.json` | last known Navidrome accounts | `auth.navidrome_users()` | fallback, deletable |
 | `plugin_key.json` | the key of the Navidrome plugin: only its SHA-256 and when it was created (`{"sha256", "at"}`) | `sonic.new_key()`, `sonic.remove_key()` (`/api/plugin/key…`) | secret; deleting it = the plugin is shut out until a new key is entered in Navidrome |
 | `install_id` | random ID of this installation (16 hex characters) – tells announcements of the own installation in `.tuttiphon/` apart from those of another one ([Shared folder .tuttiphon/](#shared-folder-tuttiphon)) | `instances.install_id()` on first need – a new one only if the file is missing or doesn't contain a valid ID; if it is briefly unreadable, no new one (that would look like another installation), it is read again later | state, deletable (a new one is created at the next start); not in the backup (`backup.SKIP_STATE`) – a copy elsewhere is another installation |
-| `deezer.json` | Deezer rank and stars set per song | `deezer` step, `/api/deezer/ranks` | important |
+| `deezer.json` | Deezer rank and stars set per song | `deezer` step | important |
 | `lautstaerke.json` | measured loudness and peak per song, and which of it has already been written to the file | `analyse` step (`lautstaerke.run()`) | state; deleting = measure everything again (only what changes is written) |
 | `plays/<account>/` | plays per day for the recap, live plays from the Navidrome plugin | `rueckblick.snapshot()`, `listen.record()` | important, not recoverable |
 | `managed_playlists.json` | which files in the playlist folder belong to Tuttiphon | `playlists` step | important |
@@ -757,7 +740,7 @@ environment and in `.env` ([Keys](#keys)).
 | `watch.json` | state of the folder watch | scheduler | state, deletable |
 | `watch_files.json` | folders of the music folder with modification time, audio files and subfolders at the last look; written only when something changed | scheduler (`watch.check()`) | state, deletable (the next look reads everything and only takes note); not in the backup |
 | `langzeit.json` | state of [long-term maintenance](05-maintenance.md#long-term-maintenance): last pass, last compaction, usual size of the song list, vanished song IDs with date | `langzeit.run()` | state, deletable (then the 30 days for vanished songs start over) |
-| `seen.json` | `{"tour": [account, …], "welcome": [account, …]}` – accounts (lowercase, `""` without sign-in) that have completed the tour or the welcome assistant; an older `tour_seen.json` (list of accounts, tour only) is read as well and carried over on the next write | `POST /api/seen` or `POST /api/tour/seen` (`auth.mark_seen()`) | state, deletable (then both come back once – the tour only if `tour_seen.json` is missing too, and not on devices that remembered it in the browser, `tuttiphon-tour:<account>`/`tuttiphon-welcome:<account>`) |
+| `seen.json` | `{"tour": [account, …], "welcome": [account, …]}` – accounts (lowercase, `""` without sign-in) that have completed the tour or the welcome assistant | `POST /api/seen` (`auth.mark_seen()`) | state, deletable (then both come back once – not on devices that remembered it in the browser, `tuttiphon-tour:<account>`/`tuttiphon-welcome:<account>`) |
 | `cache/img/`, `cache/artist_info.json` | images and artist info from Navidrome | `images.py`, cleaned up by `tasks.tidy()` | cache, deletable |
 
 Tuttiphon writes all JSON files with `write_atomic()`; only `history.jsonl` is appended to. If a file is missing or
@@ -802,8 +785,7 @@ password in `sessions.json`. Deleting the file signs everyone out. See [Security
 One entry per sign-in: the key is the random session ID from the token (`secrets.token_urlsafe(12)`),
 `u` the account (`@notfall` for the local administrator), `e` the expiry in Unix seconds; sessions of the local
 administrator additionally carry `p`, a marker of the administrator password (`auth._notfall_mark()`, derived from
-`localadmin.identity()`) – if `TUTTIPHON_ADMIN_PASSWORD` or the hash in `admin_password.json` changes, they are no
-longer valid. Permissions `600` (`ensure_dirs()` sets them again at startup). Expired entries are dropped on every write
+`localadmin.identity()`) – if the hash in `admin_password.json` changes, they are no longer valid. Permissions `600` (`ensure_dirs()` sets them again at startup). Expired entries are dropped on every write
 (sign-in, sign-out, role `none` – which removes all entries of the account). A token is valid only as long as its ID is listed here with the same
 account; deleting the file signs everyone out. The server keeps the content in memory until modification time or
 size change; if the file is briefly unreadable, the last state applies. See [Security](07-security.md#sessions).
@@ -814,14 +796,13 @@ size change; if the file is briefly unreadable, the last state applies. See [Sec
 { "hash": "scrypt:16384:8:1:<salt>:<hash>", "at": 1767950000 }
 ```
 
-The password of the local administrator when it was set in the browser – at the first start with the setup code
+The password of the local administrator, set in the browser – at the first start with the setup code
 (`POST /api/setup`) or under Settings → Users & permissions (`POST /api/admin-password`); `at` is the time in Unix
 seconds. Only the hash is stored (`localadmin.make_hash()`): scrypt with `n = 16384`, `r = 8`, `p = 1`, a random
 16-byte salt and 32 bytes of result, salt and hash in base64url without `=`; where Python has no scrypt
 `pbkdf2:600000:<salt>:<hash>` (PBKDF2-SHA256, 600,000 rounds). Every new password gets a new salt. Permissions `600`,
 written with `write_atomic()`; the server reads the file again only when modification time or size change (briefly
-unreadable: the last state). It counts only as long as `TUTTIPHON_ADMIN_PASSWORD` is not set – the environment wins
-(`localadmin.source()`), and while it is set, no new hash can be stored. Deleting the file resets a forgotten password:
+unreadable: the last state). Deleting the file resets a forgotten password:
 on the network the server is in setup mode again within about 10 s and writes a new setup code to the log, on the PC
 without network binding sign-in is off again ([Security](07-security.md#local-administrator)).
 
@@ -848,7 +829,6 @@ a restart) – so that roles are correct even then. After a failure, the server 
 | `s` | stars computed from it |
 | `t` | time of the check (seconds) |
 | `u` | stars Tuttiphon has set per account. A star in Navidrome that matches neither the new value nor `u` (and isn't 0) counts as set by hand and stays – except with `overwriteManual` |
-| `v` | 2 = checked with the exact search (band and title must match); missing on older entries – the nightly refresh checks those first |
 | `i` | ISRC through which the song was found (MusicBrainz → Deezer) – used directly on the next check |
 | `b` | 1 = as a top song of its band, one star more than the levels give |
 | `full` | only while a full check (mode `full`) is running or interrupted: start and song count; afterwards the end is in `lastFull` |
@@ -865,7 +845,7 @@ One folder `plays/<account>/` per Navidrome account (name via `slug()`, i.e. low
 | `<YYYY-MM-DD>.json` | `{song-id: n}`: new plays of this listening day – the day midway between the previous and this measurement (measurement at 05:30 or 07:00: the previous day; a second one in the afternoon: today); without an earlier measurement, the time minus 6 hours |
 | `first.json` | `{song-id: day}`: when a song was counted for the first time |
 | `moments.json` | `{"v": 1, "moments": [[song-id, played], …]}`: listening clock – for every song with new plays its last play (`played` from Navidrome, UTC) at the time of the snapshot, so a later play doesn't erase it; kept 120 days, at most 30,000 (`listenclock.record()`, [06](06-intelligence.md#listening-clock-applistenclockpy)) |
-| `live-<YYYY-MM-DD>.jsonl` | live plays from the Navidrome plugin (`listen.record()`), one event per line: `{"t": Unix seconds, "k": "start" \| "play" \| "report", "id": song-id, "pos": seconds, "dur": the song's length in seconds, "st": state, "pl": player}` – the day of `t` in local time, permissions 0640, only for accounts with a person in Tuttiphon that are not blocked; kept 120 days (`KEEP_DAYS`: older days go with the next event of the account and with the long-term maintenance, [Maintenance](05-maintenance.md#long-term-maintenance)). For an account without `baseline.json` every `play` also goes into `<YYYY-MM-DD>.json` and `first.json` (the listening day: time minus 6 hours) – with the first counter snapshot that stops ([Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy)) |
+| `live-<YYYY-MM-DD>.jsonl` | live plays from the Navidrome plugin (`listen.record()`), one event per line: `{"t": Unix seconds, "k": "start" \| "play" \| "report", "id": song-id, "pos": seconds, "dur": the song's length in seconds, "st": state, "pl": player}` – the day of `t` in local time, permissions 0640, only for accounts with a person in Tuttiphon that are not blocked; kept 120 days (`KEEP_DAYS`: older days go with the next event of the account and with the long-term maintenance, [Maintenance](05-maintenance.md#long-term-maintenance)). A broken line (cut off while writing, a damaged byte) is skipped when reading, the rest of the day counts. For an account without `baseline.json` every `play` also goes into `<YYYY-MM-DD>.json` and `first.json` (the listening day: time minus 6 hours) – with the first counter snapshot that stops ([Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy)) |
 
 Navidrome only knows counters, not a history – what is missing here can't be recovered. Counter snapshots are taken at
 server start, once a day from `settings.dailyAt` on and when the recap is fetched (at most every 30 minutes); only for
@@ -879,8 +859,13 @@ accounts with a password. See [Intelligence](06-intelligence.md).
 
 `current` maps each file that Tuttiphon manages after the last `playlists` step to its playlist ID; `ever`
 collects all files Tuttiphon has ever written. With this, `playlists.py` decides which files it may change or
-delete and which count as handmade. The older format `{file: name}` is converted on read.
-See [Playlists](04-playlists.md).
+delete and which count as handmade. See [Playlists](04-playlists.md).
+
+`playlists.load_managed()` reads the file: missing → empty; no valid JSON → set aside as
+`managed_playlists.defekt-<YYYYMMDD-HHMMSS>.json` (server log “⚠ managed_playlists.json was damaged – set aside as …”)
+and empty; wrong types are coerced (`current` an object, `ever` a list, only string file names kept). A file that is
+briefly not readable (`OSError`, e.g. on the NAS share) stops the run instead – an empty list would make the own files
+look foreign.
 
 ### history.jsonl
 
@@ -993,8 +978,10 @@ lyrics (or with only a `.txt`, if `upgradePlain` is on) is searched again on the
 
 ### mixes.json
 
-`{playlist-id: {day, key, ids}}`: start of the period (`YYYY-MM-DD`), fingerprint of the mix settings
-(`mixer.settings_key()`) and the written song IDs. As long as period and fingerprint match, the mix delivers
+`{playlist-id: {day, key, ids[, albums]}}`: start of the period (`YYYY-MM-DD`), fingerprint of the mix settings
+(`mixer.settings_key()`), the written song IDs and – for whole albums (“Album of the week”, “Next episode”) – how many
+there were to choose from (`mixer.remember(…, albums=n)`), so the preview of a remembered selection reports the right
+pool. As long as period and fingerprint match, the mix delivers
 exactly this selection. Entries of playlists that are no longer in `config.json` drop out on the next write.
 Without the file, the selection is recomputed; it may then differ slightly.
 
@@ -1002,8 +989,7 @@ Without the file, the selection is recomputed; it may then differ slightly.
 
 `{playlist-id: [{day, every, user, ids, done}]}` – per mix, the selection of the last up to 12 periods: start of the
 period (`YYYY-MM-DD`), `day`/`week`/`month`, the person's Navidrome account and the song IDs in play order.
-`feedback.record()` writes the entry every time the `.m3u` is written (not in a dry run; nothing if the person has no
-account); `feedback.learn()` sets `done: true` as soon as the period has been evaluated. `feedback.forget_removed()`
+`feedback.record()` writes the entry every time the `.m3u` is written (not in a dry run); `feedback.learn()` sets `done: true` as soon as the period has been evaluated. `feedback.forget_removed()`
 removes entries of playlists that are no longer in `config.json` before every write. The history is kept even with
 `settings.mixLearn: false`.
 
@@ -1035,13 +1021,14 @@ time. See [Maintenance](05-maintenance.md#self-check).
 ```
 
 The key is the band name in lowercase; the value holds the name in its original spelling, the music world, the match rate
-and the time of assignment. `classify.auto_log()` also reads the older version, a list of names
-(`["band a", …]`), and turns it into `{"band a": {"name": "band a"}}`; the next write produces the new form
-(old entries keep only `name`). Each band
+and the time of assignment (`classify.auto_log()`). Each band
 is classified automatically at most once: if someone takes it out again, it doesn't come back. Entries with
 `at` from the last 14 days whose band is still in the world's `artists` appear under “To review” with
-“Undo” ([Playlists](04-playlists.md#to-review-inbox)); entries of the old version have no `at` and don't appear
-there. If the file is missing or unreadable, the memory counts as empty. See
+“Undo” ([Playlists](04-playlists.md#to-review-inbox)). An assignment is remembered (`classify.remember()`) only after
+the configuration with it has been saved (`tasks._step_analyse()`, after `update_config()`). For reading, a file that
+is missing, unreadable or not an object counts as empty. Before writing (`auto_log(write=True)`), a file that is not
+an object is set aside as `auto_assigned.defekt-<YYYYMMDD-HHMMSS>.json` (server log) instead of being overwritten, and
+a briefly unreadable file (`OSError`) stops writing – otherwise bands taken out by hand would come back. See
 [Intelligence](06-intelligence.md#suggestion-or-automatic).
 
 ### daily.json, watch.json, watch_files.json
@@ -1050,7 +1037,7 @@ there. If the file is missing or unreadable, the memory counts as empty. See
 |---|---|---|
 | `daily.json` | `{date, mode, attempt, at, result}` | day and kind (`playlists`/`alles`) of the most recently started daily refresh, which attempt of the day it was (`attempt`, 1–4), start time in Unix seconds (`at`) and – added as soon as the run is over – `result` (`ok`, or `fehler` if a step ended with `fehler`). On `fehler`, the scheduler starts a new attempt no earlier than 15 minutes after `at`, until `attempt` reaches 4 ([Maintenance](05-maintenance.md#daily-refresh)). Written only once the run has actually started – if the start fails (something is already running, another instance is working), the scheduler tries again the next minute. If the file is missing, the refresh runs once more today (after `dailyAt`) |
 | `watch.json` | `{last, checked, found, lastRun}` | files with a modification time (`max(ctime, mtime)`) after `last` count as new if their path isn't in `watch_files.json`; `checked` = last look. `last` only advances if there was nothing new or the run for the new files has started. Turning the watch off empties the file; turning it on starts watching from that moment |
-| `watch_files.json` | `{"v": 2, "dirs": {"Band/Album": [mtime in ns or null, ["01 Title.flac", …], [subfolders …]], …}}` (the music folder itself as `""`) | per folder, what it contained at the last look; `null` = read again next time. The known paths follow from this. Rewritten if there was nothing new or the run for the new files has started. If the file is missing, nothing counts as new at the next look – it only takes note. This way, changed permissions or tags (new `ctime`) don't turn an old file into “new music”. The older form (just a list of paths) is read; the folder state is then built at the next look |
+| `watch_files.json` | `{"v": 2, "dirs": {"Band/Album": [mtime in ns or null, ["01 Title.flac", …], [subfolders …]], …}}` (the music folder itself as `""`) | per folder, what it contained at the last look; `null` = read again next time. The known paths follow from this. Rewritten if there was nothing new or the run for the new files has started. If the file is missing, unreadable or malformed (`watch._load_files()`: `dirs` not an object of `[mtime, [files], [subfolders]]` entries), nothing counts as new at the next look – it only takes note, like the first look. This way, changed permissions or tags (new `ctime`) don't turn an old file into “new music” |
 
 ### Shared folder .tuttiphon/
 
@@ -1105,13 +1092,16 @@ Before Tuttiphon overwrites or removes a file in the playlist folder that doesn'
   written it – also recorded in `takeover.backup`;
 - when a foreign file has the same name as a Tuttiphon playlist.
 
-In a dry run, this is only logged (on removal, not even that). In addition, `load_config()` creates
-`backup/config_v<old>_<YYYYMMDD_HHMMSS>.json` before a migration (see [Version and migration](#version-and-migration)). Backups
-are never deleted automatically. See [Playlists](04-playlists.md).
+In a dry run, this is only logged (on removal, not even that). Backups are never deleted automatically. See [Playlists](04-playlists.md).
 
 ## Temporary files
 
 - `.<name>.<pid>.<thread>.<random>.tmp` – temporary file of `write_atomic()`; only left behind after a crash.
+- `.<name>.<tag>.<random>.part` on the music share and in the archive – a new hidden file from `config.new_temp()` /
+  `config.temp_copy()`, created with `O_EXCL | O_NOFOLLOW` (never into an existing file or through a link): the
+  conversion output ffmpeg writes into (`encode`, [Maintenance](05-maintenance.md#conversion)), the copy into an archive
+  on another volume (`copy`), the cover from the file (`cover`) and the copy for the loudness tags (`tuttiphon-rg`);
+  renamed or deleted at the end, only left behind after a crash.
 - `.tuttiphon-sicherung-….zip.<pid>.<random>.tmp` in the backup folder – temporary file of `backup.create()`
   (permissions `600`); removed again if the backup fails.
 - `.schreibtest` in the data folder – probe file of `ensure_dirs()`, deleted again immediately.

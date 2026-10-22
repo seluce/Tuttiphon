@@ -12,29 +12,25 @@ filtered and every save is merged on the server side.
 ## Two operating modes
 
 Which one applies is decided solely by whether the [local administrator](#local-administrator) has a password
-(`localadmin.source()`, re-read by the server at most every 10 s, `Handler._admin()`): `"env"` –
-`TUTTIPHON_ADMIN_PASSWORD` from the environment or `.env` (`config.admin_password()`), `"stored"` – set in the browser,
-a hash in `state/admin_password.json`, `""` – none.
+(`localadmin.configured()`: a hash in `state/admin_password.json`, set in the browser; re-read by the server at most
+every 10 s, `Handler._admin()`).
 
 | | without an administrator password | with an administrator password |
 |---|---|---|
 | Sign-in | none | Navidrome account or local administrator |
 | Who am I? | always “local admin” (`auth.me(None)`: `role = admin`, `local = true`, all people) | the signed-in account with its role |
 | Reachable via | only the host names `127.0.0.1`, `localhost`, `::1` and those from `TUTTIPHON_HOSTS` – otherwise `421` | any host name |
-| Typical use | `./tuttiphon.sh` on the PC | Docker container (password set in the browser at the first start, or `TUTTIPHON_ADMIN_PASSWORD` in `docker-compose.yaml`) |
+| Typical use | `./tuttiphon.sh` on the PC | Docker container (password set in the browser at the first start) |
 
 Bound to a network address, the mode without a password doesn't exist (unless forced with `--unsafe-no-password`):
-as long as there is no administrator password at all, the server is in [setup mode](#setup-mode) – sign-in is
-required, and the password is set through the setup with a one-time code from the server log. A weak
-`TUTTIPHON_ADMIN_PASSWORD` keeps it [locked](#running-without-a-password) instead of letting anyone in with it.
+as long as there is no administrator password, the server is in [setup mode](#setup-mode) – sign-in is required, and
+the password is set through the setup with a one-time code from the server log.
 
 ## Order of checks for a request
 
 ```mermaid
 flowchart TD
-    R["Request"] --> N{"bound to a network address<br/>and TUTTIPHON_ADMIN_PASSWORD weak?"}
-    N -- yes --> E503["503 locked"]
-    N -- no --> P{"administrator password?<br/>(environment or set in the browser)"}
+    R["Request"] --> P{"administrator password set?"}
     P -- no --> SM{"bound to a network address?"}
     SM -- "yes: setup mode" --> SO
     SM -- no --> H{"Host header localhost<br/>or in TUTTIPHON_HOSTS?"}
@@ -133,21 +129,20 @@ asks for the password again.
 
 Tuttiphon's own administrator account, without a Navidrome account – for the first setup and for when Navidrome is
 unreachable: user name empty (sign-in page → “Local administrator”, field “Administrator password”) and its password.
-`app/localadmin.py` knows two sources; the environment wins (`localadmin.source()`):
+The password is only ever set in the browser (`app/localadmin.py`) and kept only as a hash in
+`state/admin_password.json` ([02](02-data-model.md#admin_passwordjson)):
 
-| Source | `source()` | Where | Changed |
-|---|---|---|---|
-| `TUTTIPHON_ADMIN_PASSWORD` | `"env"` | environment (`docker-compose.yaml`) or `.env`, plain text, optional | only there – `PUT /api/env` refuses the key, `POST /api/admin-password` answers `400`; the interface shows a note |
-| set in the browser | `"stored"` | `state/admin_password.json`, only a hash ([02](02-data-model.md#admin_passwordjson)) | Settings → Users & permissions with the current password (`POST /api/admin-password`) |
-| none | `""` | – | on the PC no sign-in (set it under Settings → Users & permissions, no current password needed); on the network [setup mode](#setup-mode) |
+| State | Set or changed |
+|---|---|
+| set | Settings → Users & permissions with the current password (`POST /api/admin-password`) |
+| not set | on the network [setup mode](#setup-mode): the first start sets it with the setup code; on the PC no sign-in – set it under Settings → Users & permissions, no current password needed |
 
 The hash (`localadmin.make_hash()`) is scrypt (`n = 16384`, `r = 8`, `p = 1`: about 16 MB and 50 ms per check) with a
 random 16-byte salt, stored as `scrypt:16384:8:1:<salt>:<hash>`; where Python has no scrypt, PBKDF2-SHA256 with
 600,000 rounds. `verify_hash()` accepts only parameters within limits (scrypt `n` up to 2^20, `r` up to 32, `p` up
 to 16; PBKDF2 up to 10,000,000 rounds), so an edited file can't make a check run for minutes. The file has permissions
-`0600` and is part of the built-in backup. `localadmin.check()` compares a password from the environment in constant
-time (`hmac.compare_digest`), a stored one via `verify_hash()`; a wrong password → “The administrator password is
-wrong.”
+`0600` and is part of the built-in backup. `localadmin.check()` checks a password via `verify_hash()` (the final
+comparison in constant time, `hmac.compare_digest`); a wrong password → “The administrator password is wrong.”
 
 As long as Navidrome is not connected (address or admin access missing), the sign-in page offers only this access: it
 asks the public `GET /api/login`, which answers nothing but `{"setup": bool, "navidrome": bool}` – a Navidrome account
@@ -156,31 +151,29 @@ internal user `@notfall` (`auth.NOTFALL`):
 
 - Role always `admin`, regardless of settings; display name “Administrator” (`/api/me` → `name`), in the server log
   “Local administrator” (`web._who()`).
-- Sees all people but owns none (`own` is empty) – admin rights still apply to all playlists.
+- Sees all people but owns none (`own` is `null`) – admin rights still apply to all playlists.
 - Can't store a Navidrome password (`/api/me/password` → `400`); `remember` is ignored. Settings → My account shows a
-  hint instead of the password field: its password is changed under Settings → Users & permissions, or in
-  `docker-compose.yaml` when it comes from there.
+  hint instead of the password field: its password is changed under Settings → Users & permissions.
 - Never asks Navidrome: `role_of()` and `me()` don't look up `@notfall` in the account list – so the access
   works precisely when Navidrome is unreachable.
 - The session carries an identifier of the administrator password in `state/sessions.json` (`p` = `_notfall_mark()`:
   the first 16 characters of HMAC-SHA256(`notfall:<identity>`) with the key from `state/secret`; `localadmin.identity()`
-  is `env:<password>` or `hash:<stored hash>`). `read_token()` compares it on every request; when the password changes –
-  `TUTTIPHON_ADMIN_PASSWORD` edited, or a new hash via `POST /api/admin-password` (new salt, so even the same password
-  again) – all sessions of the local administrator end. If the local administrator changed it itself via
+  is `hash:<stored hash>`). `read_token()` compares it on every request; when the password changes – a new hash via
+  `POST /api/admin-password` (new salt, so even the same password again) or a deleted `admin_password.json` – all
+  sessions of the local administrator end. If the local administrator changed it itself via
   `POST /api/admin-password`, its browser gets a new session right away.
 
-**Forgotten password:** with source `stored`, delete `state/admin_password.json` in the data folder. Within about 10 s
+**Forgotten password:** delete `state/admin_password.json` in the data folder. Within about 10 s
 (`Handler._admin()`) a server on the network is in setup mode again and writes a new setup code to the log; on the PC
-without network binding, sign-in is simply off again. Sessions of Navidrome accounts stay valid. With source `env`,
-set a new value in `docker-compose.yaml` and recreate the container (in `.env` it takes effect within 10 s).
+without network binding, sign-in is simply off again. Sessions of Navidrome accounts stay valid.
 
 If no administrator password is set, signing in as local administrator always fails. A Navidrome account named
 `notfall` therefore can't sign in normally.
 
 ### Setup mode
 
-A server bound to a network address (`Handler.network`) without any administrator password (`localadmin.source()`
-is `""`) doesn't run without sign-in, but waits for its setup (`setup` in `_handle()`):
+A server bound to a network address (`Handler.network`) without an administrator password
+(`localadmin.configured()` is false) doesn't run without sign-in, but waits for its setup (`setup` in `_handle()`):
 
 - The host check doesn't apply; every protected request needs a session – `401 {"error": "login"}` for the API and
   images, `302` → `/login.html` for pages. `GET /api/login` answers `{"setup": true, …}`, and the sign-in page shows
@@ -297,9 +290,9 @@ There are three roles (`auth.ROLES`): `admin`, `user`, `none`. `auth.role_of()` 
   (account deleted in Navidrome), the sessions stay stored and become valid again as soon as the account
   has a role again.
 - **Own person** (`own`) of an account: one person per Navidrome account – the person whose `user` matches the account
-  name (`auth.persons_of()`, case-insensitive; never the family entry): `[id]` or `[]`. An account without a person
-  gets the welcome assistant, which creates exactly one ([Writing](#writing-merge_user_changes)). Admins see all
-  people (`persons`), users only their own; the local administrator has `own: []`.
+  name (`auth.own_person(user, cfg)`, case-insensitive; never the family entry): its id or `None`. An account without
+  a person gets the welcome assistant, which creates exactly one ([Writing](#writing-merge_user_changes)). Admins see
+  all people (`persons`), users only their own (`[own]` or `[]`); the local administrator has `own: null`.
 - **The family** (optional, `auth.family_id()`): a person with `family: true` and an account of its own that Tuttiphon
   created (`POST /api/family`, admins only). Its account has the role `none` – nobody signs in with it; shared devices
   (car, kitchen tablet) can use it in Symfonium. Its playlists are for everyone; who may change them is
@@ -358,27 +351,17 @@ doesn't bring them back. The entry contains only the account name.
 
 ## Running without a password
 
-Without an administrator password – neither `TUTTIPHON_ADMIN_PASSWORD` nor one set in the browser – there is no
-sign-in; whoever reaches the server is an administrator. Three safeguards keep this restricted to your own computer:
+Without an administrator password there is no sign-in; whoever reaches the server is an administrator. Three
+safeguards keep this restricted to your own computer:
 
-- **Start:** if `--host` is not `127.0.0.1`, `localhost` or `::1`, `tuttiphon.py serve` aborts with code 2 when
-  `TUTTIPHON_ADMIN_PASSWORD` is set but weak (`config.weak_password()`): shorter than 8 characters or the placeholder
-  (`config.PASSWORD_PLACEHOLDERS`: `change-me`) in any spelling – compared without surrounding spaces and in
-  lowercase, so `Change-Me` counts too. The message names the placeholder or the number of characters and where the
-  value comes from (`docker-compose.yaml`/environment or the `.env` in the data folder), and asks for a
-  password with at least 8 characters – or for removing the line and setting the password in the browser. Without any
-  administrator password the server starts in [setup mode](#setup-mode) and announces the setup code.
-  `--unsafe-no-password` forces a start with a weak password (warning) or without sign-in on the network.
-- **Network lock while running:** `web.serve(host, port, strict=True)` sets `Handler.network` if the server is bound
-  to an address other than `127.0.0.1`, `localhost`, `::1` (`--unsafe-no-password` passes `strict=False` and turns this
-  off). Then `_handle()` answers **every** request – the interface, static files and `/api/login` included – with
-  `503 {"error": "Tuttiphon is locked: TUTTIPHON_ADMIN_PASSWORD is too short or still the placeholder – please set at
-  least 8 characters."}` as long as the password from the environment or `.env` is weak, e.g. because the `.env` was
-  edited while the server is running. A password that goes missing entirely – the line removed,
-  `state/admin_password.json` deleted – switches to setup mode instead: sign-in stays required, never the mode without
-  sign-in. The server re-reads the password every 10 s; once a proper one is back, it answers normally again, without
-  a restart. Bound to loopback only (the PC on `127.0.0.1`), nothing changes: there, a missing password still means the
-  mode without sign-in.
+- **Start:** if `--host` is not `127.0.0.1`, `localhost` or `::1`, `tuttiphon.py serve` without an administrator
+  password starts in [setup mode](#setup-mode) and announces the setup code. `--unsafe-no-password` forces a start
+  without sign-in on the network; without a password it prints a warning.
+- **Network binding while running:** `web.serve(host, port, strict=True)` sets `Handler.network` if the server is
+  bound to an address other than `127.0.0.1`, `localhost`, `::1` (`--unsafe-no-password` passes `strict=False` and
+  turns this off). A password that goes missing while the server runs – `state/admin_password.json` deleted – then
+  switches to setup mode (re-read every 10 s): sign-in stays required, never the mode without sign-in. Bound to
+  loopback only (the PC on `127.0.0.1`), a missing password means the mode without sign-in.
 - **Host check** (`Handler._host_ok()`, against DNS rebinding): without a password and outside setup mode, the `Host`
   header (without port) must be one of `127.0.0.1`, `localhost`, `::1` or be listed in `TUTTIPHON_HOSTS`
   (comma-separated list, case-insensitive). Otherwise `421` (“Access only via 127.0.0.1 – or set an administrator
@@ -389,9 +372,9 @@ sign-in; whoever reaches the server is an administrator. Three safeguards keep t
 only protects against browsers (DNS rebinding): a program on the network can set the `Host` header freely. Without
 an administrator password, Tuttiphon therefore never runs on a network address without sign-in (`--host 0.0.0.0`
 then starts in setup mode; `--unsafe-no-password` deliberately overrides this). On the PC, sign-in is turned on under
-Settings → Users & permissions: with source `""`, `POST /api/admin-password` needs no current password and signs
+Settings → Users & permissions: without a password, `POST /api/admin-password` needs no current password and signs
 this browser in as local administrator. Via the interface the administrator password can only be replaced by one
-that isn't weak, never deleted; `PUT /api/env` doesn't accept `TUTTIPHON_ADMIN_PASSWORD` at all.
+that isn't weak (`config.weak_password()`: shorter than 8 characters), never deleted.
 
 ## Behind a reverse proxy
 
@@ -434,21 +417,21 @@ endpoint.
 |---|---|
 | `GET /api/config` | `auth.view_config()`: only visible playlists (their own person's and the family's); their own person in full, every other person – the family, the members of “What everyone likes” – only with `id`, `name`, `icon`, `color`, `prefix`, `family` (`PUBLIC_PERSON_FIELDS` – without preferences, dislikes, kid-safe mode, ntfy topic and account names); from `settings` only `autoApply`, `namePattern`, `allName`, `limit`, `minDuration`, `allMinRating`, `seasonRest`, `familyEdit` (`USER_SETTINGS` – no paths, accounts, owners), plus from `notify` only `enabled` and `server`; no `accounts`; `dismissed`/`ignored` from their own account, no `dismissedAt` |
 | `GET /api/status` | reachability, version and scan state of Navidrome, the link address `webUrl`, only their own accounts under `env.users`; no access address, no admin name, no paths, no steps, no other instances, no Navidrome error message |
-| `GET /api/playlists` | only visible playlists, no handmade ones, no orphaned files |
-| `GET /api/playlist`, `/api/welt`, `/api/artist` | only visible playlists; `/api/playlist` for a playlist they may not change (the family's while `settings.familyEdit` is `admins`) without `nsp`, without `usage` and without the lines “Never included: …” (dislikes), “New from the favorite bands in the last …” (favorite bands) and “Prefers what …” (family mix) in `summary`; for artists “Favorite”/“never” only for their own person; `forMe` in `/api/welt` always from the taste of the signed-in account (local administrator: `null`) |
+| `GET /api/playlists` | only visible playlists, no handmade ones, no orphaned files; `navidromeError` only `true`/`false`, without the error text |
+| `GET /api/playlist`, `/api/welt`, `/api/artist` | only visible playlists; `/api/playlist` for every playlist that is not their own person's – the family's too, whatever `settings.familyEdit` says, since the family mix carries its members' taste – without `nsp` and without the lines “Never included: …” (dislikes), “New from the favorite bands in the last …” (favorite bands) and “Prefers what …” (family mix) in `summary` (`web.PRIVATE_SUMMARY`, recognized in every language); `usage` of a mix only on playlists they may change; for artists “Favorite”/“never” only for their own person; `forMe` in `/api/welt` always from the taste of the signed-in account (local administrator: `null`) |
 | `GET /api/taste` | `person` only their own or the family (`_own_person()`, otherwise `403`); `me=1` always the signed-in account (local administrator and without sign-in: `available: false`) |
 | `GET /api/search` | songs, styles, moods and lyrics matches from the whole library; combo suggestions (`combos`) for their own person. If their own person has kid-safe mode on, explicit songs (rude lyrics and songs tagged as explicit, `web._child_blocked()` like the song window) are missing from `songs` and `lyrics`. If there is no lyrics index yet, the search triggers reading the lyrics – at most every 6 hours (`liedtext.update_soon()`) |
 | `GET /api/song`, `/api/song/more`, `/api/stream` | songs from the whole library (as in Symfonium), playlists in the song window only visible ones; the server fetches audio via the admin account, credentials never leave it. If their own person has kid-safe mode on, explicit songs can neither be played nor shown in the song window (`403`, `web._child_blocked()`); “More like this” uses the dislikes and kid-safe mode of their own person. Listening in doesn't count as a play in Navidrome |
 | `GET /api/suggestions`, `/api/inbox` | only suggestions they can take – for their own person and the family's unless `settings.familyEdit` is `admins` (`auth.editable_persons()`) –, no new music worlds, their own hide lists, their own “To review” list |
 | `GET /api/task`, `POST /api/apply/now` | whether and what is running, but no log lines |
-| `POST /api/preview`, `/api/counts` | computed with the stored state instead of the `config` sent along: for their own person only the storable fields (`PERSON_FIELDS`) come from the interface – `id` and account stay as on the server –, other people (the family too) without `likes`/`dislikes`/`push` (`_preview_config()`). The playlist must belong to their own person or – unless `settings.familyEdit` is `admins` – the family (`_guard_preview()` with `_own_person(…, write=True)`, otherwise `403`) – otherwise recap, favorite-band or rule playlists could be used to query the listening, stars and favorites of other accounts; fields that only the server sets (`rules` …) are dropped, `sampleSize` at most 100, `mix.size` at most 500. `/api/counts` (song counts for the wizard) accepts their own person and the family |
+| `POST /api/preview`, `/api/counts` | computed with the stored state instead of the `config` sent along (`_preview_config()`): for their own person only the storable fields (`PERSON_FIELDS`) come from the interface – `id` and account stay as on the server, a stored kid-safe mode stays on –, the family's entry stays complete as stored (its playlists can be theirs to change), every other person without `likes`/`dislikes`/`push`. The playlist must belong to their own person or – unless `settings.familyEdit` is `admins` – the family (`_guard_preview()` with `_own_person(…, write=True)`, otherwise `403`) – otherwise recap, favorite-band or rule playlists could be used to query the listening, stars and favorites of other accounts; fields that only the server sets (`rules` …) are dropped, `together` (“What everyone likes”) only as saved for that playlist `id` and otherwise removed – other people's taste and 1-star songs never on request –, `sampleSize` at most 100, `mix.size` at most 500. `/api/counts` (song counts for the wizard) takes only `welt`, `person`, `hits` and `minRating` from the request (so never `together`) and accepts their own person and the family |
 | `POST /api/rueckblick/keep` | only their own person, and the family's while they may change its playlists; a playlist with the same name can exist only once (`400`) |
 | `GET /api/stats`, `/api/rueckblick`, `/api/missing` | only their own person and the family, otherwise `403` |
 | everything in `ADMIN_ONLY` | `403` |
 
 A playlist is **visible** if it belongs to the user's own person or is for everyone – the family's (`rules.for_everyone()`, `auth.visible_playlist()` – the
 same rule as `public` in `build_nsp()`: a person's playlists are private, the family's are for everyone). Every
-playlist has a `person` (`auth.person_id()`); there is no fallback.
+playlist has a `person` (`playlist["person"]`).
 Users may **change** (`auth.own_playlist()`) the playlists of `auth.editable_persons()`: their own person's, and the
 family's unless `settings.familyEdit` is `"admins"` – the family entry itself (name, look, preferences, kid-safe mode)
 only administrators change. `/api/snapshot`, `/api/cover/*` and `/cover` check this with `_own_playlist_id()`;
@@ -477,7 +460,7 @@ incoming state, `merge_user_changes()` takes only:
 | limits | at most `MAX_USER_PLAYLISTS` (200) playlists of the people whose playlists they may change (trash included) – otherwise `400` “You can have at most …”; an account that already has more keeps them, but can't add any. Texts and lists are limited by `validate_config()` (name 120, prefix 40, icon 64 characters, lists 2,000 entries) |
 | playlists they may change | their own person's and – unless `settings.familyEdit` is `admins` – the family's (`auth.editable_persons()`): change, delete (missing from the incoming state), create; playlists of anyone else stay unchanged, and giving one to a person they may not edit is ignored. The fields `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName` (`auth.SERVER_PLAYLIST_FIELDS`) are set only by the server and administrators: existing playlists keep the server's state, new ones lose them (only the server creates takeovers of handmade playlists) |
 | their own hide lists | `dismissed` and `ignored` → `accounts.<account>`, strings only, at most 500 |
-| family mix (`together`) | only on the family's playlists; members are existing people other than the family – unknown ids and the family drop out, on any other playlist the field is dropped (`config._validate_owners()` refuses it there too). If fewer than two members remain, the field is dropped; an “All × Everything” playlist then becomes a mix based on the own taste (`mix.flavor: "geschmack"`). `rules.together_of()` checks the same on every evaluation. The family mix is the one place where the taste of several accounts meets – on the family's playlist, for everyone; the members' dislikes, 1-star songs and kid-safe mode apply – protection comes first |
+| family mix (`together`) | only on the family's playlists; a user only adds or removes themselves – the other members stay as saved (a new playlist from a user starts with no other members), since joining puts that person's taste and 1-star songs into the playlist; members are existing people other than the family – unknown ids and the family drop out, on any other playlist the field is dropped (`config._validate_owners()` refuses it there too). If fewer than two members remain, the field is dropped; an “All × Everything” playlist then becomes a mix based on the own taste (`mix.flavor: "geschmack"`). `rules.together_of()` checks the same on every evaluation. The family mix is the one place where the taste of several accounts meets – on the family's playlist, for everyone; the members' dislikes, 1-star songs and kid-safe mode apply – protection comes first |
 | kid-safe mode (`clean`) | anyone may turn it on, only the administrator may turn it off – a stored `clean: true` stays in place when users save. The exclusion rules are built without account-dependent rules (stars, favorites, plays), so that explicit favorite songs of the account drop out too ([04](04-playlists.md#playlists-from-listening)) |
 
 Everything else – other people's persons and playlists, music worlds, vibes, settings, global lists, other accounts –
@@ -520,11 +503,10 @@ All passwords and keys are in `.env` in the data folder (`data/.env` on the PC, 
 environment variables. Format, keys and precedence: [02 – Data model](02-data-model.md#env--credentials).
 
 - `save_env()` writes only the keys the interface may set (`config.EDITABLE_ENV`: `NAV_URL`, `NAV_PUBLIC_URL`,
-  `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `RATING_USERS`, `LASTFM_API_KEY`, `NTFY_TOKEN`), only printable
+  `NAV_ADMIN_USER`, `NAV_ADMIN_PASS`, `NAV_PASS_*`, `LASTFM_API_KEY`, `NTFY_TOKEN`), only printable
   values without line breaks, and always sets the file to permissions **`0600`** (`write_atomic(…, mode=0o600)`). An
-  empty value is skipped. `TUTTIPHON_ADMIN_PASSWORD` is not among them (“Unknown key”): a hand-written line still
-  counts, but the interface can neither set nor delete it. A password set in the browser never lands in `.env` –
-  `state/admin_password.json` holds only its hash (permissions `0600`, [Local administrator](#local-administrator)).
+  empty value is skipped. The administrator password never lands in `.env` – `state/admin_password.json` holds only
+  its hash (permissions `0600`, [Local administrator](#local-administrator)).
   `write_atomic()` creates the temporary file with the target permissions right away
   (`os.open(…, mode)`), so it is never readable by others, not even briefly. `config.ensure_dirs()` sets a
   hand-made `.env` to `0600` at startup, as well as `state/secret` and
@@ -535,9 +517,9 @@ environment variables. Format, keys and precedence: [02 – Data model](02-data-
   ([08 – Backup](08-operations.md#built-in-backup-appbackuppy)).
 - The data folder is never the project folder: without `TUTTIPHON_DATA` it is always `<project>/data` – so backups
   with credentials can't end up in Git ([02 – Data folder](02-data-model.md#the-data-folder)).
-- Environment variables (`NAV_*`, `TUTTIPHON_*`, `RATING_USERS`, `LASTFM_API_KEY`) take precedence over the file.
+- Environment variables (`NAV_*`, `TUTTIPHON_*`, `LASTFM_API_KEY`, `NTFY_TOKEN`) take precedence over the file.
 - **No response contains a password or a key**: the server only reports whether something is stored
-  (`adminOk`, `users[].ok`, `passwordStored`, `lastfm`, `auth`, `adminPassword` – only the source).
+  (`adminOk`, `users[].ok`, `passwordStored`, `lastfm`, `auth`).
 
 ### Navidrome access and images stay on the server
 
@@ -565,15 +547,15 @@ interface shows the key once, after creating it. `sonic.check_key()` compares in
 `GET /api/sonic/…` – song ids, titles, bands and albums of the whole library, as the family sees them (without
 separate worlds unless asked for one of their songs, without the family's dislikes – without a family nobody's –,
 kid-safe as soon as a person other than the family has kid-safe mode or a person is a child profile, and for the
-family's answers also with the family's kid-safe mode) – and `POST /api/sonic/listen`, which only adds plays of an account
+family's answers and on a guess also with the family's kid-safe mode – only a sure listener's answer goes without it) – and `POST /api/sonic/listen`, which only adds plays of an account
 with a person in Tuttiphon that is not blocked (`listen.allowed()`; whoever has the key could add made-up plays, never
 read any; the day files `plays/<account>/live-….jsonl` with permissions 0640); nothing of accounts, people, playlists
 or settings. The answers are personal all the same: for a song that one account is playing, `/api/sonic/…` answers
 for that account's person (one person per account; on a shared device the family's) – without their dislikes and
 without what they just heard or rated 1 star –, so whoever has the key can read from the answers roughly what was
 played lately. Keep the key like a password. Where it is
-unclear who is listening, Tuttiphon guesses from the plays (a guess leaves the 1-star songs in and never brings a
-child profile's music) or answers for the family (without a family: for everyone, without anyone's dislikes). Wrong keys count toward a lockout like passwords, but only per address (`_limited()`, key
+unclear who is listening, Tuttiphon guesses from the plays (a guess leaves the 1-star songs in, never brings a
+child profile's music and keeps the family's kid-safe mode on) or answers for the family (without a family: for everyone, without anyone's dislikes). Wrong keys count toward a lockout like passwords, but only per address (`_limited()`, key
 `plugin|<address>`, 30 in 10 minutes) – the right key always passes, so wrong guesses from elsewhere never shut the
 plugin out. Creating, removing and the status
 (`/api/plugin…`) and the download of the plugin are admin only. In Navidrome the key is in the plugin's settings
@@ -586,24 +568,25 @@ in there – since Navidrome 0.64 a host name alone never allows a private addre
 |---|---|
 | `Handler._length()` / `_body()` | JSON at most 2,000,000 bytes, cover upload 10 MiB; JSON objects only; no `NaN`, `Infinity` or numbers beyond the float range (`1e999`) – they would become endless numbers that break `int()` when writing playlists |
 | every answer | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` and `Content-Security-Policy: frame-ancestors 'none'` (no embedding in foreign pages), `Referrer-Policy: same-origin`; `Server: Tuttiphon` without the Python version. `HEAD` gets the headers of `GET` without the content. An unexpected error (`500`) only says “Something went wrong – the details are in the server log”; type and message are only in the server log |
-| broken playlists | a playlist whose rules can't be built (a value an older version let through) is left out of `playlists.plan()` with a log line, keeps its file (it isn't removed from Navidrome), shows `state: "fehler"` in `playlists.status()` and is skipped in the band and song window – it never breaks writing or the pages of the others |
+| broken playlists | a playlist whose rules can't be built (e.g. a value edited by hand in `config.json`) is left out of `playlists.plan()` with a log line, keeps its file (it isn't removed from Navidrome), shows `state: "fehler"` in `playlists.status()` and is skipped in the band and song window – it never breaks writing or the pages of the others |
 | `Handler.timeout` | 30 s per connection |
 | `_static()`, `api_log()` | the resolved path must lie inside the build or log folder |
 | `validate_config()` | every stored configuration is fully checked, including the field types of people and playlists (`_validate_types()`) – a wrong type would otherwise make writing all playlists, or whole pages, fail. Every number that ends up in `int()` has a range (`minDuration` 0–3600 or `null`, `radio.bands` 1–100, `limit`, `minRating` …), the name pattern only knows `{welt}` and `{stil}` (no format details), a person's `color` only `#rgb`, `#rrggbb` or `hsl(…)` (it goes into the page's styles – never `url(…)`). A wrong type the single checks don't foresee is a `ValueError` (`400`), never a crash |
 | `auth.login()`, `Handler._login()` | constant-time comparison for the administrator password (`localadmin.check()`); only with `X-Tuttiphon: 1`; sign-in lockout per account and address, per address and per account ([Sign-in lockout](#sign-in-lockout)), 1 s delay per counting failed attempt; sign-ins, counting failed attempts and lockouts are in the server log with the account name (without password, without address) ([08](08-operations.md#server-log)) |
-| `Handler.network` | bound to a network address: `503` for every request while `TUTTIPHON_ADMIN_PASSWORD` is weak ([Running without a password](#running-without-a-password)); without any administrator password setup mode – sign-in required, the password only via the setup code ([Setup mode](#setup-mode)) |
+| `Handler.network` | bound to a network address: without an administrator password setup mode – sign-in required, the password only via the setup code ([Setup mode](#setup-mode), [Running without a password](#running-without-a-password)) |
 | `Handler._setup()` | only in setup mode (otherwise `409`) and only with `X-Tuttiphon: 1`; setup code compared in constant time, lockout `setup\|<address>` 10 and `setup` 50 in 10 minutes; `_setup_lock` – of two simultaneous requests only the first sets the password; `setup-code.txt` deleted on success, never in a backup |
-| `Handler._admin_password()` | admin only (`ADMIN_ONLY`), only with `X-Tuttiphon: 1`; refused with source `env`; the new password must not be weak; with source `stored` only with the current password – a wrong one counts under the lockout keys of the local administrator (status `400`); all sessions of the local administrator end, the browser of the local administrator gets a new one |
-| `localadmin.py` | only a hash of a password set in the browser (scrypt, PBKDF2 as fallback), permissions `0600`; parameters outside sensible limits are refused when checking ([Local administrator](#local-administrator)) |
-| `POST /api/seen`, `POST /api/tour/seen` | record “tour/welcome done” only for the signed-in account (`auth.current()["user"]`), never for one sent along; only the values `tour` and `welcome` |
+| `Handler._admin_password()` | admin only (`ADMIN_ONLY`), only with `X-Tuttiphon: 1`; the new password must not be weak; once a password is set only with the current password – a wrong one counts under the lockout keys of the local administrator (status `400`); all sessions of the local administrator end, the browser of the local administrator gets a new one |
+| `localadmin.py` | only a hash of the password (scrypt, PBKDF2 as fallback), permissions `0600`; parameters outside sensible limits are refused when checking ([Local administrator](#local-administrator)) |
+| `POST /api/seen` | records “tour/welcome done” only for the signed-in account (`auth.current()["user"]`), never for one sent along; only the values `tour` and `welcome` |
 | `api_env_test()` | a stored password is only sent to the stored `NAV_URL`; for a new address the password must be sent along – so “Test connection” can't be used to send a stored password to a foreign server |
 | `api_accounts_save()` | self-protection: one's own account can't take away its own admin role (see [Roles](#roles)); role `none` ends all sessions of the account |
-| `api_env_save()` | `NAV_URL` and `NAV_PUBLIC_URL` only with `http://` or `https://` – the link address of the interface (`nav_web_url()`) also ignores any other value from the environment (no `javascript:` links); `TUTTIPHON_ADMIN_PASSWORD` can't be set or deleted this way (`save_env()`: “Unknown key”) |
-| `POST /api/notify/test` | at most one test message per 30 seconds and account, topic only from letters, digits, `-`, `_`; users only with their own person and only to its topic (also the one just being entered) – never to the administrator's topic or one another person uses, and without a topic there is no fallback to the administrator's (`notify.test(fallback=False)`); without a person only administrators. `view_config()` gives users only `enabled` and `server` of `settings.notify` – never the administrator's topic; other people's ntfy topics stay private, like all person fields except name, icon, color, prefix |
+| `api_env_save()` | `NAV_URL` and `NAV_PUBLIC_URL` only with `http://` or `https://` – the link address of the interface (`nav_web_url()`) also ignores any other value from the environment (no `javascript:` links) |
+| `POST /api/notify/test` | at most one attempt per 30 seconds and account – the time is set before any check, so every attempt counts, also a refused one (guessing other people's topics stays slow) –, topic only from letters, digits, `-`, `_`; users only with their own person and only to its topic (also the one just being entered) – never to the administrator's topic or one another person uses, and without a topic there is no fallback to the administrator's (`notify.test(fallback=False)`); without a person only administrators. `view_config()` gives users only `enabled` and `server` of `settings.notify` – never the administrator's topic; other people's ntfy topics stay private, like all person fields except name, icon, color, prefix |
 | `POST /api/push/*` | devices always apply to the signed-in account; “administrator device” only with role `admin`. Only push addresses via `https` at the known push services are accepted (`webpush.PUSH_HOSTS`: Google, Mozilla, Apple, Microsoft) – so no subscription can make Tuttiphon request addresses in the local network; the subscription's keys are checked for length and form; at most 10 devices per account; test message at most every 30 seconds |
 | Notifications through the app | content end-to-end encrypted (RFC 8291) – the push service only sees size and time; sender key `state/push_keys.json` with permissions 0600, never in a response (only the public part via `GET /api/push/key`) |
 | Notifications via ntfy | go only to the configured ntfy server; content: band name, album name, music world, name of a run and, as the target when tapped, the configured address of Tuttiphon with the page – no credentials, no paths. `NTFY_TOKEN` is only sent over `https`. Anyone who knows a topic can read along on ntfy.sh; protected topics on your own server with `NTFY_TOKEN` |
 | `config.write_atomic()` | temporary file with a random name, `O_EXCL` and `O_NOFOLLOW` – never writes through a symlink or into an existing file (important for covers on the music share); sets the permissions with `fchmod` on the open file, also after the rename – never via the path, where someone could have put a link in the meantime. Without an explicit mode: `0640` in the data folder (configuration and state are not for other users of the NAS), `0664` elsewhere (playlists and lyrics on the music share, which Navidrome reads); credentials `0600` |
+| `config.new_temp()`, `config.temp_copy()` | temporary files in album folders and the archive (conversion output that ffmpeg then writes into, copy into an archive on another volume, cover from the file, copy for the loudness tags): a new hidden file `.<name>.<tag>.<random>.part`, created with `O_EXCL` and `O_NOFOLLOW` – never into an existing file or through a link someone put into a shared music folder |
 | `.m3u` of the mixes | the name in `#PLAYLIST:` without line breaks (`mixer.m3u()`) – a name can't add entries |
 | Shared folder `.tuttiphon/` | writable for everyone, so links there are never followed: `instances.shared_dir()` doesn't use a folder that is a symlink (falls back to `state/`) and sets `0777` through the opened folder (`O_DIRECTORY \| O_NOFOLLOW`, `fchmod`); `task.lock` is opened with `O_NOFOLLOW` (a link in its place is removed first), its permissions are set with `fchmod`; announcements whose `ts` isn't a number are skipped ([02](02-data-model.md#shared-folder-tuttiphon)) |
 | `liedtext.update()` | reads only real files (no symlinks, `lstat`) up to 512 KB in folders inside the music folder – so a symlink to `/config/.env` never ends up in the search index |

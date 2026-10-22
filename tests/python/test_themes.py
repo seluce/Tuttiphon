@@ -182,8 +182,8 @@ class TestThemeAndHiddenContent(ThemeTest):
 # ---------------------------------------------------------------------------- Search
 
 class TestSearch(ThemeTest):
-    ADMIN = {"user": "niklas", "role": "admin", "own": [], "persons": [], "local": False}
-    JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False}
+    ADMIN = {"user": "niklas", "role": "admin", "own": None, "persons": [], "local": False}
+    JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False}
 
     def setUp(self):
         super().setUp()
@@ -195,7 +195,7 @@ class TestSearch(ThemeTest):
         patcher = mock.patch.object(web.CACHE, "get", return_value=self.lib)
         patcher.start()
         self.addCleanup(patcher.stop)
-        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": [], "persons": [], "local": False})
+        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": None, "persons": [], "local": False})
         auth.set_current(self.ADMIN)
 
     def combos(self, q, cfg=None):
@@ -204,13 +204,11 @@ class TestSearch(ThemeTest):
 
     def test_catalog_endpoints(self):
         routes = self.web.Handler.GET_ROUTES
-        for path in ("/api/sound/catalog", "/api/instruments"):
-            self.assertIn(path, routes)
-            self.assertNotIn(path, self.web.Handler.ADMIN_ONLY)          # labels and counts for everyone
-        old = routes["/api/instruments"]({})                              # the older name still has its fields
-        self.assertEqual(len(old["instruments"]), 40)
-        self.assertIn("available", old)
+        self.assertIn("/api/sound/catalog", routes)
+        self.assertNotIn("/api/sound/catalog", self.web.Handler.ADMIN_ONLY)   # labels and counts for everyone
         cat = routes["/api/sound/catalog"]({})
+        self.assertEqual(len(cat["instruments"]), 40)
+        self.assertIn("available", cat)
         self.assertEqual({x["id"]: x["songs"] for x in cat["themes"]}["christmas"], 2)
 
     def test_theme_group(self):

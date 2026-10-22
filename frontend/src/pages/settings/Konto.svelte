@@ -72,8 +72,7 @@
       </div>
       <button class="btn" onclick={logout}><Icon name="logout" size={16} />{t('Sign out')}</button>
     </div>
-    <div class="hint">{me.notfall ? (S.status?.env?.adminPassword === 'env' ? t('The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).')
-        : t('You change the password of the local administrator under Settings → Users & permissions.'))
+    <div class="hint">{me.notfall ? t('You change the password of the local administrator under Settings → Users & permissions.')
       : me.passwordStored ? t('You change your password in Navidrome, in the profile at the top right. Then enter the new one here under “Statistics & stars” as well.')
       : t('You change your password in Navidrome, in the profile at the top right.')}</div>
   </Card>

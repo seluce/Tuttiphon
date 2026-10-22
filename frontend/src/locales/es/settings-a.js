@@ -240,8 +240,6 @@ export default {
     'La contraseña guardada ya no funciona – probablemente se cambió en Navidrome. Introduce la nueva para que tus estadísticas y estrellas sigan funcionando.',
   'Save new password':
     'Guardar nueva contraseña',
-  'The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).':
-    'La contraseña del administrador local está definida en docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).',
   'The local administrator has no Navidrome account of its own.':
     'El administrador local no tiene cuenta propia de Navidrome.',
   'Turned on':
@@ -450,12 +448,8 @@ export default {
     'Si muchas canciones de una banda comparten el máximo de estrellas, las más populares reciben una estrella más. Así Symfonium ordena bien las canciones top. Surte efecto en la próxima ejecución.',
   'Refresh every night':
     'Actualizar cada noche',
-  'Checks {n} songs on Deezer again every night in the time window of the night analysis, first those rated with the older, less accurate search. After that always the ones unchecked the longest – so the stars stay up to date.':
-    'Cada noche, en la franja del análisis nocturno, vuelve a comprobar {n} canciones en Deezer, primero las valoradas con la búsqueda antigua y menos precisa. Después, siempre las que llevan más tiempo sin comprobar – así las estrellas se mantienen al día.',
-  'Checked with the accurate search: {done} of {total} songs · {top} top tracks highlighted.':
-    'Comprobadas con la búsqueda precisa: {done} de {total} canciones · {top} canciones top destacadas.',
-  'Checked with the accurate search: {done} of {total} songs.':
-    'Comprobadas con la búsqueda precisa: {done} de {total} canciones.',
+  'Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.':
+    'Cada noche, en la franja del análisis nocturno, vuelve a comprobar {n} canciones en Deezer – siempre las que llevan más tiempo sin comprobar, así las estrellas se mantienen al día.',
   'Who gets stars?':
     '¿Quién recibe estrellas?',
   'No accounts yet – create them under People first.':

@@ -4,6 +4,9 @@ export default {
   // lib/guides.js
   'First a profile': 'Erst ein Profil',
   'The welcome assistant briefly asks what you like to listen to. After that, suggestions and mixes fit you.': 'Der Willkommen-Assistent fragt kurz, was du gern hörst. Danach passen Vorschläge und Mixe zu dir.',
+  'First a person': 'Erst eine Person',
+  'There is no person yet. Add one first – every playlist and every profile belongs to a person.':
+    'Es gibt noch keine Person. Leg zuerst eine an – jede Playlist und jedes Profil gehört zu einer Person.',
   'Bring everything up to date': 'Alles auf den neuesten Stand bringen',
   'Open the home page': 'Startseite öffnen',
   'Tap “Update everything”': '„Alles aktualisieren“ antippen',
@@ -62,7 +65,7 @@ export default {
   'With an account’s password, Tuttiphon creates playlists there and sees what is played.': 'Mit dem Passwort eines Kontos legt Tuttiphon dort Playlists an und erkennt, was gehört wird.',
   'Who may do what?': 'Wer darf was?',
   'Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account – and who may change the family playlists.':
-    'Jede:r meldet sich mit dem eigenen Navidrome-Konto an. Hier wählst du je Konto Administrator, Benutzer oder kein Zugang – und wer die Familien-Playlists ändern darf.',
+    'Jeder meldet sich mit dem eigenen Navidrome-Konto an. Hier wählst du je Konto Administrator, Benutzer oder kein Zugang – und wer die Familien-Playlists ändern darf.',
   'People': 'Personen',
   'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
     'Eine Person je Konto: Für sie entstehen Vorschläge und Mixe mit ihren Lieblingen und ohne das, was sie nicht mag.',
@@ -344,6 +347,6 @@ export default {
   'In the log of the container, in the line <b>Setup code:</b> – in the Docker app of your NAS under the container’s log, or with <code>docker logs tuttiphon</code>. Opening this page writes it there again, so it is near the end.': 'Im Protokoll des Containers, in der Zeile <b>Setup code:</b> – in der Docker-App deines NAS beim Protokoll des Containers oder mit <code>docker logs tuttiphon</code>. Beim Öffnen dieser Seite schreibt Tuttiphon ihn erneut hinein, er steht also weit unten.',
   'In the file <b>setup-code.txt</b> in Tuttiphon’s data folder – the folder <code>config</code> next to docker-compose.yaml.': 'In der Datei <b>setup-code.txt</b> im Datenordner von Tuttiphon – dem Ordner <code>config</code> neben docker-compose.yaml.',
   'Forgot the password?': 'Passwort vergessen?',
-  'Set in the browser: delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml). A few seconds later this page asks for a new one – with a new setup code from the container log. Everything else stays as it is.': 'Im Browser festgelegt: Lösche die Datei <b>admin_password.json</b> im Ordner <code>state</code> des Datenordners (<code>config/state</code> neben docker-compose.yaml). Wenige Sekunden später fragt diese Seite nach einem neuen – mit einem neuen Einrichtungscode aus dem Container-Protokoll. Alles andere bleibt, wie es ist.',
-  'Set in docker-compose.yaml: it is there as <code>TUTTIPHON_ADMIN_PASSWORD</code>.': 'In docker-compose.yaml festgelegt: Es steht dort als <code>TUTTIPHON_ADMIN_PASSWORD</code>.',
+  'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
+    'Lösche die Datei <b>admin_password.json</b> im Ordner <code>state</code> des Datenordners (<code>config/state</code> neben docker-compose.yaml) und lade diese Seite danach neu. Dann fragt sie nach einem neuen – mit einem neuen Einrichtungscode aus dem Container-Protokoll. Alles andere bleibt, wie es ist.',
 }

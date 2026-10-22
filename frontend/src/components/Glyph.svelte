@@ -1,4 +1,4 @@
-<!-- Icon of a music world, vibe or person: "i:teddy", an icon name or (older data) an emoji. -->
+<!-- Icon of a music world, vibe or person: "i:teddy" or an icon name (anything else is shown as text). -->
 <script>
   import Icon from './Icon.svelte'
   import { glyphName } from '../lib/icons.js'

@@ -214,7 +214,7 @@ class WatchRunTest(unittest.TestCase):
         new.write_text("x")
         self.addCleanup(lambda: (new.unlink(missing_ok=True), watch.STATE_FILE.unlink(missing_ok=True),
                                  watch.FILES_FILE.unlink(missing_ok=True)))
-        watch.FILES_FILE.write_text("[]")
+        watch.FILES_FILE.write_text(json.dumps({"v": 2, "dirs": {}}))
         watch._save({"last": time.time() - 700, "checked": 0})
         got = {}
 

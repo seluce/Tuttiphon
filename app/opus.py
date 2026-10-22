@@ -37,7 +37,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from .config import is_inside, load_env, paths
+from .config import is_inside, load_env, new_temp, paths, temp_copy
 from .i18n import _s
 
 EXTENSIONS = {"flac": (".flac",), "wav": (".wav",), "aiff": (".aif", ".aiff"), "ape": (".ape",), "wv": (".wv",),
@@ -108,14 +108,15 @@ def copy_to_archive(src, dst):
 
 def _copy_checked(src, dst):
     """Copy first as a hidden temporary file, check the size, then rename – never half a file under the real name."""
-    tmp = dst.with_name(f".{dst.name}.part")
+    tmp = None
     try:
-        shutil.copy2(src, tmp)
+        tmp = temp_copy(src, dst, "copy")   # a new file under a unique name – never through a link
         if tmp.stat().st_size != src.stat().st_size:
             raise OSError(_s("copy to the archive is incomplete"))
         os.replace(tmp, dst)
     except BaseException:
-        tmp.unlink(missing_ok=True)
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
         raise
 
 
@@ -482,9 +483,11 @@ def keep_cover(src, owner, log, dry_run=False):
     if dry_run:
         log(_s("  (dry run) cover from the file → {name}", name=dst.name))
         return
-    tmp = src.parent / f".cover-{os.getpid()}-{threading.get_ident()}{ext}.part"
+    tmp = None
     try:
-        tmp.write_bytes(cover[0])
+        tmp, fd = new_temp(dst, "cover")
+        with os.fdopen(fd, "wb") as f:
+            f.write(cover[0])
         if not _folder_has_cover(src.parent):
             os.replace(tmp, dst)
             _own(dst, owner, 0o644)
@@ -492,7 +495,8 @@ def keep_cover(src, owner, log, dry_run=False):
     except OSError:
         pass
     finally:
-        tmp.unlink(missing_ok=True)
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
 
 
 def embed_cover(src, dst):
@@ -781,7 +785,8 @@ def convert(src, op, env, log, track=None, dry_run=False):
         log(_s("  ✓ {format} already existed (complete).", format=name))
     else:
         keep_cover(src, owner, log)
-        tmp = src.parent / f".{src.name}{ext}.part"   # with the source's extension: Song.flac and Song.wav never share it
+        tmp, fd = new_temp(src.parent / f"{src.name}{ext}", "encode")   # unique, a new file – never through a link
+        os.close(fd)   # ffmpeg writes into it (-y)
         proc = subprocess.Popen(_encode_cmd(src, tmp, codec, rate), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
                                 stdin=subprocess.DEVNULL, text=True, errors="replace", start_new_session=True)
         if track:

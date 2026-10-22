@@ -4,9 +4,8 @@
   directly with Navidrome and does not have to manage any passwords itself.
 * Roles: Navidrome administrators are administrators in Tuttiphon, everyone else is a user.
   Settings → Users & permissions changes this per account (also “no access”).
-* Local administrator: Tuttiphon's own administrator – password set in the browser at the first start or as
-  TUTTIPHON_ADMIN_PASSWORD (docker-compose), see app/localadmin.py. No Navidrome account, so it also works when
-  Navidrome is not reachable. Internally the user "@notfall".
+* Local administrator: Tuttiphon's own administrator – password set in the browser at the first start (with the
+  setup code), see app/localadmin.py. No Navidrome account, so it also works when Navidrome is not reachable. Internally the user "@notfall".
 * Without such a password (Tuttiphon only locally on the PC) there is no login; you are administrator.
 """
 import base64
@@ -36,10 +35,6 @@ class LoginError(Exception):
     def __init__(self, message, counts=True):
         super().__init__(message)
         self.counts = counts   # counts toward the lockout after failed attempts (not: Navidrome gone, field empty)
-
-
-def required(env=None):
-    return localadmin.configured(env)
 
 
 def _secret():
@@ -212,14 +207,15 @@ def role_of(user, cfg=None):
     return "admin" if nav and nav["admin"] else "user"
 
 
-def persons_of(user, cfg):
-    """The account's person – one person per Navidrome account: [id] or [] (none yet)."""
-    return [p["id"] for p in cfg.get("personen", []) if (p.get("user") or "").lower() == (user or "").lower()
-            and user and not p.get("family")][:1]
+def own_person(user, cfg):
+    """The account's person – one person per Navidrome account: its id or None (none yet; never the family)."""
+    if not user:
+        return None
+    return next((p["id"] for p in cfg.get("personen", []) if not p.get("family")
+                 and (p.get("user") or "").lower() == user.lower()), None)
 
 
 SEEN_FILE = STATE_DIR / "seen.json"          # {"tour": [account, …], "welcome": [account, …]}
-TOUR_FILE = STATE_DIR / "tour_seen.json"     # older version (tour only) – read as well
 SEEN_KINDS = ("tour", "welcome")
 _seen_cache = {"key": None, "seen": {}}
 
@@ -235,20 +231,15 @@ def _stamp(path):
 def _seen():
     """What which accounts have already seen (tour, welcome assistant) – in memory until the file changes;
     me() runs with every request."""
-    key = (_stamp(SEEN_FILE), _stamp(TOUR_FILE))
-    if _seen_cache["key"] != key:
+    key = _stamp(SEEN_FILE)
+    if _seen_cache["key"] != key or not _seen_cache["seen"]:
         out = {k: set() for k in SEEN_KINDS}
         try:
-            data = json.loads(read_text(SEEN_FILE)) if key[0] else {}
+            data = json.loads(read_text(SEEN_FILE)) if key else {}
             for k in SEEN_KINDS:
                 out[k] |= set(data.get(k, [])) if isinstance(data, dict) else set()
         except (OSError, ValueError):
             return _seen_cache["seen"] or out
-        try:
-            old = json.loads(read_text(TOUR_FILE)) if key[1] else []
-            out["tour"] |= set(old) if isinstance(old, list) else set()
-        except (OSError, ValueError):
-            pass
         _seen_cache.update(key=key, seen=out)
     return _seen_cache["seen"]
 
@@ -266,18 +257,15 @@ def mark_seen(user, kind):
     write_atomic(SEEN_FILE, json.dumps(data, ensure_ascii=False))
 
 
-def mark_tour_seen(user):
-    mark_seen(user, "tour")
-
 
 def me(user, cfg=None):
     """Who is logged in? user=None: no login needed (local) -> administrator."""
     cfg = cfg or load_config()
     if user is None:
         return {"user": None, "name": "", "role": "admin", "local": True, "persons": [p["id"] for p in cfg["personen"]],
-                "own": [], "tourSeen": "" in _seen()["tour"], "welcomeSeen": True}
+                "own": None, "tourSeen": "" in _seen()["tour"], "welcomeSeen": True}
     role = role_of(user, cfg)
-    own = persons_of(user, cfg)
+    own = own_person(user, cfg)
     # the local administrator is meant precisely for “Navidrome gone” – do not look it up for that
     nav = None if user == NOTFALL else next((u for u in navidrome_users() if u["name"].lower() == user.lower()), None)
     name = "Administrator" if user == NOTFALL else (nav or {}).get("fullName") or user
@@ -285,7 +273,7 @@ def me(user, cfg=None):
     if stored and user != NOTFALL:
         check_password_soon(user)
     return {"user": user, "name": name.split(" ")[0] if name else user, "fullName": name, "role": role, "local": False,
-            "persons": [p["id"] for p in cfg["personen"]] if role == "admin" else own, "own": own,
+            "persons": [p["id"] for p in cfg["personen"]] if role == "admin" else [own] if own else [], "own": own,
             "notfall": user == NOTFALL, "passwordStored": stored,
             "passwordRejected": stored and user != NOTFALL and password_rejected(user),
             "tourSeen": user.lower() in _seen()["tour"], "welcomeSeen": user.lower() in _seen()["welcome"]}
@@ -387,7 +375,7 @@ def login(username, password, remember=True):
     if not isinstance(password, str) or not password:
         raise LoginError(_("Please enter the password."), counts=False)
     if not username or username.lower() in ("notfall", NOTFALL):
-        if localadmin.check(password, env):
+        if localadmin.check(password):
             return NOTFALL
         raise LoginError(_("The administrator password is wrong."))
     try:
@@ -447,12 +435,7 @@ def visible_playlist(p, cfg, m=None):
     """Can one see this playlist? Own ones and the family's (rules.for_everyone); administrators all."""
     from .rules import for_everyone
     m = m or current()
-    return m["role"] == "admin" or person_id(p, cfg) in m["own"] or for_everyone(cfg, p)
-
-
-def person_id(p, cfg):
-    """Person of a playlist (every playlist has one)."""
-    return p.get("person")
+    return m["role"] == "admin" or (m["own"] is not None and p.get("person") == m["own"]) or for_everyone(cfg, p)
 
 
 def editable_persons(cfg, m=None):
@@ -461,7 +444,7 @@ def editable_persons(cfg, m=None):
     m = m or current()
     if m["role"] == "admin":
         return {p["id"] for p in cfg.get("personen", [])}
-    out = set(m["own"])
+    out = {m["own"]} if m["own"] else set()
     fam = family_id(cfg)
     if fam and cfg.get("settings", {}).get("familyEdit", "all") == "all":
         out.add(fam)
@@ -471,7 +454,7 @@ def editable_persons(cfg, m=None):
 def own_playlist(p, m=None, cfg=None):
     """May one change this playlist? (editable_persons)"""
     m = m or current()
-    return m["role"] == "admin" or person_id(p, cfg or load_config()) in editable_persons(cfg or load_config(), m)
+    return m["role"] == "admin" or p.get("person") in editable_persons(cfg or load_config(), m)
 
 
 def view_config(cfg, m=None):
@@ -490,8 +473,7 @@ def view_config(cfg, m=None):
         out["settings"]["notify"] = {"enabled": bool(nt.get("enabled")), "server": nt.get("server") or "https://ntfy.sh"}
         # people: the own one in full; the others (the family, members of “What everyone likes”) only with name and
         # look – without likes, dislikes and account names
-        own = set(m["own"])
-        out["personen"] = [p if p["id"] in own else {k: v for k, v in p.items() if k in PUBLIC_PERSON_FIELDS}
+        out["personen"] = [p if p["id"] == m["own"] else {k: v for k, v in p.items() if k in PUBLIC_PERSON_FIELDS}
                            for p in cfg["personen"]]
     acc = _account(cfg, m["user"])
     out["dismissed"] = acc.get("dismissed", []) if m["role"] != "admin" else cfg.get("dismissed", [])
@@ -519,13 +501,13 @@ def merge_user_changes(current_cfg, incoming, m):
     import copy
     out = copy.deepcopy(current_cfg)
     user = (m["user"] or "").lower()
-    own = set(m["own"])
+    own = m["own"]
     cur_persons = {p["id"]: p for p in out["personen"]}
     taken = {(p.get("user") or "").lower() for p in out["personen"]}
     for p in incoming.get("personen", []) if isinstance(incoming.get("personen"), list) else []:
         if not isinstance(p, dict):
             continue
-        if p.get("id") in own and p["id"] in cur_persons:
+        if own and p.get("id") == own and own in cur_persons:
             was_clean = bool(cur_persons[p["id"]].get("clean"))
             for k in PERSON_FIELDS:
                 if k in p:
@@ -539,9 +521,9 @@ def merge_user_changes(current_cfg, incoming, m):
             fresh = {k: p[k] for k in PERSON_FIELDS if k in p}
             fresh.update(id=p["id"], user=m["user"])
             out["personen"].append(fresh)
-            own.add(p["id"])
+            own = p["id"]
             taken.add(user)
-    m = {**m, "own": sorted(own)}
+    m = {**m, "own": own}
     mine = editable_persons(out, m)
     cur_pl = {p["id"]: p for p in out["playlists"]}
     inc_list = incoming.get("playlists") if isinstance(incoming.get("playlists"), list) else []
@@ -549,11 +531,11 @@ def merge_user_changes(current_cfg, incoming, m):
     result = []
     for p in out["playlists"]:   # existing ones in their order
         new = inc_pl.get(p["id"])
-        if person_id(p, out) not in mine:
+        if p.get("person") not in mine:
             result.append(p)   # someone else's: unchanged
         elif new is None:
             continue           # deleted
-        elif person_id(new, out) in mine:
+        elif new.get("person") in mine:
             for k in SERVER_PLAYLIST_FIELDS:   # stay as they are on the server
                 if k in p:
                     new[k] = p[k]
@@ -563,23 +545,26 @@ def merge_user_changes(current_cfg, incoming, m):
         else:
             result.append(p)   # giving it away to someone else's person is not possible
     for pid, new in inc_pl.items():   # new ones
-        if pid not in cur_pl and person_id(new, out) in mine:
+        if pid not in cur_pl and new.get("person") in mine:
             for k in SERVER_PLAYLIST_FIELDS:   # only the server creates takeovers of handmade playlists (administrator)
                 new.pop(k, None)
             result.append(new)
     family = family_id(out)
     persons = {p["id"] for p in out["personen"]}
     for p in result:   # “What everyone likes”: the family's only, its members are people (not the family itself)
-        if person_id(p, out) in mine and isinstance(p.get("together"), list):
-            p["together"] = [x for x in p["together"] if x in persons and x != family] if person_id(p, out) == family else []
+        if p.get("person") in mine and isinstance(p.get("together"), list):
+            # a user only adds or removes themselves – other people's taste and 1-star songs only with their consent
+            others = [x for x in ((cur_pl.get(p["id"]) or {}).get("together") or []) if x != own]
+            p["together"] = others + ([own] if own and own in p["together"] else [])
+            p["together"] = [x for x in p["together"] if x in persons and x != family] if p.get("person") == family else []
             if len(p["together"]) < 2:
                 p.pop("together")
                 # without members “All × Everything” would be invalid – then it becomes a mix by the own taste
                 if p.get("welt", "*") == "*" and p.get("stil", "*") == "*" and not (p.get("radio") or p.get("fav") or p.get("review")):
                     p["type"] = "mix"
                     p["mix"] = {**(p.get("mix") if isinstance(p.get("mix"), dict) else {}), "flavor": "geschmack"}
-    before = sum(1 for p in current_cfg["playlists"] if person_id(p, current_cfg) in mine)
-    after = sum(1 for p in result if person_id(p, out) in mine)
+    before = sum(1 for p in current_cfg["playlists"] if p.get("person") in mine)
+    after = sum(1 for p in result if p.get("person") in mine)
     if after > max(MAX_USER_PLAYLISTS, before):   # more than before is only possible up to the limit
         raise ValueError(_("You can have at most {n} playlists – please delete some you no longer listen to (also from "
                            "the trash).", n=MAX_USER_PLAYLISTS))

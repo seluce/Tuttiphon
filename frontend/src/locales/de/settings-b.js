@@ -79,7 +79,7 @@ export default {
   'statistics on': 'Statistik an',
   'stored password no longer works': 'hinterlegtes Passwort funktioniert nicht mehr',
   'Who may do what?': 'Wer darf was?',
-  'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.': 'Jede:r meldet sich mit dem eigenen Navidrome-Konto an – mit demselben Namen und Passwort wie in Symfonium.',
+  'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.': 'Jeder meldet sich mit dem eigenen Navidrome-Konto an – mit demselben Namen und Passwort wie in Symfonium.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.': 'Sieht und ändert alles: alle Playlists, Musikwelten, Richtungen, Personen und alle Einstellungen – auch Deezer, Lyrics und Umwandlung.',
   'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
     'Hat eine eigene Startseite „Für dich“, eigene Playlists und ein eigenes Profil. Hört die Familien-Playlists – und ändert sie, wenn das nicht nur Administratoren dürfen.',
@@ -276,7 +276,6 @@ export default {
   'Turn on notifications above first.': 'Erst oben die Benachrichtigungen einschalten.',
   'Besides the Navidrome accounts there is Tuttiphon’s own administrator: choose “Local administrator” on the sign-in page and enter its password. It has all rights and works even when Navidrome cannot be reached.': 'Neben den Navidrome-Konten gibt es den eigenen Administrator von Tuttiphon: auf der Anmeldeseite „Lokaler Administrator“ wählen und sein Passwort eingeben. Er hat alle Rechte und funktioniert auch, wenn Navidrome nicht erreichbar ist.',
   'Not set up yet: Tuttiphon only asks for a sign-in once the local administrator has a password. Without it, Tuttiphon can only be reached from its own computer.': 'Noch nicht eingerichtet: Erst wenn der lokale Administrator ein Passwort hat, verlangt Tuttiphon eine Anmeldung. Ohne ist Tuttiphon nur vom eigenen Computer aus erreichbar.',
-  'Its password is set in docker-compose.yaml as TUTTIPHON_ADMIN_PASSWORD and can only be changed there.': 'Sein Passwort steht in docker-compose.yaml als TUTTIPHON_ADMIN_PASSWORD und lässt sich nur dort ändern.',
   'Current password': 'Bisheriges Passwort',
   'New password': 'Neues Passwort',
   'Password of the local administrator': 'Passwort des lokalen Administrators',

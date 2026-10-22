@@ -619,11 +619,14 @@ The Tuttiphon plugin hands Navidrome's questions to `GET /api/sonic/…` ([API](
 Instant Mix, “similar songs”, the smart queue, song and artist radio in Navidrome and its apps (Symfonium, Feishin …) and the
 OpenSubsonic extension `sonicSimilarity` follow the sound of the own files.
 
-**What may come** (`_pool()`, cached per song list, configuration, worlds and person): Navidrome does not say who asks,
-so “All” as for the family – minimum rating 0, without the separate worlds, without its dislikes, without live
-recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon as any person is a child profile or has
-kid-safe mode on – the family's own kid-safe mode only for the family's answers, it is the default for its playlists
-(`_view()`; without a family a stand-in without dislikes: an answer for everyone). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
+**What may come** (`_pool()`, cached per song list, configuration, worlds and person; the configuration's part of the
+key, `_cfg_key()`, covers worlds, vibes, settings and per person the id, the family flag, kid-safe mode, child profile
+and dislikes): Navidrome does not say who asks, so “All” as for the family – minimum rating 0, without the separate
+worlds, without its dislikes, without live recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon
+as any person is a child profile or has kid-safe mode on – the family's own kid-safe mode (the default for its
+playlists) for the family's answers and on a guess, where the one asking may be the family's shared device; only a
+sure listener gets their own view without it (`_view()`; without a family a stand-in without dislikes: an answer for
+everyone). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
 lead to children's songs, a rock song never to an audio play.
 
 **For the one listening** (`_who()`): the live plays (`app/listen.py`) tell who is playing what. `listen.listener()`
@@ -638,6 +641,11 @@ looks at the day files of all accounts and gives the account and whether it is s
   their question is never taken for someone else's;
 - **unclear** – the family's answer (without a family the neutral one): two accounts on the same song, two playing at
   once and neither the song, or two Navidrome accounts whose names give the same folder name.
+
+The day files (`plays/<account>/live-<day>.jsonl`) are parsed once and kept for the 32 used last (`DAYS_CACHED`, least
+recently used goes first) – parsed again only when a file changes. Reading an account's recent events (`_recent()`)
+takes every day from the start of the window to now, so a window across midnight misses nothing. A broken line – cut
+off while writing, a damaged byte – is skipped; the rest of the day stays.
 
 The account must belong to a person who is allowed (`listen.allowed()`) – one person per account (`_listener()`). The
 family's account (a shared device such as the car or the kitchen tablet) is no exception: its plays get the family's
@@ -667,14 +675,17 @@ radio:
   3 often; Profile → “New songs in the queue”). “Played” is what Tuttiphon counted (`rueckblick.played_ever()`:
   `baseline.json` and `first.json`) plus the live plays of the last two days; without anything counted the answer stays
   as it is. The count goes on from the last never played song of an earlier answer that the account played since
-  (`_given`, memory only, `_since_new()` over `listen.sequence()`), so the smart queue – which takes the first song of
-  each answer – gets one every n songs and an Instant Mix one at every n-th place. The song brought is the most similar
-  never played one (another recording than those in the answer); the similarities are made to fall along the answer
-  (`_monotone()`) so the order holds even where a player sorts by them;
+  (`_given`, memory only, `_since_new()` over `listen.sequence()`): the first place is `max(0, every − 1 − since)`, so
+  an overdue one comes first, and the smart queue – which takes the first song of each answer – gets one every n songs
+  and an Instant Mix one at every n-th place. The song brought is the most similar never played one (another recording
+  than those in the answer) whose own similarity reaches `max(NEW_FLOOR, the weakest score of the answer)`
+  (`NEW_FLOOR` = 0.2) – none rather than one that sounds like something else. It takes the place and the similarity of
+  the song it pushes on; the songs after it keep theirs (the last one drops out), and `_monotone()` makes the
+  similarities never rise along the answer, so the order holds even where a player sorts by them;
 - a guess is careful – it may be someone else asking: no 1-stars left out, no variety, no steering, no songs never
-  played, never a child profile's music;
+  played, never a child profile's music, and the family's kid-safe mode stays on (it may be the family's shared device);
 - kid-safe stays as soon as any person other than the family has kid-safe mode or is a child profile – never loosened
-  for the one listening;
+  for the one listening; only a sure listener's answer goes without the family's own kid-safe mode;
 - not remembered (the family's answers are).
 
 The settings card shows for whom the last answer with similar songs was, when, and whether it was a guess
@@ -687,11 +698,15 @@ unclear, and `null` when it was unclear and there is no family (“for everyone�
 | Artist radio (`artist`) | every song by closeness to the band's mean sound (`Index.centroid()`), + 0.1 for bands of its radio (`RADIO_BONUS` – only for the order, the similarity shown stays the closeness); the band itself up to a third of the songs; without vectors the radio's bands, shuffled by the day, similarity falling from 0.5 |
 | Album (`album`) | closeness to the mean sound of the album's songs (without vectors on the album: of its band), not from the album itself; without any sound like the artist radio of its band, without the album |
 | Similar bands (`artists`) | `classify.radio_artists()` (Last.fm and sound) – only bands with songs that may come for this band (separate worlds only for a band of them), never the band itself, with Navidrome's artist id |
-| Path (`path`) | from the start song to the end song in `count` steps: at step k the song nearest to the normalized point (1 − t)·a + t·b between the two centered sounds (t = k / (count − 1)), every song and recording once, at most `max(2, count / 8)` per band; both ends included; songs without a vector of their own take the sound of their album or band; without any sound the first half from the similar songs of the start, the second from those of the end; from a song to itself: the song and its similar songs |
+| Path (`path`) | from the start song to the end song in `count` steps: at step k the song nearest to the normalized point (1 − t)·a + t·b between the two centered sounds (t = k / (count − 1)), every song and recording once, at most `max(2, count / 8)` per band – picked from the 64 nearest (`heapq.nlargest()`), the whole library sorted only when none of those can be taken; both ends included; songs without a vector of their own take the sound of their album or band; without any sound the first half from the similar songs of the start, the second from those of the end; from a song to itself: the song and its similar songs |
 
 Every answer: at most `max(2, count / 12)` songs per band (the band asked for a quarter, the artist radio a third),
 every recording once (`_Seen`: the same title without “(…)”/“[…]” – but “(Part 2)”, “(2011)” stay – and band with
-about the same length, ± 4 s), never the song asked for; similarity clamped to 0–1. Answers are remembered per song
+about the same length, ± 4 s), never the song asked for; similarity clamped to 0–1. An answer of similar songs, artist
+or album radio short of `count` (few bands, little sound) is filled up by `_fill()` from the answer's own candidates –
+the songs that may come for the one listening (view, kid-safe mode and dislikes respected), without the limit per
+band, every recording once, each score at most the one before it (never rising). Otherwise Navidrome would fill up with
+its own picks, which know none of that. Answers are remembered per song
 list, configuration and sound vectors (256 for similar songs).
 A band is found by Navidrome's artist id or name among all artists and album artists of a song (Navidrome also asks
 for an artist who only takes part); it counts as the main artist of most of those songs (`_artist_songs()`).
@@ -870,8 +885,9 @@ limit of 2 minutes (`tasks.WATCH_BUDGET`; once the library is done, only the new
 fingerprints take new songs first anyway) – the playlists after it no longer wait for the
 whole analysis backlog, which follows in the regular runs and at night.
 
-`state/auto_assigned.json` stores `{name, welt, score, at}` per band; `auto_log()` still reads the older format (just a list of names)
-([Data model](02-data-model.md#auto_assignedjson)).
+`state/auto_assigned.json` stores `{name, welt, score, at}` per band (`auto_log()`,
+[Data model](02-data-model.md#auto_assignedjson)); `classify.remember()` writes it only after `update_config()` has
+saved the assignments, so a failed save never leaves a band remembered that is not in its world.
 
 An open interface does not know about such automatically assigned bands at first. After a run ends, it first takes over
 from the server the bands newly added to a music world (except those from `excludedArtists`) into
@@ -1025,7 +1041,7 @@ reference data (two personal accounts, 25,000 songs) the habit shows from the pl
 | Part | How |
 |---|---|
 | Sources | `.lrc`, otherwise `.txt` next to the music file (one directory listing per folder) – without timestamps and header lines such as `[ar: …]` (`plain()`); plus lyrics embedded in the file, which `library.real_paths()` reads along from Navidrome's own API (`embedded_text()`) |
-| Updating | `update(lib)`: only new and changed entries (modification time of the file or fingerprint of the embedded text), what has disappeared is dropped. If a folder or file is momentarily unreadable (NAS), the previous entry stays; only what is really missing is forgotten. Only real files up to 512 KB in the music folder, no symlinks. The very first indexing starts in the background (`update_soon()`); with about 18,000 lyrics it takes a few minutes; after that in the `scan` step. The database runs in WAL mode (searches keep reading while indexing runs); creating and migrating tables happens under a lock |
+| Updating | `update(lib)`: only new and changed entries (modification time of the file or fingerprint of the embedded text), what has disappeared is dropped. If a folder or file is momentarily unreadable (NAS), the previous entry stays; only what is really missing is forgotten. Only real files up to 512 KB in the music folder, no symlinks. The very first indexing starts in the background (`update_soon()`); with about 18,000 lyrics it takes a few minutes; after that in the `scan` step. The database runs in WAL mode (searches keep reading while indexing runs); creating the tables happens under a lock |
 | Search | `search(q)`: all words must occur, the last one also as a prefix; only from two words or one word with at least five letters. Ranking by `bm25`, literal matches first; per song the line with the most words |
 | Explicit lyrics | `rude()`: one word from `STRONG` (sexual terms, harsh swear words, insults, German and English) or at least two from `MILD` (such as “Scheiß…”, “Arschloch”, “shit”) – each at the start of a word, so “Marsch” does not count. The result is stored per song in the index (`files.rude`) |
 | Kid-safe mode | `derb(allow)`: all explicit songs except the allowed ones (`settings.kinderschutz.allow`), cached until the next change of the index; if the database is briefly locked, the last result applies. `rules.clean_rules()` removes them from the playlists of people with `clean` – together with songs marked as “explicit” in the file ([04](04-playlists.md#playlists-from-listening)) |
@@ -1175,7 +1191,7 @@ Snapshots are taken:
 | once a day from `settings.dailyAt` (also with `dailyMode: "aus"`), for all accounts | `daily_loop()` → `_plays_snapshot_daily()` |
 | when the recap is requested, if the account's last snapshot is older than 30 minutes | `api_rueckblick()` |
 
-`snapshot_all()` takes every Navidrome account that is entered for a person and skips accounts without a
+`snapshot_all()` takes the account of every person (one person per account) and skips accounts without a
 password. With `TUTTIPHON_NO_SCHEDULER=1` the first two are dropped. A PC instance leaves the daily
 snapshot to the Docker container if one is running ([05-maintenance.md](05-maintenance.md#daily-refresh)).
 

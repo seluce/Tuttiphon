@@ -49,7 +49,7 @@ class DiscoverTest(unittest.TestCase):
     @env.german
     def test_suggested_once_per_account_with_enough_unheard_songs(self):
         s = next(x for x in self.suggestions() if x["playlist"].get("unheard"))
-        self.assertEqual((s["title"], s["playlist"]["name"]), ("Entdeckt für Jonas", "Entdeckt für Jonas"))
+        self.assertEqual((s["title"], s["playlist"]["name"]), ("Jonas · Entdeckt", "Jonas · Entdeckt"))
         self.assertEqual(s["playlist"]["mix"], {"size": 30, "perArtist": 2, "perAlbum": 1, "every": "week"})
         self.assertLess(s["count"], len(self.lib.songs))   # counted from the never played songs only
         self.assertIn("jeden Montag neu", s["why"])

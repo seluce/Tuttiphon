@@ -211,12 +211,7 @@ def _heard_shares(cfg, lib, today):
     """Person -> {band: share of what was played} for all people with a taste profile (taste.py)."""
     from . import taste
     out = {}
-    users = set()
     for p in cfg["personen"]:
-        u = (p.get("user") or "").lower()
-        if not u or u in users:
-            continue
-        users.add(u)
         try:
             prof = taste.profile(cfg, lib, p["user"], today)
         except Exception:   # noqa: BLE001 – no password, or Navidrome briefly away

@@ -119,7 +119,7 @@
         <div class="in grid gap-3.5">
           {#each changes.slice(0, 5) as v (v.version)}
             <div>
-              <b>{v.unreleased ? t('Not released yet') : v.version}</b>{#if v.date}<span class="muted small"> · {v.date}</span>{/if}
+              <b>{v.unreleased ? t('Not released yet') : v.version}</b>
               <!-- levels (parallel to items): 1 = a sub-point of the point above it -->
               <ul class="list-disc pl-5 mt-1 grid gap-0.5 small text-text-2">{#each v.items as item, i (i)}<li class={v.levels?.[i] === 1 ? 'ml-5 list-[circle]' : ''}>{item}</li>{/each}</ul>
             </div>

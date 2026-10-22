@@ -3,8 +3,8 @@ import datetime as dt
 import json
 import math
 
-from . import mixer, rules, scenes
-from .i18n import _, _n, _s
+from . import i18n, mixer, rules, scenes
+from .i18n import N_, _, _n, _s
 from .rules import ALL, BuildContext, join_and
 
 MIN_SONGS = 25
@@ -16,19 +16,34 @@ MIN_ALBUMS = 5        # "Album of the week": at least this many never played alb
 
 
 def key_of(p):
+    """Identity of a suggestion – an existing playlist with the same key means it is taken. Formats there is one of per
+    person (good morning, "What everyone likes", the car ride with its sound) do not depend on their worlds, which
+    follow the listening; neither do the playlists across all favorite worlds (several worlds)."""
     w = p.get("welt", ALL)
-    w = "+".join(sorted(w)) if isinstance(w, list) else w
+    if p.get("daytime") or p.get("together") or (p.get("sound") and p.get("type") == "mix"):
+        w = ALL
+    elif isinstance(w, list):
+        w = "+".join(sorted(w)) if len(w) < 2 else "favorites"   # i18n-ignore: part of a key
+    mix = p.get("mix") if isinstance(p.get("mix"), dict) else {}
     radio = "|radio:" + "+".join(sorted((p.get("radio") or {}).get("seed", []))) if p.get("radio") else ""
     special = ("|fav" if p.get("fav") else "") + (f"|review:{p['review'].get('period', 'month')}" if p.get("review") else "") \
         + ("|together" if p.get("together") else "") + ("|sound" if p.get("sound") else "") \
         + (f"|daytime:{p['daytime']}" if p.get("daytime") else "") + ("|unheard" if p.get("unheard") else "") \
-        + ("|album" if p.get("album") else "") + ("|episodes" if p.get("episodes") else "")
+        + ("|album" if p.get("album") else "") + ("|episodes" if p.get("episodes") else "") \
+        + (f"|flavor:{mix['flavor']}" if mix.get("flavor") else "")
     return f"{p.get('person')}|{w}|{p.get('stil', ALL)}|{'hits' if p.get('hits') else ''}" + ("|mix" if p.get("type") == "mix" else "") + radio + special
 
 
+PERSONAL = ("unheard", "album", "episodes", "daytime", "fav", "review")   # made from the account's own listening
+
+
 def _content_key(p):
-    """Like key_of, but without the person: the same music, no matter for whom."""
-    return key_of({**p, "person": None})
+    """Like key_of, but without the person: the same music, no matter for whom – except what is made from the
+    account's own listening (discovered, album of the week, next episode, good morning, favorite bands, recap, own
+    sound): that is never the same for two people."""
+    mix = p.get("mix") if isinstance(p.get("mix"), dict) else {}
+    personal = any(p.get(k) for k in PERSONAL) or mix.get("flavor") == "geschmack"
+    return key_of(p if personal else {**p, "person": None})
 
 
 def dislikes_of(person):
@@ -72,31 +87,6 @@ def coherence(cfg, lib, ctx, p):
     return sum(c for a, c in combo.items() if base.get(a) and c / base[a] >= 0.5) / n
 
 
-def possessive(name):
-    """German genitive of a name ("Annas", "Jonas’") – passed to the texts as {owner}; English uses {name}’s."""
-    return f"{name}’" if name[-1:].lower() in "sßxz" else f"{name}s"   # i18n-ignore: German grammar
-
-
-def rename_all_sorts(cfg, lang):
-    """Configuration v8: the personal smart playlist across all favorite worlds was stored as “{name}’s mix”
-    (German “Niklas’ Mix”), although it is no mix. It becomes “{name}’s All Sorts” (“Niklas’ Querbeet”) in the server
-    language – only while it still has the name the suggestion gave it; a name someone typed stays.
-    The file stays the same, so it remains the same playlist in Navidrome. -> renamed playlists"""
-    from .i18n import tr
-    persons = {p.get("id"): p for p in cfg.get("personen", [])}
-    default = (cfg.get("settings") or {}).get("defaultPerson")
-    renamed = []
-    for p in cfg.get("playlists", []):
-        who = (persons.get(p.get("person") or default) or {}).get("name") or ""
-        if (not who or p.get("rules") is not None or p.get("type") == "mix" or p.get("stil", ALL) != ALL
-                or any(p.get(k) for k in ("hits", "radio", "fav", "review", "together"))):
-            continue
-        if p.get("name") in (f"{who}’s mix", f"{possessive(who)} Mix"):   # i18n-ignore: names as stored before (data)
-            p["name"] = tr("{name}’s All Sorts", lang, name=who, owner=possessive(who))
-            renamed.append(p)
-    return renamed
-
-
 def _reason(top, n):
     names = [a for a, _ in top[:3] if a]
     more = " …" if len(top) > 3 else ""
@@ -117,21 +107,30 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
     has_plays = sum(1 for s in lib.songs if s.get("played")) >= 100
     has_loved = sum(1 for s in lib.songs if s.get("starred")) >= 15
     # the family (if there is one): "Our …" names and the family-wide ideas (car ride, What everyone likes)
-    default = next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
-    persons = sorted(cfg.get("personen", []), key=lambda p: p["id"] != default)   # the family first
+    family = next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
+    persons = sorted(cfg.get("personen", []), key=lambda p: p["id"] != family)   # the family first
     mix_cache = {}
     out = []
     # taste per account from what is played in Navidrome/Symfonium (taste.py) – adds to the preferences set by hand
     from . import taste
     profiles = {}
     for person in persons:
-        if person.get("user") and (not only_person or person["id"] == only_person):
+        if not only_person or person["id"] == only_person:
             try:
                 prof = taste.for_person(cfg, lib, person, today)
             except Exception:   # noqa: BLE001 – suggestions must never fail because of one profile
                 prof = None
             if prof and prof.get("enough"):
                 profiles[person["id"]] = prof
+
+    def names(person, plain, ours=None, **values):
+        """(name for Navidrome in the server language, title for the card in the page language) of a format: the
+        family's own wording where it has one ("Our album of the week"), otherwise the person's prefix in front of the
+        format – like every other playlist of theirs ("Anna · Album of the week")."""
+        if ours and person["id"] == family:
+            return _s(ours, **values), _(ours, **values)   # i18n-ignore – N_ constants
+        prefix = person.get("prefix") or ""
+        return prefix + _s(plain, **values), prefix + _(plain, **values)   # i18n-ignore – N_ constants
 
     def add(p, score, title=None, why=None, group=None, because=None, only=None, core=False, count=None, small=False):
         if rules.sound_of(cfg, p) and p.get("type") != "mix":   # sound vibes only exist as mixes
@@ -193,26 +192,22 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
 
     def special(person, prof):
         pid = person["id"]
-        own = pid == default
         favs = rules.favorite_artists(cfg, person, ctx)
         if favs:
             # name: goes to Navidrome (server language); title: the card (language of the page)
-            name = _s("New from our favorite bands") if own else \
-                _s("New from {name}’s favorite bands", name=person["name"], owner=possessive(person["name"]))
-            title = _("New from our favorite bands") if own else \
-                _("New from {name}’s favorite bands", name=person["name"], owner=possessive(person["name"]))
+            name, title = names(person, N_("New from favorite bands"), N_("New from our favorite bands"))
             offer({"person": pid, "welt": ALL, "stil": ALL, "fav": {"days": 60}, "sort": "neu", "minRating": 0, "name": name},   # i18n-ignore: stored value
                   2.3, title, _("what the favorite bands added in the last two months – newest first"), pid,
                   because=_("From listening") if prof else None, min_songs=5, core=True)
-        if person.get("user"):
-            from .mixer import mix_day
-            for period, score, why in (("month", 2.0, _("the most played songs of last month – changes on the first of the "
-                                                        "month, it stays one playlist")),
-                                       ("year", 1.4, _("the most played songs of the year – in January the whole previous year"))):
-                p = {"person": pid, "welt": ALL, "stil": ALL, "type": "mix", "review": {"period": period},
-                     "mix": {"size": 50, "perArtist": 0, "perAlbum": 0, "every": "month"}}
-                offer(p, score, rules.review_name(cfg, p, mix_day()), why, pid, because=_("From listening"), min_songs=20,
-                      core=period == "month")
+        from .mixer import mix_day
+        for period, score, why in (("month", 2.0, _("the most played songs of last month – changes on the first of the "
+                                                    "month, it stays one playlist")),
+                                   ("year", 1.4, _("the most played songs of the year – in January the whole previous year"))):
+            p = {"person": pid, "welt": ALL, "stil": ALL, "type": "mix", "review": {"period": period},
+                 "mix": {"size": 50, "perArtist": 0, "perAlbum": 0, "every": "month"}}
+            with i18n.speaking(i18n.current()):   # the card's title in the language of the page
+                title = rules.review_name(cfg, p, mix_day())
+            offer(p, score, title, why, pid, because=_("From listening"), min_songs=20, core=period == "month")
 
     def played_worlds(x):
         """Worlds a family member's account plays – for the family's playlists everything, also what the person keeps
@@ -220,7 +215,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         prof = profiles.get(x["id"]) or {}
         if taste.excluded(x):
             try:
-                prof = taste.profile(cfg, lib, x.get("user"), today) or prof
+                prof = taste.profile(cfg, lib, x["user"], today) or prof
             except Exception:   # noqa: BLE001 – suggestions must never fail because of one profile
                 pass
         return [w for w, share in prof.get("welten", []) if share >= 0.08 and w in welten]
@@ -249,16 +244,15 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         if plib is None:
             return
         pid = person["id"]
-        own = pid == default
-        p = {"person": pid, "welt": ALL, "stil": ALL, "type": "mix", "album": True, "mix": {"every": "week"},
-             "name": _s("Our album of the week") if own else _s("Album of the week for {name}", name=person["name"])}
+        name, title = names(person, N_("Album of the week"), N_("Our album of the week"))
+        p = {"person": pid, "welt": ALL, "stil": ALL, "type": "mix", "album": True, "mix": {"every": "week"}, "name": name}
         if key_of(p) in existing:
             return
         cands = mixer.album_candidates(cfg, lib, plib, p, rules.build_nsp(cfg, p, ctx), today)
         if len(cands) < MIN_ALBUMS:
             return
         best = {aid for _w, aid in sorted(cands, reverse=True)[:12]}   # the card shows the best fitting albums
-        add(p, 2.5, title=_("Our album of the week") if own else _("Album of the week for {name}", name=person["name"]),
+        add(p, 2.5, title=title,
             why=_("One whole album a week that this account has never played – by a favorite band or in its sound, in "
                   "album order."), group=pid, because=_("From listening"), core=True, count=len(cands),
             only={s["id"] for s in lib.songs if s.get("albumId") in best})
@@ -270,16 +264,16 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         if not spoken:
             return
         pid = person["id"]
-        own = pid == default
+        name, title = names(person, N_("Next episode"))
         p = {"person": pid, "welt": spoken, "stil": ALL, "type": "mix", "episodes": True, "mix": {"every": "day"},
-             "name": _s("Next episode") if own else _s("Next episode for {name}", name=person["name"])}
+             "name": name}
         if key_of(p) in existing:
             return
         plib = mixer.person_lib(cfg, p, lib)
         order, n = mixer.episode_order(cfg, lib, plib, p, rules.build_nsp(cfg, p, ctx), today)
         if not order:
             return
-        add(p, 2.6, title=_("Next episode") if own else _("Next episode for {name}", name=person["name"]),
+        add(p, 2.6, title=title,
             why=_("For every audio play series this account listens to, the episode that comes next – new every day, the "
                   "series heard last first."), group=pid, because=_("From listening"), core=True, count=n,
             only={plib.songs[i]["id"] for i in order}, small=True)
@@ -305,9 +299,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                 if share >= MORNING_SHARE:
                     shares.append((share, w["id"]))
         wl = [wid for _share, wid in sorted(shares, reverse=True)[:3]]
-        own = pid == default
-        name = _s("Good morning") if own else _s("Good morning, {name}", name=person["name"])
-        title = _("Good morning") if own else _("Good morning, {name}", name=person["name"])
+        name, title = names(person, N_("Good morning"))
         why = _("{minutes} minutes every morning, for the usual listening on weekdays around {time} – starts calm, gets "
                 "livelier and sounds like the mornings.", minutes=info["minutes"], time=info["at"]) if info["weekdays"] else \
             _("{minutes} minutes every morning, for the usual listening around {time} – starts calm, gets livelier and "
@@ -325,9 +317,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             return
         never = {plib.songs[i]["id"] for i in mixer.unheard(plib, range(len(plib.songs)))}
         pid = person["id"]
-        own = pid == default
-        name = _s("Discovered for us") if own else _s("Discovered for {name}", name=person["name"])
-        title = _("Discovered for us") if own else _("Discovered for {name}", name=person["name"])
+        name, title = names(person, N_("Discovered"), N_("Discovered for us"))
         add({"person": pid, "welt": ALL, "stil": ALL, "type": "mix", "unheard": True, "name": name,
              "mix": {"size": 30, "perArtist": 2, "perAlbum": 1, "every": "week"}},
             2.6, title=title, why=_("30 songs from the library that this account has never played, picked to fit the "
@@ -360,8 +350,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         pid = person["id"]
         if only_person and pid != only_person:
             continue
-        if person.get("user"):
-            next_episode(person)   # also for a profile without favorites yet (a child listening to audio plays)
+        next_episode(person)   # also for a profile without favorites yet (a child listening to audio plays)
         likes = person.get("likes", {})
         prof = profiles.get(pid)
         liked_w = [w for w in likes.get("welten", []) if w in welten]
@@ -369,7 +358,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         heard_w = [w for w, share in (prof or {}).get("welten", []) if share >= 0.08 and w in welten and w not in liked_w][:3]
         liked_w = liked_w + heard_w
         liked_s = set(likes.get("stile", []))
-        if not liked_w and not liked_s and pid != default:
+        if not liked_w and not liked_s and pid != family:
             k = f"likes|{pid}"
             if k not in existing:
                 out.append({"key": k, "kind": "likes", "person": pid, "group": pid, "score": 3.0, "core": True,
@@ -411,7 +400,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                 add(p, score, group="saison" if seasonal else pid)
 
         # "all" playlists only for the family or with matching preferences
-        if pid == default or liked_s:
+        if pid == family or liked_s:
             for s in stile:
                 if s.get("kind") == "season" or s.get("excludeElsewhere", {}).get("albums") and not s.get("season"):
                     continue
@@ -421,7 +410,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                     continue
                 if s["id"] == "lieblinge" and not has_loved:
                     continue
-                if liked_s and s["id"] not in liked_s and pid != default:
+                if liked_s and s["id"] not in liked_s and pid != family:
                     continue
                 score = 0.8 + (0.5 if s["id"] in liked_s else 0) + (0.6 if s.get("season") else 0) \
                     + (0.15 if s.get("group") in ("Zeitreise", "Spezial") else 0)
@@ -430,22 +419,22 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
 
         # Daily Mixes: one per favorite world, new every day, at most 3 per band
         for wid in liked_w:
-            if pid != default and wid not in likes.get("welten", []) and wid not in heard_w:
+            if pid != family and wid not in likes.get("welten", []) and wid not in heard_w:
                 continue
             w = welten[wid]
             add({"person": pid, "welt": wid, "stil": ALL, "type": "mix", "mix": {"size": 50, "perArtist": 3}},
                 1.75 + (0.3 if w.get("separate") else 0), title=f"Daily Mix · {w['name']}",
                 why=_("50 new songs every day – at most 3 per band, never twice in a row"), group=pid,
                 core=wid in core_worlds)
-        if len(liked_w) >= 2 and pid != default:
-            add({"person": pid, "welt": liked_w, "stil": ALL, "type": "mix",
-                 "name": _s("{name}’s Daily Mix", name=person["name"], owner=possessive(person["name"])),
+        if len(liked_w) >= 2 and pid != family:
+            name, title = names(person, N_("Daily Mix"))
+            add({"person": pid, "welt": liked_w, "stil": ALL, "type": "mix", "name": name,
                  "mix": {"size": 60, "perArtist": 2, "flavor": "ausgewogen"}},
-                2.1, title=_("{name}’s Daily Mix", name=person["name"], owner=possessive(person["name"])),
-                why=_("new every day from all favorite worlds, at most 2 per band"), group=pid)
-            add({"person": pid, "welt": liked_w, "stil": ALL, "type": "mix", "name": _s("Discoveries for {name}", name=person["name"]),
+                2.1, title=title, why=_("new every day from all favorite worlds, at most 2 per band"), group=pid)
+            name, title = names(person, N_("Discoveries"))
+            add({"person": pid, "welt": liked_w, "stil": ALL, "type": "mix", "name": name,
                  "mix": {"size": 40, "perArtist": 2, "flavor": "entdecken", "avoidRecent": 30}},
-                1.6, title=_("Discoveries for {name}", name=person["name"]), why=_("Songs that rarely or never played – different ones every day"), group=pid)
+                1.6, title=title, why=_("Songs that rarely or never played – different ones every day"), group=pid)
 
         # Radio: favorite bands (or the biggest bands of the favorite worlds) + similar bands – new every week
         seeds = [a for a in likes.get("artists", []) if a not in dislikes_of(person)][:3]
@@ -463,10 +452,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
 
         if prof:
             # "Your sound": what sounds like the person's taste, from the whole library (sound, AI style, bands)
-            sound_name = _s("Our sound") if pid == default else \
-                _s("{name}’s sound", name=person["name"], owner=possessive(person["name"]))
-            sound_title = _("Our sound") if pid == default else \
-                _("{name}’s sound", name=person["name"], owner=possessive(person["name"]))
+            sound_name, sound_title = names(person, N_("Sound"), N_("Our sound"))
             add({"person": pid, "welt": ALL, "stil": ALL, "type": "mix", "minRating": 0, "name": sound_name,
                  "mix": {"size": 50, "perArtist": 2, "every": "day", "flavor": "geschmack", "avoidRecent": 14}},
                 2.4, title=sound_title,
@@ -488,10 +474,8 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                 if not st_ or (sid == "klang-morgen" and prof):   # with listening data only from the clock (morning_mix)
                     continue
                 if sid in ("klang-schlaf", "klang-morgen"):   # daily routine: fixed length instead of a song count, new every day
-                    title = _("Good night · {world}", world=welten[wid]["name"]) if sid == "klang-schlaf" else \
-                        _("Good morning · {world}", world=welten[wid]["name"])
-                    stored = _s("Good night · {world}", world=welten[wid]["name"]) if sid == "klang-schlaf" else \
-                        _s("Good morning · {world}", world=welten[wid]["name"])
+                    stored, title = names(person, N_("Good night · {world}") if sid == "klang-schlaf" else
+                                          N_("Good morning · {world}"), world=welten[wid]["name"])
                     add({"person": pid, "welt": wid, "stil": sid, "type": "mix", "name": stored,
                          "mix": {"size": 40, "minutes": 30, "perArtist": 2, "every": "day", "avoidRecent": 3}},
                         (1.7 if sid == "klang-schlaf" else 1.65) + (0.3 if welten[wid].get("separate") else 0), title=title, why=why, group=pid)
@@ -507,17 +491,18 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             morning_mix(person)
 
         # personal smart playlist across all favorite worlds (“All Sorts” – not a mix: “Mix” is for real mixes)
-        if len(liked_w) >= 2 and pid != default:
-            add({"person": pid, "welt": liked_w, "stil": ALL, "minRating": 3,
-                 "name": _s("{name}’s All Sorts", name=person["name"], owner=possessive(person["name"]))},
-                2.2, title=_("{name}’s All Sorts", name=person["name"], owner=possessive(person["name"])),
-                why=_("across all favorite worlds, from ★★★"), group=pid)
-            add({"person": pid, "welt": liked_w, "stil": "neu", "name": _s("New for {name}", name=person["name"])},   # i18n-ignore: stored value
-                1.9, title=_("New for {name}", name=person["name"]), why=_("what is new in the favorite worlds"), group=pid)
+        if len(liked_w) >= 2 and pid != family:
+            name, title = names(person, N_("All Sorts"))
+            add({"person": pid, "welt": liked_w, "stil": ALL, "minRating": 3, "name": name},
+                2.2, title=title, why=_("across all favorite worlds, from ★★★"), group=pid)
+            if any(x["id"] == "neu" for x in stile) and "neu" not in liked_s:   # i18n-ignore: vibe id (may be deleted; liked: above)
+                name, title = names(person, N_("Newly added"))
+                add({"person": pid, "welt": liked_w, "stil": "neu", "name": name},   # i18n-ignore: stored value
+                    1.9, title=title, why=_("what is new in the favorite worlds"), group=pid)
 
     # the family's car ride and "What everyone likes" (at least two people who have listened enough) – only with a family
-    if not only_person and default:
-        family_mix(next((x for x in persons if x["id"] == default), None))
+    if not only_person and family:
+        family_mix(next((x for x in persons if x["id"] == family), None))
 
     # new music worlds from the scene catalog
     linked = {w.get("scene") for w in cfg["welten"]}
@@ -578,7 +563,7 @@ def unused_playlists(cfg, lib, only_persons=None, today=None):
     from . import rueckblick
     today = today or dt.date.today()
     start = today - dt.timedelta(days=UNUSED_DAYS)
-    users = {(p.get("user") or "").strip() for p in cfg["personen"] if p.get("user")}
+    users = {p["user"] for p in cfg["personen"]}
     played, counted = set(), False
     for u in users:
         snap = rueckblick.last_snapshot(u)
@@ -640,13 +625,13 @@ def taste_hints(cfg, lib, only_persons=None):
     asked whether it is a child profile, and nobody gets a hint to keep music out. Not for the family, not for
     child profiles. -> [(key, level, title, text, actions)]"""
     from . import taste
-    default = next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
+    family = next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
     separate = {w["id"]: w for w in cfg["welten"] if w.get("separate")}
     candidates = rules.child_candidates(cfg)
     admin = only_persons is None
     out = []
     for p in cfg["personen"]:
-        if not separate or not p.get("user") or p["id"] == default or p.get("child") \
+        if not separate or p["id"] == family or p.get("child") \
                 or (only_persons is not None and p["id"] not in only_persons):
             continue
         try:
@@ -672,8 +657,7 @@ def taste_hints(cfg, lib, only_persons=None):
         for wid, share in prof.get("welten", []):
             if wid in separate and wid not in left_out and share >= TASTE_HINT_SHARE:
                 out.append((f"taste-world|{p['id']}|{wid}", "info",
-                            _("“{world}” counts for {name}’s taste", world=separate[wid]["name"], name=p["name"],
-                              owner=possessive(p["name"])),
+                            _("“{world}” counts for {name}’s taste", world=separate[wid]["name"], name=p["name"]),
                             _("{pct} % of what this account plays is from “{world}”. If that plays for someone else, keep it "
                               "out of the taste – then discoveries, album of the week and own sound follow the person’s own "
                               "music. The family playlists keep it.", pct=round(share * 100), world=separate[wid]["name"]),

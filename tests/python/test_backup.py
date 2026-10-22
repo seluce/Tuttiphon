@@ -51,7 +51,7 @@ class TestCreate(BackupTest):
         put(config.STATE_DIR / "install_id", "0123456789abcdef\n")
         put(config.STATE_DIR / ".versteckt")
         put(config.STATE_DIR / "halb.json.123.tmp")
-        put(config.BACKUP_DIR / "config_v1_test.json", "{}")
+        put(config.BACKUP_DIR / "notiz.json", "{}")
         self.sessions_existed = (config.STATE_DIR / "sessions.json").exists()
         if not self.sessions_existed:
             put(config.STATE_DIR / "sessions.json", "{}")
@@ -73,8 +73,8 @@ class TestCreate(BackupTest):
             self.assertEqual(z.read("config.json"), config.CONFIG_FILE.read_bytes())
             self.assertEqual(z.read(".env"), b"NAV_URL=http://test.invalid\n")
         self.assertEqual(info["files"], len(names))
-        self.assertLessEqual({"config.json", ".env", "state/test-lyrics.json", "state/test-sub/werte.json",
-                              "backup/config_v1_test.json"}, names)
+        self.assertLessEqual({"config.json", ".env", "state/test-lyrics.json", "state/test-sub/werte.json"}, names)
+        self.assertNotIn("backup/notiz.json", names)   # backup/: only original playlists
         for skipped in ("state/cache/img/ab/bild.png", "state/sessions.json", "state/task.lock",
                         "state/instance-pc_test.json", "state/install_id", "state/.versteckt", "state/halb.json.123.tmp"):
             self.assertNotIn(skipped, names)
@@ -105,8 +105,7 @@ class TestCreate(BackupTest):
             names = z.namelist()
         self.assertFalse(any(n.endswith(".zip") for n in names), names)   # never earlier backups
         self.assertIn("backup/2026-01-01_120000_Lieder.nsp", names)
-        self.assertIn("backup/config_v1_test.json", names)
-        self.assertNotIn("backup/notiz.txt", names)   # backup/ holds only playlist originals and old configurations
+        self.assertNotIn("backup/notiz.txt", names)   # backup/ holds only playlist originals
         inner = config.STATE_DIR / "sicherungen"   # a folder inside state/: nothing from it
         inner.mkdir()
         self.addCleanup(shutil.rmtree, inner, True)

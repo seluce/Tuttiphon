@@ -126,7 +126,6 @@ class TestValidateConfig(unittest.TestCase):
         self.assertInvalid(lambda c: c["personen"][0].update(dislikes={"artists": [1]}), "dislikes ungültig")
         self.assertInvalid(lambda c: c["playlists"][0].update(excludeArtists="Band"), "excludeArtists")
         self.assertInvalid(lambda c: c["playlists"][0].update(name=["x"]), "name muss Text sein")
-        self.assertInvalid(lambda c: c["playlists"][0].update(public="ja"), "public ungültig")
         self.assertInvalid(lambda c: c.update(personen={}), "personen ungültig")
 
     def test_valid_configs(self):
@@ -178,7 +177,6 @@ class TestValidateConfig(unittest.TestCase):
         self.assertInvalid(lambda c: c["settings"].update(pipeline=["kaffee"]), "Alles aktualisieren")
         self.assertInvalid(lambda c: c["settings"]["deezer"].update(thresholds=[5, 4, 3, 2, 1]), "Deezer-Stufen")
         self.assertInvalid(lambda c: c["settings"]["backup"].update(dir="../anderswo"), "Sicherung")
-        self.assertInvalid(lambda c: c["settings"]["opus"].update(archiveDir="/tmp/archiv"), "Archivordner")
         self.assertInvalid(lambda c: c["settings"]["opus"].update(owner="niklas"), "UID:GID")
         self.assertInvalid(lambda c: c["settings"].update(paths={"music": "Musik/../.."}), "..")
         self.assertInvalid(lambda c: c["settings"].update(paths={"temp": "/tmp"}), "Speicherort")
@@ -204,11 +202,11 @@ class TestSaveEnv(EnvFileTest):
         self.assertEqual(stat.S_IMODE(config.ENV_FILE.stat().st_mode), 0o600)
 
     def test_commented_template_is_filled_in_place_and_kept_on_delete(self):
-        config.ENV_FILE.write_text("# Zugang\n# NAV_URL=http://beispiel\n#LASTFM_API_KEY=\nRATING_USERS=a,b\n")
+        config.ENV_FILE.write_text("# Zugang\n# NAV_URL=http://beispiel\n#LASTFM_API_KEY=\nNTFY_TOKEN=tk-test\n")
         config.save_env({"LASTFM_API_KEY": "key-test", "NAV_PASS_JONAS": "pw-test"})
         self.assertEqual(self.lines(), ["# Zugang", "# NAV_URL=http://beispiel", "LASTFM_API_KEY=key-test",
-                                        "RATING_USERS=a,b", "NAV_PASS_JONAS=pw-test"])
-        config.save_env({"RATING_USERS": None, "NAV_URL": None, "LASTFM_API_KEY": ""})   # "" = unchanged
+                                        "NTFY_TOKEN=tk-test", "NAV_PASS_JONAS=pw-test"])
+        config.save_env({"NTFY_TOKEN": None, "NAV_URL": None, "LASTFM_API_KEY": ""})   # "" = unchanged
         self.assertEqual(self.lines(), ["# Zugang", "# NAV_URL=http://beispiel", "LASTFM_API_KEY=key-test",
                                         "NAV_PASS_JONAS=pw-test"])
 
@@ -261,7 +259,7 @@ class TestLoadEnv(EnvFileTest):
 
 class TestPaths(unittest.TestCase):
     def cfg(self, **st):
-        return {"settings": {"playlistDir": "Music/00_SmartPlaylists", **st}}
+        return {"settings": dict(st)}
 
     def test_defaults_next_to_base(self):
         p = config.paths(self.cfg())
@@ -283,11 +281,6 @@ class TestPaths(unittest.TestCase):
             self.assertEqual(config.paths(self.cfg(paths={"music": "Musik"}))["music"], env.BASE / "Musik")
         finally:
             os.chdir(old)
-
-    def test_legacy_playlist_dir_and_archive_setting(self):
-        p = config.paths(self.cfg(playlistDir="Playlists", opus={"archiveDir": "Altes"}))
-        self.assertEqual(p["playlists"], env.BASE / "Playlists")
-        self.assertEqual(p["archive"], env.BASE / "Altes")
 
     def test_environment_wins(self):
         with mock.patch.dict(os.environ, {"MUSIC_DIR": "/nas/Music", "ARCHIVE_DIR": "/nas/Archiv"}):

@@ -13,6 +13,7 @@
   import { api } from '../../lib/api.js'
   import { fmt } from '../../lib/format.js'
   import { t } from '../../lib/i18n.svelte.js'
+  import { pwOk, starAccounts, getsStars, toggleStars } from '../personen/shared.js'
 
   const DEFAULTS = [10000, 100000, 300000, 600000, 850000]
   S.config.settings.deezer ??= {}
@@ -35,7 +36,8 @@
     })
     return out
   })
-  const total = $derived(per ? per.reduce((a, b) => a + b, 0) || 1 : 1)
+  const ranked = $derived(per ? per.reduce((a, b) => a + b, 0) : 0)   // songs with a known rank
+  const total = $derived(ranked || 1)
   const max = $derived(per ? Math.max(1, ...per) : 1)
 
   function setThreshold(i, e) {
@@ -64,12 +66,10 @@
     startTask(['deezer'], { deezer_mode: 'full', ...(overwrite ? { overwrite_manual: true } : {}) })
   }
 
-  const users = $derived((S.status?.env?.users || []).map((u) => u.name))
-  const chosen = $derived(dz.users ?? users)
+  // every person's account – also those switched off, so they can be switched on again
+  const users = $derived(starAccounts(dz))
   function toggleUser(u) {
-    const cur = new Set(dz.users ?? users)
-    cur.has(u) ? cur.delete(u) : cur.add(u)
-    dz.users = [...cur]
+    toggleStars(dz, u)
     changed()
   }
 </script>
@@ -88,6 +88,8 @@
       <div class="err-t small">{error}</div>
     {:else if !per}
       <div class="skel h-[160px]"></div>
+    {:else if !ranked}
+      <p class="muted small">{t('No numbers yet – they appear with the first run.')}</p>
     {:else}
       <div class="sbars">
         {#each per as n, k (k)}
@@ -99,8 +101,8 @@
         {/each}
       </div>
       <p class="hint mt-2">{hist.notFound
-        ? t('This is how {n} songs with a known Deezer rank are distributed; {missing} were not found on Deezer.', { n: fmt(total), missing: fmt(hist.notFound) })
-        : t('This is how {n} songs with a known Deezer rank are distributed.', { n: fmt(total) })}</p>
+        ? t('This is how {n} songs with a known Deezer rank are distributed; {missing} were not found on Deezer.', { n: fmt(ranked), missing: fmt(hist.notFound) })
+        : t('This is how {n} songs with a known Deezer rank are distributed.', { n: fmt(ranked) })}</p>
     {/if}
   </div>
   <div class="btns">
@@ -113,21 +115,17 @@
   <Row label={t('Highlight top tracks per band')} hint={t('If many songs of a band share the highest star count, the most popular get one more star. This way Symfonium sorts the top tracks correctly. Takes effect on the next run.')}>
     <Toggle label={t('Highlight top tracks per band')} obj={dz} key="topBoost" def={true} />
   </Row>
-  <Row label={t('Refresh every night')} hint={t('Checks {n} songs on Deezer again every night in the time window of the night analysis, first those rated with the older, less accurate search. After that always the ones unchecked the longest – so the stars stay up to date.', { n: fmt(hist?.perNight || 1500) })}>
+  <Row label={t('Refresh every night')} hint={t('Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.', { n: fmt(hist?.perNight || 1500) })}>
     <Toggle label={t('Refresh every night')} obj={dz} key="refresh" def={true} />
   </Row>
-  {#if hist?.total}
-    <div class="hint">{hist.top
-      ? t('Checked with the accurate search: {done} of {total} songs · {top} top tracks highlighted.', { done: fmt(hist.verified), total: fmt(hist.total), top: fmt(hist.top) })
-      : t('Checked with the accurate search: {done} of {total} songs.', { done: fmt(hist.verified), total: fmt(hist.total) })}</div>
-  {/if}
 </Card>
 
 <Card title={t('Who gets stars?')} icon="users">
   {#if users.length}
     <div class="toggles">
       {#each users as u (u)}
-        <button class={['toggle', chosen.includes(u) && 'on']} onclick={() => toggleUser(u)}>{u}</button>
+        <button class={['toggle', getsStars(dz, u) && 'on']} aria-pressed={getsStars(dz, u)} onclick={() => toggleUser(u)}
+          title={pwOk(u) === false ? t('Password missing') : undefined}>{u}{#if pwOk(u) === false}<Icon name="lock" size={13} />{/if}</button>
       {/each}
     </div>
   {:else}

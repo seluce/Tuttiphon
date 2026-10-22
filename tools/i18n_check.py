@@ -8,8 +8,7 @@ Errors (exit code 1):
   conflict  the same English text has two different German entries
   placeholder the German entry does not have exactly the {placeholders} of the English text – a value would be missing
             in German, or str.format() would fail on an unknown name. Allowed: a form the code passes along for the
-            translation instead of the English one (PLACEHOLDER_ALTERNATIVES: {Every} = {every} capitalized, {owner} =
-            the German possessive of {name})
+            translation instead of the English one (PLACEHOLDER_ALTERNATIVES: {Every} = {every} capitalized)
   values    a call with a literal text and only keyword values that does not pass a placeholder of the English text
             or of a translation ({n} of _n()/_sn() comes by itself) – it would raise KeyError
   format    a translation that does not format with values like the code passes them (a date for {start:%d/%m}, a
@@ -51,8 +50,8 @@ FUNCS = {"_": (0,), "_s": (0,), "_n": (1, 2), "_sn": (1, 2), "N_": (0,)}
 EXCEPTIONS = re.compile(r"(Error|Exception|Refused)$")
 UI_KEYS = {"error", "message", "title", "text", "hint", "why", "detail", "label", "warning"}
 # a translation may use another form of a value that the code passes along for it:
-# rules.py: every=…, Every=every.capitalize() (German puts it first) · suggest.py: name=…, owner=possessive(name)
-PLACEHOLDER_ALTERNATIVES = {"every": {"Every"}, "name": {"owner"}}
+# rules.py: every=…, Every=every.capitalize() (German puts it first)
+PLACEHOLDER_ALTERNATIVES = {"every": {"Every"}}
 
 
 def bare(text):

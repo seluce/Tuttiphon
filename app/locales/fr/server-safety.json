@@ -3,9 +3,9 @@
  "This topic belongs to someone else – please choose your own.": "Ce sujet appartient à quelqu’un d’autre – veuillez choisir le vôtre.",
  "Something went wrong – the details are in the server log.": "Quelque chose s’est mal passé – les détails se trouvent dans le journal du serveur.",
  "⚠ The configuration {file} is damaged ({error}) – Tuttiphon keeps working with the last good state and writes it back with the next save. Copy of the damaged file: {copy}": "⚠ La configuration {file} est endommagée ({error}) – Tuttiphon continue avec le dernier état correct et le réécrit au prochain enregistrement. Copie du fichier endommagé : {copy}",
- "The configuration {file} is damaged and cannot be read ({error}). Tuttiphon does not start, so that nothing gets overwritten – please correct the file or replace it with a backup (backup/config_v*.json or config.json from a tuttiphon-sicherung-*.zip), then start again.": "La configuration {file} est endommagée et illisible ({error}). Tuttiphon ne démarre pas, afin que rien ne soit écrasé – veuillez corriger le fichier ou le remplacer par une sauvegarde (backup/config_v*.json ou config.json d’un tuttiphon-sicherung-*.zip), puis redémarrez.",
- "migration failed: {error}": "échec de la migration : {error}",
- "The configuration {file} is from an earlier version and does not fit this one: {error}. Tuttiphon does not start and has changed nothing – please put this right in the earlier version first (see the changelog), then update again.": "La configuration {file} provient d’une version antérieure et ne convient pas à celle-ci : {error}. Tuttiphon ne démarre pas et n’a rien modifié – veuillez d’abord corriger cela dans la version antérieure (voir le journal des modifications), puis mettre à jour à nouveau.",
+ "⚠ The configuration {file} is gone – Tuttiphon keeps working with the last good state and writes it back with the next save.": "⚠ La configuration {file} a disparu – Tuttiphon continue avec le dernier état correct et le réécrit au prochain enregistrement.",
+ "The configuration {file} is damaged and cannot be read ({error}). Tuttiphon does not start, so that nothing gets overwritten – please correct the file or replace it with a backup (config.json from a tuttiphon-sicherung-*.zip), then start again.": "La configuration {file} est endommagée et illisible ({error}). Tuttiphon ne démarre pas, afin que rien ne soit écrasé – veuillez corriger le fichier ou le remplacer par une sauvegarde (config.json d’un tuttiphon-sicherung-*.zip), puis redémarrez.",
+ "The configuration {file} is from a version before Tuttiphon 2.0 and cannot be read by this one. Tuttiphon does not start and has changed nothing – move the file away to start with a new setup.": "La configuration {file} provient d’une version antérieure à Tuttiphon 2.0 et ne peut pas être lue par celle-ci. Tuttiphon ne démarre pas et n’a rien modifié – déplacez le fichier ailleurs pour recommencer la configuration.",
  "not an object": "pas un objet",
  "“{key}” has the wrong type": "« {key} » a un type incorrect",
  "config: invalid value ({error})": "config : valeur invalide ({error})",
@@ -25,5 +25,6 @@
  "The Deezer file was damaged and has been set aside as {name} – the next run starts with fresh ranks.": "Le fichier Deezer était endommagé et a été mis de côté sous {name} – la prochaine exécution repart avec des rangs neufs.",
  "⚠ Lyrics index damaged ({error}) – set aside as {name}, it is built anew.": "⚠ Index des paroles endommagé ({error}) – mis de côté sous {name}, il est reconstruit.",
  "⚠ Recap: {file} was damaged – set aside as {name}.": "⚠ Rétrospective : {file} était endommagé – mis de côté sous {name}.",
- "⚠ Mixes learn: {file} was damaged – set aside as {name}.": "⚠ Les mix apprennent : {file} était endommagé – mis de côté sous {name}."
+ "⚠ Mixes learn: {file} was damaged – set aside as {name}.": "⚠ Les mix apprennent : {file} était endommagé – mis de côté sous {name}.",
+ "⚠ {file} was damaged – set aside as {name}.": "⚠ {file} était endommagé – mis de côté sous {name}."
 }

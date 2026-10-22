@@ -95,15 +95,14 @@ Tuttiphon sync name, owner and visibility.
 
 1. `tuttiphon.py` reads the options and calls `config.ensure_dirs()`: creates the data folder, `state/`, `logs/`, `backup/`,
    write test. If that fails, the process exits with code 2.
-2. If the server is to be reachable not only via loopback and `TUTTIPHON_ADMIN_PASSWORD` is set (environment or
-   `.env`), it must not be weak (`config.weak_password()`, see [command line](#tuttiphonpy)). Otherwise the process
-   exits with code 2 (with `--unsafe-no-password` only a warning). Without any administrator password – neither that
-   variable nor one set in the browser (`localadmin.source()`) – it starts anyway, in
-   [setup mode](07-security.md#setup-mode).
-3. `web.serve(host, port, strict)` sets `Handler.network` for a non-loopback address (`strict=False` with
-   `--unsafe-no-password`): from then on the server answers every request with `503` while `TUTTIPHON_ADMIN_PASSWORD`
-   is weak, and without any administrator password it requires sign-in and only lets the setup with the setup code
-   through ([Security](07-security.md#running-without-a-password)). It opens the `ThreadingHTTPServer` (with
+2. If the server is to be reachable not only via loopback and there is no administrator password yet
+   (`localadmin.configured()`), it starts in [setup mode](07-security.md#setup-mode) (with `--unsafe-no-password`
+   only a warning and no sign-in).
+3. `web.serve(host, port, strict)` reads `config.json` first: if it is damaged or from a version before Tuttiphon 2.0
+   (`config.ConfigDamaged`, [Data model](02-data-model.md#version-and-damaged-files)), the process ends with that message
+   and changes nothing. It sets `Handler.network` for a non-loopback address (`strict=False` with
+   `--unsafe-no-password`): from then on the server requires sign-in, and without an administrator password it only
+   lets the setup with the setup code through ([Security](07-security.md#running-without-a-password)). It opens the `ThreadingHTTPServer` (with
    an IPv6 address such as `::1` or `::` with `AF_INET6`) and starts `warm_up()`. Without `TUTTIPHON_NO_SCHEDULER=1` these follow: `heartbeat()` (instance registration, `app/instances.py`), a
    thread for `rueckblick.snapshot_all()` and the scheduler thread `daily_loop()`.
 4. `web.startup_report()` writes an overview to the server log (`events.say()`): version, storage locations with
@@ -125,7 +124,7 @@ Tuttiphon sync name, owner and visibility.
 | Scheduler | at startup | every 60 s, first pass after 60 s | instance registration, tidy-up, freeing memory, recap, backup, folder watch, night analysis, daily refresh (see below) | `TUTTIPHON_NO_SCHEDULER=1` |
 | Auto-apply | 8 s after `PUT /api/config` or a takeover; every further change restarts the wait | once per scheduling | starts the run “Applied automatically” (`playlists` + `scan`) if something is pending – if a pausable run is already in progress, it pauses that run briefly | setting `autoApply` |
 | Run | when a run starts (interface, scheduler, folder watch, auto-apply), after `TaskRunner.start()` has acquired the lock against other instances | until the run is finished | `TaskRunner._run()` executes the steps one after another | Cancel in the interface |
-| Continuation | at the end of a run that `pause_for()` paused | until the queued runs have started and finished | `TaskRunner._continue()`: waits for the run thread to end, first starts the apply run, then the rest of the paused run (“… (continued)”); if a start fails, up to 30 attempts 2 s apart | – |
+| Continuation | at the end of a run that `pause_for()` paused | until the queued runs have started and finished | `TaskRunner._continue()`: waits for the run thread to end, first starts the apply run, then the rest of the paused run (“… (continued)”); if a start fails, up to 180 attempts 10 s apart | – |
 | Workers in steps | within a run | per step | thread pools: Opus `opus.jobs` (default 1), lyrics `lyrics.workers` (default 6), sound analysis `analysis.workers` (0 = half the core count), Deezer 4; the AI sound analysis works song by song in its own process (`analysis.mlThreads` cores, default 2) | Settings |
 
 In addition there are subprocesses for `ffmpeg`/`ffprobe` and – only during the AI sound analysis – a separate Python process
@@ -140,7 +139,7 @@ waiting for the Navidrome scan. The step currently running and all steps not yet
 **Auto-apply** (`web.AutoApply`): it uses `pending_count()` to count the playlists in the states `neu`, `geändert`,
 `scan` or `entfernen` (new, changed, awaiting scan, to be removed) plus orphaned files. If a run is in progress when the timer expires and something is pending,
 it pauses that run briefly with `RUNNER.pause_for()` – but only if all of its open steps are pausable (`flac`, `lyrics`,
-`analyse`, `deezer`); “Applied automatically” runs first, then the rest of the run as “… (continued)” (see
+`cover`, `analyse`, `deezer`); “Applied automatically” runs first, then the rest of the run as “… (continued)” (see
 [Maintenance](05-maintenance.md#short-pause-for-an-apply-pause_for)). If that isn't possible (the run itself still writes
 playlists), it reschedules itself 30 s later; meanwhile `state()` reports `{"waiting": true}` instead of a countdown, and the
 interface shows “Changes follow after the running task” (otherwise the countdown would keep starting over
@@ -202,12 +201,12 @@ The scheduler catches errors and tries again in the next pass.
 | Navidrome sessions | `navidrome.native_session()` | one per account, for the lifetime of the process |
 | Navidrome accounts | `auth.navidrome_users()` | cached for 10 min; if the query fails (any exception), the last state applies, after a restart the one from `state/navidrome_users.json`, and for 60 s it doesn't ask again |
 | Sessions | `auth._load_sessions()` | `state/sessions.json` in memory until the file changes |
-| Administrator password | `Handler._pw_cache`, `localadmin._cache` | source and plain password, read again at most every 10 s (`Handler._admin()`); the hash from `state/admin_password.json` in memory until the file changes; setting a password resets both |
+| Administrator password | `Handler._pw_cache`, `localadmin._cache` | whether a password is set, read again at most every 10 s (`Handler._admin()`); the hash from `state/admin_password.json` in memory until the file changes; setting a password resets both |
 | Song lists of other accounts | `stats._cache` | 10 min per account; the scheduler releases older ones every minute (`stats.purge()`). Only one request per account loads at a time, a second one waits for it. Loaded page by page and laid over the shared list (`stats.overlay()`): songs with the same stars, favorites and plays are the same entries, only the rest are copies – around 15 MB per account instead of a second full list |
 | Live log | `TaskRunner.lines` | the last up to 4,000 lines, available via `GET /api/task?since=…` |
 | Queued runs | `TaskRunner._chain` | after `pause_for()`: the apply run and the continuation; empty as long as nothing is paused |
 | Server log | `events.say()` | writes lines with a timestamp to standard output, under a lock so that lines from several threads don't get mixed up |
-| Tour/welcome seen | `auth._seen_cache` | `state/seen.json` (and the older `tour_seen.json`) in memory until one of the files changes |
+| Tour/welcome seen | `auth._seen_cache` | `state/seen.json` in memory until the file changes |
 
 `python3 tuttiphon.py run` doesn't start a server. A `TaskRunner` executes the steps in the foreground and additionally
 writes the log to standard output. It writes its instance registration only at the start and at the end of the
@@ -219,8 +218,8 @@ run.
 |---|---|
 | `web.py` | HTTP server with JSON API, serves `web/` and images; auto-apply, scheduler |
 | `auth.py` | sign-in via Navidrome or as local administrator, signed sessions with a server-side session list, roles, per-account filters |
-| `localadmin.py` | password of the local administrator: source (`TUTTIPHON_ADMIN_PASSWORD` or a hash set in the browser, `state/admin_password.json`), checking, setting, the one-time setup code of the first start ([Security](07-security.md#local-administrator)) |
-| `config.py` | paths, credentials (`.env`; which keys the interface may set: `EDITABLE_ENV`; `weak_password()`), loading, checking, migrating and saving `config.json`; `write_atomic()`, `read_text()` |
+| `localadmin.py` | password of the local administrator: the hash set in the browser (`state/admin_password.json`), checking, setting, the one-time setup code of the first start ([Security](07-security.md#local-administrator)) |
+| `config.py` | paths, credentials (`.env`; which keys the interface may set: `EDITABLE_ENV`; `weak_password()`), loading, checking and saving `config.json`; `write_atomic()`, `new_temp()`/`temp_copy()` (new hidden temporary files on the music share), `read_text()` |
 | `tasks.py` | runs: `TaskRunner` executes steps, logs, writes the history, pauses briefly for an apply run (`pause_for()`); instance lock; daily tidy-up (`tidy()`) |
 | `events.py` | server log: `say()` writes short lines with date and time to standard output (in the container `docker logs`) |
 | `version.py` | `VERSION` – the program version (startup message, `GET /api/status`, release); matches the top section in `CHANGELOG.md` |
@@ -324,10 +323,10 @@ python3 tuttiphon.py run deezer --deezer-mode full
 
 | Option | Default | Effect |
 |---|---|---|
-| `--host` | `127.0.0.1` | address the server binds to; IPv6 addresses (`::1`, `::`) work too. For anything other than `127.0.0.1`, `localhost`, `::1`, sign-in is always required: a `TUTTIPHON_ADMIN_PASSWORD` that is set must not be weak (`config.weak_password()`: at least 8 characters and not the placeholder `change-me` in any spelling; otherwise code 2, the message names what is wrong and where the value comes from); without any administrator password the server starts in [setup mode](07-security.md#setup-mode) and writes the setup code to the log. While running, it stays locked (`503`) if the variable becomes weak, and goes back to setup mode if the password goes missing. For `0.0.0.0` the startup message shows the address `http://127.0.0.1:<port>/`, for `::` `http://[::1]:<port>/`, other IPv6 addresses in square brackets. |
+| `--host` | `127.0.0.1` | address the server binds to; IPv6 addresses (`::1`, `::`) work too. For anything other than `127.0.0.1`, `localhost`, `::1`, sign-in is always required: without an administrator password the server starts in [setup mode](07-security.md#setup-mode) and writes the setup code to the log; while running, it goes back to setup mode if the password goes missing. For `0.0.0.0` the startup message shows the address `http://127.0.0.1:<port>/`, for `::` `http://[::1]:<port>/`, other IPv6 addresses in square brackets. |
 | `--port` | `8765` | port |
 | `--no-browser` | off | don't open a browser |
-| `--unsafe-no-password` | off | start on the network despite a too short password, and without setup mode when there is none; also turns off the lock while running (`serve(…, strict=False)`). Only a warning appears: with a too short password or the placeholder “… but the administrator password is too short or still the placeholder!”, without a password the notice that there is then no sign-in and the server only answers requests via `127.0.0.1`/`localhost` and the names in `TUTTIPHON_HOSTS` – see [Security](07-security.md). |
+| `--unsafe-no-password` | off | start on the network without setup mode when there is no administrator password (`serve(…, strict=False)`). Only a warning appears when no password is set: there is then no sign-in, and the server only answers requests via `127.0.0.1`/`localhost` and the names in `TUTTIPHON_HOSTS` – see [Security](07-security.md). |
 
 **`run`** – steps without the interface (for cron or a systemd timer):
 
@@ -345,8 +344,8 @@ the command line.
 
 **Exit codes:** `0` = done; for `run` only if every step is `ok`. `1` = at least one step `warnung`,
 `fehler` or `abgebrochen` (warning, error, canceled) – or the run couldn't start at all because another instance is working (message “✕ Another
-Tuttiphon instance (PC or Docker) is working right now – please try again later.”). `2` = data folder not
-writable or network start with a weak `TUTTIPHON_ADMIN_PASSWORD`.
+Tuttiphon instance (PC or Docker) is working right now – please try again later.”), or `serve` didn't start because
+`config.json` is damaged or from a version before Tuttiphon 2.0. `2` = data folder not writable.
 
 `tuttiphon.py` sets `sys.dont_write_bytecode` so that no `__pycache__` folders are created.
 
@@ -388,7 +387,7 @@ The order of the storage locations (environment > settings > default) is describ
 
 **Credentials and switches** – via `config.load_env()`. The sources in ascending priority: `<data>/.env` (empty
 values don't count), then the environment. From the environment Tuttiphon takes all variables starting with `NAV_` or
-`TUTTIPHON_`, as well as `RATING_USERS`, `LASTFM_API_KEY` and `NTFY_TOKEN` – only with a
+`TUTTIPHON_`, as well as `LASTFM_API_KEY` and `NTFY_TOKEN` – only with a
 non-empty value; an empty variable (e.g. `NAV_ADMIN_PASS: ""` in `docker-compose.yaml`) doesn't override the `.env`.
 
 | Variable | Effect | Can be saved via `PUT /api/env` |
@@ -397,9 +396,7 @@ non-empty value; an empty variable (e.g. `NAV_ADMIN_PASS: ""` in `docker-compose
 | `NAV_PUBLIC_URL` | address for “Open in Navidrome” links; empty = `NAV_URL` | yes |
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | admin account for scan, native API, images and song list | yes |
 | `NAV_PASS_<ACCOUNT>` | password of a Navidrome account for stars, statistics and an exact preview. Account name in upper case; characters other than letters, digits and `_` become `_` (`config.pass_key()`). | yes |
-| `RATING_USERS` | comma-separated accounts for which Deezer sets stars (`config.rating_users()`). Only applies as long as the setting `deezer.users` is not a list (default `null`); without either: all accounts of the people. | yes (the interface has no field for it) |
 | `LASTFM_API_KEY` | key for Last.fm | yes |
-| `TUTTIPHON_ADMIN_PASSWORD` | optional: the password of the [local administrator](07-security.md#local-administrator) in plain text instead of one set in the browser – it wins over a stored one and can then only be changed here; turns on sign-in. On the network it must not be weak | no, only `.env` or environment |
 | `TUTTIPHON_HOSTS` | additional allowed host names, comma-separated (only effective without a password) | no, only `.env` or environment |
 | `TUTTIPHON_TRUSTED_PROXIES` | reverse proxies whose `X-Forwarded-For`/`X-Forwarded-Proto` count, addresses or networks, comma-separated (e.g. `172.16.0.0/12`): the sign-in lockout then counts each person's own address, sign-ins via https get the `Secure` cookie ([Security](07-security.md#behind-a-reverse-proxy)) | no, only `.env` or environment |
 

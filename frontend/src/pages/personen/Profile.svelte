@@ -32,7 +32,7 @@
   import { go } from '../../lib/router.svelte.js'
   import { passwordModal } from '../../lib/account.js'
   import { genreSuggestions } from '../../lib/richtungen.js'
-  import { users, pwOk, takenAccounts } from './shared.js'
+  import { users, pwOk, takenAccounts, dropStars } from './shared.js'
   import Switch from '../../components/Switch.svelte'
   import { api } from '../../lib/api.js'
   import { t, tn } from '../../lib/i18n.svelte.js'
@@ -59,8 +59,9 @@
   /** your own person (also as administrator): notifications on this device */
   const own = $derived(self || myPerson()?.id === p.id)
 
-  // kid-safe mode: anyone may turn it on, only the administrator may turn it off (otherwise the server keeps it on)
-  const cleanLocked = untrack(() => !isAdmin() && !!p.clean)
+  // kid-safe mode: anyone may turn it on, only the administrator may turn it off (otherwise the server keeps it on) –
+  // for users the switch locks as soon as it is on, also right after turning it on
+  const cleanLocked = $derived(!isAdmin() && !!p.clean)
   // suggestion for a topic that is hard to guess
   const suffix = Math.random().toString(36).slice(2, 7)
   let topic = $state(untrack(() => p.push || ''))
@@ -100,6 +101,7 @@
       }
     })
     const name = p.name
+    dropStars(S.config.settings.deezer, p.user)   // Deezer no longer rates the account – it may be deleted in Navidrome next
     S.config.personen = S.config.personen.filter((x) => x !== p)
     changed()
     toast(t('{name} deleted', { name }), { undo: true })
@@ -151,10 +153,8 @@
     </div>
   </div>
 
-  {#if p.user}
-    <div class="section"><TasteCard person={p.id} likes={p.likes} {self} name={p.name} onchange={ch} /></div>
-    {#if !fam && !p.child}<div class="section"><TasteExclude {p} {self} onchange={ch} /></div>{/if}
-  {/if}
+  <div class="section"><TasteCard person={p.id} likes={p.likes} {self} name={p.name} onchange={ch} /></div>
+  {#if !fam && !p.child}<div class="section"><TasteExclude {p} {self} onchange={ch} /></div>{/if}
 
   <div class="card section grid gap-4" data-guide="likes">
     <h2 class="ih"><span class="hi"><Icon name="heart" size={18} /></span>{self ? t('What you like to hear') : t('Preferences')}</h2>
@@ -164,7 +164,7 @@
     <Field label={self ? t('Favorite bands – show up more often in your mixes') : t('Favorite bands – go into the personal mix')}>
       <ArtistChips items={p.likes.artists} onchange={ch} />
     </Field>
-    {#if p.user && S.status?.plugin}
+    {#if S.status?.plugin}
       <!-- never played songs in the smart queue and Instant Mix (the plugin's answers, p.newEvery: 0, 5 or 3) -->
       <Field label={t('New songs in the queue')}>
         <Seg class="justify-self-start" options={[['0', t('Never')], ['5', t('Now and then')], ['3', t('Often')]]} value={String(p.newEvery ?? 5)}

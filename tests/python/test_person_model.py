@@ -1,6 +1,6 @@
-"""One person per Navidrome account, the family as an entry with an account of its own: the rules, an older
-configuration (v12 – nothing is converted), setting up the family (POST /api/family) and the family's kid-safe mode in
-the plugin's answers."""
+"""One person per Navidrome account, the family as an entry with an account of its own: the rules, a configuration
+from before 2.0 (not read), setting up the family (POST /api/family) and the family's kid-safe mode in the plugin's
+answers."""
 from tests.python import env  # noqa: F401  (before app.*)
 
 import copy
@@ -9,7 +9,6 @@ import unittest
 from unittest import mock
 
 from app import config, sonic, web
-from app.navidrome import NavidromeError
 from tests.python.factory import base_config
 
 
@@ -36,43 +35,23 @@ class RulesTest(unittest.TestCase):
 
 
 class OlderConfigTest(unittest.TestCase):
-    """An older configuration is not converted: what fits loads (the settings that are gone are removed), what does
-    not fit stops the start – and the file stays as it was."""
+    """A configuration of a version before 2.0 is not read: Tuttiphon does not start, and the file stays as it is."""
 
     def tearDown(self):
         config.save_config(base_config())
 
-    def write(self, cfg):
+    def test_not_read(self):
+        cfg = without_family()
+        cfg["version"] = 12
         text = json.dumps(cfg, ensure_ascii=False)
         config.CONFIG_FILE.write_text(text, encoding="utf-8")
         env.reset_caches()
-        return text
-
-    def test_it_fits(self):
-        cfg = without_family()
-        cfg["version"] = 12
-        cfg["settings"].update(defaultPerson="jonas", public=True)
-        cfg["personen"][0]["public"] = True
-        self.write(cfg)
-        out = config.load_config()
-        self.assertEqual(out["version"], config.CONFIG_VERSION)
-        self.assertFalse({"defaultPerson", "public"} & set(out["settings"]))
-        self.assertNotIn("public", out["personen"][0])
-        self.assertEqual([p["id"] for p in out["personen"]], ["jonas", "niklas", "oma"])
-
-    def test_it_does_not_fit(self):
-        cfg = without_family()
-        cfg["version"] = 12
-        cfg["personen"].append({"id": "familie", "name": "Familie", "user": "jonas", "prefix": ""})   # an account twice
-        text = self.write(cfg)
-        backups = set(config.BACKUP_DIR.glob("config_v*.json"))
         with self.assertRaises(config.ConfigOutdated) as cm:
             config.load_config()
-        self.assertIn("earlier version", str(cm.exception))
+        self.assertIn("before Tuttiphon 2.0", str(cm.exception))
         with self.assertRaises(SystemExit):
             web.serve("127.0.0.1", 0)
         self.assertEqual(config.CONFIG_FILE.read_text(encoding="utf-8"), text)   # untouched
-        self.assertEqual(set(config.BACKUP_DIR.glob("config_v*.json")), backups)   # no backup per attempt either
 
 
 class FamilySetupTest(unittest.TestCase):
@@ -83,16 +62,19 @@ class FamilySetupTest(unittest.TestCase):
         self.addCleanup(config.save_config, base_config())
         self.created, self.saved, self.runs = [], {}, []
 
+        self.env = {}
+
         class Api:
+            def users(api):
+                return [{"userName": "root"}, {"userName": "Taken"}, {"userName": "anna-lena"}]
+
             def create_user(api, name, full, password):
-                if name.lower() in ("root", "taken"):
-                    raise NavidromeError('HTTP 400: {"errors":{"userName":"ra.validation.unique"}}')
                 self.created.append((name, full, password))
                 return "id-1"
         patches = [mock.patch.object(web.playlists, "native_api", lambda env: Api()),
                    mock.patch.object(web, "save_env", lambda values: self.saved.update(values)),
                    mock.patch.object(web.auth, "navidrome_users", lambda force=False: []),
-                   mock.patch.object(web, "load_env", lambda: {}),
+                   mock.patch.object(web, "load_env", lambda: self.env),
                    mock.patch.object(web.RUNNER, "start", lambda steps, **opts: self.runs.append((steps, opts)))]
         for p in patches:
             p.start()
@@ -112,11 +94,78 @@ class FamilySetupTest(unittest.TestCase):
             web.api_family({})                                       # only one family
 
     def test_account_names(self):
-        for body in ({"account": "root"}, {"account": "Taken"}, {"account": "jonas"}, {"account": "a b"}):
+        self.env["NAV_PASS_OMA_2"] = "pw-test"
+        for body in ({"account": "root"}, {"account": "taken"}, {"account": "jonas"}, {"account": "a b"},
+                     {"account": "anna.lena"}, {"account": "oma.2"}):   # the same password key as "anna-lena", "oma_2"
             with self.assertRaises(ValueError, msg=body):
                 web.api_family(body)
         self.assertEqual(self.created, [])
         self.assertFalse(any(p.get("family") for p in config.load_config()["personen"]))
+
+
+class SuggestionKeyTest(unittest.TestCase):
+    """What counts as "already there": formats made from an account's own listening are never shared with the family,
+    one-per-person formats do not depend on their worlds, two mixes of the same worlds differ by their flavor."""
+
+    def test_keys(self):
+        from app import suggest
+        morning = {"person": "jonas", "welt": ["kinder"], "stil": "*", "type": "mix", "daytime": "morning"}
+        self.assertEqual(suggest.key_of(morning), suggest.key_of({**morning, "welt": ["kinder", "metal"]}))
+        daily = {"person": "jonas", "welt": ["kinder", "metal"], "stil": "*", "type": "mix", "mix": {"flavor": "ausgewogen"}}
+        self.assertNotEqual(suggest.key_of(daily), suggest.key_of({**daily, "mix": {"flavor": "entdecken"}}))
+        unheard = {"person": "familie", "welt": "*", "stil": "*", "type": "mix", "unheard": True}
+        self.assertNotEqual(suggest._content_key(unheard), suggest._content_key({**unheard, "person": "jonas"}))
+        plain = {"person": "familie", "welt": "kinder", "stil": "80er"}
+        self.assertEqual(suggest._content_key(plain), suggest._content_key({**plain, "person": "jonas"}))
+
+    def test_a_deleted_vibe_newly_added(self):
+        from app import suggest
+        from app.library import Library
+        from tests.python.factory import random_songs
+        cfg = base_config()
+        cfg["stile"] = [s for s in cfg["stile"] if s["id"] != "neu"]
+        cfg["personen"][1]["likes"]["welten"] = ["kinder", "metal"]
+        out = suggest.suggestions(cfg, Library(random_songs(800, seed=4)), only_person="jonas")   # no KeyError
+        self.assertFalse(any((x.get("playlist") or {}).get("stil") == "neu" for x in out))
+
+
+class TogetherConsentTest(unittest.TestCase):
+    """“What everyone likes” takes the members' taste and 1-star songs: a user only adds or removes themselves, and the
+    preview takes the members as saved."""
+
+    def setUp(self):
+        from app import auth
+        self.cfg = base_config()
+        self.cfg["playlists"] = [{"id": "alle", "person": "familie", "welt": "*", "stil": "*", "type": "mix",
+                                  "together": ["niklas", "oma"]}]
+        self.jonas = {"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False}
+        self.auth = auth
+
+    def merged(self, together, pid="alle"):
+        incoming = copy.deepcopy(self.cfg)
+        pl = next((x for x in incoming["playlists"] if x["id"] == pid), None)
+        if pl is None:
+            pl = {"id": pid, "person": "familie", "welt": "*", "stil": "*", "type": "mix"}
+            incoming["playlists"].append(pl)
+        pl["together"] = together
+        out = self.auth.merge_user_changes(self.cfg, incoming, self.jonas)
+        return next(x for x in out["playlists"] if x["id"] == pid).get("together")
+
+    def test_only_themselves(self):
+        self.assertEqual(self.merged(["niklas", "oma", "jonas"]), ["niklas", "oma", "jonas"])
+        self.assertEqual(self.merged(["jonas"]), ["niklas", "oma", "jonas"])     # others stay, only themselves added …
+        self.assertEqual(self.merged([]), ["niklas", "oma"])                     # … or removed
+        self.assertIsNone(self.merged(["niklas", "oma"], pid="neu"))             # a new one: not with other people
+
+    def test_preview_takes_the_saved_members(self):
+        body = {"id": "alle", "person": "familie", "together": ["jonas", "oma"]}
+        with mock.patch.object(web.auth, "current", return_value=self.jonas), \
+                mock.patch.object(web, "load_config", return_value=self.cfg):
+            web._guard_preview(body, self.cfg)
+            self.assertEqual(body["together"], ["niklas", "oma"])
+            other = {"person": "familie", "together": ["niklas", "oma"]}         # not saved: no members
+            web._guard_preview(other, self.cfg)
+            self.assertNotIn("together", other)
 
 
 class DeezerCatchUpTest(unittest.TestCase):

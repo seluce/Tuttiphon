@@ -15,7 +15,7 @@ import webbrowser
 
 sys.dont_write_bytecode = True   # no __pycache__ folders on the NAS
 
-from app.i18n import _s, _sn, english  # noqa: E402
+from app.i18n import _s, english  # noqa: E402
 from app.tasks import PIPELINE, STEP_TITLES, TaskRunner, pipeline  # noqa: E402
 
 
@@ -25,7 +25,7 @@ def main():
 
     p_serve = sub.add_parser("serve", help="start the web interface (default)")
     p_serve.add_argument("--host", default="127.0.0.1",
-                         help="0.0.0.0 = reachable from phones on the Wi-Fi too (then set TUTTIPHON_ADMIN_PASSWORD – it turns on the login)")
+                         help="0.0.0.0 = reachable from phones on the Wi-Fi too (the first start asks for the administrator password with a setup code)")
     p_serve.add_argument("--port", type=int, default=8765)
     p_serve.add_argument("--no-browser", action="store_true")
     p_serve.add_argument("--unsafe-no-password", action="store_true", help="start on the network even without a password (not recommended)")
@@ -65,34 +65,11 @@ def main():
     host = getattr(args, "host", "127.0.0.1")
     port = getattr(args, "port", 8765)
     from app import localadmin
-    from app.config import PASSWORD_PLACEHOLDERS, admin_password, environment, weak_password
-    pw = admin_password()
     on_network = host not in ("127.0.0.1", "localhost", "::1")
     unsafe = getattr(args, "unsafe_no_password", False)
-    if on_network and pw and weak_password(pw) and not unsafe:
-        # a password from docker-compose.yaml/.env that is too weak: say exactly what is wrong and where the value
-        # came from – without showing the password itself (none at all is fine: then the setup in the browser)
-        source = (_s("from docker-compose.yaml/environment") if admin_password(environment())
-                  else _s("from the .env in the data folder"))
-        if pw.strip().lower() in PASSWORD_PLACEHOLDERS:
-            problem = _s("Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is still the "
-                         "placeholder “{placeholder}” ({source}).", placeholder=pw, source=source)
-        else:
-            problem = _sn(len(pw), "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has "
-                                   "only {n} character ({source}).",
-                          "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} "
-                          "characters ({source}).", source=source)
-        fix = _s("Please enter your own password with at least 8 characters in docker-compose.yaml (or remove the "
-                 "line and set the password in the browser) and restart.")
-        print(f"✕ {english(problem)} {english(fix)}", flush=True)   # the console (docker logs) is always English
-        return 2
-    if on_network and unsafe:
-        if pw and weak_password(pw):
-            print(english(_s("⚠ Tuttiphon is reachable on the network, but the administrator password is too short or "
-                             "still the placeholder!")), flush=True)
-        elif not localadmin.configured():
-            print(english(_s("⚠ Without an administrator password there is no login – Tuttiphon then only answers "
-                             "requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.")), flush=True)
+    if on_network and unsafe and not localadmin.configured():
+        print(english(_s("⚠ Without an administrator password there is no login – Tuttiphon then only answers "
+                         "requests via 127.0.0.1/localhost and the names in TUTTIPHON_HOSTS.")), flush=True)
     server = serve(host, port, strict=not getattr(args, "unsafe_no_password", False))
     shown = "127.0.0.1" if host == "0.0.0.0" else "[::1]" if host == "::" else f"[{host}]" if ":" in host else host
     url = f"http://{shown}:{port}/"

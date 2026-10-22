@@ -164,9 +164,10 @@ def _load_state():
         return {}
 
 
-def remember(cfg, playlist, lib, order, day):
+def remember(cfg, playlist, lib, order, day, albums=None):
     """Remember the written selection of the day (song IDs) – so it stays the same over the day. Also records the
-    selection in the mix history the mixes learn from (app/feedback.py)."""
+    selection in the mix history the mixes learn from (app/feedback.py). albums: for whole albums ("Album of the week",
+    "Next episode") how many there were to choose from – the preview shows it again later."""
     from . import feedback, rules
     user = (rules.person_of(cfg, playlist) or {}).get("user")
     feedback.record(playlist["id"], user, options(playlist).get("every", "day"), day, [lib.songs[i]["id"] for i in order])
@@ -176,6 +177,8 @@ def remember(cfg, playlist, lib, order, day):
         data = {k: v for k, v in data.items() if k in ids}
         data[playlist["id"]] = {"day": day.isoformat(), "key": settings_key(cfg, playlist),
                                 "ids": [lib.songs[i]["id"] for i in order]}
+        if albums is not None:
+            data[playlist["id"]]["albums"] = albums
         try:
             write_atomic(MIX_STATE, json.dumps(data))
         except OSError:
@@ -416,8 +419,8 @@ def album_order(cfg, base, plib, playlist, nsp, today=None):
     if saved and saved.get("day") == day.isoformat() and saved.get("key") == settings_key(cfg, playlist):
         index = plib.index_of()
         order = [index[s] for s in saved.get("ids", []) if s in index]
-        if order:
-            return order, saved.get("albums", 1)
+        if order:   # remembered before the count was: the albums to choose from now (the one taken may be begun)
+            return order, saved.get("albums") or max(1, len(album_candidates(cfg, base, plib, playlist, nsp, today)))
     cands = album_candidates(cfg, base, plib, playlist, nsp, today)
     if not cands:
         return [], 0
@@ -483,8 +486,8 @@ def episode_order(cfg, base, plib, playlist, nsp, today=None):
             and saved.get("key") == settings_key(cfg, playlist):
         index = plib.index_of()
         order = [index[s] for s in saved.get("ids", []) if s in index]
-        if order:
-            return order, saved.get("albums", 1)
+        if order:   # remembered before the count was: one episode per series
+            return order, saved.get("albums") or len({plib.songs[i].get("albumId") for i in order})
     user = (rules.person_of(cfg, playlist) or {}).get("user")
     if not user:
         return [], 0
@@ -599,7 +602,7 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
         else:   # the next episode of every series being listened to
             order, n = episode_order(cfg, base, plib, playlist, nsp, today)
         if keep and order:
-            remember(cfg, playlist, plib, order, period_start(options(playlist).get("every", "week"), today))
+            remember(cfg, playlist, plib, order, period_start(options(playlist).get("every", "week"), today), albums=n)
         if plib is not base:
             index = base.index_of()
             order = [index[plib.songs[i]["id"]] for i in order if plib.songs[i]["id"] in index]
@@ -609,16 +612,13 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
         pool = frozenset(unheard(plib, pool))
     adjust = {}
     if cfg["settings"].get("mixLearn", True):   # learn from listening: skipped -> less often, 1 star by hand -> never
-        user = (rules.person_of(cfg, playlist) or {}).get("user")
+        person = rules.person_of(cfg, playlist) or {}   # none: a neutral view
+        user = person.get("user")
         members = [x for x in cfg["personen"] if x["id"] in (playlist.get("together") or [])]
-        never = _never(base, plib, [u for u in dict.fromkeys([user] + [x.get("user") for x in members]) if u])   # protection: everyone
+        never = _never(base, plib, [x["user"] for x in [person] + members if x.get("user")])   # protection: everyone
         together = rules.together_of(cfg, playlist)   # taste: only with consent
-        person = rules.person_of(cfg, playlist) or {}
-        tasters = {}   # one per account – the playlist's own person first (with its own exclusion)
-        for x in [person] + together:
-            if x.get("user"):
-                tasters.setdefault(x["user"].lower(), x)
-        tasters = list(tasters.values())
+        # one per account – the playlist's own person first (with its own exclusion); the members are never the family
+        tasters = [x for x in [person] + together if x.get("user")]
         if never:
             pool = frozenset(i for i in pool if plib.songs[i]["id"] not in never)
         adjust = dict(feedback.factors(user, today))

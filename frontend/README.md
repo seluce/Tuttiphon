@@ -27,13 +27,13 @@ frontend/
   `S.config.playlists.push(p); const neu = S.config.playlists.at(-1)`. And write `obj.genres ??= []` as its own
   statement, then pass `items={obj.genres}` (the value of a `??=` expression is the raw array).
 - `S.status`, `S.library`, `S.pl`, `S.history`, `S.task` are only ever replaced as a whole.
-- Instead of the old events: everything is reactive. Reload a page's own data after a run:
+- Everything is reactive, there are no events. Reload a page's own data after a run:
   `$effect(() => { S.done; untrack(load) })`. `S.saved` counts saves.
 - Helpers: `findWelt/findStil/findPerson/findPl`, `plStatus(id)`, `artistId(name)`, `weltIds(p)`, `soundOf(p)`,
   `mixWording(p)`, `MOODS`, `passKey(user)`, `isAdmin()`, `save()`, `undo()`, `reloadConfig()`, `mergeServerFields()`,
   `loadLibrary/loadStatus/loadPlaylists/loadHistory()`, `runTask(steps, extra)`, `applyNow()`, `pendingCount()`.
 - **People** – one person per Navidrome account, the family is an optional person with an account of its own
-  (`family: true`); there is no default person and no visibility per person:
+  (`family: true`); a person's playlists are private, the family's are for everyone:
   - `myPerson()` – the signed-in account's person, or `null` (local administrator, an account without one yet).
   - `familyPerson()` – the family entry, or `null`. `isFamily(p)` – is this person (object or id) the family?
   - `canEdit(playlist)` – administrators always; users their own person's playlists and the family's unless
@@ -41,7 +41,9 @@ frontend/
   - `creatablePersons()` – whom you may create playlists for: administrators everyone; users their own person and the
     family if allowed (never `null` entries). Offer a “For whom?” choice only when it has more than one.
   - `defaultOwner()` – owner of a new playlist when none is chosen: `myPerson()`, for administrators otherwise the
-    family, otherwise the first person; `null` for a user without a person (send them to `#/willkommen`).
+    family, otherwise the first person; `null` for a user without a person (send them to `#/willkommen`) and for an
+    administrator while there is no person at all (send them to `#/person/neu`) – never the local administrator to the
+    welcome assistant (`Welcome.svelte` sends it on to `#/personen`).
   - `ownerOrder(list)` (`lib/playlist.js`) – sorts people as the pages show them: you, the family, the others.
 
 ## Overlays – `lib/overlay.svelte.js`
@@ -73,7 +75,7 @@ closes it; `go()` and links from a sheet replace that entry.
 | Component | Props |
 |---|---|
 | `Icon` | `name` (see `lib/icons.js`), `size`, `class` |
-| `Glyph` | `value` ("i:teddy", icon name or emoji), `size` – icon of a music world/vibe/person |
+| `Glyph` | `value` ("i:teddy" or an icon name; anything else is shown as text), `size` – icon of a music world/vibe/person |
 | `GlyphButton` / `GlyphPicker` | `bind:value`, `onpick` |
 | `Avatar` | `name`, `id` (otherwise from the library), `size` – artist image |
 | `Cover` | `id`, `size` – album cover |
@@ -220,7 +222,7 @@ export const STEPS = translated(() => [{ title: t('…') }])   // at module leve
   | Einordnung | classification |
   | Saison-Playlist | seasonal playlist |
   | Mix, Daily Mix / Weekly Mix / Monthly Mix (only real mixes) | mix, Daily Mix / Weekly Mix / Monthly Mix |
-  | Querbeet (smart playlist of a whole world: „Die 90er · Querbeet“, „Niklas’ Querbeet“) | All Sorts (“The 90s · All Sorts”, “Lukas’s All Sorts”) |
+  | Querbeet (smart playlist of a whole world: „Die 90er · Querbeet“, of a person: „Niklas · Querbeet“) | All Sorts (“The 90s · All Sorts”, “Lukas · All Sorts”) |
   | Die Hits (in playlist names) | The Hits |
   | Musik verstehen (the analysis step, also in the history) | Understand music |
   | Passwort hinterlegt / Passwort fehlt | password stored / password missing |

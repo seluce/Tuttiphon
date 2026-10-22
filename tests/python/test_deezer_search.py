@@ -64,7 +64,7 @@ class ApplyTest(unittest.TestCase):
         for sid in ("a", "b"):
             deezer._apply(track("Song", "Band", sid=sid), None, entries, users, "refresh", False, False, result, lambda *_: None)
         nav.set_rating.assert_called_once_with("a", 0)       # someone set b to 5 by hand – stays
-        self.assertEqual((result["cleared"], entries["a"]["v"], entries["a"]["r"]), (1, 2, None))
+        self.assertEqual((result["cleared"], entries["a"]["r"]), (1, None))
 
     def test_isrc_is_remembered(self):
         users = {"niklas": (mock.Mock(), {})}
@@ -75,9 +75,9 @@ class ApplyTest(unittest.TestCase):
         self.assertEqual((entries["a"]["i"], result["isrc"]), ("DEABC1234567", 1))
 
     def test_refresh_order(self):
-        songs = [track("x", "B", sid=s) for s in ("alt-neu", "alt-alt", "v2")]
-        entries = {"alt-neu": {"t": 200}, "alt-alt": {"t": 100}, "v2": {"t": 1, "v": 2}}
-        self.assertEqual([s["id"] for s in deezer.refresh_order(songs, entries)], ["alt-alt", "alt-neu", "v2"])
+        songs = [track("x", "B", sid=s) for s in ("neu", "alt", "neuer", "unbekannt")]
+        entries = {"neu": {"t": 200}, "alt": {"t": 100}, "neuer": {"t": 300}}
+        self.assertEqual([s["id"] for s in deezer.refresh_order(songs, entries)], ["alt", "neu", "neuer"])
 
 
 if __name__ == "__main__":

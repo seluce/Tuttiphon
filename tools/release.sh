@@ -102,8 +102,8 @@ from app import backup
 target = Path(sys.argv[1])
 n = 0
 for path, arc in backup._files():
-    if Path(arc).name in ("instances.json", "secret"):
-        continue   # old PC state or session key – the container creates both anew
+    if Path(arc).name == "secret":
+        continue   # the session key – the container creates it anew
     dst = target / arc
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(path, dst)

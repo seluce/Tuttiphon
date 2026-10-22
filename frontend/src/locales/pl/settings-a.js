@@ -235,8 +235,6 @@ export default {
     'Zapisane hasło już nie działa – prawdopodobnie zostało zmienione w Navidrome. Wpisz nowe, aby statystyki i gwiazdki nadal działały.',
   'Save new password':
     'Zapisz nowe hasło',
-  'The password of the local administrator is set in docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).':
-    'Hasło administratora lokalnego jest ustawione w docker-compose.yaml (TUTTIPHON_ADMIN_PASSWORD).',
   'The local administrator has no Navidrome account of its own.':
     'Administrator lokalny nie ma własnego konta Navidrome.',
   'Turned on':
@@ -444,12 +442,8 @@ export default {
     'Jeśli wiele piosenek zespołu ma najwyższą liczbę gwiazdek, najpopularniejsze dostają jedną gwiazdkę więcej. Dzięki temu Symfonium poprawnie sortuje najlepsze utwory. Działa od następnego przebiegu.',
   'Refresh every night':
     'Odświeżaj co noc',
-  'Checks {n} songs on Deezer again every night in the time window of the night analysis, first those rated with the older, less accurate search. After that always the ones unchecked the longest – so the stars stay up to date.':
-    'Co noc w oknie czasowym analizy nocnej ponownie sprawdza w Deezer kolejne piosenki ({n}) – najpierw te ocenione starszym, mniej dokładnym wyszukiwaniem. Potem zawsze te najdłużej niesprawdzane – tak gwiazdki pozostają aktualne.',
-  'Checked with the accurate search: {done} of {total} songs · {top} top tracks highlighted.':
-    'Sprawdzone dokładnym wyszukiwaniem: {done} z {total} piosenek · wyróżnione najlepsze utwory: {top}.',
-  'Checked with the accurate search: {done} of {total} songs.':
-    'Sprawdzone dokładnym wyszukiwaniem: {done} z {total} piosenek.',
+  'Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.':
+    'Co noc w oknie czasowym analizy nocnej ponownie sprawdza w Deezer kolejne piosenki ({n}) – zawsze te najdłużej niesprawdzane, tak gwiazdki pozostają aktualne.',
   'Who gets stars?':
     'Kto dostaje gwiazdki?',
   'No accounts yet – create them under People first.':

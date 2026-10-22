@@ -65,10 +65,9 @@ again and writes a new setup code to the container log.
 docker compose pull && docker compose up -d
 ```
 
-In a NAS Docker app: pull the image again and recreate the project. Settings and history stay in `config/` and are
-migrated automatically – read the changelog first: if a version asks for something to be done before the update
-(say, one Navidrome account per person), a configuration that does not fit keeps Tuttiphon from starting until it is
-put right in the earlier version. With the Navidrome plugin: its file lives in Navidrome's plugins folder – when the changelog
+In a NAS Docker app: pull the image again and recreate the project. Settings and history stay in `config/` – read the
+changelog first: if a version asks for something to be done before the update, it says so there. With the Navidrome
+plugin: its file lives in Navidrome's plugins folder – when the changelog
 says so, put the new `tuttiphon.ndp` there and restart Navidrome. What changed: [CHANGELOG.md](../CHANGELOG.md). Going
 back to an older version: [Operations → Updates](08-operations.md#updates).
 
@@ -79,7 +78,6 @@ Almost everything is set in the interface. Environment variables in `docker-comp
 
 | Variable | Meaning |
 |---|---|
-| `TUTTIPHON_ADMIN_PASSWORD` | optional: the password of the local administrator in plain text instead of setting it in the browser – then it can only be changed here (at least 8 characters, `$` written as `$$`). Without it and without a password set in the browser, the container waits for the setup with the code – which also takes the language of your browser as the server language; with it, the server starts in English (change it under Settings → General) |
 | `NAV_URL` | Navidrome as seen from the container |
 | `NAV_PUBLIC_URL` | Navidrome address for "Open in Navidrome" links, if different |
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | Navidrome admin – better entered in the interface (stored in `config/.env`) |

@@ -14,7 +14,7 @@ import { toast, closeSheet } from './overlay.svelte.js'
 import { t, translated } from './i18n.svelte.js'
 
 class Store {
-  /** /api/me: { user, name, fullName, role: 'admin'|'user', own: [person ids], notfall (local administrator), … } */
+  /** /api/me: { user, name, fullName, role: 'admin'|'user', own: person id or null, notfall (local administrator), … } */
   me = $state(null)
   /** /api/config (filtered by the server for users) */
   config = $state(null)
@@ -83,7 +83,7 @@ export const isAdmin = () => !S.me || S.me.role === 'admin'
 /** A run that only applies changes to Navidrome (writing playlists + scan) – told by its steps, its name is translated. */
 export const isApplyRun = (task) => !!task?.steps?.length && task.steps.every((s) => s === 'playlists' || s === 'scan')
 /** Your own person – one person per Navidrome account (the local administrator and accounts without one: null). */
-export const myPerson = () => S.config?.personen.find((p) => (S.me?.own || [])[0] === p.id) || null
+export const myPerson = () => (S.me?.own && S.config?.personen.find((p) => p.id === S.me.own)) || null
 /** The family – an entry with a Navidrome account of its own (or null). */
 export const familyPerson = () => S.config?.personen.find((p) => p.family) || null
 /** Is this person (object or id) the family? */
@@ -91,7 +91,7 @@ export const isFamily = (p) => !!(typeof p === 'string' ? findPerson(p) : p)?.fa
 /** May you create, change and delete the family's playlists? (settings.familyEdit) */
 const familyEditable = () => isAdmin() || (S.config?.settings.familyEdit || 'all') === 'all'
 /** May you edit this playlist? Administrators all; users their own and – unless only administrators may – the family's. */
-export const canEdit = (p) => isAdmin() || (S.me?.own || []).includes(p?.person) || (isFamily(p?.person) && familyEditable())
+export const canEdit = (p) => isAdmin() || (!!S.me?.own && p?.person === S.me.own) || (isFamily(p?.person) && familyEditable())
 /** People you may create playlists for: administrators everyone; users their own person and the family (if allowed). */
 export const creatablePersons = () => (isAdmin() ? S.config.personen
   : [myPerson(), familyEditable() ? familyPerson() : null].filter(Boolean))

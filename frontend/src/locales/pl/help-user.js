@@ -322,8 +322,8 @@ export default {
     'Gdzie znajdę kod konfiguracji?',
   'I forgot the password of the local administrator.':
     'Nie pamiętam hasła administratora lokalnego.',
-  'If it was set in the browser: delete the file admin_password.json in the folder state of the data folder (config/state next to docker-compose.yaml). A few seconds later the sign-in page asks for a new one – with a new setup code from the container log; everything else stays as it is. If it is set in docker-compose.yaml as TUTTIPHON_ADMIN_PASSWORD, look it up or change it there and recreate the container.':
-    'Jeśli zostało ustawione w przeglądarce: usuń plik admin_password.json w folderze state folderu danych (config/state obok docker-compose.yaml). Kilka sekund później strona logowania poprosi o nowe – z nowym kodem konfiguracji z dziennika kontenera; wszystko inne zostaje bez zmian. Jeśli jest ustawione w docker-compose.yaml jako TUTTIPHON_ADMIN_PASSWORD, sprawdź je lub zmień tam i utwórz kontener ponownie.',
+  'Delete the file admin_password.json in the folder state of the data folder (config/state next to docker-compose.yaml), then reload the sign-in page. It asks for a new one – with a new setup code from the container log; everything else stays as it is.':
+    'Usuń plik admin_password.json w folderze state folderu danych (config/state obok docker-compose.yaml), a potem odśwież stronę logowania. Poprosi wtedy o nowe – z nowym kodem konfiguracji z dziennika kontenera; wszystko inne zostaje bez zmian.',
   'When you open Tuttiphon, you land on <a class="link" href="#/">For you</a>:':
     'Gdy otworzysz Tuttiphon, trafiasz na <a class="link" href="#/">Dla Ciebie</a>:',
   '<b>Your mixes</b> – playlists that renew themselves daily, weekly or monthly.':

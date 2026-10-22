@@ -1,7 +1,6 @@
 """app/rules.py: local evaluation of the rules (Library), build_nsp(), summary()."""
 from tests.python import env  # noqa: F401  (before app.*)
 
-import copy
 import datetime as dt
 import random
 import unittest

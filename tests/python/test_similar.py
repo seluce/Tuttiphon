@@ -371,8 +371,8 @@ class TestClassification(SimilarTest):
 # ---------------------------------------------------------------------------- Endpoints
 
 class TestEndpoints(SimilarTest):
-    ADMIN = {"user": "niklas", "role": "admin", "own": [], "persons": [], "local": False}
-    JONAS = {"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False}
+    ADMIN = {"user": "niklas", "role": "admin", "own": None, "persons": [], "local": False}
+    JONAS = {"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False}
 
     def setUp(self):
         super().setUp()
@@ -395,7 +395,7 @@ class TestEndpoints(SimilarTest):
                         mock.patch.object(web, "_structured_lyrics", return_value=(None, None))):
             patcher.start()
             self.addCleanup(patcher.stop)
-        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": [], "persons": [], "local": False})
+        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": None, "persons": [], "local": False})
         auth.set_current(self.ADMIN)
 
     def test_song_window_has_key_tempo_and_instruments(self):
@@ -421,9 +421,7 @@ class TestEndpoints(SimilarTest):
         self.assertEqual(len(metal), 7)
 
     def test_instrument_catalog_and_search(self):
-        self.assertIn("/api/instruments", self.web.Handler.GET_ROUTES)
-        self.assertNotIn("/api/instruments", self.web.Handler.ADMIN_ONLY)   # labels and counts for everyone
-        cat = self.web.Handler.GET_ROUTES["/api/instruments"]({})
+        cat = self.web.Handler.GET_ROUTES["/api/sound/catalog"]({})
         self.assertEqual({x["id"]: x["songs"] for x in cat["instruments"]}["piano"], 1)
         out = self.web.api_search({"q": "piano"})
         self.assertEqual([(x["id"], x["count"]) for x in out["instruments"]], [("piano", 1)])

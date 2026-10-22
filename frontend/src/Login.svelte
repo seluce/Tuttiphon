@@ -176,8 +176,7 @@
       <p class="text-[.82rem] muted text-center">{t('The password set during setup. The local administrator has all rights and works even when Navidrome cannot be reached.')}</p>
       <details class="text-[.82rem] muted">
         <summary class="cursor-pointer text-center">{t('Forgot the password?')}</summary>
-        <p class="mt-1.5">{@html t('Set in the browser: delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml). A few seconds later this page asks for a new one – with a new setup code from the container log. Everything else stays as it is.')}</p>
-        <p class="mt-1.5">{@html t('Set in docker-compose.yaml: it is there as <code>TUTTIPHON_ADMIN_PASSWORD</code>.')}</p>
+        <p class="mt-1.5">{@html t('Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.')}</p>
       </details>
     {/if}
   </form>

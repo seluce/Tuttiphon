@@ -13,9 +13,11 @@ separate worlds such as children's music and audio plays – unless the song ask
 without what they heard in the last hours or rated 1 star by hand, songs they skip further down. When that is unclear,
 the answer is the family's (its dislikes; without a family nobody's) – and always without live recordings and the
 like (settings.excludeTitles, minDuration) and without explicit songs as soon as a person is kid-safe, never loosened
-on a guess. The smart queue learns in the moment: what was skipped in the last minutes steers
-the next answer away from its sound (_steer()). And every few songs one the account has never played comes in
-(_mix_new(), the person's "newEvery").
+on a guess (the family's kid-safe mode too: the one asking may be its shared device). The smart queue learns in the
+moment: what was skipped in the last minutes steers the next answer away from its sound (_steer()). And every few
+songs one the account has never played comes in (_mix_new(), the person's "newEvery"). An answer short of the count
+asked for is filled up from the songs that may come (_fill()) – otherwise Navidrome adds its own picks, which know
+nothing of kid-safe mode and dislikes.
 
 The plugin signs in with its own key (Settings → Navidrome, card "Navidrome plugin"): only its SHA-256 is stored
 (state/plugin_key.json),
@@ -53,6 +55,7 @@ STEER_BACK = 0.5                   # … after two in a row also toward what was
 SKIPPED_BAND = (0.7, 0.5, 0.25)    # songs of the skipped bands: scores times this
 NEW_EVERY = 5          # default of a person's "newEvery": every 5th song one the account has never played (0: never)
 NEW_CHOICES = (0, 3, 5)
+NEW_FLOOR = 0.2        # a never played song comes in only this similar at least (and as the weakest of the answer)
 _lock = threading.Lock()
 _memo = {}
 _seen = {"at": None, "calls": 0, "for": None, "forAt": None, "guess": False}   # the plugin's last call (settings page)
@@ -141,15 +144,16 @@ def status():
 def _view(cfg, who=None):
     """The configuration as the plugin sees the library: the person listening – or, when that is unclear, the family
     (without one a stand-in without dislikes) – kid-safe as soon as any person is a child profile or has kid-safe mode
-    on (the family's kid-safe mode only for the family's answers: it is the default for its playlists).
-    who: (person id, plain) from _who() – plain: without the children's music of a child profile (a guess).
+    on (the family's kid-safe mode – the default for its playlists – for the family's answers and on a guess, where
+    the one asking may be the family's shared device; only a sure listener gets their own view without it).
+    who: (person id, plain) from _who() – plain: a guess, without the children's music of a child profile.
     -> (configuration, person id)"""
     pid, plain = who or (None, False)
-    default = pid or next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
-    clean = any(p.get("child") or (p.get("clean") and (not p.get("family") or p["id"] == default))
+    view = pid or next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)   # the listener, else the family
+    clean = any(p.get("child") or (p.get("clean") and (not p.get("family") or p["id"] == view or plain))
                 for p in cfg.get("personen", []))
     personen = [dict(p) for p in cfg.get("personen", [])]
-    me = next((p for p in personen if p["id"] == default), None)
+    me = next((p for p in personen if p["id"] == view), None)
     if me is None:
         me = {"id": "_sonic", "name": "", "user": ""}
         personen.append(me)
@@ -162,7 +166,8 @@ def _view(cfg, who=None):
 
 def _cfg_key(cfg):
     parts = [cfg.get("welten"), cfg.get("stile"), cfg.get("settings"),
-             [(p.get("id"), p.get("clean"), p.get("child"), p.get("dislikes")) for p in cfg.get("personen", [])]]
+             [(p.get("id"), p.get("family"), p.get("clean"), p.get("child"), p.get("dislikes"))
+              for p in cfg.get("personen", [])]]
     return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()
 
 
@@ -403,8 +408,11 @@ def _monotone(out):
 def _mix_new(lib, out, ranked, me, seeds=()):
     """Every n-th song of the answer one the account has never played (the person's "newEvery", NEW_EVERY by default;
     only for the one listening for sure) – the most similar of them, counted on from the last one brought, so the
-    smart queue (which takes the first song of each answer) gets one every n songs. out: the answer, ranked: all
-    candidates best first. Without anything known about the account the answer stays as it is."""
+    smart queue (which takes the first song of each answer) gets one every n songs (one overdue comes first). It takes
+    the place and the similarity of the song it pushes on, the songs after it keep theirs; only one as similar as the
+    weakest song of the answer and at least NEW_FLOOR comes in – none rather than one that sounds like something else.
+    out: the answer, ranked: all candidates best first. Without anything known about the account the answer stays as
+    it is."""
     if not me or not me["sure"] or not out:
         return out
     every = me["person"].get("newEvery", NEW_EVERY)
@@ -416,16 +424,17 @@ def _mix_new(lib, out, ranked, me, seeds=()):
     seen = _Seen()
     for i in taken:
         seen.add(songs[i])
-    fresh = (x for x in ranked if x[0] not in taken and songs[x[0]]["id"] not in played)
+    floor = max(NEW_FLOOR, min(sc for _i, sc in out))
+    fresh = (x for x in ranked if x[1] >= floor and x[0] not in taken and songs[x[0]]["id"] not in played)
     out, given, changed = list(out), [], False
-    for pos in range(every - 1 - _since_new(me["user"]) % every, len(out), every):
+    for pos in range(max(0, every - 1 - _since_new(me["user"])), len(out), every):
         if songs[out[pos][0]]["id"] not in played:
             given.append(songs[out[pos][0]]["id"])
             continue
         pick = next((x for x in fresh if seen.add(songs[x[0]])), None)
         if pick is None:
             break
-        out.insert(pos, (pick[0], max(0.0, min(1.0, round(pick[1], 4)))))
+        out.insert(pos, (pick[0], out[pos][1]))   # with the similarity of the song it pushes on
         out.pop()
         given.append(songs[pick[0]]["id"])
         changed = True
@@ -532,6 +541,30 @@ def _diverse(lib, scored, count, seeds=(), seed_share=0.25, own=None, exclude=fr
     return out
 
 
+def _fill(lib, out, scored, count, seeds=()):
+    """An answer short of `count` (few bands, little sound) filled up from scored [(index, score)] without the limit
+    per band – they are the songs that may come for the one listening (kid-safe, dislikes), every recording once, none
+    more similar than the one before. Otherwise Navidrome fills up with its own picks, which know none of that."""
+    if len(out) >= count:
+        return out
+    songs = lib.songs
+    have = {i for i, _sc in out} | set(seeds)
+    seen = _Seen()
+    for i in have:
+        seen.add(songs[i])
+    out = list(out)
+    low = out[-1][1] if out else 1.0
+    for i, sc in scored:
+        if len(out) >= count:
+            break
+        if i in have or not seen.add(songs[i]):
+            continue
+        have.add(i)
+        low = min(low, max(0.0, min(1.0, round(sc, 4))))
+        out.append((i, low))
+    return out
+
+
 def _radio(lib, i, allowed, exclude, count, below=0.5):
     """Without any sound: songs of the band and similar bands (radio) ordered by how much they sound like song i
     (our features). Scores fall from `below` – always under the real ones they follow – over `count` places."""
@@ -579,7 +612,7 @@ def similar_songs(cfg, lib, song_id, count=50, personal=False):
         radio = _favour(_radio(lib, i, allowed, have, count, below=low), factor)
         out = _diverse(lib, out + radio, count, seeds=[i])
         scored = scored + radio
-    out = _mix_new(lib, out, scored, me, seeds=[i])
+    out = _fill(lib, _mix_new(lib, out, scored, me, seeds=[i]), scored, count, seeds=[i])
     return out if pid else _remember("similar", key, out, keep=256)
 
 
@@ -624,12 +657,12 @@ def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50, exclude=fro
     if centre is not None:
         scored = _favour(_closest(lib, centre, allowed, exclude), factor)
         ranked = sorted(scored, key=lambda x: -(x[1] + (RADIO_BONUS if lib._main_artist(lib.songs[x[0]]) in bands else 0)))
-        return _mix_new(lib, _diverse(lib, ranked, count, own=artist), ranked, me)
+        return _fill(lib, _mix_new(lib, _diverse(lib, ranked, count, own=artist), ranked, me), ranked, count)
     rnd = random.Random(f"{artist}|{dt.date.today()}")
     cands = [i for i in allowed if i not in exclude and lib._main_artist(lib.songs[i]) in bands]
     rnd.shuffle(cands)
     scored = _favour([(i, max(0.01, 0.5 - 0.49 * k / count)) for k, i in enumerate(cands)], factor)
-    return _mix_new(lib, _diverse(lib, scored, count, own=artist), scored, me)
+    return _fill(lib, _mix_new(lib, _diverse(lib, scored, count, own=artist), scored, me), scored, count)
 
 
 def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50, personal=False):
@@ -652,7 +685,8 @@ def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50, 
         vec = idx.centroid(lib._main_artist(songs[own[0]]))
     if vec is not None:
         scored = _favour(_closest(lib, vec, allowed, exclude=set(own) | leave), factor)
-        return _mix_new(lib, _diverse(lib, scored, count, seeds=own), scored, me, seeds=own)
+        out = _mix_new(lib, _diverse(lib, scored, count, seeds=own), scored, me, seeds=own)
+        return _fill(lib, out, scored, count, seeds=own)
     return songs_like_artist(cfg, lib, name=lib._main_artist(songs[own[0]]), count=count, exclude=set(own), who=who)
 
 
@@ -709,27 +743,27 @@ def path(cfg, lib, start_id, end_id, count=25):
     per = Counter()
     cap = max(2, round(count / 8))
     out = [(a, 1.0)]
+
+    def first_free(cands):
+        for i, k in cands:
+            band = lib._main_artist(lib.songs[i])
+            if i in used or per[band] >= cap or not seen.add(lib.songs[i]):
+                continue
+            return i, k, band
+        return None
     for step in range(1, count - 1):
         t = step / (count - 1)
         target = similar.unit([(1 - t) * x + t * y for x, y in zip(va, vb)])
         if target is None:
             continue
         scores = batch.closeness(target)
-        near = heapq.nlargest(64, rows, key=lambda r: scores[r[1]])   # nearly always the pick is among these
-        for cands in (near, sorted(rows, key=lambda r: -scores[r[1]])):
-            pick = None
-            for i, k in cands:
-                band = lib._main_artist(lib.songs[i])
-                if i in used or per[band] >= cap or not seen.add(lib.songs[i]):
-                    continue
-                pick = (i, k, band)
-                break
-            if pick:
-                i, k, band = pick
-                used.add(i)
-                per[band] += 1
-                out.append((i, max(0.0, min(1.0, round(scores[k], 4)))))
-                break
+        near = heapq.nlargest(64, rows, key=lambda r: scores[r[1]])   # nearly always the pick is among these …
+        pick = first_free(near) or first_free(sorted(rows, key=lambda r: -scores[r[1]]))   # … the whole list only if not
+        if pick:
+            i, k, band = pick
+            used.add(i)
+            per[band] += 1
+            out.append((i, max(0.0, min(1.0, round(scores[k], 4)))))
     out.append((b, 1.0))
     return out
 

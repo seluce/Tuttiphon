@@ -1,7 +1,7 @@
 """How easy a song is to listen to (approachable) and how much it asks for close listening (engaging) – two regression
 heads of the AI sound analysis: the worker's output with fake Essentia/numpy modules, the state (ml.scores()), merged
 features, sound filters (audio.matches(), config validation), the delivered vibes “In the background” and “For
-listening closely” (default configuration, migration v9), summary and search words.
+listening closely” (default configuration), summary and search words.
 Temp folders only, no network, no Essentia."""
 from tests.python import env  # noqa: F401  (before app.*)
 
@@ -267,51 +267,6 @@ class TestValidationAndSummary(unittest.TestCase):
         self.assertIn("Zum genauen Zuhören 75–100 %", next(x for x in lines if x.startswith("Klang:")))
 
 
-class TestMigration(unittest.TestCase):
-    def old(self, lang="de", version=8):
-        cfg = copy.deepcopy(config.default_config())
-        cfg["version"] = version
-        cfg["settings"]["language"] = lang
-        cfg["stile"] = [s for s in cfg["stile"] if s["id"] not in (BACKGROUND, CLOSE)]   # as delivered before
-        return cfg
-
-    def names(self, cfg):
-        return {s["id"]: s["name"] for s in cfg["stile"]}
-
-    def test_v8_gets_both_vibes_in_the_server_language(self):
-        cfg = config.migrate(self.old("de"))
-        self.assertEqual(cfg["version"], config.CONFIG_VERSION)
-        self.assertEqual((self.names(cfg)[BACKGROUND], self.names(cfg)[CLOSE]), ("Im Hintergrund", "Zum Zuhören"))
-        by_id = {s["id"]: s for s in cfg["stile"]}
-        self.assertEqual(by_id[BACKGROUND]["sound"], delivered(BACKGROUND)["sound"])
-        self.assertEqual(by_id[CLOSE]["group"], "Klang")
-        english = config.migrate(self.old("en"))
-        self.assertEqual((self.names(english)[BACKGROUND], self.names(english)[CLOSE]),
-                         ("In the background", "For listening closely"))
-
-    def test_deleted_vibes_stay_deleted_and_nothing_twice(self):
-        cfg = self.old("de")
-        cfg["stile"] = [s for s in cfg["stile"] if s["id"] != "klang-toben"]   # deleted by the family
-        cfg["stile"].append({**delivered(CLOSE), "name": "Genau hinhören"})     # already there (e.g. a test build)
-        cfg = config.migrate(cfg)
-        ids = [s["id"] for s in cfg["stile"]]
-        self.assertNotIn("klang-toben", ids)
-        self.assertEqual((ids.count(BACKGROUND), ids.count(CLOSE)), (1, 1))
-        self.assertEqual(self.names(cfg)[CLOSE], "Genau hinhören")              # a chosen name stays
-        config.validate_config(cfg)
-
-    def test_very_old_configuration_gets_them_once(self):
-        cfg = self.old("de", version=3)
-        cfg["stile"] = [s for s in cfg["stile"] if s.get("group") != "Klang"]
-        cfg = config.migrate(cfg)
-        ids = [s["id"] for s in cfg["stile"]]
-        self.assertEqual((ids.count(BACKGROUND), ids.count(CLOSE), ids.count("klang-schlaf")), (1, 1, 1))
-
-    def test_current_version_is_left_alone(self):
-        cfg = self.old("de", version=config.CONFIG_VERSION)   # deleted after the update: not added again
-        self.assertNotIn(BACKGROUND, self.names(config.migrate(cfg)))
-
-
 # ---------------------------------------------------------------------------- Search
 
 @env.german   # checks the German output of existing installations
@@ -321,8 +276,8 @@ class TestSearchWords(unittest.TestCase):
         self.web = web
         self.cfg = base_config()
         self.cfg["stile"] += [{**delivered(BACKGROUND), "name": "Im Hintergrund"}, {**delivered(CLOSE), "name": "Zum Zuhören"}]
-        auth.set_current({"user": "Jonas", "role": "user", "own": ["jonas"], "persons": ["jonas"], "local": False})
-        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": [], "persons": [], "local": False})
+        auth.set_current({"user": "Jonas", "role": "user", "own": "jonas", "persons": ["jonas"], "local": False})
+        self.addCleanup(auth.set_current, {"user": None, "role": "none", "own": None, "persons": [], "local": False})
 
     def combos(self, q, cfg=None):
         with mock.patch.object(self.web.rules, "count", return_value=50):

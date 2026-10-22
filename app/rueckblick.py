@@ -256,16 +256,12 @@ def summary(cfg, lib, user, kind="woche", year=None):
 
 
 def snapshot_all(cfg=None, base_lib=None, log=lambda *_: None):
-    """Record the counter state for every Navidrome account with a password (and the default account)."""
+    """Record the counter state for every person's Navidrome account (with a password)."""
     from .library import CACHE
     from .stats import songs_for
     cfg = cfg or load_config()
     base = base_lib or CACHE.get()
-    users = []
-    for p in cfg["personen"]:
-        u = (p.get("user") or "").strip()
-        if u and u.lower() not in [x.lower() for x in users]:
-            users.append(u)
+    users = [p["user"] for p in cfg["personen"]]   # one person per account
     done = {}
     for u in users:
         try:
