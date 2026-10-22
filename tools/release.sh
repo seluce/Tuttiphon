@@ -48,7 +48,7 @@ python3 -m unittest discover -s tests/python -t . >"$LOGS/tests.log" 2>&1 \
   || { echo "✕ Python tests fail – see $LOGS/tests.log"; exit 1; }
 npm run -s build >"$LOGS/build.log" 2>&1 \
   || { echo "✕ Interface does not build – see $LOGS/build.log"; exit 1; }
-if grep -qi "warn" "$LOGS/build.log"; then
+if grep -qiE "warn|vite-plugin-svelte|a11y|\(!\)" "$LOGS/build.log"; then   # Svelte's own warnings say no "warn"
   echo "✕ Interface builds with warnings – see $LOGS/build.log"; exit 1
 fi
 PLUGIN=1

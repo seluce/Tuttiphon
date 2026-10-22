@@ -5,7 +5,7 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 2.0.0
 
 - **One person per Navidrome account – the family on its own:** every account has exactly one person now; there is no
   shared “Family” on someone's account any more, no default person and no extra profiles. The family is an optional
