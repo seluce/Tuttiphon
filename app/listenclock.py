@@ -83,15 +83,18 @@ def record(user, songs, new_ids, now=None):
 
 def moments(user, songs, now=None, days=DAYS):
     """[(local time, song id)] of the last `days` days, oldest first – recorded moments and the last play of every
-    song, each moment once."""
+    song, each moment once. A family mix heard on a person's own account is the family's moment, not the person's
+    (listen.family_moments())."""
     now = now or dt.datetime.now()
     cutoff = dt.datetime.combine(now.date() - dt.timedelta(days=days), dt.time())
     seen, out = set(), []
     from . import listen
     live = listen.moments(user, cutoff)   # live from the Navidrome plugin: every play, exact
+    if listen.is_family(user):
+        live = sorted(live + listen.family_moments(cutoff))
     near = {}
-    for t, sid in live:
-        near.setdefault(sid, []).append(t)
+    for t, sid in live + ([] if listen.is_family(user) else listen.family_moments(cutoff, user)):
+        near.setdefault(sid, []).append(t)   # the family's moments on this account: not again from Navidrome
     other = [(local_time(iso), sid) for sid, iso in
              _stored(user) + [[s["id"], s.get("played")] for s in songs if s.get("played")]]
     for t, sid, is_live in [(t, sid, True) for t, sid in live] + [(t, sid, False) for t, sid in other]:

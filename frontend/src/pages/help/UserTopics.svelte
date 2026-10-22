@@ -129,6 +129,7 @@
       <li>{@html t('<b>Ideal for downloading:</b> save it offline in Symfonium once – new songs arrive by themselves at the next sync.')}</li>
       <li>{@render rich(t('Don’t like the selection? <Ui icon="dice">Reshuffle</Ui> on the playlist page.'))}</li>
       <li>{@html t('<b>Learns as you go:</b> what you skip in a mix comes up less often. Songs you rate with 1 star yourself no longer go into your mixes.')}</li>
+      <li>{@html t('<b>The family’s mixes too:</b> if you play one on your own account, Tuttiphon recognizes it by its order – then the family learns from it, not your own taste.')}</li>
     </CompareCard>
   </div>
   <p>{t('Rule of thumb: the mix for on the go and for children’s and family music, the smart playlist for browsing at home.')}</p>

@@ -92,6 +92,8 @@ export default {
     'Bevalt de selectie niet? <Ui icon="dice">Opnieuw husselen</Ui> op de pagina van de playlist.',
   '<b>Learns as you go:</b> what you skip in a mix comes up less often. Songs you rate with 1 star yourself no longer go into your mixes.':
     '<b>Leert gaandeweg:</b> wat je in een mix overslaat, komt minder vaak. Nummers die je zelf 1 ster geeft, komen niet meer in je mixen.',
+  '<b>The family’s mixes too:</b> if you play one on your own account, Tuttiphon recognizes it by its order – then the family learns from it, not your own taste.':
+    '<b>Ook de mixen van het gezin:</b> speel je er een af met je eigen account, dan herkent Tuttiphon die aan de volgorde – dan leert het gezin ervan, niet je eigen smaak.',
   'Rule of thumb: the mix for on the go and for children’s and family music, the smart playlist for browsing at home.':
     'Vuistregel: de mix voor onderweg en voor kinder- en gezinsmuziek, de slimme playlist om thuis rond te snuffelen.',
   '<Ui icon="edit">Edit</Ui> – change music, name and type; Symfonium keeps the playlist.':

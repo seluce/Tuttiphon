@@ -457,7 +457,11 @@ def _listened(user, plib, today):
     from . import listen, rueckblick
     last, done = {}, set(rueckblick.played_ever(user))
     since = time.time() - EPISODE_DAYS * 86400
-    for r in listen.events(user, today - dt.timedelta(days=EPISODE_DAYS), today):
+    first = today - dt.timedelta(days=EPISODE_DAYS)
+    rows = listen.events(user, first, today)
+    if listen.is_family(user):   # the family's mixes heard on the people's accounts – a child on a parent's phone
+        rows = rows + listen.family_events(first, today)
+    for r in rows:
         if r["k"] in ("start", "play"):
             last[r["id"]] = max(last.get(r["id"], 0), r["t"])
             if r["k"] == "play":

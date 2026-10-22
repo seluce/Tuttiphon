@@ -7,6 +7,10 @@ released.
 
 ## Unreleased
 
+- **The family's mixes learn from everyone:** play one on your own account and Tuttiphon recognizes it by its order
+  (three songs in a row) – what is played or skipped there teaches the family's mixes, taste, good morning and next
+  episode, not your own taste and mixes. Your recap keeps it, you did listen. What you put on yourself (an album, a
+  band, your own playlist) counts for you as before. With the Navidrome plugin; smart playlists are not recognized.
 - **Your formats in line with your playlists:** Good morning, Album of the week, Daily Mix and the other formats
   Tuttiphon makes for a person start with the person's prefix like all their other playlists – “Anna · Good morning”
   instead of “Good morning, Anna”. The family keeps “Our …”. Playlists you already have keep their name until you

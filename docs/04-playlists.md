@@ -713,7 +713,8 @@ kept.
 | 1 star by hand | the account's star in Navidrome (e.g. given in Symfonium) that was not set by the Deezer rating (rules below) | the song no longer appears in this person's mixes |
 
 **Remembering.** `mixer.remember()` calls `feedback.record()` when writing the `.m3u`: start of the period, `every`, account
-and song IDs go to `state/mix_history.json` – per mix the last 12 periods (`KEEP_PERIODS`).
+and song IDs go to `state/mix_history.json` – per mix the last 12 periods (`KEEP_PERIODS`); of the family's mixes
+also every period of the last 120 days (`listen.KEEP_DAYS`), so that they are recognized in the live plays (below).
 
 **Evaluating.** Before writing, the `playlists` step calls `feedback.learn()` and `forget_removed()` (not in a
 dry run; an error there does not stop the writing, it appears in the log as “⚠ Learning from mixes: …”). `learn()`
@@ -753,6 +754,20 @@ these skips like the marks of the mix history (half-life 60 days) for every song
 play makes up for half a skip (`_live_effect()`, cached per account, day and state of the live files). A mix period
 with live plays of the account is only marked as done in `learn()` – no guess from the mix history, nothing counts
 twice.
+
+**The family's mixes on a person's own account** (`listen._runs()`): Navidrome does not say from which playlist a song
+comes, so Tuttiphon recognizes it by the order – at least 3 songs in a row (`RUN`) in the order of an edition of one of
+the family's mixes (its song IDs in the mix history, editions of that day and the day before; the next song at most 3
+places on, `RUN_GAP`, e.g. after songs skipped before they started), per player from its reports, otherwise from the
+starts. Such a stretch belongs to the family: its skips and plays go into the family's `factors()`
+(`listen.family_summary()` – the family's own account plus the stretches on the people's accounts, cached with
+`listen.stamp_all()` and `listen.family_key()`), not into the person's (`listen.summary()` leaves them out). The same
+for the taste (`taste.recent_plays()`: the person's recent plays and play counts minus them, the family's plus them –
+`listen.family_shift()`), the listening clock (`listen.moments()` without them, the family's with
+`listen.family_moments()`), “Next episode” of the family (`listen.family_events()`) and how much the family's mixes are
+listened to (`usage()`). The recap and the statistics keep everything – the person did listen. Shuffled, or
+something of one's own (an album, a band, a playlist of one's own): the person's as before. Smart playlists are not
+recognized – Navidrome chooses their order, and an album of the same music would look the same.
 
 **How much a mix is listened to** (`feedback.usage()`, read only, also with `mixLearn` off): the same finished and
 counted periods of the mix history (rules 1–2 above, without waiting or discarding) – per mix the number of editions

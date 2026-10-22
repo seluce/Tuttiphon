@@ -926,6 +926,10 @@ stored password (otherwise Tuttiphon does not know the account's plays, favorite
 | 1 star by hand (`feedback.manual_dislikes`) | −3 (dislike) |
 | skipped in mixes (`feedback.factors`) | factor on the weight |
 
+A family mix heard on a person's own account (recognized by its order, `listen._runs()` –
+[04](04-playlists.md#mixes-that-learn-appfeedbackpy)) counts for the family, not the person: `taste.recent_plays()`
+takes its plays off the person's recent plays and play counts and adds them to the family's (`listen.family_shift()`).
+
 Stars set by the Deezer rating (`state/deezer.json`, `u[account]`) only say something about popularity and
 do not count – “by hand” means: the star differs from the one Deezer set last (`feedback.deezer_stars`). Below
 `MIN_SIGNAL` (15) songs with a signal there is no profile (`enough: false`).
@@ -1022,7 +1026,7 @@ the length of their usual morning round and the sound of their mornings
 
 | Step | How |
 |---|---|
-| Moments | Navidrome keeps per account and song only the last play (`played`, UTC). Two sources together, each moment once (song + minute): the account's song list right now (the last play of every song – the clock works from the first day on) and `state/plays/<account>/moments.json`, which every recap snapshot extends with the last play of the songs with new plays (`listenclock.record()`), so a song played again later doesn't erase its earlier moment. With the Navidrome plugin also every play as it happens (`listen.moments()`: a start within the first 15 s of the song or a scrobble, a start and the scrobble of the same song within 10 minutes once) – exact, also several plays of a song a day. Local time (TZ of the container), the last 42 days (`DAYS`) |
+| Moments | Navidrome keeps per account and song only the last play (`played`, UTC). Two sources together, each moment once (song + minute): the account's song list right now (the last play of every song – the clock works from the first day on) and `state/plays/<account>/moments.json`, which every recap snapshot extends with the last play of the songs with new plays (`listenclock.record()`), so a song played again later doesn't erase its earlier moment. With the Navidrome plugin also every play as it happens (`listen.moments()`: a start within the first 15 s of the song or a scrobble, a start and the scrobble of the same song within 10 minutes once) – exact, also several plays of a song a day. A family mix heard on a person's own account is the family's moment (`listen.family_moments()`), not the person's – also not again from Navidrome's `played`. Local time (TZ of the container), the last 42 days (`DAYS`) |
 | Sessions (`sessions()`) | moments less than 20 minutes apart belong together; a session lasts from its first to its last play plus 3.5 minutes |
 | Morning (`morning()`) | a session of at least two songs starting from 05:00 to 09:59; the habit is there with at least 6 such mornings spread over at least 3 calendar weeks. Usual time = median of the first morning session per day (rounded to 5 minutes), usual length = median of the longest morning session per day (15–60 minutes), “weekdays” when at least 80 % of the mornings are Monday to Friday |
 | Sound of the mornings (`morning_taste()`) | the morning songs (weight 1 + ln(1 + plays)) as liked songs for `soundtaste.compute()` – prototypes of the morning sound, scores 0–1 per song; None without sound vectors or with too few morning songs with one |

@@ -12,7 +12,8 @@
 Result per account: state/feedback/<account>.json = {song ID: {"s": [days on which it was skipped], "p": plays from mixes}}
 * Live plays (the Navidrome plugin, listen.py): a song left within the first seconds counts as skipped there and then,
   every play partly makes up for skips – for every song, not only in mixes. For a mix period with live plays of the
-  account the guess from the mix history above is left out, so nothing counts twice.
+  account the guess from the mix history above is left out, so nothing counts twice. A family mix heard on a person's
+  own account (recognized by its order, listen._runs()) teaches the family, not the person.
 With the setting settings.mixLearn = false none of this has an effect (the history is still kept).
 """
 import calendar
@@ -33,7 +34,7 @@ SKIP_FACTOR = 0.55     # weight per (fresh) skip
 MAX_SKIPS = 4          # no stronger downgrade than this (0.55⁴ ≈ 0.09 – only 1 star should make a song disappear)
 HALF_LIFE = 60         # days after which a skip only counts half
 SEQUENTIAL = 0.5       # share of the positions up to the last one played that must have played (otherwise: shuffled)
-KEEP_PERIODS = 12      # remember this many past periods per mix
+KEEP_PERIODS = 12      # remember this many past periods per mix (the family's: listen.KEEP_DAYS days – record())
 _lock = threading.Lock()
 _cache = {}
 
@@ -94,10 +95,18 @@ def period_end(every, start):
 
 # ---------------------------------------------------------------------------- History
 
+def history():
+    """The mix history {playlist id: [{"day", "every", "user", "ids", "done"?}, …]} – read only."""
+    return _cached(HISTORY, {})
+
+
 def record(playlist_id, user, every, start, song_ids):
-    """Remember the selection of a mix period (when writing the .m3u)."""
+    """Remember the selection of a mix period (when writing the .m3u) – KEEP_PERIODS of them; of the family's mixes all
+    of the days the live plays are kept, so that they are recognized there (listen._runs())."""
     if not user or not song_ids:
         return
+    from . import listen
+    cutoff = (start - dt.timedelta(days=listen.KEEP_DAYS)).isoformat() if listen.is_family(user) else "9999"
     with _lock:
         try:
             data = _load_to_write(HISTORY, {})
@@ -105,7 +114,8 @@ def record(playlist_id, user, every, start, song_ids):
             return
         entries = [e for e in data.get(playlist_id, []) if e.get("day") != start.isoformat()]
         entries.append({"day": start.isoformat(), "every": every, "user": user, "ids": list(song_ids)})
-        data[playlist_id] = sorted(entries, key=lambda e: e["day"])[-KEEP_PERIODS:]
+        entries = sorted(entries, key=lambda e: e["day"])
+        data[playlist_id] = [e for k, e in enumerate(entries) if k >= len(entries) - KEEP_PERIODS or e["day"] >= cutoff]
         try:
             write_atomic(HISTORY, json.dumps(data))
         except OSError:
@@ -134,8 +144,9 @@ def usage(playlist_ids=None, today=None):
     -> {playlist id: {"every", "periods": finished editions the counters cover, "heard": editions with at least
     MIN_HEARD of their songs played in their period, "songs", "played": songs in them / of those played, "days": days
     covered, "last": first day of the last heard edition (ISO) or None}} – mixes without such an edition are missing.
-    Songs played elsewhere in the period (album, artist) count too."""
-    from . import rueckblick
+    Songs played elsewhere in the period (album, artist) count too; for the family's mixes also where they were heard
+    on a person's own account (listen.family_summary())."""
+    from . import listen, rueckblick
     today = today or dt.date.today()
     data = _cached(HISTORY, {}, extra=today)
     snaps, plays_memo, out = {}, {}, {}
@@ -143,7 +154,7 @@ def usage(playlist_ids=None, today=None):
         if playlist_ids is not None and pid not in playlist_ids:
             continue
         res = {"every": None, "periods": 0, "heard": 0, "songs": 0, "played": 0, "days": 0, "last": None}
-        for e in entries if isinstance(entries, list) else []:
+        for e in entries[-KEEP_PERIODS:] if isinstance(entries, list) else []:
             try:
                 start = dt.date.fromisoformat(e["day"])
             except (KeyError, TypeError, ValueError):
@@ -162,6 +173,8 @@ def usage(playlist_ids=None, today=None):
             key = (user, start, end)
             if key not in plays_memo:
                 plays_memo[key] = rueckblick.plays_between(user, start, end)[0]
+                if listen.is_family(user):   # its mixes heard on the people's accounts count too
+                    plays_memo[key] = {**listen.family_summary(start, end)[1], **plays_memo[key]}
             ids = e.get("ids") or []
             n = sum(1 for sid in ids if plays_memo[key].get(sid))
             res.update(every=every, periods=res["periods"] + 1, songs=res["songs"] + len(ids),
@@ -283,14 +296,16 @@ _live_memo = {}
 
 
 def _live_effect(user, today):
-    """The same from the live plays (listen.py): skips on their days, every play makes up for half a skip."""
+    """The same from the live plays (listen.py): skips on their days, every play makes up for half a skip. The family:
+    also its mixes heard on the people's accounts (listen.family_summary())."""
     from . import listen
-    key = (user.lower(), today, listen.stamp(user))
+    family = listen.is_family(user)
+    key = (user.lower(), today, listen.stamp_all() if family else listen.stamp(user), listen.family_key())
     hit = _live_memo.get(key)
     if hit is not None:
         return hit
     start = today - dt.timedelta(days=listen.KEEP_DAYS)
-    skipped, played = listen.summary(user, start, today)
+    skipped, played = listen.family_summary(start, today) if family else listen.summary(user, start, today)
     out = {}
     for sid, days in skipped.items():
         out[sid] = sum(0.5 ** (max((today - dt.date.fromisoformat(d)).days, 0) / HALF_LIFE) for d in days)

@@ -23,7 +23,13 @@ What comes of it:
   nothing counts twice. A play that arrives twice (Navidrome retrying it) is kept once;
 * who is listening right now (listener(), heard()) – Navidrome does not say who asks the plugin for similar songs;
   sonic.py answers for the person playing the song asked about;
-* what was skipped in the last minutes (moment()) – the smart queue turns away from it at once.
+* what was skipped in the last minutes (moment()) – the smart queue turns away from it at once;
+* a family playlist heard on a person's own account (_runs()) – Navidrome does not say from which playlist a song
+  comes, so Tuttiphon recognizes it by the order: at least RUN songs in a row in the order of an edition of one of the
+  family's mixes (as written – the mix history, feedback.record) belong to the family. Their plays and skips teach the
+  family (family_summary(), family_moments(), family_events(), family_shift()) instead of the person (summary(),
+  moments(), family_shift()); the recap and the statistics keep them (the person did listen). Smart playlists are not
+  recognized: Navidrome chooses their order, and an album of the same music would look the same.
 """
 import datetime as dt
 import json
@@ -46,6 +52,8 @@ LISTENER_ACTIVE = 600     # otherwise: the one account playing anything right no
 HEARD_SECONDS = 3 * 3600  # what the listener heard this recently does not come again at once (sonic.py)
 STEER_SECONDS = 900       # skips this recent steer the smart queue (moment(), sonic._steer())
 DAYS_CACHED = 32          # day files kept parsed – the ones used last (the newest days of the accounts playing)
+RUN = 3                   # songs in a row in the order of a family mix: that stretch was the family's playlist
+RUN_GAP = 3               # … where the next one may be a few places on (songs skipped before they started)
 KINDS = ("start", "play", "report")
 STATES = ("starting", "playing", "paused", "stopped", "expired")
 _lock = threading.Lock()
@@ -56,7 +64,8 @@ _active = {}                   # account (lower case) -> (time, state) of its la
 _days = OrderedDict()          # path -> ((size, mtime), rows), the DAYS_CACHED used last – parsed again only when
                                # the file changed (summary() keeps its results per day, the older days need no rows)
 _days_lock = threading.Lock()
-_summary_days = {}             # (account folder, day) -> (signature of the day files, (skips, plays)) – summary()
+_summary_days = {}             # (account folder, day) -> (signature of the day files and editions, parts) – _day()
+_fam = {"key": None, "account": None, "editions": ()}   # _family()
 
 
 def _folder(user):
@@ -266,9 +275,22 @@ def stamp(user):
     return _versions[user.lower()]
 
 
+def stamp_all():
+    """Changes with every event kept for any account (for caches of the family)."""
+    return sum(_versions.values())
+
+
+def family_key():
+    """Changes when the family or the editions of its mixes change (for caches)."""
+    account, editions = _family()
+    return account, tuple((e[0], e[1]) for e in editions)
+
+
 def moments(user, since):
     """[(local time, song id)] of the plays since `since` (datetime) – for the listening clock: a start near the
-    beginning of the song or a scrobble, a start and its scrobble once (SAME_PLAY), a song played again later twice."""
+    beginning of the song or a scrobble, a start and its scrobble once (SAME_PLAY), a song played again later twice.
+    A person's account without what was one of the family's mixes (family_moments())."""
+    spans = [] if is_family(user) or not _family()[0] else _spans(_folder(user), since.date(), dt.date.today())
     out, last = [], {}
     for r in events(user, since.date(), dt.date.today()):
         if r["k"] not in ("start", "play") or (r["k"] == "start" and (r.get("pos") or 0) > START_SECONDS):
@@ -276,7 +298,7 @@ def moments(user, since):
         if r["id"] in last and abs(r["t"] - last[r["id"]]) < SAME_PLAY:
             continue
         last[r["id"]] = r["t"]
-        if _local(r["t"]) >= since:
+        if _local(r["t"]) >= since and not _in(spans, r["id"], r["t"]):
             out.append((_local(r["t"]), r["id"]))
     return out
 
@@ -424,17 +446,79 @@ def _skipped(segs, heard):
     return out
 
 
-def _summarize(rows, start, end):
-    """Skips and plays among these events that started on the days start…end: ({song id: {days}}, {song id: plays}).
+def _mtime(path):
+    try:
+        st = path.stat()
+        return st.st_mtime_ns, st.st_size
+    except OSError:
+        return None
+
+
+def _family():
+    """(the family's account in lower case or None, the editions of its mixes ((playlist id, first day, last day,
+    {song id: position}), …)) – from the configuration and the mix history (feedback.record), read again only when
+    one of them changes."""
+    from . import feedback
+    from .config import CONFIG_FILE, load_config
+    key = (_mtime(CONFIG_FILE), _mtime(feedback.HISTORY))
+    with _lock:
+        if _fam["key"] == key:
+            return _fam["account"], _fam["editions"]
+    cfg = load_config()
+    account = next(((p.get("user") or "").lower() for p in cfg.get("personen", []) if p.get("family")), None) or None
+    editions = []
+    if account:
+        for pid, entries in feedback.history().items():
+            for e in entries if isinstance(entries, list) else []:
+                try:
+                    first = dt.date.fromisoformat(e["day"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if (e.get("user") or "").lower() == account and e.get("ids"):
+                    editions.append((pid, first, feedback.period_end(e.get("every", "day"), first),
+                                     {sid: i for i, sid in enumerate(e["ids"])}))
+    with _lock:
+        _fam.update(key=key, account=account, editions=tuple(editions))
+    return account, tuple(editions)
+
+
+def is_family(user):
+    """Is this the family's account?"""
+    return bool(user) and user.lower() == _family()[0]
+
+
+def _editions(first, last):
+    """The family's mix editions that can have played on these days (the day after an edition ends too: a night)."""
+    return tuple(e for e in _family()[1] if e[1] <= last and first <= e[2] + dt.timedelta(days=1))
+
+
+def _runs(segs, editions):
+    """The segments that were a family mix: at least RUN in a row in the order of one edition (the next one at most
+    RUN_GAP places on). -> {(song id, start)}"""
+    out = set()
+    for _pid, _first, _last, pos in editions:
+        run = []
+        for seg in segs + [None]:
+            p = pos.get(seg["id"]) if seg else None
+            if p is not None and run and 0 < p - run[-1][0] <= RUN_GAP:
+                run.append((p, seg))
+                continue
+            if len(run) >= RUN:
+                out |= {(x["id"], x["t0"]) for _p, x in run}
+            run = [(p, seg)] if p is not None else []
+    return out
+
+
+def _summarize(rows, start, end, editions=()):
+    """Skips and plays among these events that started on the days start…end – split into the account's own and what
+    was one of the family's mixes (_runs()): {"own": (skips, plays), "family": (skips, plays), "spans": [(song id,
+    start, end)] of the family's stretches}, skips as {song id: {days}}, plays as {song id: count}.
     Per player from its reports; without reports from the account's starts near the beginning of a song (two devices
     playing at once on one account can look like a skip there – one skip weighs little)."""
     played = defaultdict(list)
-    plays_ = defaultdict(int)
     for r in rows:
         if r["k"] == "play":
             played[r["id"]].append(r["t"])
-            if start <= _local(r["t"]).date() <= end:
-                plays_[r["id"]] += 1
 
     def heard(sid, a, b):   # scrobbled: its start time lies around the start of this part
         return any(a - SAME_PLAY <= t <= b + 5 for t in played.get(sid, ()))
@@ -444,22 +528,32 @@ def _summarize(rows, start, end):
         by_player = defaultdict(list)
         for r in reports:
             by_player[r["pl"]].append(r)
-        found = [x for seq in by_player.values() for x in _skipped(_segments(seq), heard)]
+        sequences = [_segments(seq) for seq in by_player.values()]
     else:
-        starts = [r for r in rows if r["k"] == "start" and (r.get("pos") or 0) <= START_SECONDS]
-        found = _skipped(_segments(starts), heard)
-    skipped = defaultdict(set)
+        sequences = [_segments([r for r in rows if r["k"] == "start" and (r.get("pos") or 0) <= START_SECONDS])]
+    found, theirs, spans = [], set(), []
+    for segs in sequences:
+        found.extend(_skipped(segs, heard))
+        mine = _runs(segs, editions) if editions else set()
+        theirs |= mine
+        spans.extend((seg["id"], seg["t0"], seg["t1"]) for seg in segs if (seg["id"], seg["t0"]) in mine)
+    out = {"own": (defaultdict(set), defaultdict(int)), "family": (defaultdict(set), defaultdict(int)), "spans": spans}
     for sid, t in found:
         day = _local(t).date()
         if start <= day <= end:
-            skipped[sid].add(day.isoformat())
-    return skipped, dict(plays_)
+            out["family" if (sid, t) in theirs else "own"][0][sid].add(day.isoformat())
+    for sid, times in played.items():
+        for t in times:
+            if start <= _local(t).date() <= end:
+                fam = any(x == sid and a - SAME_PLAY <= t <= b + 5 for x, a, b in spans)
+                out["family" if fam else "own"][1][sid] += 1
+    return {k: (dict(v[0]), dict(v[1])) if k != "spans" else v for k, v in out.items()}
 
 
-def _day(user, day):
-    """The skips and plays of one day (with its neighbours for the context) – worked out again only when one of the
-    three day files changed, so a new event costs one day, not 120."""
-    folder = _folder(user)
+def _day(folder, day, family=False):
+    """The parts of one day (with its neighbours for the context) – _summarize(); family: the family's own account
+    (all of it is the family's). Worked out again only when one of the three day files or the family's editions
+    changed, so a new event costs one day, not 120."""
     sig = []
     for d in (day - dt.timedelta(days=1), day, day + dt.timedelta(days=1)):
         try:
@@ -468,13 +562,18 @@ def _day(user, day):
         except OSError:
             sig.append(None)
     if sig[1] is None:
-        return {}, {}   # nothing started on this day
-    key, sig = (str(folder), day), tuple(sig)
+        return {"own": ({}, {}), "family": ({}, {}), "spans": []}   # nothing started on this day
+    editions = () if family else _editions(day - dt.timedelta(days=1), day + dt.timedelta(days=1))
+    key, sig = (str(folder), day), (tuple(sig), tuple((e[0], e[1]) for e in editions))
     with _lock:
         hit = _summary_days.get(key)
     if hit and hit[0] == sig:
         return hit[1]
-    out = _summarize(events(user, day - dt.timedelta(days=1), day + dt.timedelta(days=1)), day, day)
+    rows = []
+    for d in (day - dt.timedelta(days=1), day, day + dt.timedelta(days=1)):
+        rows.extend(_rows(folder / f"live-{d.isoformat()}.jsonl"))
+    rows.sort(key=lambda r: r["t"])
+    out = _summarize(rows, day, day, editions)
     with _lock:
         if len(_summary_days) > 5000:
             _summary_days.clear()
@@ -482,18 +581,74 @@ def _day(user, day):
     return out
 
 
+def _add(into, part):
+    skipped, plays_ = into
+    for sid, days in part[0].items():
+        skipped[sid] |= set(days)
+    for sid, n in part[1].items():
+        plays_[sid] += n
+
+
+def _result(acc):
+    return {sid: sorted(days) for sid, days in acc[0].items()}, dict(acc[1])
+
+
 def summary(user, start, end):
-    """Skips and plays of these days: ({song id: [days skipped]}, {song id: plays}) – day by day (_day())."""
-    skipped, plays_ = defaultdict(set), defaultdict(int)
+    """Skips and plays of these days: ({song id: [days skipped]}, {song id: plays}) – day by day (_day()). A person's
+    account without what was one of the family's mixes (that teaches the family: family_summary())."""
+    folder, fam = _folder(user), is_family(user)
+    acc = (defaultdict(set), defaultdict(int))
     day = start
     while day <= end:
-        s, p = _day(user, day)
-        for sid, days in s.items():
-            skipped[sid] |= days
-        for sid, n in p.items():
-            plays_[sid] += n
+        _add(acc, _day(folder, day, fam)["own"])
         day += dt.timedelta(days=1)
-    return {sid: sorted(days) for sid, days in skipped.items()}, dict(plays_)
+    return _result(acc)
+
+
+def _others():
+    """The day folders of the accounts other than the family's."""
+    from .config import slug
+    from .rueckblick import PLAYS_DIR
+    account = _family()[0]
+    try:
+        return [f for f in PLAYS_DIR.iterdir() if f.is_dir() and f.name != slug(account or "")]
+    except OSError:
+        return []
+
+
+def family_summary(start, end):
+    """The family's skips and plays: its own account's and the stretches of its mixes on the people's accounts."""
+    account = _family()[0]
+    if not account:
+        return {}, {}
+    acc = (defaultdict(set), defaultdict(int))
+    folders = [(_folder(account), True)] + [(f, False) for f in _others()]
+    for folder, own in folders:
+        day = start
+        while day <= end:
+            parts = _day(folder, day, own)
+            _add(acc, parts["own"] if own else parts["family"])
+            day += dt.timedelta(days=1)
+    return _result(acc)
+
+
+def family_shift(user, start, end):
+    """What changes the plays an account's taste counts on these days: {song id: -n} for a person (what was the
+    family's mix), {song id: +n} for the family (its mixes on the people's accounts) – {} otherwise."""
+    if is_family(user):
+        folders, sign = _others(), 1
+    elif _family()[0]:
+        folders, sign = [_folder(user)], -1
+    else:
+        return {}
+    out = defaultdict(int)
+    for folder in folders:
+        day = start
+        while day <= end:
+            for sid, n in _day(folder, day)["family"][1].items():
+                out[sid] += sign * n
+            day += dt.timedelta(days=1)
+    return dict(out)
 
 
 def skips(user, start, end):
@@ -504,6 +659,44 @@ def skips(user, start, end):
 def plays(user, start, end):
     """{song id: plays that arrived live} on these days."""
     return summary(user, start, end)[1]
+
+
+def _spans(folder, first, last):
+    out = []
+    day = first
+    while day <= last:
+        out.extend(_day(folder, day)["spans"])
+        day += dt.timedelta(days=1)
+    return out
+
+
+def _in(spans, sid, t):
+    return any(x == sid and a - SAME_PLAY <= t <= b + 5 for x, a, b in spans)
+
+
+def family_moments(since, user=None):
+    """[(local time, song id)] of the family's mixes on the people's accounts since `since` (the listening clock) –
+    user: only on this account."""
+    out = []
+    for folder in [_folder(user)] if user else _others():
+        spans = _spans(folder, since.date(), dt.date.today())
+        out.extend((_local(a), sid) for sid, a, _b in spans if _local(a) >= since)
+    return sorted(out)
+
+
+def family_events(start, end):
+    """The family's mixes on the people's accounts as events ({"t", "k": "start"|"play", "id"}) – for "Next episode"."""
+    out = []
+    for folder in _others():
+        spans = _spans(folder, start, end)
+        out.extend({"t": a, "k": "start", "id": sid} for sid, a, _b in spans)
+        day = start
+        while day <= end:
+            out.extend({"t": r["t"], "k": "play", "id": r["id"]} for r in _rows(folder / f"live-{day.isoformat()}.jsonl")
+                       if r["k"] == "play" and _in(spans, r["id"], r["t"]))
+            day += dt.timedelta(days=1)
+    out.sort(key=lambda r: r["t"])
+    return out
 
 
 def status():

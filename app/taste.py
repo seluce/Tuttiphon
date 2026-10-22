@@ -1,7 +1,7 @@
 """Taste per Navidrome account – from what the person really listens to in Navidrome or Symfonium.
 
 Signals per song (only for accounts with a stored password – otherwise Tuttiphon does not know the account's stars and
-plays):
+plays; a family mix heard on a person's own account counts for the family, not the person – recent_plays()):
 * plays of the last RECENT_DAYS days (recap, state/plays/) – count the most
 * plays overall (playCount) – damped
 * favorites and stars the account gave by hand – stars set by the Deezer rating only say something about popularity
@@ -70,11 +70,27 @@ def excluded_ids(cfg, plib, exclude, today=None):
     return out
 
 
+def recent_plays(user, today):
+    """{song id: plays} of the last RECENT_DAYS days (recap) and the change to the overall play counts – what was one
+    of the family's mixes on a person's own account is the family's (listen.family_shift()). -> (recent, shift)"""
+    from . import listen
+    start = today - dt.timedelta(days=RECENT_DAYS)
+    recent, _ = rueckblick.plays_between(user, start, today)
+    shift = listen.family_shift(user, today - dt.timedelta(days=listen.KEEP_DAYS), today)
+    if not shift:
+        return recent, {}
+    near = listen.family_shift(user, start, today)
+    recent = dict(recent)
+    for sid, n in near.items():
+        recent[sid] = max(0, recent.get(sid, 0) + n)
+    return recent, shift
+
+
 def song_scores(plib, user, today=None, cfg=None, exclude=()):
     """Song index -> weight (>0 liked, <0 rejected) for this account – without the songs of the music worlds
     `exclude` (they say nothing about this person's taste)."""
     today = today or dt.date.today()
-    recent, _ = rueckblick.plays_between(user, today - dt.timedelta(days=RECENT_DAYS), today)
+    recent, shift = recent_plays(user, today)
     skip = feedback.factors(user, today)
     never = feedback.manual_dislikes(plib, user)
     by_deezer = feedback.deezer_stars(user)
@@ -88,7 +104,7 @@ def song_scores(plib, user, today=None, cfg=None, exclude=()):
         r = recent.get(sid, 0)
         if r:
             score += 1.0 + 1.5 * math.log1p(r)
-        plays = s.get("playCount") or 0
+        plays = max(0, (s.get("playCount") or 0) + shift.get(sid, 0))
         if plays:
             score += 0.6 * math.log1p(plays)
         rating = s.get("userRating") or 0
@@ -157,7 +173,7 @@ def _compute(cfg, plib, user, today, exclude=()):
     from .classify import song_features
     scores = song_scores(plib, user, today, cfg, exclude)
     pos = {i: s for i, s in scores.items() if s > 0}
-    recent, _ = rueckblick.plays_between(user, today - dt.timedelta(days=RECENT_DAYS), today)
+    recent, _shift = recent_plays(user, today)
     by_deezer = feedback.deezer_stars(user)
     basis = {"songs": len(pos), "recent": sum(1 for v in recent.values() if v),
              "favorites": sum(1 for s in plib.songs if s.get("starred")),

@@ -284,6 +284,8 @@ export default {
     'I mix si rinnovano all\'ora dell\'aggiornamento giornaliero (<a class="link" href="#/einstellungen/ablaeufe">Impostazioni → Automazione</a>) – ogni giorno, il lunedì o il primo del mese.',
   '<b>Mixes learn:</b> what was skipped comes up less often, songs someone rates 1 star never – with the Navidrome plugin for every account, otherwise for accounts whose password Tuttiphon knows. Switch: “Mixes that learn” under <a class="link" href="#/einstellungen/playlists">Settings → Playlists</a>.':
     '<b>I mix imparano:</b> ciò che viene saltato compare meno spesso, i brani a cui qualcuno dà 1 stella mai – con il plugin di Navidrome per ogni account, altrimenti per gli account di cui Tuttiphon conosce la password. Interruttore: «Mix che imparano» in <a class="link" href="#/einstellungen/playlists">Impostazioni → Playlist</a>.',
+  '<b>The family’s mixes</b> heard on a person’s own account are recognized by their order (three songs in a row): what is played or skipped there teaches the family, not the person’s taste and mixes – with the Navidrome plugin.':
+    '<b>I mix di famiglia</b> ascoltati con l\'account di una persona vengono riconosciuti dall\'ordine (tre brani di fila): ciò che viene ascoltato o saltato insegna alla famiglia, non al gusto e ai mix della persona – con il Plugin di Navidrome.',
   'A playlist’s page shows a preview, its bands and in plain words how it is made; a click on a song plays it.':
     'La pagina di una playlist mostra un\'anteprima, le sue band e, in parole semplici, come nasce; un clic su un brano lo riproduce.',
   '{trash} – filed under “Trash”, deleted for good after 30 days.':

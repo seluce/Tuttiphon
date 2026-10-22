@@ -987,7 +987,8 @@ Without the file, the selection is recomputed; it may then differ slightly.
 
 ### mix_history.json
 
-`{playlist-id: [{day, every, user, ids, done}]}` – per mix, the selection of the last up to 12 periods: start of the
+`{playlist-id: [{day, every, user, ids, done}]}` – per mix, the selection of the last up to 12 periods (of the family's
+mixes also every period of the last 120 days – they are recognized in the live plays, listen._runs()): start of the
 period (`YYYY-MM-DD`), `day`/`week`/`month`, the person's Navidrome account and the song IDs in play order.
 `feedback.record()` writes the entry every time the `.m3u` is written (not in a dry run); `feedback.learn()` sets `done: true` as soon as the period has been evaluated. `feedback.forget_removed()`
 removes entries of playlists that are no longer in `config.json` before every write. The history is kept even with

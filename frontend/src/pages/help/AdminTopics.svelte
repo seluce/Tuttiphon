@@ -91,6 +91,7 @@
   </Bullets>
   <p>{@html t('Mixes renew themselves at the time of the daily refresh (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>) – daily, on Mondays or on the 1st.')}</p>
   <p>{@html t('<b>Mixes learn:</b> what was skipped comes up less often, songs someone rates 1 star never – with the Navidrome plugin for every account, otherwise for accounts whose password Tuttiphon knows. Switch: “Mixes that learn” under <a class="link" href="#/einstellungen/playlists">Settings → Playlists</a>.')}</p>
+  <p>{@html t('<b>The family’s mixes</b> heard on a person’s own account are recognized by their order (three songs in a row): what is played or skipped there teaches the family, not the person’s taste and mixes – with the Navidrome plugin.')}</p>
 {/snippet}
 
 {#snippet playlists()}

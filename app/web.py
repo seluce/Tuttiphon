@@ -216,10 +216,18 @@ def _sync_welten():
     _welten_sig["sig"] = sig
 
 
+def _warm_learning():
+    """What the mixes learned per account – the live plays of 120 days, for the family also its mixes on the people's
+    accounts: the plugin's first answer after a start need not wait for it."""
+    from . import feedback
+    for p in load_config()["personen"]:
+        feedback.factors(p["user"])
+
+
 def warm_up():
     """Prepare expensive calculations in the background so the pages are there right away."""
     def run():
-        for fn in (lambda: CACHE.get(), _sync_welten, api_playlists, api_inbox, api_suggestions):
+        for fn in (lambda: CACHE.get(), _warm_learning, _sync_welten, api_playlists, api_inbox, api_suggestions):
             try:
                 fn()
             except Exception:

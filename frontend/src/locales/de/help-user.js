@@ -48,6 +48,8 @@ export default {
   '<b>Ideal for downloading:</b> save it offline in Symfonium once – new songs arrive by themselves at the next sync.': '<b>Ideal zum Herunterladen:</b> In Symfonium einmal offline speichern – neue Songs kommen beim Abgleich von selbst.',
   'Don’t like the selection? <Ui icon="dice">Reshuffle</Ui> on the playlist page.': 'Gefällt dir die Auswahl nicht? <Ui icon="dice">Neu würfeln</Ui> auf der Playlist-Seite.',
   '<b>Learns as you go:</b> what you skip in a mix comes up less often. Songs you rate with 1 star yourself no longer go into your mixes.': '<b>Lernt mit:</b> Was du im Mix überspringst, kommt seltener. Songs, die du selbst mit 1 Stern bewertest, kommen in deine Mixe nicht mehr.',
+  '<b>The family’s mixes too:</b> if you play one on your own account, Tuttiphon recognizes it by its order – then the family learns from it, not your own taste.':
+    '<b>Auch die Familien-Mixe:</b> Hörst du einen mit deinem eigenen Konto, erkennt Tuttiphon ihn an der Reihenfolge – dann lernt die Familie davon, nicht dein eigener Geschmack.',
   'Rule of thumb: the mix for on the go and for children’s and family music, the smart playlist for browsing at home.': 'Faustregel: Für unterwegs und für Kinder- und Familienmusik den Mix, zum Stöbern zu Hause die Smart-Playlist.',
   '<Ui icon="edit">Edit</Ui> – change music, name and type; Symfonium keeps the playlist.': '<Ui icon="edit">Bearbeiten</Ui> – Musik, Name und Art ändern; Symfonium behält die Playlist.',
   '<Ui icon="image">Cover</Ui> – a picture from band photos and album covers, or a photo of your own.': '<Ui icon="image">Cover</Ui> – ein Bild aus Bandfotos und Album-Covern oder ein eigenes Foto.',
