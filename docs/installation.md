@@ -66,7 +66,9 @@ docker compose pull && docker compose up -d
 ```
 
 In a NAS Docker app: pull the image again and recreate the project. Settings and history stay in `config/` and are
-migrated automatically. With the Navidrome plugin: its file lives in Navidrome's plugins folder – when the changelog
+migrated automatically – read the changelog first: if a version asks for something to be done before the update
+(say, one Navidrome account per person), a configuration that does not fit keeps Tuttiphon from starting until it is
+put right in the earlier version. With the Navidrome plugin: its file lives in Navidrome's plugins folder – when the changelog
 says so, put the new `tuttiphon.ndp` there and restart Navidrome. What changed: [CHANGELOG.md](../CHANGELOG.md). Going
 back to an older version: [Operations → Updates](08-operations.md#updates).
 

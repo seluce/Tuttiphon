@@ -1,110 +1,33 @@
-"""One person per Navidrome account, the family as an entry with an account of its own: the update of older
-configurations (v13), setting up the family (POST /api/family) and the family's kid-safe mode in the plugin's answers."""
+"""One person per Navidrome account, the family as an entry with an account of its own: the rules, an older
+configuration (v12 – nothing is converted), setting up the family (POST /api/family) and the family's kid-safe mode in
+the plugin's answers."""
 from tests.python import env  # noqa: F401  (before app.*)
 
 import copy
+import json
 import unittest
 from unittest import mock
 
-from app import auth, config, sonic, web
+from app import config, sonic, web
 from app.navidrome import NavidromeError
 from tests.python.factory import base_config
 
 
-def old_config():
-    """A v12 configuration as it was: the shared person "Familie" on Alex' account (the default person, visible to
-    everyone), a child profile on Sam's account, a person without an account."""
+def without_family():
     cfg = base_config()
-    cfg["version"] = 12
-    cfg["settings"].update(defaultPerson="familie", public=True)
-    cfg["personen"] = [
-        {"id": "familie", "name": "Familie", "user": "alex", "public": True, "prefix": "", "icon": "i:home",
-         "likes": {"welten": ["kinder"], "stile": [], "artists": []}, "dislikes": {"artists": ["Band X"], "genres": []}},
-        {"id": "alex", "name": "Alex", "user": "alex", "prefix": "Alex · ",
-         "likes": {"welten": [], "stile": [], "artists": []}, "dislikes": {"artists": [], "genres": []}},
-        {"id": "sam", "name": "Sam", "user": "Sam", "public": False, "prefix": "Sam · "},
-        {"id": "lena", "name": "Lena", "user": "sam", "child": True, "prefix": "Lena · "},
-        {"id": "oma", "name": "Oma", "user": "", "public": True, "prefix": "Oma · "},
-    ]
-    cfg["playlists"] = [
-        {"id": "kids", "welt": "kinder", "stil": "*", "status": "aktiv"},                        # no person: Familie
-        {"id": "car", "person": "familie", "welt": "*", "stil": "*", "type": "mix", "name": "Autofahrt",
-         "together": ["alex", "sam"], "mix": {"every": "day"}},
-        {"id": "f1", "person": "alex", "welt": "metal", "stil": "*"},
-        {"id": "m1", "person": "lena", "welt": "kinder", "stil": "tanzen"},
-        {"id": "o1", "person": "oma", "welt": "mittelalter", "stil": "*"},
-    ]
+    cfg["personen"] = [p for p in cfg["personen"] if not p.get("family")]
     return cfg
 
 
-def migrated(cfg, admin="root"):
-    with mock.patch.object(config, "load_env", lambda: {"NAV_ADMIN_USER": admin}):
-        return config.migrate(copy.deepcopy(cfg))
-
-
-class MigrationTest(unittest.TestCase):
-    def test_one_person_per_account(self):
-        out = migrated(old_config())
-        config.validate_config(out)
-        persons = {p["id"]: p for p in out["personen"]}
-        self.assertEqual(set(persons), {"alex", "sam", "oma"})          # Familie and Lena merged
-        self.assertEqual(persons["oma"]["user"], "root")                   # without an account: the administrator's
-        self.assertFalse(any("public" in p or p.get("family") for p in out["personen"]))
-        self.assertNotIn("defaultPerson", out["settings"])
-        self.assertNotIn("public", out["settings"])
-        owner = {p["id"]: p["person"] for p in out["playlists"]}
-        self.assertEqual(owner, {"kids": "alex", "car": "alex", "f1": "alex", "m1": "sam", "o1": "oma"})
-        by_id = {p["id"]: p for p in out["playlists"]}
-        self.assertEqual(by_id["kids"]["name"], "Kinder · All Sorts")   # the name it has in Navidrome now stays –
-        self.assertNotIn("name", by_id["f1"])                              # not “Alex · …” (server language here: en)
-        self.assertNotIn("together", by_id["car"])                   # only the family has “What everyone likes”
-
-    def test_what_is_left_to_review(self):
-        st = migrated(old_config())["settings"]
-        self.assertEqual(st["familySetup"]["name"], "Familie")
-        self.assertEqual(st["familySetup"]["dislikes"], {"artists": ["Band X"], "genres": []})
-        self.assertEqual(st["familySetup"]["playlists"], ["kids", "car"])
-        self.assertEqual(st["familySetup"]["together"], {"car": ["alex", "sam"]})
-        self.assertEqual(st["mergedPersons"], [{"name": "Lena", "into": "sam", "child": True, "playlists": ["m1"]}])
-
-    def test_the_former_family_playlists_stay_for_everyone_until_the_family_is_set_up(self):
-        from app import rules
-        cfg = migrated(old_config())
-        kids = next(p for p in cfg["playlists"] if p["id"] == "kids")      # Familie's – now Alex'
-        mine = next(p for p in cfg["playlists"] if p["id"] == "f1")
-        self.assertTrue(rules.build_nsp(cfg, kids)["public"])               # nobody loses it in Symfonium meanwhile
-        self.assertFalse(rules.build_nsp(cfg, mine)["public"])
-        sam = {"user": "Sam", "role": "user", "own": ["sam"], "local": False}
-        self.assertTrue(auth.visible_playlist(kids, cfg, sam))
-        self.assertFalse(auth.visible_playlist(mine, cfg, sam))
-        cfg["settings"].pop("familySetup")                                   # set up (or done with)
-        self.assertFalse(rules.build_nsp(cfg, kids)["public"])
-
-    def test_a_default_person_alone_on_its_account_stays_a_person(self):
-        cfg = old_config()
-        cfg["personen"] = [cfg["personen"][0], cfg["personen"][2]]
-        cfg["personen"][0]["user"] = "familie"
-        cfg["playlists"] = [cfg["playlists"][0]]
-        out = migrated(cfg)
-        config.validate_config(out)
-        self.assertEqual([p["id"] for p in out["personen"]], ["familie", "sam"])
-        self.assertFalse(out["personen"][0].get("family"))   # never by itself: that needs an account of its own
-        self.assertEqual(out["settings"]["familySetup"]["person"], "familie")
-
-    def test_an_old_new_installation(self):
-        cfg = copy.deepcopy(old_config())
-        cfg["personen"] = [{"id": "familie", "name": "Family", "user": "", "public": True, "prefix": ""}]
-        cfg["playlists"] = []
-        out = migrated(cfg)
-        self.assertEqual(out["personen"], [])
-        config.validate_config(out)
-
+class RulesTest(unittest.TestCase):
     def test_the_rules(self):
         cfg = base_config()
         for change in (lambda c: c["personen"][2].update(user=""),
                        lambda c: c["personen"][2].update(user="JONAS"),                    # the account twice
                        lambda c: c["personen"][2].update(family=True),                     # two families
                        lambda c: c["playlists"].append({"id": "x", "welt": "*", "stil": "80er"}),   # nobody's
+                       lambda c: c["playlists"].append({"id": "y", "person": "oma", "welt": "*", "stil": "*",
+                                                        "together": ["jonas", "oma"]}),     # only the family's
                        lambda c: c["settings"].update(familyEdit="alle")):
             bad = copy.deepcopy(cfg)
             change(bad)
@@ -112,10 +35,51 @@ class MigrationTest(unittest.TestCase):
                 config.validate_config(bad)
 
 
+class OlderConfigTest(unittest.TestCase):
+    """An older configuration is not converted: what fits loads (the settings that are gone are removed), what does
+    not fit stops the start – and the file stays as it was."""
+
+    def tearDown(self):
+        config.save_config(base_config())
+
+    def write(self, cfg):
+        text = json.dumps(cfg, ensure_ascii=False)
+        config.CONFIG_FILE.write_text(text, encoding="utf-8")
+        env.reset_caches()
+        return text
+
+    def test_it_fits(self):
+        cfg = without_family()
+        cfg["version"] = 12
+        cfg["settings"].update(defaultPerson="jonas", public=True)
+        cfg["personen"][0]["public"] = True
+        self.write(cfg)
+        out = config.load_config()
+        self.assertEqual(out["version"], config.CONFIG_VERSION)
+        self.assertFalse({"defaultPerson", "public"} & set(out["settings"]))
+        self.assertNotIn("public", out["personen"][0])
+        self.assertEqual([p["id"] for p in out["personen"]], ["jonas", "niklas", "oma"])
+
+    def test_it_does_not_fit(self):
+        cfg = without_family()
+        cfg["version"] = 12
+        cfg["personen"].append({"id": "familie", "name": "Familie", "user": "jonas", "prefix": ""})   # an account twice
+        text = self.write(cfg)
+        backups = set(config.BACKUP_DIR.glob("config_v*.json"))
+        with self.assertRaises(config.ConfigOutdated) as cm:
+            config.load_config()
+        self.assertIn("earlier version", str(cm.exception))
+        with self.assertRaises(SystemExit):
+            web.serve("127.0.0.1", 0)
+        self.assertEqual(config.CONFIG_FILE.read_text(encoding="utf-8"), text)   # untouched
+        self.assertEqual(set(config.BACKUP_DIR.glob("config_v*.json")), backups)   # no backup per attempt either
+
+
 class FamilySetupTest(unittest.TestCase):
     def setUp(self):
-        self.cfg = migrated(old_config())
-        config.save_config(self.cfg)
+        cfg = without_family()
+        cfg["settings"]["deezer"] = {**cfg["settings"].get("deezer", {}), "users": ["Jonas"]}
+        config.save_config(cfg)
         self.addCleanup(config.save_config, base_config())
         self.created, self.saved, self.runs = [], {}, []
 
@@ -134,24 +98,21 @@ class FamilySetupTest(unittest.TestCase):
             p.start()
             self.addCleanup(p.stop)
 
-    def test_set_up_with_the_playlists_chosen(self):
-        out = web.api_family({"name": "Familie", "playlists": ["car", "f1"]})
+    def test_set_up(self):
+        out = web.api_family({"name": "Familie"})
         self.assertEqual((out["person"], out["account"]), ("familie", "familie"))
         self.assertEqual(self.created[0][:2], ("familie", "Familie"))
         self.assertEqual(self.saved, {config.pass_key("familie"): out["password"]})
         cfg = config.load_config()
         family = next(p for p in cfg["personen"] if p.get("family"))
-        self.assertEqual((family["user"], family["clean"], family["dislikes"]["artists"]), ("familie", True, ["Band X"]))
-        owner = {p["id"]: p["person"] for p in cfg["playlists"]}
-        self.assertEqual((owner["car"], owner["kids"], owner["f1"]), ("familie", "alex", "alex"))   # chosen ones
-        self.assertEqual(next(p for p in cfg["playlists"] if p["id"] == "car")["together"], ["alex", "sam"])
-        self.assertNotIn("familySetup", cfg["settings"])
-        self.assertEqual(self.runs, [(["deezer", "playlists", "scan"], {"deezer_mode": "new"})])   # its stars, the move
+        self.assertEqual((family["id"], family["user"], family["clean"]), ("familie", "familie", True))
+        self.assertEqual(cfg["settings"]["deezer"]["users"], ["Jonas", "familie"])   # its stars too
+        self.assertEqual(self.runs, [(["deezer"], {"deezer_mode": "new"})])
         with self.assertRaises(ValueError):
             web.api_family({})                                       # only one family
 
     def test_account_names(self):
-        for body in ({"account": "root"}, {"account": "Taken"}, {"account": "alex"}, {"account": "a b"}):
+        for body in ({"account": "root"}, {"account": "Taken"}, {"account": "jonas"}, {"account": "a b"}):
             with self.assertRaises(ValueError, msg=body):
                 web.api_family(body)
         self.assertEqual(self.created, [])

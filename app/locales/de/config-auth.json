@@ -89,7 +89,7 @@
  "User name or password is wrong – it is the same as in Navidrome or Symfonium.": "Benutzername oder Passwort stimmt nicht – es ist dasselbe wie in Navidrome bzw. Symfonium.",
  "Navidrome is not reachable right now. If needed, sign in as local administrator.": "Navidrome ist gerade nicht erreichbar. Notfalls als lokaler Administrator anmelden.",
  "Tuttiphon is not enabled for this account – please ask the administrator.": "Für dieses Konto ist Tuttiphon nicht freigegeben – bitte die Administratorin oder den Administrator fragen.",
- "Only administrators may do this.": "Das dürfen nur Administrator:innen.",
+ "Only administrators may do this.": "Das dürfen nur Administratoren.",
  "Backup {name}: {n} file, {size} KB.": "Sicherung {name}: {n} Datei, {size} KB.",
  "Backup {name}: {n} files, {size} KB.": "Sicherung {name}: {n} Dateien, {size} KB.",
  "Unknown backup": "Unbekannte Sicherung",

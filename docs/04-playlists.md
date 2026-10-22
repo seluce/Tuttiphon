@@ -119,7 +119,7 @@ of its own with `family: true` and an account Tuttiphon created for it.
 | Field | Contribution |
 |---|---|
 | `user` | Navidrome account that **owns** the playlist. Navidrome evaluates `rating`/`loved` with that account's stars and favorites; mixes pick from that account's point of view (see [Mixes](#person-and-view)) |
-| `family` | the family's playlists are **for everyone** (`rules.for_everyone()` – also the former family playlists while `settings.familySetup` is left from the update): `public: true` in the `.nsp` and in Navidrome, and every account sees them in Tuttiphon. A person's playlists are **private**: only their account in Navidrome, in Tuttiphon that account and the administrators (`rules.build_nsp()`, `auth.visible_playlist()`, see [Security](07-security.md)). Who may change the family's playlists: `settings.familyEdit` |
+| `family` | the family's playlists are **for everyone** (`rules.for_everyone()`): `public: true` in the `.nsp` and in Navidrome, and every account sees them in Tuttiphon. A person's playlists are **private**: only their account in Navidrome, in Tuttiphon that account and the administrators (`rules.build_nsp()`, `auth.visible_playlist()`, see [Security](07-security.md)). Who may change the family's playlists: `settings.familyEdit` |
 | `prefix` | prepended to the built name, e.g. `"Kind · "` (the family has none) |
 | `likes` | `welten`, `stile`, `artists` – the basis of the [suggestions](#suggestions) |
 | `dislikes` | dislikes: `artists` (`isNot artist`/`albumartist`) and `genres` (`notContains genre`) in **every** playlist of the person |
@@ -497,8 +497,7 @@ dry run (`dry_run`), scan and sync are skipped entirely.
 2. For each active playlist, the target values `name`, `comment`, `public` (`true` only for the family's) and – if the
    person's account exists in Navidrome – `ownerId`. Only differing fields are set via `PUT /api/playlist/{id}`. If
    the account does not exist, a warning appears in the log (“User '…' does not exist in Navidrome”) and the
-   playlist stays with its current owner. (The warning “person without a Navidrome account” is left over from before
-   v13 – every person has an account now.) If setting the values fails for a playlist (`NavidromeError`), the log reports “⚠ …: not
+   playlist stays with its current owner. If setting the values fails for a playlist (`NavidromeError`), the log reports “⚠ …: not
    updated in Navidrome”, and the sync continues with the others.
 3. If a playlist is missing in Navidrome (e.g. deleted there by hand), its file gets a new modification time
    (`os.utime`) so the next scan reads it in again. The step then starts a second, quick scan
@@ -980,8 +979,6 @@ for new music worlds. Users only get ideas they can take – for their own perso
 | Entry | When | Action |
 |---|---|---|
 | Passwords missing | an account from `rating_users` without a password | “Enter” (settings) |
-| Set up the family (`familySetup`) | `settings.familySetup` exists and there is no family yet – left by the update to one person per account ([Data model](02-data-model.md#left-over-from-the-update-to-one-person-per-account)); the text says how many of the old shared person's playlists can move | “Set up” (`#/personen`: the setup sheet, `POST /api/family`) |
-| <name> needs an account of their own (`merged\|<name>`) | per entry in `settings.mergedPersons`: the person used the Navidrome account of another person and is now part of that person – every person needs an account of its own | “People” (`#/personen`) |
 | new songs without a rating | according to the Deezer state | “Rate now” (starts the Deezer step) |
 | handmade playlist | per file from `handmade()` | “Take over …” |
 | New: band (`new\|<band>`) | added in the last 45 days, ≥ 3 songs, in no world (not even taken out) | `fits <scene> (new world)` if the band is in an unlinked scene; otherwise, if classification finds a world, `→ <world> (<match rate> %)` to add it directly (the text then names the reason); always “Assign music world …” (`do: "artist"`: opens the band window, where the world is chosen) |

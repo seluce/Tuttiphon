@@ -96,9 +96,9 @@ export default {
   'Where do the music worlds come from?': 'Woher kommen die Musikwelten?',
   'A band is in the wrong music world.': 'Eine Band ist in der falschen Musikwelt.',
   'Click the band name – in the window under “In which music worlds?”, select or deselect the worlds. Or remove the band from the music world with ×.': 'Auf den Bandnamen klicken – im Fenster unter „In welchen Musikwelten?“ die Welten an- oder abwählen. Oder in der Musikwelt die Band mit × herausnehmen.',
-  'What do users see of each other?': 'Was sehen Benutzer:innen von den anderen?',
+  'What do users see of each other?': 'Was sehen Benutzer von den anderen?',
   'Only the family playlists – they can change them too, unless only administrators may. Statistics, profile and playlists of each person stay with them. Administrators see everything.':
-    'Nur die Familien-Playlists – ändern können sie diese auch, außer wenn das nur Administrator:innen dürfen. Statistik, Profil und Playlists jeder Person bleiben bei ihr. Administrator:innen sehen alles.',
+    'Nur die Familien-Playlists – ändern können sie diese auch, außer wenn das nur Administratoren dürfen. Statistik, Profil und Playlists jeder Person bleiben bei ihr. Administratoren sehen alles.',
   'Kid-safe mode removes a harmless song.': 'Der Kinderschutz nimmt einen harmlosen Song heraus.',
   'Kid-safe mode leaves out songs with explicit lyrics and songs tagged as explicit in the file; songs found by their lyrics can be allowed under Settings → Lyrics. They go back in the next time the playlists are written.': 'Der Kinderschutz lässt Songs mit derben Texten weg und Songs, die in der Datei als explicit markiert sind; an den Liedtexten erkannte Songs lassen sich unter Einstellungen → Lyrics erlauben. Sie kommen beim nächsten Schreiben der Playlists wieder hinein.',
   'When does the search find lyrics?': 'Wann findet die Suche Liedtexte?',
@@ -114,7 +114,7 @@ export default {
   'A song comes up less often or not at all in my mix.': 'Ein Song kommt in meinem Mix seltener oder gar nicht mehr.',
   'Can I change the family playlists?': 'Kann ich die Familien-Playlists ändern?',
   'Yes, unless only administrators may – then “Copy for me” gives you your own version that you can adjust as you like.':
-    'Ja, außer wenn das nur Administrator:innen dürfen – dann bekommst du mit „Für mich kopieren“ deine eigene Version, die du beliebig anpassen kannst.',
+    'Ja, außer wenn das nur Administratoren dürfen – dann bekommst du mit „Für mich kopieren“ deine eigene Version, die du beliebig anpassen kannst.',
   'Can others see my playlists?': 'Sehen andere meine Playlists?',
   'No – your playlists are only yours; the family playlists are for everyone. Apart from you, only the administrator sees your statistics and your profile.':
     'Nein – deine Playlists gehören nur dir; die Familien-Playlists sind für alle. Deine Statistik und dein Profil sieht außer dir nur der Administrator.',

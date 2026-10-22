@@ -226,7 +226,7 @@ export const STEPS = translated(() => [{ title: t('…') }])   // at module leve
   | Passwort hinterlegt / Passwort fehlt | password stored / password missing |
   | Alle ansehen → (link to the whole list) | See all → |
   | Familie (the family entry with its own account), Familien-Playlist | family, family playlist |
-  | Administrator:in / Benutzer:in | administrator / user |
+  | Administrator / Benutzer (no gender forms: not „Administrator:innen“) | administrator / user |
 
 **Help texts** (`pages/help/`): a topic opens with one sentence, then at most about seven points of one or two short
 sentences each – what something does and where it is (a link to the page). No technical details (models, percentages,

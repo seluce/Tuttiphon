@@ -752,26 +752,6 @@ def inbox(cfg, lib, env, deezer_stats, handmade_list, users_ok):
              _("Without a password for {users}, Deezer cannot set stars and the preview is only approximate.",
                users=", ".join(missing)),
              [{"label": _("Enter"), "do": "settings"}])
-    # left over from the update to one person per account (config migration v13)
-    setup = cfg["settings"].get("familySetup")
-    if isinstance(setup, dict) and not any(p.get("family") for p in cfg["personen"]):
-        n = sum(1 for p in cfg["playlists"] if p["id"] in (setup.get("playlists") or [])
-                and p.get("status", "aktiv") != "papierkorb")   # i18n-ignore: stored value
-        item("familySetup", "info", _("Set up the family"),
-             _n(n, "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – "
-                   "and you choose whether its playlist moves there.",
-                "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – "
-                "and you choose which of its {n} playlists move there.") if n else
-             _("The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it."),
-             [{"label": _("Set up"), "do": "goto", "href": "#/personen"}])
-    names = {p["id"]: p.get("name") or p["id"] for p in cfg["personen"]}
-    for x in cfg["settings"].get("mergedPersons") or []:
-        if isinstance(x, dict) and x.get("name"):
-            item(f"merged|{x['name']}", "info", _("{name} needs an account of their own", name=x["name"]),
-                 _("{name} used the Navidrome account of {into} and is now part of {into} – every person has an account of "
-                   "their own. Create one for {name} in Navidrome, then add {name} under People.",
-                   name=x["name"], into=names.get(x.get("into"), x.get("into") or "?")),
-                 [{"label": _("People"), "do": "goto", "href": "#/personen"}])
     new = (deezer_stats or {}).get("new")
     if new:
         item(f"deezer-{new}", "info", _n(new, "{n} new song without a rating", "{n} new songs without a rating"),

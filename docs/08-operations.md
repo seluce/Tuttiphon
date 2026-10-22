@@ -412,14 +412,14 @@ on, the validation ignores sound filter keys it doesn't know yet (e.g. written b
 refuse to save settings that contain such keys.
 
 **Configuration:** If `config.json` is older than the current version (`CONFIG_VERSION`), `load_config()` migrates it
-by itself on the first load. Before that, it uses `write_atomic()` to save a copy as
-`backup/config_v<old>_<YYYYMMDD_HHMMSS>.json` ([Data model](02-data-model.md)). It adds missing settings
-from `app/default_config.json`. The migration to one person per Navidrome account (v13,
-[Data model](02-data-model.md#version-and-migration)) changes nothing in Navidrome by itself: a shared person
-(“Familie” on a parent's account) and profiles that shared an account are merged into the account's person, and “To
-review” then offers “Set up the family” – Tuttiphon creates a Navidrome account for the family, shows its password
-once (for shared devices in Symfonium) and moves the playlists chosen there – and names every merged profile that
-needs an account of its own.
+by itself on the first load. Before writing, it uses `write_atomic()` to save a copy as
+`backup/config_v<old>_<YYYYMMDD_HHMMSS>.json` ([Data model](02-data-model.md#version-and-migration)). It adds missing
+settings from `app/default_config.json`. What the new version requires and an older configuration does not have is
+not converted: Tuttiphon does not start, says what does not fit, and leaves `config.json` as it was. Since one person
+per Navidrome account (v13) that means, before updating from an earlier version: every person needs a Navidrome
+account of their own (no two people on one account, none without), and “What everyone likes” playlists exist only for
+the family – delete such playlists (and empty the trash) or the extra people in the earlier version first. After the
+update, People → “Set up the family” creates the family with an account of its own.
 
 **Browser:** The server delivers `index.html` and `login.html` with `Cache-Control: no-cache`, and files under
 `/assets/` (content hash in the name) as `immutable` for one year. The service worker (`sw.js`) loads from the server

@@ -36,13 +36,3 @@ export function toggleIn(arr, id) {
   if (i >= 0) arr.splice(i, 1)
   else arr.push(id)
 }
-
-/** A person to add that the update to one person per account merged into someone else (settings.mergedPersons):
- *  People → "Add person" hands it to the assistant, which takes it once. */
-let draft = null
-export const setDraft = (x) => { draft = x }
-export function takeDraft() {
-  const x = draft
-  draft = null
-  return x
-}

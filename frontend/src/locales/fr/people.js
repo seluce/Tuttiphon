@@ -496,14 +496,8 @@ export default {
     'Dans la file intelligente et l’Instant Mix de Symfonium, un titre que {name} n’a jamais écouté s’intercale tous les quelques titres – celui dont le son se rapproche le plus de ce qui passe.',
   'for everyone':
     'pour tout le monde',
-  '{name} needs a Navidrome account of their own. Until then, their playlists are with {into} – create the account in Navidrome, then add {name} here.':
-    '{name} a besoin de son propre compte Navidrome. D’ici là, ses playlists sont chez {into} – créez le compte dans Navidrome, puis ajoutez {name} ici.',
   'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
     'Tuttiphon crée un compte Navidrome pour la famille. Ses playlists sont pour tout le monde – et les appareils partagés, dans la voiture ou sur la tablette de la cuisine, peuvent les lire dans Symfonium.',
-  'The former family playlist can move there.':
-    'L’ancienne playlist de la famille peut y être déplacée.',
-  'The {n} former family playlists can move there.':
-    'Les {n} anciennes playlists de la famille peuvent y être déplacées.',
   'The family’s account “{account}” is ready.':
     'Le compte « {account} » de la famille est prêt.',
   'Password – shown only now:':
@@ -516,10 +510,6 @@ export default {
     'Compte Navidrome',
   'Letters, digits, dots, hyphens and underscores. Tuttiphon picks a random password and stores it.':
     'Lettres, chiffres, points, traits d’union et tirets bas. Tuttiphon choisit un mot de passe aléatoire et l’enregistre.',
-  'Move to the family':
-    'Déplacer vers la famille',
-  'These playlists were the family’s before – checked ones become family playlists again.':
-    'Ces playlists appartenaient auparavant à la famille – celles qui sont cochées redeviennent des playlists de la famille.',
   'Every Navidrome account already has a person.':
     'Chaque compte Navidrome a déjà une personne.',
   'Playlists for everyone':
@@ -548,16 +538,4 @@ export default {
     'Seuls les administrateurs',
   'The family’s account – for shared devices in Symfonium, nobody signs in to Tuttiphon with it':
     'Le compte de la famille – pour les appareils partagés dans Symfonium, personne ne s’en sert pour se connecter à Tuttiphon',
-  '“{name}” stays a person with the account “{account}”. If nobody needs it any more, delete it in its profile.':
-    '« {name} » reste une personne avec le compte « {account} ». Si plus personne n’en a besoin, supprimez-la dans son profil.',
-  'Open profile':
-    'Ouvrir le profil',
-  'No family':
-    'Pas de famille',
-  'Continue without a family?':
-    'Continuer sans famille ?',
-  'The former family playlists then stay with the person they belong to now – only that account sees them.':
-    'Les anciennes playlists de la famille restent alors chez la personne à qui elles appartiennent maintenant – seul son compte les voit.',
-  'Without a family':
-    'Sans famille',
 }

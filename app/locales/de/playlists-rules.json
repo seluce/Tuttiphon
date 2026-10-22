@@ -215,13 +215,5 @@
  "new every month": "jeden Monat neu",
  "Next episode – the next episode of every audio play series being listened to, new every day": "Nächste Folge – die nächste Folge jeder Hörspielserie, die gerade gehört wird, jeden Tag neu",
  "Next episode: for every series this account listened to in the last 3 months, the next episode – the rest of the one begun, otherwise the next one never heard, by episode number": "Nächste Folge: für jede Serie, die dieses Konto in den letzten 3 Monaten gehört hat, die nächste Folge – der Rest der angefangenen, sonst die nächste noch nie gehörte, nach Folgennummer",
- "New every day – the series heard last come first": "Jeden Tag neu – die zuletzt gehörten Serien zuerst",
- "Set up the family": "Familie einrichten",
- "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it.": "Die Familie bekommt jetzt ein eigenes Navidrome-Konto, statt eines mitzubenutzen. Tuttiphon legt es an.",
- "{name} needs an account of their own": "{name} braucht ein eigenes Konto",
- "{name} used the Navidrome account of {into} and is now part of {into} – every person has an account of their own. Create one for {name} in Navidrome, then add {name} under People.": "{name} hat das Navidrome-Konto von {into} mitbenutzt und gehört jetzt zu {into} – jede Person hat ein eigenes Konto. Lege für {name} eines in Navidrome an und füge {name} dann unter Personen hinzu.",
- "Set up": "Einrichten",
- "People": "Personen",
- "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose whether its playlist moves there.": "Die Familie bekommt jetzt ein eigenes Navidrome-Konto, statt eines mitzubenutzen. Tuttiphon legt es an – und du wählst, ob ihre Playlist dorthin umzieht.",
- "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose which of its {n} playlists move there.": "Die Familie bekommt jetzt ein eigenes Navidrome-Konto, statt eines mitzubenutzen. Tuttiphon legt es an – und du wählst, welche ihrer {n} Playlists dorthin umziehen."
+ "New every day – the series heard last come first": "Jeden Tag neu – die zuletzt gehörten Serien zuerst"
 }

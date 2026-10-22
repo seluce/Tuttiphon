@@ -265,17 +265,6 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 Of these, users see only `notify.enabled` and `notify.server` (`auth.view_config()`), so that the profile knows whether
 to show the field for their own topic.
 
-#### Left over from the update to one person per account
-
-The migration to v13 ([Version and migration](#version-and-migration)) writes these two keys when the old configuration
-had a shared default person or several people on one account; “To review” then offers what is left to do
-([Playlists](04-playlists.md#to-review-inbox)). Only the server writes them; users never get them (`auth.USER_SETTINGS`).
-
-| Key | Type | Meaning | Validation |
-|---|---|---|---|
-| `familySetup` | object | the old default person (“Familie”), to become the family: `name`, `icon`, `color`, `likes`, `dislikes`, `clean` (as far as it had them), `playlists` (ids of its former playlists), `together` (`{playlist id: [person ids]}` – the members of its “What everyone likes” playlists, already mapped to the people that remain) and `person` (only if it was alone on its account: it stayed a person with this id and still owns `playlists`). As long as it exists, its `playlists` stay for everyone (`rules.for_everyone()`: public in Navidrome, visible to every account), so nobody loses them in Symfonium before the family is set up; “No family” on the People page removes it (they become the owner's own). `POST /api/family` takes icon, color, likes, dislikes and kid-safe mode over (the setup sheet prefills the name), moves the playlists chosen there (with their members) and removes the key; while there is a family, “To review” no longer offers it | an object |
-| `mergedPersons` | list | people merged into another person of the same account: `{name, into, child, playlists}` – name, id of the person they became part of, whether it was a child profile, ids of the playlists that moved. “To review” shows one notice per entry (“{name} needs an account of their own”), People one with “Add person” (prefilled) and “hide” – hiding removes the entry (the administrator's save) | a list |
-
 ### personen
 
 One person per Navidrome account: every person has an account of its own, and the family – if there is one – is a
@@ -298,7 +287,7 @@ person too, with an account Tuttiphon created for it.
 | `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. The family playlists keep them ([Intelligence](06-intelligence.md#taste-per-person)). No effect on a child profile; the interface does not offer it for the family. Users set it for their own person; ids of worlds that no longer exist are removed when the configuration is loaded or saved |
 | `newEvery` | number | never played songs in the plugin's answers (smart queue, Instant Mix, song and artist radio in Symfonium): every n-th song one the account has never played – `0` never, `5` now and then, `3` often; missing = 5 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Users set it for their own person (Profile → “New songs in the queue”, only while the plugin is in use); validation: `0`, `3` or `5` |
 
-There is no visibility per person (the field `public` and `settings.public` are gone since v13): a person's
+There is no visibility per person: a person's
 playlists are private – only their account sees them in Navidrome, in Tuttiphon the account and the administrators –,
 the family's are for everyone.
 
@@ -532,7 +521,7 @@ those in `accounts.<account>`; `/api/config` delivers each person their own unde
 | List | Keys (examples) |
 |---|---|
 | `dismissed` – suggestions (`suggest.key_of()`) | `<person>\|<welt>\|<stil>\|<hits>[\|mix][\|radio:<bands>]`, e.g. `familie\|kinder\|*\|` or `familie\|kinder\|*\|\|mix`; several worlds joined with `+`; also `likes\|<person>` and `scene\|<scene>` |
-| `ignored` – notices under “To review” | administrators: `cred`, `deezer-<n>`, `hand\|<file>`, `new\|<band>`, `class\|<band>`, `scenes-<n>`, `check\|<playlist>\|<songs in Navidrome>`, `low\|<playlist>\|<n>`, `gone\|<welt>\|<n>`, `untagged-<n>`, `familySetup`, `merged\|<name>`; users: `profil`, `likes\|<person>`, `erste-playlist`, `passwort` |
+| `ignored` – notices under “To review” | administrators: `cred`, `deezer-<n>`, `hand\|<file>`, `new\|<band>`, `class\|<band>`, `scenes-<n>`, `check\|<playlist>\|<songs in Navidrome>`, `low\|<playlist>\|<n>`, `gone\|<welt>\|<n>`, `untagged-<n>`; users: `profil`, `likes\|<person>`, `erste-playlist`, `passwort` |
 
 Keys containing a number reappear as soon as the number changes. Hidden suggestions come back after
 180 days ([long-term maintenance](05-maintenance.md#long-term-maintenance), `langzeit.expire_dismissed()`), so that “Discover” never
@@ -542,9 +531,15 @@ doesn't count. “Show again” under Discover and under My account empties the 
 
 ### Version and migration
 
-`load_config()` compares `version` (if missing: 1) with `CONFIG_VERSION`. If it is older, it backs up `config.json`
-with `write_atomic()` to `backup/config_v<old>_<YYYYMMDD_HHMMSS>.json` (a second one in the same second gets `_2`, `_3` …),
-calls `migrate()` and writes the result back immediately.
+`load_config()` compares `version` (if missing: 1) with `CONFIG_VERSION`. If it is older, it calls `migrate()`; the
+result must fit the rules of this version (`validate_config()`). Only then it backs up `config.json` with
+`write_atomic()` to `backup/config_v<old>_<YYYYMMDD_HHMMSS>.json` (a second one in the same second gets `_2`, `_3` …)
+and writes the result back. An older configuration that does not fit – say, two people on one Navidrome account
+(v13) – is **not converted**: `load_config()` raises `ConfigOutdated` (a `ConfigDamaged`), `web.serve()` refuses to
+start with a clear message (“… is from an earlier version and does not fit this one: … please put this right in the
+earlier version first”), and `config.json` stays exactly as it was – no backup either, so a container that restarts
+again and again does not fill `backup/`. While `load_config()` reads the file, messages from inside use the last known
+server language (`i18n.reading_config()`), so they never read the file again.
 
 A **damaged** `config.json` (no valid JSON, not an object, `settings`/lists or `version` of the wrong type, a
 migration that fails) is never replaced silently: before the first good state `load_config()` raises
@@ -569,7 +564,7 @@ through) is read as `null`, so the value falls back to its default and `GET /api
 | 9 → 10 | setup assistant: an existing installation counts as set up – `settings.setup.done = true` (other keys in `setup` stay, no `at`). Defaults that changed for new installations keep their earlier effective value: if `settings.opus.enabled` is missing, it becomes `true` (before `_fill()` could bring the new default `false`); an explicit value stays |
 | 10 → 11 | new files no longer get the owner `1000:10` by default (new installations: empty = the user Tuttiphon runs as). If `settings.opus.owner` is missing, it becomes `"1000:10"` – an existing installation keeps its earlier behavior; an explicit value stays |
 | 11 → 12 | the weekly notification “New for you this week”: `settings.notify.events.weekly = true` where it is missing (a missing `notify` or `events` object is created); an explicit value stays |
-| 12 → 13 | one person per Navidrome account (`_one_person_per_account()`, no network – nothing is created in Navidrome). `settings.defaultPerson` and `settings.public` are removed; a playlist whose `person` doesn't exist gets the old default person (the old fallback, resolved once). A person without `user` gets the Navidrome administrator's account (`NAV_ADMIN_USER` from `.env` – it owns that person's playlists in Navidrome today; without one, the person's `id`) or, without playlists, is removed. Of several people on one account, the first that is not the old default person stays; the others are merged into it: their playlists move to it – where the other prefix would change a built name, the name it has now is frozen in `name` (not for recaps) –, nothing else is merged (no likes, no dislikes). The old default person never becomes the family by itself (that needs an account of its own): it is remembered in `settings.familySetup` with its look, preferences, kid-safe mode and the ids of its former playlists – if it was merged into another person, it is gone as a person; if it was alone on its account, it stays a person and `familySetup.person` names it. Merged child or extra profiles go into `settings.mergedPersons`. `together` is removed from every playlist and kept in `familySetup.together` (members mapped to the people that remain); an “All × Everything” playlist without its members becomes a mix by the own taste (`mix.flavor: "geschmack"`). A playlist that still has no person (no default person was set) gets the first person, without any person it is dropped. Finally `public` and `family` are removed from every person. “To review” then offers “Set up the family” and “{name} needs an account of their own” ([Playlists](04-playlists.md#to-review-inbox)) |
+| 12 → 13 | one person per Navidrome account, the family an entry with an account of its own – **nothing is converted**: `settings.defaultPerson`, `settings.public` and `public` of every person are removed (gone without a replacement); everything else must already fit (every person has an account of their own, every playlist an existing `person`, `together` only on the family's playlists), otherwise Tuttiphon does not start (`ConfigOutdated`, above). The changelog says what to do in the earlier version first |
 
 After the last stage, `migrate()` calls `localize_defaults()` with `settings.language`: whatever a stage added gets its
 name in the server language, and bundled vibes, the family entry and `allName` that still carry a bundled name in

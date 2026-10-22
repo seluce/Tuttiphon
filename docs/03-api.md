@@ -436,7 +436,7 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `POST /api/lastfm/test` | Body optional `key` (otherwise the stored key) | `{"ok": true, "tags"}` or `{"ok": false, "error"}` |
 | `GET /api/users` | – | `[{name, admin, fullName}]` of the Navidrome accounts; Navidrome unreachable → `400 {"error"}` |
 | `GET /api/accounts` | – | `[{name, fullName, navidromeAdmin, role, override, lastLogin, persons, family, passwordStored, passwordRejected}]` – `persons`: the account's person (`[id]` or `[]`, `auth.persons_of()`), `family`: it is the family's account (its role is always `none`) |
-| `POST /api/family` | Body `{"name"?, "account"?, "playlists"?}` | `{"person", "account", "password"}` – sets up the family (see below) |
+| `POST /api/family` | Body `{"name"?, "account"?}` | `{"person", "account", "password"}` – sets up the family (see below) |
 | `PUT /api/accounts` | Body `{"user", "role"}`, `role` = `admin`, `user`, `none` or `null` (remove the override) | `{"ok": true}` |
 | `POST /api/admin-password` | Body `{"current", "password"}` – `current` only needed when the password was set in the browser | `{"ok": true}`, for the local administrator itself (and on the PC without sign-in) with `Set-Cookie: tuttiphon=…` – see below |
 | `GET /api/intel` | – | `{"lastfm", "audio", "ml", "classify", "stile", "moods", "fingerprints"}` – status of Last.fm, sound analysis, AI sound analysis, classification and audio fingerprints (see below) |
@@ -489,12 +489,11 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
   account “…” – please choose another name.”, other errors `400` “Navidrome could not create the account: …”. The
   password goes to `.env` as `NAV_PASS_<ACCOUNT>` (so its stars, plays and recap work like any account's), the account
   list is reloaded, and the entry is added: id `familie` (`familie-2` … if taken), `user` = the account, `family:
-  true`, `prefix: ""`, and – from `settings.familySetup` if the update to one person per account left one – `icon`,
-  `color`, `likes`, `dislikes` and `clean` (default `true`). `playlists`: ids out of `familySetup.playlists` that move
-  to the family (other ids are ignored), each with its “What everyone likes” members from `familySetup.together` that
-  are still people other than the family (at least two). `settings.familySetup` is removed, and a list in
-  `settings.deezer.users` gets the account. The server log says “Family set up: Navidrome account …”. Only this answer
-  carries the password – shown once, for shared devices in Symfonium; nobody signs in to Tuttiphon with it.
+  true`, `prefix: ""`, `icon: "i:home"`, `clean: true`, empty likes and dislikes; a list in `settings.deezer.users`
+  gets the account. The server log says “Family set up: Navidrome account …”, and a Deezer run (`deezer_mode: "new"`)
+  gives the new account the stars of the songs rated before (`deezer._catch_up()`; while a task runs, the next Deezer
+  run does it). Only this answer carries the password – shown once, for shared devices in Symfonium; nobody signs in
+  to Tuttiphon with it.
 - `POST /api/notify/test` is the only endpoint in this section that is also open to users – but only with
   `person` set to their own person (otherwise `403`) and only to that person's topic (`topic`
   or the stored one): the administrator's topic or one another person uses → `403`, no topic → `400 "No topic

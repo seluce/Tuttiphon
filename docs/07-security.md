@@ -446,7 +446,7 @@ endpoint.
 | `GET /api/stats`, `/api/rueckblick`, `/api/missing` | only their own person and the family, otherwise `403` |
 | everything in `ADMIN_ONLY` | `403` |
 
-A playlist is **visible** if it belongs to the user's own person or is for everyone – the family's, and until the family is set up after the update the former family playlists (`rules.for_everyone()`, `auth.visible_playlist()` – the
+A playlist is **visible** if it belongs to the user's own person or is for everyone – the family's (`rules.for_everyone()`, `auth.visible_playlist()` – the
 same rule as `public` in `build_nsp()`: a person's playlists are private, the family's are for everyone). Every
 playlist has a `person` (`auth.person_id()`); there is no fallback.
 Users may **change** (`auth.own_playlist()`) the playlists of `auth.editable_persons()`: their own person's, and the

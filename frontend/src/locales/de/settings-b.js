@@ -82,7 +82,7 @@ export default {
   'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.': 'Jede:r meldet sich mit dem eigenen Navidrome-Konto an – mit demselben Namen und Passwort wie in Symfonium.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.': 'Sieht und ändert alles: alle Playlists, Musikwelten, Richtungen, Personen und alle Einstellungen – auch Deezer, Lyrics und Umwandlung.',
   'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
-    'Hat eine eigene Startseite „Für dich“, eigene Playlists und ein eigenes Profil. Hört die Familien-Playlists – und ändert sie, wenn das nicht nur Administrator:innen dürfen.',
+    'Hat eine eigene Startseite „Für dich“, eigene Playlists und ein eigenes Profil. Hört die Familien-Playlists – und ändert sie, wenn das nicht nur Administratoren dürfen.',
   'Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.': 'Kann sich in Tuttiphon nicht anmelden. Navidrome und Symfonium funktionieren weiter.',
   'you': 'du',
   'Default: {role}': 'Standard: {role}',

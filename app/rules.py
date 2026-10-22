@@ -189,13 +189,8 @@ def is_family(person):
 
 
 def for_everyone(cfg, playlist):
-    """Is the playlist for every account (public in Navidrome, visible to everyone in Tuttiphon)? The family's – and,
-    until the family is set up after the update to one person per account, the former family playlists
-    (settings.familySetup), so that nobody loses them in Symfonium meanwhile."""
-    if is_family(person_of(cfg, playlist)):
-        return True
-    setup = cfg.get("settings", {}).get("familySetup")
-    return isinstance(setup, dict) and playlist.get("id") in (setup.get("playlists") or [])
+    """Is the playlist for every account (public in Navidrome, visible to everyone in Tuttiphon)? Only the family's."""
+    return is_family(person_of(cfg, playlist))
 
 
 def together_of(cfg, playlist):

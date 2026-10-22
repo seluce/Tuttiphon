@@ -56,11 +56,25 @@ def speaking(lang):
         _local.speak = before
 
 
+@contextlib.contextmanager
+def reading_config():
+    """While config.load_config() reads the file: a message from inside (a damaged or outdated file) must not read it
+    again for the server language – that would start over (migration backups included) until the stack runs out."""
+    before = getattr(_local, "reading", False)
+    _local.reading = True
+    try:
+        yield
+    finally:
+        _local.reading = before
+
+
 def server_lang():
     """settings.language – checked at most every few seconds (log lines ask for it all the time); inside speaking() the
     reader's language."""
     if getattr(_local, "speak", None):
         return _local.speak
+    if getattr(_local, "reading", False):
+        return _server["lang"] or "en"
     if _server["lang"] is None or time.monotonic() - _server["at"] > 5:
         from .config import load_config   # here, not at the top: config itself uses _()
         try:

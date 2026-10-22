@@ -1703,16 +1703,13 @@ FAMILY_ACCOUNT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{1,39}")
 
 def api_family(body):
     """Set up the family: Tuttiphon creates its Navidrome account (native API, random password – stored like any
-    account password, so its stars, plays and recap work) and adds the entry {"family": true}. Left over from the update
-    to one person per account (settings.familySetup): its look and preferences are taken over, and the playlists chosen
-    in body["playlists"] move to the family (with their “What everyone likes” members). -> {"person", "account",
+    account password, so its stars, plays and recap work) and adds the entry {"family": true}. -> {"person", "account",
     "password"} – the password only now, for shared devices in Symfonium."""
     import secrets
     from .config import FAMILY_NAME, slug
     cfg = load_config()
     if auth.family_id(cfg):
         raise ValueError(_("There already is a family."))
-    setup = cfg["settings"].get("familySetup") if isinstance(cfg["settings"].get("familySetup"), dict) else {}
     name = " ".join(str(body.get("name") or "").split())[:60] or _s(FAMILY_NAME)   # i18n-ignore – N_ constant
     account = str(body.get("account") or "").strip() or slug(name)
     if not FAMILY_ACCOUNT.fullmatch(account):
@@ -1731,33 +1728,20 @@ def api_family(body):
     auth.navidrome_users(force=True)
     ids = {p["id"] for p in cfg["personen"]}
     pid = next(x for x in ["familie"] + [f"familie-{n}" for n in range(2, 100)] if x not in ids)   # i18n-ignore – id
-    move = set(body.get("playlists") or []) & set(setup.get("playlists") or [])
 
     def add(c):
-        person = {"id": pid, "name": name, "icon": setup.get("icon") or "i:home", "user": account, "family": True,
-                  "clean": setup.get("clean", True), "prefix": "",
-                  "likes": setup.get("likes") or {"welten": [], "stile": [], "artists": []},
-                  "dislikes": setup.get("dislikes") or {"artists": [], "genres": []}}
-        if setup.get("color"):
-            person["color"] = setup["color"]
-        c["personen"].append(person)
-        members = {p["id"] for p in c["personen"] if not p.get("family")}
-        for pl in c["playlists"]:
-            if pl["id"] in move:
-                pl["person"] = pid
-                together = [x for x in (setup.get("together") or {}).get(pl["id"], []) if x in members]
-                if len(together) >= 2:
-                    pl["together"] = together
-        c["settings"].pop("familySetup", None)
+        c["personen"].append({"id": pid, "name": name, "icon": "i:home", "user": account, "family": True, "clean": True,
+                              "prefix": "", "likes": {"welten": [], "stile": [], "artists": []},
+                              "dislikes": {"artists": [], "genres": []}})
         deezer = c["settings"].get("deezer")
         if isinstance(deezer, dict) and isinstance(deezer.get("users"), list) and account not in deezer["users"]:
             deezer["users"].append(account)   # Deezer stars for the family's account too (its rules use them)
     update_config(add)
     events.say(_s("Family set up: Navidrome account {account}", account=account))
-    try:   # its stars (deezer._catch_up) and the moved playlists under its account – now, or after the running task
-        RUNNER.start(["deezer", "playlists", "scan"], deezer_mode="new")
+    try:   # its stars now (deezer._catch_up) – while a task runs, the next Deezer run catches up
+        RUNNER.start(["deezer"], deezer_mode="new")
     except RuntimeError:
-        AUTO.schedule()
+        pass
     return {"person": pid, "account": account, "password": password}
 
 

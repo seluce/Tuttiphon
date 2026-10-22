@@ -10,7 +10,7 @@ import string
 import threading
 from pathlib import Path
 
-from .i18n import LANGS, N_, _, _s
+from .i18n import LANGS, N_, _, _s, reading_config
 
 ROOT = Path(__file__).resolve().parent.parent      # program: the project folder (/app in the container)
 PREFIX = "TUTTIPHON_"   # own environment variables
@@ -328,6 +328,10 @@ class ConfigDamaged(ValueError):
     """config.json cannot be read as a configuration (broken JSON, wrong structure)."""
 
 
+class ConfigOutdated(ConfigDamaged):
+    """config.json of an earlier version does not fit this one – nothing is converted, Tuttiphon does not start."""
+
+
 def _finite_or_none(text):
     value = float(text)
     return value if math.isfinite(value) else None
@@ -391,7 +395,8 @@ def _damaged(key, error):
 def load_config():
     """The configuration – kept in memory until config.json changes. Always returns a copy.
     A damaged config.json: ConfigDamaged before the first good state (serve() refuses to start with a clear
-    message instead of silently starting over), afterwards the last good state stays (see _damaged)."""
+    message instead of silently starting over), afterwards the last good state stays (see _damaged). A migrated one
+    must fit the rules of this version (validate_config) – otherwise ConfigOutdated and the file stays as it was."""
     with _lock:
         if not CONFIG_FILE.exists():
             write_atomic(CONFIG_FILE, read_text(DEFAULT_CONFIG_FILE))
@@ -399,32 +404,53 @@ def load_config():
         if _cfg_cache["cfg"] is not None and _cfg_cache.get("damaged") == key:
             return copy.deepcopy(_cfg_cache["cfg"])   # still the same damaged file: do not read it again every time
         if _cfg_cache["key"] != key or _cfg_cache["cfg"] is None:
-            try:
-                text = read_text(CONFIG_FILE)
-                cfg = _parse_config(text)
-                if cfg.get("version", 1) < CONFIG_VERSION:
-                    _migration_backup(cfg.get("version", 1), text)   # the original stays, even if migrating fails
-                    try:
-                        cfg = migrate(cfg)
-                    except (KeyError, TypeError, AttributeError, IndexError, ValueError) as e:
-                        raise ConfigDamaged(_s("migration failed: {error}", error=f"{type(e).__name__}: {e}")) from None
-                    _write(cfg)
-                    key = _stamp(CONFIG_FILE)
-            except ConfigDamaged as e:
-                if _cfg_cache["cfg"] is None:
-                    raise ConfigDamaged(_s(
-                        "The configuration {file} is damaged and cannot be read ({error}). Tuttiphon does not start, so "
-                        "that nothing gets overwritten – please correct the file or replace it with a backup "
-                        "(backup/config_v*.json or config.json from a tuttiphon-sicherung-*.zip), then start again.",
-                        file=CONFIG_FILE, error=e)) from None
-                _damaged(key, e)
-                return copy.deepcopy(_cfg_cache["cfg"])
-            _fill(cfg.setdefault("settings", {}), default_config()["settings"])
-            for k in ("welten", "stile", "playlists", "personen", "dismissed", "ignored"):
-                cfg.setdefault(k, [])
-            normalize_persons(cfg)   # also for a config.json edited by hand
-            _cfg_cache.update(key=key, cfg=cfg, damaged=None)
+            with reading_config():
+                _read(key)
         return copy.deepcopy(_cfg_cache["cfg"])
+
+
+def _read(key):
+    """load_config(): read config.json (key: its stamp), migrate it if it is older, keep it in _cfg_cache."""
+    try:
+        text = read_text(CONFIG_FILE)
+        cfg = _parse_config(text)
+        if cfg.get("version", 1) < CONFIG_VERSION:
+            version = cfg.get("version", 1)
+            try:
+                cfg = migrate(cfg)
+            except (KeyError, TypeError, AttributeError, IndexError, ValueError) as e:
+                raise ConfigDamaged(_s("migration failed: {error}", error=f"{type(e).__name__}: {e}")) from None
+            try:   # say, one person per Navidrome account (v13): what does not fit is not converted
+                validate_config(_complete(copy.deepcopy(cfg)))
+            except ValueError as e:
+                raise ConfigOutdated(_s(
+                    "The configuration {file} is from an earlier version and does not fit this one: {error}. "
+                    "Tuttiphon does not start and has changed nothing – please put this right in the earlier "
+                    "version first (see the changelog), then update again.", file=CONFIG_FILE, error=e)) from None
+            _migration_backup(version, text)   # only now: what fails leaves config.json as it was (a restart loop too)
+            _write(cfg)
+            key = _stamp(CONFIG_FILE)
+    except ConfigDamaged as e:
+        if _cfg_cache["cfg"] is not None:
+            _damaged(key, e)
+            return
+        if isinstance(e, ConfigOutdated):
+            raise
+        raise ConfigDamaged(_s(
+            "The configuration {file} is damaged and cannot be read ({error}). Tuttiphon does not start, so "
+            "that nothing gets overwritten – please correct the file or replace it with a backup "
+            "(backup/config_v*.json or config.json from a tuttiphon-sicherung-*.zip), then start again.",
+            file=CONFIG_FILE, error=e)) from None
+    _cfg_cache.update(key=key, cfg=_complete(cfg), damaged=None)
+
+
+def _complete(cfg):
+    """Settings with their defaults, the lists, the people normalized (also for a config.json edited by hand)."""
+    _fill(cfg.setdefault("settings", {}), default_config()["settings"])
+    for k in ("welten", "stile", "playlists", "personen", "dismissed", "ignored"):
+        cfg.setdefault(k, [])
+    normalize_persons(cfg)
+    return cfg
 
 
 def save_config(cfg):
@@ -694,10 +720,6 @@ def _validate_config(cfg):
     _validate_settings(settings)
     if settings.get("familyEdit", "all") not in FAMILY_EDIT:
         raise ValueError(_("config: {kind} invalid", kind="familyEdit"))
-    for key in ("familySetup", "mergedPersons"):   # what the update to one person per account left to review
-        v = settings.get(key)
-        if v is not None and not isinstance(v, dict if key == "familySetup" else list):
-            raise ValueError(_("config: {kind} invalid", kind=key))
     if settings.get("dailyMode", "playlists") not in ("playlists", "alles", "aus"):   # i18n-ignore
         raise ValueError(_("config: dailyMode unknown"))
     if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", str(settings.get("dailyAt") or "05:30")):
@@ -1112,99 +1134,17 @@ def migrate(cfg):
             st["notify"]["events"] = {}
         st["notify"]["events"].setdefault("weekly", True)
         cfg["version"] = 12
-    if version < 13:   # v13: one person per Navidrome account – the family becomes an entry with an account of its own
-        _one_person_per_account(cfg)
+    if version < 13:   # v13: one person per Navidrome account, the family an entry with an account of its own –
+        # nothing is converted (load_config refuses what does not fit); only the settings that are gone are removed
+        st = cfg.setdefault("settings", {})
+        st.pop("defaultPerson", None)
+        st.pop("public", None)
+        for p in cfg.get("personen", []):
+            if isinstance(p, dict):
+                p.pop("public", None)
         cfg["version"] = 13
     if version < CONFIG_VERSION:   # whatever a stage added gets its name in the server language (chosen names stay)
         localize_defaults(cfg, cfg.get("settings", {}).get("language") or "en")
-    return cfg
-
-
-def _one_person_per_account(cfg):
-    """Migration to v13 (no network): the old fallback "playlist without a person = the default person" resolved; a
-    person without an account gets the Navidrome administrator's (who owns its playlists today); of several persons on
-    one account the first that is not the old default person stays and the others are merged into it (their
-    playlists move, names frozen where the prefix changes). Nothing becomes the family by itself – that needs an account
-    of its own (created by Tuttiphon): the old default person is remembered in settings.familySetup (its look,
-    preferences and playlists – "To review" offers to set up the family and move them), merged child or extra profiles
-    in settings.mergedPersons. "Visible to everyone" (person.public, settings.public) is gone: the family's playlists
-    are for everyone, a person's are their own. "What everyone likes" stays only on the family's playlists (kept in
-    familySetup for when they move there)."""
-    from . import rules
-    st = cfg.setdefault("settings", {})
-    default = st.pop("defaultPerson", None)
-    st.pop("public", None)
-    persons = [p for p in cfg.get("personen", []) if isinstance(p, dict)]
-    playlists = [p for p in cfg.get("playlists", []) if isinstance(p, dict)]
-    known = {p.get("id") for p in persons}
-    for pl in playlists:   # the old fallback, resolved once
-        if pl.get("person") not in known:
-            pl["person"] = default if default in known else None
-    admin = (load_env().get("NAV_ADMIN_USER") or "").strip()
-    for p in list(persons):   # without an account: the Navidrome administrator owns its playlists today
-        if not (isinstance(p.get("user"), str) and p["user"].strip()):
-            if any(pl.get("person") == p["id"] for pl in playlists):
-                p["user"] = admin or p["id"]
-            else:
-                persons.remove(p)
-    by_account = {}
-    for p in persons:
-        by_account.setdefault(p["user"].strip().lower(), []).append(p)
-    remap, merged, setup = {}, [], None
-    for group in by_account.values():
-        keep = next((p for p in group if p["id"] != default), group[0])
-        for p in group:
-            if p is keep:
-                continue
-            remap[p["id"]] = keep
-            ids = [pl["id"] for pl in playlists if pl.get("person") == p["id"]]
-            if p["id"] == default:
-                setup = {k: p[k] for k in ("name", "icon", "color", "likes", "dislikes", "clean") if k in p}
-                setup["playlists"] = ids
-            else:
-                merged.append({"name": p.get("name") or p["id"], "into": keep["id"], "child": bool(p.get("child")),
-                               "playlists": ids})
-    if setup is None and default and any(p["id"] == default for p in persons):   # alone on its account: stays a person
-        old = next(p for p in persons if p["id"] == default)
-        setup = {k: old[k] for k in ("name", "icon", "color", "likes", "dislikes", "clean") if k in old}
-        setup["playlists"] = [pl["id"] for pl in playlists if pl.get("person") == default]
-        setup["person"] = default
-    by_id = {p["id"]: p for p in persons}
-    for pl in playlists:   # move – the name it has in Navidrome now stays where the prefix would change it
-        new = remap.get(pl.get("person"))
-        if new is None:
-            continue
-        old = by_id[pl["person"]]
-        if not pl.get("name") and not pl.get("review") and (old.get("prefix") or "") != (new.get("prefix") or ""):
-            try:
-                pl["name"] = rules.playlist_name(cfg, pl)
-            except (KeyError, StopIteration, ValueError):
-                pass   # an unknown world: the name follows the new person
-        pl["person"] = new["id"]
-    together = {}
-    for pl in playlists:
-        if pl.get("together") is not None:
-            together[pl["id"]] = pl.pop("together")
-            if pl.get("welt", "*") == "*" and pl.get("stil", "*") == "*" and not (pl.get("radio") or pl.get("fav")
-                                                                                  or pl.get("review")):
-                pl["type"] = "mix"   # without members “All × Everything” becomes a mix by the own taste (as before)
-                pl["mix"] = {**(pl.get("mix") if isinstance(pl.get("mix"), dict) else {}), "flavor": "geschmack"}
-    for pl in playlists:
-        if pl.get("person") is None and persons:   # a playlist of nobody (no default person was set): the first person
-            pl["person"] = persons[0]["id"]
-    cfg["playlists"] = [pl for pl in playlists if pl.get("person")]
-    if setup is not None and together:   # the members, as persons that remain
-        setup["together"] = {k: list(dict.fromkeys(remap[x]["id"] if x in remap else x for x in v if x in by_id))
-                             for k, v in together.items()}
-    removed = set(remap)
-    cfg["personen"] = [p for p in persons if p["id"] not in removed]
-    for p in cfg["personen"]:
-        p.pop("public", None)
-        p.pop("family", None)
-    if setup is not None:
-        st["familySetup"] = setup
-    if merged:
-        st["mergedPersons"] = merged
     return cfg
 
 

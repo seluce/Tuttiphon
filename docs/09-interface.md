@@ -447,19 +447,13 @@ One person per Navidrome account; the family is an optional person with an accou
 
 - **The family card first** – `familyPerson()` with the pill “Family”, its account and “for everyone”. Without a family
   a dashed card **“Set up the family”** explains that Tuttiphon creates a Navidrome account for the family, that its
-  playlists are for everyone and that shared devices (car, kitchen tablet) can play them in Symfonium; if the update to
-  one person per account left `settings.familySetup`, it says how many (active) former family playlists can move there,
-  and “No family” (after a question) removes `familySetup` – the former family playlists then stay with their owner only.
+  playlists are for everyone and that shared devices (car, kitchen tablet) can play them in Symfonium.
 - Then **one card per person** (account, number of active playlists, password stored or missing, favorite worlds) and
   the dashed card “Add person”. No default pill, no public/private.
-- **Merged profiles** (`settings.mergedPersons`) as notes on top: “{name} needs a Navidrome account of their own. Until
-  then, their playlists are with {into} …”, with “Add person” (starts the assistant with the name) and “hide” (removes
-  the entry, `changed()`).
 
-**Set up the family** (`pages/personen/FamilySetup.svelte`, a sheet): name (prefilled with `familySetup.name` or the
-translated “Family”), account name (follows the name – letters without accents, digits, `.`, `_`, `-` – until it is
-edited), and with `familySetup` the former playlists to move (checkboxes, all on). “Set up the family” saves open changes first,
-then `POST /api/family` with `{name, account, playlists}`; errors from the server (name taken in Navidrome or by a
+**Set up the family** (`pages/personen/FamilySetup.svelte`, a sheet): name (prefilled with the translated “Family”)
+and account name (follows the name – letters without accents, digits, `.`, `_`, `-` – until it is edited). “Set up the
+family” saves open changes first, then `POST /api/family` with `{name, account}`; errors from the server (name taken in Navidrome or by a
 person …) appear in the sheet. After that the sheet shows the password **once** with “Copy” – for shared devices in
 Symfonium; nobody signs in to Tuttiphon with it – and reloads the configuration, the status and the account list.
 

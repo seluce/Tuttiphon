@@ -444,8 +444,7 @@ def family_id(cfg):
 
 
 def visible_playlist(p, cfg, m=None):
-    """Can one see this playlist? Own ones and those for everyone (rules.for_everyone: the family's); administrators
-    all."""
+    """Can one see this playlist? Own ones and the family's (rules.for_everyone); administrators all."""
     from .rules import for_everyone
     m = m or current()
     return m["role"] == "admin" or person_id(p, cfg) in m["own"] or for_everyone(cfg, p)

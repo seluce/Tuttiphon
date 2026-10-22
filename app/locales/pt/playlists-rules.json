@@ -215,13 +215,5 @@
  "new every month": "novo todos os meses",
  "Next episode – the next episode of every audio play series being listened to, new every day": "Próximo episódio – o próximo episódio de cada série de audiodramas que está a ser ouvida, novo todos os dias",
  "Next episode: for every series this account listened to in the last 3 months, the next episode – the rest of the one begun, otherwise the next one never heard, by episode number": "Próximo episódio: para cada série que esta conta ouviu nos últimos 3 meses, o próximo episódio – o resto do episódio já começado, caso contrário o seguinte ainda nunca ouvido, pelo número do episódio",
- "New every day – the series heard last come first": "Novo todos os dias – as séries ouvidas mais recentemente vêm primeiro",
- "Set up the family": "Configurar a família",
- "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it.": "A família passa a ter uma conta própria no Navidrome, em vez de partilhar uma. O Tuttiphon cria-a.",
- "{name} needs an account of their own": "{name} precisa de uma conta própria",
- "{name} used the Navidrome account of {into} and is now part of {into} – every person has an account of their own. Create one for {name} in Navidrome, then add {name} under People.": "{name} usava a conta do Navidrome de {into} e agora faz parte de {into} – cada pessoa tem uma conta própria. Crie uma para {name} no Navidrome e depois adicione {name} em Pessoas.",
- "Set up": "Configurar",
- "People": "Pessoas",
- "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose whether its playlist moves there.": "A família passa a ter uma conta própria no Navidrome, em vez de partilhar uma. O Tuttiphon cria-a – e escolhe se a playlist dela passa para lá.",
- "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose which of its {n} playlists move there.": "A família passa a ter uma conta própria no Navidrome, em vez de partilhar uma. O Tuttiphon cria-a – e escolhe quais das {n} playlists dela passam para lá."
+ "New every day – the series heard last come first": "Novo todos os dias – as séries ouvidas mais recentemente vêm primeiro"
 }

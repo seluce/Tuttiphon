@@ -111,7 +111,7 @@ export default {
   'Under <a class="link" href="#/personen">People</a>, “Add person”.': 'Unter <a class="link" href="#/personen">Personen</a> „Person hinzufügen“.',
   'Choose the Navidrome account – it must already exist in Navidrome under “Users”.': 'Navidrome-Konto wählen – das Konto muss in Navidrome unter „Benutzer“ schon angelegt sein.',
   'Add all': 'Alle hinzufügen',
-  'With their own sign-in, everyone maintains their own profile – more under <a class="link" href="#/hilfe/konten">Users & sign-in</a>.': 'Mit eigener Anmeldung pflegt jede:r das eigene Profil selbst – mehr unter <a class="link" href="#/hilfe/konten">Benutzer & Anmeldung</a>.',
+  'With their own sign-in, everyone maintains their own profile – more under <a class="link" href="#/hilfe/konten">Users & sign-in</a>.': 'Mit eigener Anmeldung pflegt jeder das eigene Profil selbst – mehr unter <a class="link" href="#/hilfe/konten">Benutzer & Anmeldung</a>.',
   '<b>Who gets stars?</b> – stars in Navidrome are per account; here you choose the accounts.': '<b>Wer bekommt Sterne?</b> – Sterne gibt es in Navidrome pro Konto; hier wählst du die Konten.',
   'Stars given by hand always stay, unless you explicitly allow overwriting them.': 'Von Hand vergebene Sterne bleiben immer, außer du erlaubst das Überschreiben ausdrücklich.',
   '<b>Providers:</b> LRCLIB and, if you like, NetEase – in an order you choose. Synced lyrics win.': '<b>Anbieter:</b> LRCLIB und auf Wunsch NetEase – in wählbarer Reihenfolge. Synchrone Lyrics gewinnen.',
@@ -281,7 +281,7 @@ export default {
   'Every day Tuttiphon backs up everything that cannot be restored on its own – settings, playlists, credentials, Deezer, sound analysis and the listening history – as a ZIP file. Under <a class="link" href="#/einstellungen/sicherung">Settings → Backup</a> you back up right away, download backups and set how many are kept.':
     'Jeden Tag sichert Tuttiphon alles, was sich nicht von selbst wiederherstellen lässt – Einstellungen, Playlists, Zugangsdaten, Deezer, Klanganalyse und den Hörverlauf – als ZIP-Datei. Unter <a class="link" href="#/einstellungen/sicherung">Einstellungen → Sicherung</a> sicherst du sofort, lädst Sicherungen herunter und legst fest, wie viele bleiben.',
   '<b>User</b> – own home page, playlists and profile; listens to the family playlists and changes them unless only administrators may.':
-    '<b>Benutzer</b> – eigene Startseite, Playlists und eigenes Profil; hört die Familien-Playlists und ändert sie, außer wenn das nur Administrator:innen dürfen.',
+    '<b>Benutzer</b> – eigene Startseite, Playlists und eigenes Profil; hört die Familien-Playlists und ändert sie, außer wenn das nur Administratoren dürfen.',
   'Under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a> you set the roles and who may change the family playlists; new users are guided through their profile by a short assistant.':
     'Unter <a class="link" href="#/einstellungen/benutzer">Einstellungen → Benutzer & Rechte</a> legst du die Rollen fest und wer die Familien-Playlists ändern darf; neue Benutzer führt ein kurzer Assistent durch ihr Profil.',
   'The local administrator signs in under “Local administrator” on the sign-in page – also when Navidrome is not reachable.':

@@ -290,7 +290,7 @@ export default {
   '{n} track': '{n} Titel',
   '{n} tracks': '{n} Titel',
   'For the whole family – everyone sees it in Navidrome and Symfonium. Only administrators may change it.':
-    'Für die ganze Familie – alle sehen sie in Navidrome und Symfonium. Ändern dürfen sie nur Administrator:innen.',
+    'Für die ganze Familie – alle sehen sie in Navidrome und Symfonium. Ändern dürfen sie nur Administratoren.',
   'For the whole family – everyone sees it in Navidrome and Symfonium. Everyone may change it.':
     'Für die ganze Familie – alle sehen sie in Navidrome und Symfonium. Ändern dürfen sie alle.',
   'Only for {name} – their stars & favorites count.': 'Nur für {name} – es zählen die Sterne & Favoriten von {name}.',
@@ -303,6 +303,6 @@ export default {
     'Deine Playlists – Tuttiphon hält sie aktuell, hören kannst du sie in Symfonium.',
   'Yours': 'Deine',
   'Only administrators change the family’s playlists – with “Copy for me” you get your own version.':
-    'Die Familien-Playlists ändern nur Administrator:innen – mit „Für mich kopieren“ bekommst du deine eigene Version.',
+    'Die Familien-Playlists ändern nur Administratoren – mit „Für mich kopieren“ bekommst du deine eigene Version.',
   'Family playlist · for everyone': 'Familien-Playlist · für alle',
 }

@@ -496,14 +496,8 @@ export default {
     'In de slimme wachtrij en de Instant Mix van Symfonium zit er om de paar nummers een tussen dat {name} nog nooit heeft gespeeld – het nummer dat het meest klinkt als wat er nu speelt.',
   'for everyone':
     'voor iedereen',
-  '{name} needs a Navidrome account of their own. Until then, their playlists are with {into} – create the account in Navidrome, then add {name} here.':
-    '{name} heeft een eigen Navidrome-account nodig. Tot dan staan de playlists bij {into} – maak het account aan in Navidrome en voeg {name} daarna hier toe.',
   'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
     'Tuttiphon maakt een Navidrome-account voor het gezin aan. De playlists van het gezin zijn voor iedereen – en gedeelde apparaten, in de auto of op de tablet in de keuken, kunnen ze afspelen in Symfonium.',
-  'The former family playlist can move there.':
-    'De vroegere gezinsplaylist kan daarheen verhuizen.',
-  'The {n} former family playlists can move there.':
-    'De {n} vroegere gezinsplaylists kunnen daarheen verhuizen.',
   'The family’s account “{account}” is ready.':
     'Het gezinsaccount “{account}” is klaar.',
   'Password – shown only now:':
@@ -516,10 +510,6 @@ export default {
     'Navidrome-account',
   'Letters, digits, dots, hyphens and underscores. Tuttiphon picks a random password and stores it.':
     'Letters, cijfers, punten, koppeltekens en underscores. Tuttiphon kiest een willekeurig wachtwoord en slaat het op.',
-  'Move to the family':
-    'Naar het gezin verplaatsen',
-  'These playlists were the family’s before – checked ones become family playlists again.':
-    'Deze playlists waren eerder van het gezin – de aangevinkte worden weer gezinsplaylists.',
   'Every Navidrome account already has a person.':
     'Elk Navidrome-account heeft al een persoon.',
   'Playlists for everyone':
@@ -548,16 +538,4 @@ export default {
     'Alleen beheerders',
   'The family’s account – for shared devices in Symfonium, nobody signs in to Tuttiphon with it':
     'Het account van het gezin – voor gedeelde apparaten in Symfonium, in Tuttiphon logt niemand ermee in',
-  '“{name}” stays a person with the account “{account}”. If nobody needs it any more, delete it in its profile.':
-    '“{name}” blijft een persoon met het account “{account}”. Heeft niemand die persoon nog nodig, verwijder die dan in het profiel.',
-  'Open profile':
-    'Profiel openen',
-  'No family':
-    'Geen gezin',
-  'Continue without a family?':
-    'Doorgaan zonder gezin?',
-  'The former family playlists then stay with the person they belong to now – only that account sees them.':
-    'De vroegere gezinsplaylists blijven dan bij de persoon van wie ze nu zijn – alleen dat account ziet ze.',
-  'Without a family':
-    'Zonder gezin',
 }

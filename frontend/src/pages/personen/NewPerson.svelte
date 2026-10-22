@@ -1,8 +1,7 @@
 <!--
   "New person" assistant (administrators): Who? → Navidrome account (one without a person) → favorite worlds → vibes →
   matching playlists. The person only enters S.config at the fourth step; before that everything lives only here in the
-  assistant. From People → “Add person” of a merged profile (settings.mergedPersons) it starts with its name and drops
-  the entry once the person is created.
+  assistant.
 -->
 <script>
   import { SvelteSet } from 'svelte/reactivity'
@@ -28,7 +27,7 @@
   import { slug, uid, today, clone } from '../../lib/format.js'
   import { plEmoji } from '../../lib/playlist.js'
   import { genreSuggestions } from '../../lib/richtungen.js'
-  import { COLORS, users, pwOk, takenAccounts, takeDraft } from './shared.js'
+  import { COLORS, users, pwOk, takenAccounts } from './shared.js'
   import { t, tn } from '../../lib/i18n.svelte.js'
 
   const STEPS = $derived([t('Who?'), 'Navidrome', t('Favorite worlds'), t('Vibes'), t('Playlists')])
@@ -36,10 +35,8 @@
 
   /** Navidrome accounts without a person (null = still loading) – the family's has one */
   let us = $state.raw(null)
-  const draft = takeDraft()   // a merged profile from People (settings.mergedPersons)
-  const p = $state({ id: '', name: draft?.name || '', icon: 'i:music', color: COLORS[Math.floor(Math.random() * COLORS.length)], user: '',
-    prefix: '', likes: { welten: [], stile: [], artists: [] }, dislikes: { artists: [], genres: [] },
-    ...(draft?.child ? { child: true, clean: true } : {}) })
+  const p = $state({ id: '', name: '', icon: 'i:music', color: COLORS[Math.floor(Math.random() * COLORS.length)], user: '',
+    prefix: '', likes: { welten: [], stile: [], artists: [] }, dislikes: { artists: [], genres: [] } })
   let step = $state(0)
   let pw = $state('')
   let pwState = $state(null)
@@ -82,11 +79,6 @@
       const i = S.config.personen.findIndex((x) => x.id === p.id)
       if (i >= 0) S.config.personen[i] = clone(p)
       else S.config.personen.push(clone(p))
-      if (draft) {   // the merged profile has its own person now
-        const rest = (S.config.settings.mergedPersons || []).filter((x) => x?.name !== draft.name)
-        if (rest.length) S.config.settings.mergedPersons = rest
-        else delete S.config.settings.mergedPersons
-      }
       changed()
       await save()
       loadStatus()

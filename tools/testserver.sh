@@ -10,13 +10,16 @@
 #                 from dev.local.env, otherwise the first user account of the copied configuration)
 #   --web <dir>   own build folder (otherwise web/ in the project) – e.g. after `npx vite build --outDir <dir>`
 #   --family      the copy gets a family (only in its configuration – no account in Navidrome, nothing is written
-#                 there): what "Set up the family" leaves, with the former family playlists moved to it (e2e)
+#                 there) if it has none yet (e2e)
+# TUTTIPHON_TEST_DATA (dev.local.env or the environment): copy this data folder instead of data/ – say, a backup of
+# another instance unpacked somewhere else
 # Output with --auth: the lines "admin-cookie: tuttiphon=…" and "user-cookie:  tuttiphon=…" (tests/e2e/setup.js reads them).
 # Stop: PID from `ss -ltnp | grep :<port>` – never pkill -f.
 set -euo pipefail
 cd "$(dirname "$(readlink -f "$0")")/.."
 port="${1:?port missing}"; work="${2:?work dir missing}"; shift 2
-# Personal settings (not in Git): TUTTIPHON_BASE (Navidrome folder), TUTTIPHON_TEST_USER (account for --auth)
+# Personal settings (not in Git): TUTTIPHON_BASE (Navidrome folder), TUTTIPHON_TEST_USER (account for --auth),
+# TUTTIPHON_TEST_DATA (data folder to copy)
 if [ -f dev.local.env ]; then set -a; . ./dev.local.env; set +a; fi
 auth=0; family=0; web="$PWD/web"; user="${TUTTIPHON_TEST_USER:-}"
 while [ $# -gt 0 ]; do
@@ -31,12 +34,12 @@ while [ $# -gt 0 ]; do
 done
 mkdir -p "$work"
 data="$(readlink -f "$work")/data"
-# Data source: data/ here – in a Git worktree without data/, the one of the main checkout
-src="data"
-if [ ! -d "$src" ] && common="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+# Data source: TUTTIPHON_TEST_DATA or data/ here – in a Git worktree without data/, the one of the main checkout
+src="${TUTTIPHON_TEST_DATA:-data}"
+if [ -z "${TUTTIPHON_TEST_DATA:-}" ] && [ ! -d "$src" ] && common="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
   src="$(dirname "$common")/data"
 fi
-[ -d "$src" ] || { echo "No data found (data/)." >&2; exit 1; }
+[ -d "$src" ] || { echo "No data found ($src)." >&2; exit 1; }
 if [ ! -d "$data" ]; then
   cp -a "$src" "$data"
   python3 - "$data/config.json" <<'PY'
@@ -54,14 +57,11 @@ from app import config
 def family(c):   # as POST /api/family, without the Navidrome account (the copy never writes to Navidrome)
     if any(p.get("family") for p in c["personen"]):
         return
-    setup = c["settings"].pop("familySetup", None) or {}
-    c["personen"].append({"id": "familie", "name": setup.get("name") or "Familie", "icon": setup.get("icon") or "i:home",
-                          "user": "tuttiphon-test-familie", "family": True, "clean": setup.get("clean", True), "prefix": "",
-                          "likes": setup.get("likes") or {"welten": [], "stile": [], "artists": []},
-                          "dislikes": setup.get("dislikes") or {"artists": [], "genres": []}})
-    for pl in c["playlists"]:
-        if pl["id"] in (setup.get("playlists") or []):
-            pl["person"] = "familie"
+    ids = {p["id"] for p in c["personen"]}
+    c["personen"].append({"id": next(x for x in ["familie"] + [f"familie-{n}" for n in range(2, 100)] if x not in ids),
+                          "name": "Familie", "icon": "i:home", "user": "tuttiphon-test-familie", "family": True,
+                          "clean": True, "prefix": "", "likes": {"welten": [], "stile": [], "artists": []},
+                          "dislikes": {"artists": [], "genres": []}})
 config.update_config(family)
 PY
 fi

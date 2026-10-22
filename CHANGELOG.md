@@ -14,10 +14,12 @@ released.
   account in Symfonium, so what plays there no longer shapes anyone's own taste. Whether everyone or only
   administrators may change the family playlists is set under Users & permissions. A person's playlists are their
   own.
-- **Updating from an earlier version:** people who shared one Navidrome account are merged – the old shared “Family”
-  into the account's own person; its playlists stay visible to everyone until you set up the family. “To review” then
-  offers to set up the family and lets you choose which of its playlists move there (or “No family”). A merged
-  profile, such as a child on a parent's account, shows up as “needs an account of their own”.
+- **Before updating from an earlier version:** nothing is converted. In the earlier version, every person needs a
+  Navidrome account of their own – delete people who share an account with someone else, such as an old shared
+  “Family” (make another person the default first) –, and delete “What everyone likes” playlists and empty the trash.
+  Otherwise Tuttiphon does not start, says what does not fit and leaves the configuration as it was. After the update,
+  set up the family under People.
+- **A configuration that cannot be updated** no longer leaves a new backup copy at every start attempt.
 
 - **Next episode:** a new playlist for audio plays – for every series someone listens to (“Die drei ???”, “TKKG” …)
   the episode that comes next: the rest of the one begun, otherwise the next one never heard, by episode number. New
