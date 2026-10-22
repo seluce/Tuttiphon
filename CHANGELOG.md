@@ -5,7 +5,7 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 2.1.0
 
 - **The family's mixes learn from everyone:** play one on your own account and Tuttiphon recognizes it by its order
   (three songs in a row) – what is played or skipped there teaches the family's mixes, taste, good morning and next
