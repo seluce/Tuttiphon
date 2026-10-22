@@ -190,10 +190,18 @@ def _account(cfg, user):
     return (cfg.get("accounts") or {}).get((user or "").lower(), {})
 
 
+def family_account(cfg):
+    """The account of the family entry (lower case) or None – Tuttiphon's own: nobody signs in with it."""
+    fam = next((p for p in cfg.get("personen", []) if p.get("family")), None)
+    return (fam.get("user") or "").lower() if fam else None
+
+
 def role_of(user, cfg=None):
     if user == NOTFALL:
         return "admin"
     cfg = cfg or load_config()
+    if user and user.lower() == family_account(cfg):
+        return "none"   # the family's account plays on shared devices – it is not a sign-in for Tuttiphon
     users = navidrome_users()
     nav = next((u for u in users if u["name"].lower() == user.lower()), None)
     if users and nav is None:
@@ -205,10 +213,9 @@ def role_of(user, cfg=None):
 
 
 def persons_of(user, cfg):
-    """Own people – the shared default person (e.g. “Familie”) last, so the personal profile comes first."""
-    default = cfg.get("settings", {}).get("defaultPerson")
-    own = [p["id"] for p in cfg.get("personen", []) if (p.get("user") or "").lower() == (user or "").lower()]
-    return sorted(own, key=lambda pid: pid == default)
+    """The account's person – one person per Navidrome account: [id] or [] (none yet)."""
+    return [p["id"] for p in cfg.get("personen", []) if (p.get("user") or "").lower() == (user or "").lower()
+            and user and not p.get("family")][:1]
 
 
 SEEN_FILE = STATE_DIR / "seen.json"          # {"tour": [account, …], "welcome": [account, …]}
@@ -268,7 +275,7 @@ def me(user, cfg=None):
     cfg = cfg or load_config()
     if user is None:
         return {"user": None, "name": "", "role": "admin", "local": True, "persons": [p["id"] for p in cfg["personen"]],
-                "own": [p["id"] for p in cfg["personen"]], "tourSeen": "" in _seen()["tour"], "welcomeSeen": True}
+                "own": [], "tourSeen": "" in _seen()["tour"], "welcomeSeen": True}
     role = role_of(user, cfg)
     own = persons_of(user, cfg)
     # the local administrator is meant precisely for “Navidrome gone” – do not look it up for that
@@ -392,10 +399,13 @@ def login(username, password, remember=True):
     users = navidrome_users(force=True)
     canonical = next((u["name"] for u in users if u["name"].lower() == username.lower()), username)
     cfg = load_config()
+    if canonical.lower() == family_account(cfg):
+        raise LoginError(_("This is the family's account – it plays the family playlists on shared devices. Please sign "
+                           "in with your own account."), counts=False)
     if role_of(canonical, cfg) == "none":
         raise LoginError(_("Tuttiphon is not enabled for this account – please ask the administrator."))
     if remember and canonical.lower() != (env.get("NAV_ADMIN_USER") or "").lower():
-        if env.get(pass_key(canonical)) != password:   # for personal stars, statistics and an exact preview
+        if env.get(pass_key(canonical)) != password:   # for personal stars, statistics and the person's own view
             save_env({pass_key(canonical): password})
     if user_password(load_env(), canonical) == password:   # the stored password has just worked
         note_password(canonical, True)
@@ -428,26 +438,41 @@ def require_admin():
         raise PermissionError(_("Only administrators may do this."))
 
 
+def family_id(cfg):
+    """Id of the family entry or None."""
+    return next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
+
+
 def visible_playlist(p, cfg, m=None):
-    """Can one see this playlist? Own ones always, others only when their person is visible to everyone."""
+    """Can one see this playlist? Own ones and those for everyone (rules.for_everyone: the family's); administrators
+    all."""
+    from .rules import for_everyone
     m = m or current()
-    pid = person_id(p, cfg)
-    if m["role"] == "admin" or pid in m["own"]:
-        return True
-    person = next((x for x in cfg["personen"] if x["id"] == pid), None)
-    if person is None:   # the person does not exist: the setting "public", like build_nsp()
-        return bool(cfg["settings"].get("public", True))
-    return bool(person.get("public"))
+    return m["role"] == "admin" or person_id(p, cfg) in m["own"] or for_everyone(cfg, p)
 
 
 def person_id(p, cfg):
-    """Person of a playlist – without one the default person (like rules.person_of)."""
-    return p.get("person") or cfg["settings"].get("defaultPerson")
+    """Person of a playlist (every playlist has one)."""
+    return p.get("person")
+
+
+def editable_persons(cfg, m=None):
+    """Whose playlists one may create, change and delete: administrators everyone's; a user their own person's – and
+    the family's unless settings.familyEdit is "admins"."""
+    m = m or current()
+    if m["role"] == "admin":
+        return {p["id"] for p in cfg.get("personen", [])}
+    out = set(m["own"])
+    fam = family_id(cfg)
+    if fam and cfg.get("settings", {}).get("familyEdit", "all") == "all":
+        out.add(fam)
+    return out
 
 
 def own_playlist(p, m=None, cfg=None):
+    """May one change this playlist? (editable_persons)"""
     m = m or current()
-    return m["role"] == "admin" or person_id(p, cfg or load_config()) in m["own"]
+    return m["role"] == "admin" or person_id(p, cfg or load_config()) in editable_persons(cfg or load_config(), m)
 
 
 def view_config(cfg, m=None):
@@ -464,10 +489,11 @@ def view_config(cfg, m=None):
         out["settings"] = {k: v for k, v in cfg["settings"].items() if k in USER_SETTINGS}
         nt = cfg["settings"].get("notify") or {}   # for the own topic in the profile: on or off, and which server
         out["settings"]["notify"] = {"enabled": bool(nt.get("enabled")), "server": nt.get("server") or "https://ntfy.sh"}
-        # people: own ones in full; others only when visible to everyone – without likes, dislikes and account names
+        # people: the own one in full; the others (the family, members of “What everyone likes”) only with name and
+        # look – without likes, dislikes and account names
         own = set(m["own"])
         out["personen"] = [p if p["id"] in own else {k: v for k, v in p.items() if k in PUBLIC_PERSON_FIELDS}
-                           for p in cfg["personen"] if p["id"] in own or p.get("public")]
+                           for p in cfg["personen"]]
     acc = _account(cfg, m["user"])
     out["dismissed"] = acc.get("dismissed", []) if m["role"] != "admin" else cfg.get("dismissed", [])
     out["ignored"] = acc.get("ignored", []) if m["role"] != "admin" else cfg.get("ignored", [])
@@ -476,30 +502,27 @@ def view_config(cfg, m=None):
     return out
 
 
-PERSON_FIELDS = ("name", "icon", "color", "prefix", "likes", "dislikes", "public", "clean", "push", "tasteExclude", "newEvery")
+PERSON_FIELDS = ("name", "icon", "color", "prefix", "likes", "dislikes", "clean", "push", "tasteExclude", "newEvery")
 # playlist fields that only the server or an administrator sets (handmade playlists taken over)
 SERVER_PLAYLIST_FIELDS = ("rules", "rulesExtra", "sortRaw", "takeover", "originalName")
-PUBLIC_PERSON_FIELDS = ("id", "name", "icon", "color", "prefix", "public")
-USER_SETTINGS = ("autoApply", "defaultPerson", "namePattern", "allName", "limit", "minDuration", "allMinRating", "public",
-                 "seasonRest")
+PUBLIC_PERSON_FIELDS = ("id", "name", "icon", "color", "prefix", "family")
+USER_SETTINGS = ("autoApply", "namePattern", "allName", "limit", "minDuration", "allMinRating", "seasonRest",
+                 "familyEdit")
 # what one account may create at most – every playlist is computed for everyone's pages and every run
 MAX_USER_PLAYLISTS = 200
-MAX_USER_PERSONS = 20
 
 
 def merge_user_changes(current_cfg, incoming, m):
-    """What a user saves may only change their own things: their people (profile, likes), their playlists and
-    their hide lists. Everything else stays as it is on the server."""
+    """What a user saves may only change their own things: their person (profile, likes), the playlists they may edit
+    (editable_persons: their own – and the family's unless only administrators may) and their hide lists. Everything
+    else stays as it is on the server. A user without a person may create exactly one for their own account (the
+    welcome assistant)."""
     import copy
     out = copy.deepcopy(current_cfg)
     user = (m["user"] or "").lower()
     own = set(m["own"])
     cur_persons = {p["id"]: p for p in out["personen"]}
-    # kid-safe mode counts for the whole account: a further profile of the same account gets it too (otherwise a
-    # second own profile would be a way around it)
-    clean = any(p.get("clean") for p in out["personen"] if p["id"] in own or (p.get("user") or "").lower() == user)
-    child = any(p.get("child") for p in out["personen"] if p["id"] in own or (p.get("user") or "").lower() == user)
-    persons_before = sum(1 for p in out["personen"] if p["id"] in own)
+    taken = {(p.get("user") or "").lower() for p in out["personen"]}
     for p in incoming.get("personen", []) if isinstance(incoming.get("personen"), list) else []:
         if not isinstance(p, dict):
             continue
@@ -510,29 +533,28 @@ def merge_user_changes(current_cfg, incoming, m):
                     cur_persons[p["id"]][k] = p[k]
             if was_clean:   # anyone may turn kid-safe mode on, only the administrator may turn it off
                 cur_persons[p["id"]]["clean"] = True
-        elif (isinstance(p.get("id"), str) and re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,40}", p["id"]) and p["id"] != "neu"   # i18n-ignore
-              and p["id"] not in cur_persons and (p.get("user") or "").lower() == user and str(p.get("name") or "").strip()):
-            if sum(1 for x in out["personen"] if x["id"] in own) >= max(MAX_USER_PERSONS, persons_before):
-                raise ValueError(_("You can have at most {n} profiles.", n=MAX_USER_PERSONS))
-            fresh = {k: p[k] for k in PERSON_FIELDS if k in p}   # create the own profile (welcome assistant)
+        elif (not own and user and user not in taken and user != NOTFALL.lower()   # the own one, once (welcome)
+              and isinstance(p.get("id"), str) and re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,40}", p["id"])
+              and p["id"] != "neu" and p["id"] not in cur_persons   # i18n-ignore
+              and (p.get("user") or "").lower() == user and str(p.get("name") or "").strip()):
+            fresh = {k: p[k] for k in PERSON_FIELDS if k in p}
             fresh.update(id=p["id"], user=m["user"])
-            if clean:
-                fresh["clean"] = True
-            if child:   # only the administrator sets (and removes) a child profile
-                fresh["child"] = True
             out["personen"].append(fresh)
             own.add(p["id"])
+            taken.add(user)
+    m = {**m, "own": sorted(own)}
+    mine = editable_persons(out, m)
     cur_pl = {p["id"]: p for p in out["playlists"]}
     inc_list = incoming.get("playlists") if isinstance(incoming.get("playlists"), list) else []
     inc_pl = {p["id"]: p for p in inc_list if isinstance(p, dict) and p.get("id")}
     result = []
     for p in out["playlists"]:   # existing ones in their order
         new = inc_pl.get(p["id"])
-        if person_id(p, out) not in own:
+        if person_id(p, out) not in mine:
             result.append(p)   # someone else's: unchanged
         elif new is None:
-            continue           # own one deleted
-        elif person_id(new, out) in own:
+            continue           # deleted
+        elif person_id(new, out) in mine:
             for k in SERVER_PLAYLIST_FIELDS:   # stay as they are on the server
                 if k in p:
                     new[k] = p[k]
@@ -541,25 +563,25 @@ def merge_user_changes(current_cfg, incoming, m):
             result.append(new)
         else:
             result.append(p)   # giving it away to someone else's person is not possible
-    for pid, new in inc_pl.items():   # new own ones
-        if pid not in cur_pl and person_id(new, out) in own:
+    for pid, new in inc_pl.items():   # new ones
+        if pid not in cur_pl and person_id(new, out) in mine:
             for k in SERVER_PLAYLIST_FIELDS:   # only the server creates takeovers of handmade playlists (administrator)
                 new.pop(k, None)
             result.append(new)
-    # family mix: only own people and people visible to everyone – other private profiles stay private
-    allowed = own | {p["id"] for p in out["personen"] if p.get("public")}
-    for p in result:
-        if person_id(p, out) in own and isinstance(p.get("together"), list):
-            p["together"] = [x for x in p["together"] if x in allowed]
+    family = family_id(out)
+    persons = {p["id"] for p in out["personen"]}
+    for p in result:   # “What everyone likes”: the family's only, its members are people (not the family itself)
+        if person_id(p, out) in mine and isinstance(p.get("together"), list):
+            p["together"] = [x for x in p["together"] if x in persons and x != family] if person_id(p, out) == family else []
             if len(p["together"]) < 2:
                 p.pop("together")
                 # without members “All × Everything” would be invalid – then it becomes a mix by the own taste
                 if p.get("welt", "*") == "*" and p.get("stil", "*") == "*" and not (p.get("radio") or p.get("fav") or p.get("review")):
                     p["type"] = "mix"
                     p["mix"] = {**(p.get("mix") if isinstance(p.get("mix"), dict) else {}), "flavor": "geschmack"}
-    mine_before = sum(1 for p in current_cfg["playlists"] if person_id(p, current_cfg) in own)
-    mine = sum(1 for p in result if person_id(p, out) in own)
-    if mine > max(MAX_USER_PLAYLISTS, mine_before):   # more than before is only possible up to the limit
+    before = sum(1 for p in current_cfg["playlists"] if person_id(p, current_cfg) in mine)
+    after = sum(1 for p in result if person_id(p, out) in mine)
+    if after > max(MAX_USER_PLAYLISTS, before):   # more than before is only possible up to the limit
         raise ValueError(_("You can have at most {n} playlists – please delete some you no longer listen to (also from "
                            "the trash).", n=MAX_USER_PLAYLISTS))
     out["playlists"] = result

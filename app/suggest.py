@@ -40,9 +40,9 @@ def _existing_keys(cfg):
 
 
 def _shared_content(cfg, handmade_list):
-    """Content that already exists as a public playlist (visible to everyone) – including handmade ones."""
+    """Content that already exists for everyone (the family's playlists) – including handmade ones."""
     from .playlists import guess_mapping
-    public = {p["id"] for p in cfg.get("personen", []) if p.get("public")}
+    public = {p["id"] for p in cfg.get("personen", []) if p.get("family")}   # the family's: for everyone
     keys = {_content_key(p) for p in cfg["playlists"]
             if p.get("status") != "papierkorb" and p.get("rules") is None and p.get("person") in public}   # i18n-ignore: stored value
     for h in handmade_list:
@@ -116,8 +116,9 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
     stile = cfg["stile"]
     has_plays = sum(1 for s in lib.songs if s.get("played")) >= 100
     has_loved = sum(1 for s in lib.songs if s.get("starred")) >= 15
-    default = cfg["settings"].get("defaultPerson")
-    persons = sorted(cfg.get("personen", []), key=lambda p: p["id"] != default)   # shared person first
+    # the family (if there is one): "Our …" names and the family-wide ideas (car ride, What everyone likes)
+    default = next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
+    persons = sorted(cfg.get("personen", []), key=lambda p: p["id"] != default)   # the family first
     mix_cache = {}
     out = []
     # taste per account from what is played in Navidrome/Symfonium (taste.py) – adds to the preferences set by hand
@@ -140,7 +141,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             return
         person = next((x for x in persons if x["id"] == p.get("person")), {})
         has_dislikes = any(person.get("dislikes", {}).values())
-        is_shared = _content_key(p) in shared and not (has_dislikes and not person.get("public"))
+        is_shared = _content_key(p) in shared and not (has_dislikes and not person.get("family"))
         if is_shared and not only_person:
             return   # already exists visible to everyone (or as a handmade playlist)
         nsp = rules.build_nsp(cfg, p, ctx)
@@ -155,7 +156,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         if not small and (distinct < 2 or (top and top[0][1] / n > 0.8 and distinct < 4)):
             return   # basically just one artist
         existing.add(k)
-        if person.get("public"):
+        if person.get("family"):
             shared.add(_content_key(p))
         # sound taste (soundtaste.py): what sounds more like what the person plays than the library on average moves up
         heard = (profiles.get(p.get("person")) or {}).get("soundTaste")
@@ -214,8 +215,8 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                       core=period == "month")
 
     def played_worlds(x):
-        """Worlds a family member's account plays – for the family playlists everything, also what the person keeps
-        out of their own taste (the children's music on a parent's account stays in the family's music)."""
+        """Worlds a family member's account plays – for the family's playlists everything, also what the person keeps
+        out of their own taste (children's music a parent plays for the kids still belongs to the family's music)."""
         prof = profiles.get(x["id"]) or {}
         if taste.excluded(x):
             try:
@@ -334,15 +335,11 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             core=True)
 
     def family_mix(owner):
-        """What everyone likes: the taste of all accounts with enough listening counts the same."""
+        """The family's car ride and What everyone likes: the taste of every person with enough listening counts the
+        same (the family itself is not a member)."""
         if not owner:
             return
-        members, users = [], set()
-        for x in sorted(persons, key=lambda x: x["id"] == default):   # one person per account, own before the shared one
-            u = (x.get("user") or "").lower()
-            if u and u not in users and x["id"] in profiles:
-                users.add(u)
-                members.append(x)
+        members = [x for x in persons if not x.get("family") and x["id"] in profiles]
         car_mix(owner, members)
         if len(members) < 2:
             return
@@ -358,19 +355,12 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             why=_("Songs that {names} all like – new every week, good for the car ride", names=join_and(names)),
             group=owner["id"], because=_("From listening"), core=True)
 
-    # daily routines from the listening clock: one person per account – its own profile before the shared one
-    routine, listener = {}, {}
-    for x in sorted(persons, key=lambda x: x["id"] == default):
-        if x.get("user") and x["id"] in profiles:
-            routine.setdefault(x["user"].lower(), x["id"])
-        if x.get("user"):   # the next episodes: also without a taste profile (no stored password – the live plays)
-            listener.setdefault(x["user"].lower(), x["id"])
 
     for person in persons:
         pid = person["id"]
         if only_person and pid != only_person:
             continue
-        if listener.get((person.get("user") or "").lower()) == pid:
+        if person.get("user"):
             next_episode(person)   # also for a profile without favorites yet (a child listening to audio plays)
         likes = person.get("likes", {})
         prof = profiles.get(pid)
@@ -420,8 +410,8 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                     score += 0.6
                 add(p, score, group="saison" if seasonal else pid)
 
-        # "all" playlists only for the shared person or with matching preferences
-        if pid == cfg["settings"].get("defaultPerson") or liked_s:
+        # "all" playlists only for the family or with matching preferences
+        if pid == default or liked_s:
             for s in stile:
                 if s.get("kind") == "season" or s.get("excludeElsewhere", {}).get("albums") and not s.get("season"):
                     continue
@@ -431,7 +421,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                     continue
                 if s["id"] == "lieblinge" and not has_loved:
                     continue
-                if liked_s and s["id"] not in liked_s and pid != cfg["settings"].get("defaultPerson"):
+                if liked_s and s["id"] not in liked_s and pid != default:
                     continue
                 score = 0.8 + (0.5 if s["id"] in liked_s else 0) + (0.6 if s.get("season") else 0) \
                     + (0.15 if s.get("group") in ("Zeitreise", "Spezial") else 0)
@@ -511,7 +501,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
 
         # new from the favorite bands, recap "Your October" – from what is played and liked
         special(person, prof)
-        if prof and routine.get((person.get("user") or "").lower()) == pid:
+        if prof:
             discover_mix(person)
             album_week(person)
             morning_mix(person)
@@ -525,7 +515,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             add({"person": pid, "welt": liked_w, "stil": "neu", "name": _s("New for {name}", name=person["name"])},   # i18n-ignore: stored value
                 1.9, title=_("New for {name}", name=person["name"]), why=_("what is new in the favorite worlds"), group=pid)
 
-    # family mix "What everyone likes": for the shared person as soon as at least two accounts have listened enough
+    # the family's car ride and "What everyone likes" (at least two people who have listened enough) – only with a family
     if not only_person and default:
         family_mix(next((x for x in persons if x["id"] == default), None))
 
@@ -544,7 +534,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                 "excludeTitles": [], "excludeAlbums": [], "minRating": 3, "minDuration": None, "separate": False,
                 "scene": sc["id"], "autoScene": True, "excludedArtists": []}
         tmp = {**cfg, "welten": cfg["welten"] + [welt]}
-        ids = lib.match(rules.build_nsp(tmp, {"person": cfg["settings"].get("defaultPerson"), "welt": sc["id"],
+        ids = lib.match(rules.build_nsp(tmp, {"person": None, "welt": sc["id"],
                                               "stil": ALL}, BuildContext(lib, today)))
         if len(ids) < MIN_SONGS:
             continue
@@ -605,7 +595,7 @@ def unused_playlists(cfg, lib, only_persons=None, today=None):
             continue
         if p.get("stil") in seasonal:   # seasonal playlists rest part of the year – unplayed is normal there
             continue
-        if only_persons is not None and (p.get("person") or cfg["settings"].get("defaultPerson")) not in only_persons:
+        if only_persons is not None and p.get("person") not in only_persons:
             continue
         try:
             pool = lib.match(rules.build_nsp(cfg, p, ctx))
@@ -632,7 +622,7 @@ def duplicate_playlists(cfg):
         return v
     for p in cfg["playlists"]:
         if p.get("status", "aktiv") == "aktiv" and p.get("rules") is None:   # i18n-ignore: stored value
-            k = json.dumps({"person": p.get("person") or cfg["settings"].get("defaultPerson"),
+            k = json.dumps({"person": p.get("person"),
                             **{f: norm(p.get(f)) for f in CONTENT_FIELDS}}, sort_keys=True, default=str)
             groups.setdefault(k, []).append(p)
     return [g for g in groups.values() if len(g) > 1]
@@ -647,10 +637,10 @@ def taste_hints(cfg, lib, only_persons=None):
     that still counts for their taste – offer to keep it out (person.tasteExclude); the administrator can also make it
     a child profile. If children's music (rules.child_candidates(), each song once) makes up most of it
     (CHILD_HINT_SHARE), it is probably a child's own account: then only the administrator (only_persons None) is
-    asked whether it is a child profile, and nobody gets a hint to keep music out. Not for the shared person, not for
+    asked whether it is a child profile, and nobody gets a hint to keep music out. Not for the family, not for
     child profiles. -> [(key, level, title, text, actions)]"""
     from . import taste
-    default = cfg["settings"].get("defaultPerson")
+    default = next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
     separate = {w["id"]: w for w in cfg["welten"] if w.get("separate")}
     candidates = rules.child_candidates(cfg)
     admin = only_persons is None
@@ -726,7 +716,7 @@ def playlist_tidy_items(cfg, lib, only_persons=None, user=False):
         if (not u or p["id"] in listed or p.get("status", "aktiv") != "aktiv" or u["played"] or u["days"] < UNHEARD_MIX_DAYS
                 or p.get("stil") in seasonal):   # i18n-ignore: stored value
             continue
-        if only_persons is not None and (p.get("person") or cfg["settings"].get("defaultPerson")) not in only_persons:
+        if only_persons is not None and p.get("person") not in only_persons:
             continue
         out.append((f"unheard-mix|{p['id']}", "info", _("Nobody listens to “{name}”", name=playlist_name(cfg, p)),
                     _n(u["periods"], "Not a single song of its last edition was played. Pausing takes it out of "
@@ -736,7 +726,7 @@ def playlist_tidy_items(cfg, lib, only_persons=None, user=False):
                     [{"label": _("Pause"), "do": "pause", "id": p["id"]},
                      {"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}]))
     for group in duplicate_playlists(cfg):
-        if only_persons is not None and (group[0].get("person") or cfg["settings"].get("defaultPerson")) not in only_persons:
+        if only_persons is not None and group[0].get("person") not in only_persons:
             continue
         names = [playlist_name(cfg, p) for p in group]
         out.append(("dup|" + "+".join(sorted(p["id"] for p in group)), "info", _("Duplicate playlist"),
@@ -762,6 +752,26 @@ def inbox(cfg, lib, env, deezer_stats, handmade_list, users_ok):
              _("Without a password for {users}, Deezer cannot set stars and the preview is only approximate.",
                users=", ".join(missing)),
              [{"label": _("Enter"), "do": "settings"}])
+    # left over from the update to one person per account (config migration v13)
+    setup = cfg["settings"].get("familySetup")
+    if isinstance(setup, dict) and not any(p.get("family") for p in cfg["personen"]):
+        n = sum(1 for p in cfg["playlists"] if p["id"] in (setup.get("playlists") or [])
+                and p.get("status", "aktiv") != "papierkorb")   # i18n-ignore: stored value
+        item("familySetup", "info", _("Set up the family"),
+             _n(n, "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – "
+                   "and you choose whether its playlist moves there.",
+                "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – "
+                "and you choose which of its {n} playlists move there.") if n else
+             _("The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it."),
+             [{"label": _("Set up"), "do": "goto", "href": "#/personen"}])
+    names = {p["id"]: p.get("name") or p["id"] for p in cfg["personen"]}
+    for x in cfg["settings"].get("mergedPersons") or []:
+        if isinstance(x, dict) and x.get("name"):
+            item(f"merged|{x['name']}", "info", _("{name} needs an account of their own", name=x["name"]),
+                 _("{name} used the Navidrome account of {into} and is now part of {into} – every person has an account of "
+                   "their own. Create one for {name} in Navidrome, then add {name} under People.",
+                   name=x["name"], into=names.get(x.get("into"), x.get("into") or "?")),
+                 [{"label": _("People"), "do": "goto", "href": "#/personen"}])
     new = (deezer_stats or {}).get("new")
     if new:
         item(f"deezer-{new}", "info", _n(new, "{n} new song without a rating", "{n} new songs without a rating"),

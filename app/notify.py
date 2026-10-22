@@ -205,7 +205,7 @@ def _favorites(cfg, lib, ctx, person, topic, today):
         def go(make=make, album=album):
             ok = bool(topic) and send(topic, *_in(_lang_of(person), make), ("cd",), "#/", cfg)
             account = (person.get("user") or "").lower()
-            if account:   # devices of the account: once per album, even if several people share the account
+            if account:   # the devices of the account: once per album
                 from . import webpush
                 ok = once(f"favpush|{account}|{album['id']}",
                           lambda: webpush.send_to(None, None, "#/", accounts=[account], tag=f"fav-{album['id']}",
@@ -235,14 +235,13 @@ def _review(cfg, lib, person, topic, today):
 
 
 def _of(cfg, playlist):
-    """Id of the person a playlist is for (without "person": the default person)."""
-    return playlist.get("person") or cfg["settings"].get("defaultPerson")
+    """Id of the person a playlist is for."""
+    return playlist.get("person")
 
 
 def _to_person(key, device_key, make, tags, path, cfg, person, topic, tag):
     """A message to one person: their ntfy topic once per `key`, the devices of their account once per `device_key`
-    ("{account}" filled in) – so the devices get it once, even if several people share the account. make: function
-    -> (title, text), in each reader's language. -> 1/0"""
+    ("{account}" filled in). make: function -> (title, text), in each reader's language. -> 1/0"""
     from . import webpush
 
     def go():
@@ -300,14 +299,9 @@ def _weekly(cfg, lib, person, topic, today):
         ok = bool(topic) and send(topic, *_in(_lang_of(person), lambda: (_s("New for you this week"),
                                                                           " · ".join(t() for _p, t in parts))),
                                   ("sparkles",), f"#/playlist/{parts[0][0]['id']}", cfg)
-        if account:   # the devices of the account: once, with what is new for each of its people
-            default = cfg["settings"].get("defaultPerson")
-            same = sorted((x for x in cfg["personen"] if (x.get("user") or "").lower() == account),
-                          key=lambda x: x["id"] == default)
-            every = [pt for x in same for pt in (parts if x["id"] == person["id"]
-                                                  else _weekly_parts(cfg, lib, x, start, state, index))]
+        if account:   # the devices of the account (one person per account)
             ok = once(f"weeklypush|{account}|{year}-{week}", lambda: webpush.send_to(
-                None, None, f"#/playlist/{every[0][0]['id']}", accounts=[account], tag=f"weekly-{account}",
-                make=lambda: (_s("New for you this week"), " · ".join(t() for _p, t in every)))) or ok
+                None, None, f"#/playlist/{parts[0][0]['id']}", accounts=[account], tag=f"weekly-{account}",
+                make=lambda: (_s("New for you this week"), " · ".join(t() for _p, t in parts)))) or ok
         return ok
     return int(once(f"weekly|{person['id']}|{year}-{week}", go))

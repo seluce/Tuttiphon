@@ -107,7 +107,6 @@ export default {
   '“Forgotten favorites” created': '„Vergessene Lieblinge“ angelegt',
   'No plays counted yet': 'Noch keine Wiedergaben gezählt',
   'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.': 'Navidrome hat für „{user}“ noch keine Wiedergaben gespeichert. In Symfonium muss „Scrobbling“ bzw. „Wiedergaben an den Server melden“ eingeschaltet sein.',
-  '{names} use the same Navidrome account “{account}” – so their numbers are the same.': '{names} nutzen dasselbe Navidrome-Konto „{account}“ – die Zahlen sind deshalb gleich.',
   'Plays': 'Wiedergaben',
   'from {n} different song':
     'von {n} Song',
@@ -189,7 +188,8 @@ export default {
   '· only needed without matching genre tags': '· nur nötig ohne passende Genre-Tags',
   'People': 'Personen',
   'Do you like the band?': 'Magst du die Band?',
-  'Your profiles': 'Deine Profile',
+  'Your profile':
+    'Dein Profil',
   'Favorite': 'Liebling',
   '“Favorite”: shows up more often in your mixes. “never”: never gets into your playlists.': '„Liebling“: kommt in deinen Mixen öfter vor. „nie“: kommt nie in deine Playlists.',
   'Sound': 'Klang',

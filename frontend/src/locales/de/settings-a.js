@@ -134,8 +134,8 @@ export default {
   'Tuttiphon knows your plays, stars and favorites – for your statistics, your stars and more accurate suggestions.': 'Tuttiphon kennt deine Wiedergaben, Sterne und Favoriten – für deine Statistik, deine Sterne und genauere Vorschläge.',
   'For Tuttiphon to show your statistics and set Deezer stars in your account, it needs your Navidrome password once – the same as in Symfonium. It stays on your NAS.': 'Damit Tuttiphon deine Statistik zeigen und Deezer-Sterne in deinem Konto setzen kann, braucht es einmal dein Navidrome-Passwort – dasselbe wie in Symfonium. Es bleibt auf eurem NAS.',
   'your Navidrome password': 'dein Navidrome-Passwort',
-  'Your profiles': 'Deine Profile',
-  'Playlists visible to everyone': 'Playlists für alle sichtbar',
+  'Your profile':
+    'Dein Profil',
   'Playlists only for you': 'Playlists nur für dich',
   'Create profile': 'Profil anlegen',
   'This is where your favorite worlds, bands and dislikes are – your suggestions come from them.': 'Hier stehen deine Lieblingswelten, -bands und „Mag nicht“ – daraus entstehen deine Vorschläge.',
@@ -354,8 +354,8 @@ export default {
     'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein, trage Adresse und Schlüssel ein und gib es für <b>alle Benutzer</b> frei (für die Wiedergaben). Am besten die Adresse im Heimnetz, z. B. <code>http://&lt;NAS&gt;:8765</code> – keine https-Adresse über einen Reverse Proxy, der Navidrome abweisen kann. Dieser Browser erreicht Tuttiphon unter <code>{address}</code>.',
   'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
     'Schalte in Symfonium für den Navidrome-Server <b>„Ähnliche Titel für Radio-Mix verwenden“</b> ein (Medienquellen verwalten → der Server) und wähle im Player bei der intelligenten Warteschlange <b>„Basierend auf Sonic Analysis“</b>.',
-  'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
-    'Navidrome verrät nicht, wer fragt. Läuft der Song gerade auf genau einem Konto – oder spielt nur ein Konto –, gilt die Antwort dieser Person: ohne ihre Abneigungen, ohne das, was sie gerade gehört oder mit 1 Stern bewertet hat; was sie oft überspringt, kommt später, und nach zwei Songs einer Band kommen erst andere Bands. Sonst gilt sie der Familie. Kindermusik nur zu Kinderliedern, und ohne Songs mit derben Texten, sobald ein Profil Kinderschutz hat oder ein Kinderprofil ist.',
+  'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family – without a family for everyone. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a person has kid-safe mode or is a child profile.':
+    'Navidrome verrät nicht, wer fragt. Läuft der Song gerade auf genau einem Konto – oder spielt nur ein Konto –, gilt die Antwort dieser Person: ohne ihre Abneigungen, ohne das, was sie gerade gehört oder mit 1 Stern bewertet hat; was sie oft überspringt, kommt später, und nach zwei Songs einer Band kommen erst andere Bands. Sonst gilt sie der Familie – ohne Familie allen. Kindermusik nur zu Kinderliedern, und ohne Songs mit derben Texten, sobald eine Person Kinderschutz hat oder ein Kinderprofil ist.',
   'Create a new key?': 'Neuen Schlüssel erzeugen?',
   'The old key stops working – enter the new one in Navidrome afterwards.':
     'Der alte Schlüssel gilt dann nicht mehr – trage danach den neuen in Navidrome ein.',
@@ -372,8 +372,8 @@ export default {
     'Noch nichts? Lege die neue Plugin-Datei in Navidrome, starte es neu und gib das Plugin für alle Benutzer frei.',
   '{when} · for {name}':
     '{when} · für {name}',
-  '{when} · for the family':
-    '{when} · für die Familie',
+  '{when} · for everyone':
+    '{when} · für alle',
   '{when} · probably for {name}':
     '{when} · vermutlich für {name}',
   'Last answer with similar songs': 'Letzte Antwort mit ähnlichen Songs',

@@ -188,8 +188,8 @@ export default {
     'Klik op de bandnaam – kies in het venster onder “In welke muziekwerelden?” de werelden aan of uit. Of haal de band met × uit de muziekwereld.',
   'What do users see of each other?':
     'Wat zien gebruikers van elkaar?',
-  'Only playlists of profiles that are “visible to everyone” – and only to view, listen to and copy them. Statistics, profile and private playlists stay with each person. Administrators see everything.':
-    'Alleen playlists van profielen die “zichtbaar voor iedereen” zijn – en alleen om te bekijken, te beluisteren en te kopiëren. Statistieken, profiel en privéplaylists blijven bij ieder zelf. Beheerders zien alles.',
+  'Only the family playlists – they can change them too, unless only administrators may. Statistics, profile and playlists of each person stay with them. Administrators see everything.':
+    'Alleen de gezinsplaylists – die kunnen ze ook wijzigen, tenzij alleen beheerders dat mogen. Statistieken, profiel en playlists van elke persoon blijven bij die persoon. Beheerders zien alles.',
   'Kid-safe mode removes a harmless song.':
     'De kindveilige modus haalt een onschuldig nummer weg.',
   'Kid-safe mode leaves out songs with explicit lyrics and songs tagged as explicit in the file; songs found by their lyrics can be allowed under Settings → Lyrics. They go back in the next time the playlists are written.':
@@ -204,8 +204,8 @@ export default {
     'Iemand is het Navidrome-wachtwoord vergeten.',
   'I don’t see my new playlist in Symfonium.':
     'Ik zie mijn nieuwe playlist niet in Symfonium.',
-  'Symfonium only syncs with Navidrome now and then. Wait a bit or refresh the media source in Symfonium. Also: be signed in to Symfonium with your own account – only that account sees private playlists.':
-    'Symfonium synchroniseert maar af en toe met Navidrome. Wacht even of vernieuw de mediabron in Symfonium. Let ook op: log in Symfonium in met je eigen account – alleen dat account ziet privéplaylists.',
+  'Symfonium only syncs with Navidrome now and then. Wait a bit or refresh the media source in Symfonium. Also: be signed in to Symfonium with your own account – only it sees your playlists.':
+    'Symfonium synchroniseert maar af en toe met Navidrome. Wacht even of vernieuw de mediabron in Symfonium. Let er ook op dat je in Symfonium met je eigen account bent ingelogd – alleen dat account ziet je playlists.',
   'What’s the difference between a playlist and a mix?':
     'Wat is het verschil tussen een playlist en een mix?',
   'Navidrome reshuffles a smart playlist every time you open it. A mix stays the same for a day, a week or a month and then renews itself – ideal for downloading.':
@@ -216,12 +216,12 @@ export default {
     'Een nummer komt minder vaak of helemaal niet in mijn mix.',
   'Can I change the family playlists?':
     'Kan ik de gezinsplaylists wijzigen?',
-  'Not directly – they belong to someone else. But with “Copy for me” you get your own version that you can adjust as you like.':
-    'Niet direct – ze zijn van iemand anders. Maar met “Kopie voor mij” krijg je een eigen versie die je naar wens kunt aanpassen.',
+  'Yes, unless only administrators may – then “Copy for me” gives you your own version that you can adjust as you like.':
+    'Ja, tenzij alleen beheerders dat mogen – dan geeft “Kopie voor mij” je een eigen versie die je naar wens kunt aanpassen.',
   'Can others see my playlists?':
     'Kunnen anderen mijn playlists zien?',
-  'Only if you chose “The whole family” in your profile. Even then they can’t change them. Apart from you, only the administrator sees your statistics and your profile.':
-    'Alleen als je in je profiel “Het hele gezin” hebt gekozen. Ook dan kunnen ze ze niet wijzigen. Behalve jij ziet alleen de beheerder je statistieken en je profiel.',
+  'No – your playlists are only yours; the family playlists are for everyone. Apart from you, only the administrator sees your statistics and your profile.':
+    'Nee – je playlists zijn alleen van jou; de gezinsplaylists zijn voor iedereen. Behalve jij ziet alleen de beheerder je statistieken en je profiel.',
   'My statistics are empty.':
     'Mijn statistieken zijn leeg.',
   'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
@@ -286,10 +286,8 @@ export default {
     'Deze mix bewaren',
   'In the “…” menu of a mix: save the current selection as a fixed playlist that never changes. For a smart playlist it is called “Save as fixed playlist”.':
     'In het menu “…” van een mix: de huidige selectie opslaan als vaste playlist die nooit verandert. Bij een slimme playlist heet het “Opslaan als vaste playlist”.',
-  'Shared':
-    'Gedeeld',
-  'Playlist of a profile that is “visible to everyone” – others can listen to it and copy it.':
-    'Playlist van een profiel dat “zichtbaar voor iedereen” is – anderen kunnen hem beluisteren en kopiëren.',
+  'Playlist for everyone – every account sees it in Navidrome and Symfonium.':
+    'Playlist voor iedereen – elk account ziet hem in Navidrome en Symfonium.',
   'Free lyrics database; provides synced and plain lyrics.':
     'Gratis songtekstdatabase; levert gesynchroniseerde en gewone songteksten.',
   'Modern, very efficient audio format – at 160 kbit/s hardly distinguishable from the original.':
@@ -332,8 +330,8 @@ export default {
     '<b>Jouw mixen</b> – playlists die zichzelf dagelijks, wekelijks of maandelijks vernieuwen.',
   '<b>Discovered for you</b> – ideas that match what you listen to. <Ui icon="plus" primary>Create</Ui> adds one, <Ui icon="x">✕</Ui> hides it.':
     '<b>Ontdekt voor jou</b> – ideeën die passen bij waar je naar luistert. <Ui icon="plus" primary>Maken</Ui> voegt er een toe, <Ui icon="x">✕</Ui> verbergt hem.',
-  '<b>Your week</b>, <b>your playlists</b>, what the family shares and the latest albums.':
-    '<b>Jouw week</b>, <b>je playlists</b>, wat het gezin deelt en de nieuwste albums.',
+  '<b>Your week</b>, <b>your playlists</b>, the family playlists and the latest albums.':
+    '<b>Jouw week</b>, <b>je playlists</b>, de gezinsplaylists en de nieuwste albums.',
   'On your phone, <Ui icon="more">More</Ui> at the bottom leads to all other pages.':
     'Op je telefoon leidt <Ui icon="more">Meer</Ui> onderaan naar alle andere pagina’s.',
   'Under <a class="link" href="#/profil">My profile</a> you see what Tuttiphon knows about your taste. Your mixes and suggestions build on it.':
@@ -346,8 +344,6 @@ export default {
     '<b>Liever niet:</b> bands of genres die <b>nooit</b> in je playlists terechtkomen.',
   '<b>Not part of your taste:</b> music that plays on your account for someone else, such as children’s music.':
     '<b>Hoort niet bij je smaak:</b> muziek die op jouw account voor iemand anders speelt, zoals kindermuziek.',
-  '<b>Who can see your playlists:</b> “Only me” or “The whole family” – only you can change them. The <b>prefix</b>, such as “Mia · ”, goes in front of their names.':
-    '<b>Wie je playlists kan zien:</b> “Alleen ik” of “Het hele gezin” – alleen jij kunt ze wijzigen. Het <b>voorvoegsel</b>, zoals “Mia · ”, komt voor hun namen.',
   '<b>Kid-safe mode:</b> songs with explicit lyrics stay out of all your playlists.':
     '<b>Kindveilige modus:</b> nummers met grove teksten blijven uit al je playlists.',
   '<b>To your phone:</b> “Turn on for this device” – then news from your favorite bands, what is new for you on Mondays and your monthly recap come as notifications.':
@@ -372,8 +368,8 @@ export default {
     '<b>Album van de week</b> – elke maandag een heel album dat je nog niet kent.',
   '<b>Good night</b> and <b>Good morning</b> – calming down in the evening, waking up gently in the morning.':
     '<b>Welterusten</b> en <b>Goedemorgen</b> – ’s avonds tot rust komen, ’s ochtends rustig wakker worden.',
-  '<b>Car ride</b> and <b>What everyone likes</b> – music the whole family enjoys.':
-    '<b>Autorit</b> en <b>Wat iedereen leuk vindt</b> – muziek waar het hele gezin van geniet.',
+  '<b>Car ride</b> and <b>What everyone likes</b> – for the family: music everyone enjoys.':
+    '<b>Autorit</b> en <b>Wat iedereen leuk vindt</b> – voor het gezin: muziek waar iedereen van geniet.',
   'At the very bottom, “You might also like” shows bands that are not in the library yet – if you like one, let the administrator know.':
     'Helemaal onderaan toont “Misschien ook iets voor jou” bands die nog niet in de bibliotheek staan – vind je er een leuk, laat het de beheerder weten.',
   '<b>“calm kids’ songs”</b> or <b>“medieval party”</b> – if something matches, <b>Create as mix</b> appears at the top.':
@@ -390,8 +386,8 @@ export default {
     '<Ui icon="trash">Naar de prullenbak</Ui> – 30 dagen terug te zetten.',
   '<b>Seasonal playlists</b> such as Christmas are only in Symfonium during their season and come back by themselves.':
     '<b>Seizoensplaylists</b> zoals Kerst staan alleen tijdens hun seizoen in Symfonium en komen vanzelf terug.',
-  '<b>Shared playlists</b> of others you can listen to; <Ui icon="copy">Copy for me</Ui> gives you your own version.':
-    '<b>Gedeelde playlists</b> van anderen kun je beluisteren; <Ui icon="copy">Kopie voor mij</Ui> geeft je een eigen versie.',
+  '<b>Your playlists</b> are only yours, <b>family playlists</b> are for everyone. If you may not change one, <Ui icon="copy">Copy for me</Ui> gives you your own version.':
+    '<b>Je playlists</b> zijn alleen van jou, <b>gezinsplaylists</b> zijn voor iedereen. Mag je er een niet wijzigen, dan geeft <Ui icon="copy">Kopie voor mij</Ui> je een eigen versie.',
   'Everything you create here appears in Symfonium after the next sync – or right away if you refresh the media source there.':
     'Alles wat je hier maakt, verschijnt in Symfonium na de volgende synchronisatie – of meteen als je daar de mediabron vernieuwt.',
   '<b>Listening counts:</b> what you play in Symfonium shapes your statistics, taste and mixes.':

@@ -215,5 +215,13 @@
  "new every month": "nuevo cada mes",
  "Next episode – the next episode of every audio play series being listened to, new every day": "Siguiente episodio – el siguiente episodio de cada serie de audiodramas que se está escuchando, nuevo cada día",
  "Next episode: for every series this account listened to in the last 3 months, the next episode – the rest of the one begun, otherwise the next one never heard, by episode number": "Siguiente episodio: para cada serie que esta cuenta ha escuchado en los últimos 3 meses, el siguiente episodio – lo que queda del ya empezado o, si no, el siguiente nunca escuchado, por número de episodio",
- "New every day – the series heard last come first": "Nuevo cada día – primero las series escuchadas más recientemente"
+ "New every day – the series heard last come first": "Nuevo cada día – primero las series escuchadas más recientemente",
+ "Set up the family": "Configurar la familia",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it.": "Ahora la familia recibe una cuenta propia de Navidrome en lugar de compartir una. Tuttiphon la crea.",
+ "{name} needs an account of their own": "{name} necesita una cuenta propia",
+ "{name} used the Navidrome account of {into} and is now part of {into} – every person has an account of their own. Create one for {name} in Navidrome, then add {name} under People.": "{name} usaba la cuenta de Navidrome de {into} y ahora forma parte de {into} – cada persona tiene una cuenta propia. Crea una para {name} en Navidrome y luego añade a {name} en Personas.",
+ "Set up": "Configurar",
+ "People": "Personas",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose whether its playlist moves there.": "Ahora la familia recibe una cuenta propia de Navidrome en lugar de compartir una. Tuttiphon la crea – y tú eliges si su playlist pasa a esa cuenta.",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose which of its {n} playlists move there.": "Ahora la familia recibe una cuenta propia de Navidrome en lugar de compartir una. Tuttiphon la crea – y tú eliges cuáles de sus {n} playlists pasan a esa cuenta."
 }

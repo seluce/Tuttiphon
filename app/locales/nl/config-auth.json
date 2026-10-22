@@ -114,5 +114,18 @@
  "config: playlist '{id}': time of day invalid": "config: playlist '{id}': tijdstip van de dag ongeldig",
  "config: playlist '{id}': “never played” only exists as a mix": "config: playlist '{id}': “nooit gespeeld” bestaat alleen als mix",
  "config: playlist '{id}': “album of the week” only exists as a mix": "config: playlist '{id}': “album van de week” bestaat alleen als mix",
- "config: playlist '{id}': “next episode” only exists as a mix": "config: playlist '{id}': “volgende aflevering” bestaat alleen als mix"
+ "config: playlist '{id}': “next episode” only exists as a mix": "config: playlist '{id}': “volgende aflevering” bestaat alleen als mix",
+ "This is the family's account – it plays the family playlists on shared devices. Please sign in with your own account.": "Dit is het account van het gezin – het speelt de gezinsplaylists op gedeelde apparaten. Log in met je eigen account.",
+ "config: there can only be one family": "config: er kan maar één gezin zijn",
+ "config: person '{id}' needs a Navidrome account": "config: persoon '{id}' heeft een Navidrome-account nodig",
+ "config: the Navidrome account “{account}” belongs to more than one person": "config: het Navidrome-account “{account}” hoort bij meer dan één persoon",
+ "config: the family cannot be a child profile": "config: het gezin kan geen kinderprofiel zijn",
+ "config: playlist '{id}': “What everyone likes” only exists for the family": "config: playlist '{id}': “Wat iedereen leuk vindt” bestaat alleen voor het gezin",
+ "Please add a person first – every playlist belongs to one.": "Voeg eerst een persoon toe – elke playlist hoort bij een persoon.",
+ "There already is a family.": "Er is al een gezin.",
+ "Please choose an account name of 2 to 40 letters, digits, dots, hyphens or underscores.": "Kies een accountnaam van 2 tot 40 letters, cijfers, punten, koppeltekens of underscores.",
+ "“{account}” already belongs to a person – please choose another name.": "“{account}” hoort al bij een persoon – kies een andere naam.",
+ "Navidrome could not create the account: {error}": "Navidrome kon het account niet aanmaken: {error}",
+ "Navidrome already has an account “{account}” – please choose another name.": "Navidrome heeft al een account “{account}” – kies een andere naam.",
+ "Family set up: Navidrome account {account}": "Gezin ingesteld: Navidrome-account {account}"
 }

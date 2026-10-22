@@ -276,15 +276,11 @@ class QuotaTest(unittest.TestCase):
         inc["playlists"] = [p for p in inc["playlists"] if p["id"] != "x0"]
         self.assertEqual(sum(p["person"] == "jonas" for p in merged(inc)["playlists"]), auth.MAX_USER_PLAYLISTS - 1)
 
-    def test_profiles_limited(self):
+    def test_no_second_profile(self):
         inc = self.incoming()
-        inc["personen"] += [{"id": f"j{i}", "name": f"J {i}", "user": "Jonas"} for i in range(auth.MAX_USER_PERSONS + 5)]
-        with self.assertRaises(ValueError):
-            merged(inc)
-        inc = self.incoming()
-        inc["personen"] += [{"id": f"j{i}", "name": f"J {i}", "user": "Jonas"} for i in range(auth.MAX_USER_PERSONS - 1)]
+        inc["personen"] += [{"id": f"j{i}", "name": f"J {i}", "user": "Jonas"} for i in range(5)]
         out = merged(inc)
-        self.assertEqual(sum((p.get("user") or "") == "Jonas" for p in out["personen"]), auth.MAX_USER_PERSONS)
+        self.assertEqual(sum((p.get("user") or "") == "Jonas" for p in out["personen"]), 1)   # one person per account
 
     def test_text_lengths_and_colors(self):
         for field, value in (("name", "x" * 500), ("prefix", "y" * 100), ("color", "url(https://example.com/t)"),
@@ -300,8 +296,8 @@ class QuotaTest(unittest.TestCase):
 
 
 class KidSafeAccountTest(unittest.TestCase):
-    """L1/L2: kid-safe mode counts for the whole account – a second own profile gets it, the search hides songs
-    tagged as explicit."""
+    """L1/L2: kid-safe mode stays on for a user (only the administrator turns it off), the search hides songs tagged
+    as explicit."""
 
     def setUp(self):
         cfg = base_config()
@@ -310,11 +306,11 @@ class KidSafeAccountTest(unittest.TestCase):
         self.addCleanup(save, base_config())
         as_user(self)
 
-    def test_second_profile_inherits_kid_safe(self):
+    def test_kid_safe_stays_on(self):
         inc = copy.deepcopy(auth.view_config(config.load_config(), JONAS))
-        inc["personen"].append({"id": "jonas2", "name": "Jonas 2", "user": "Jonas", "clean": False})
+        next(p for p in inc["personen"] if p["id"] == "jonas")["clean"] = False
         out = merged(inc)
-        self.assertTrue(next(p for p in out["personen"] if p["id"] == "jonas2")["clean"])
+        self.assertTrue(next(p for p in out["personen"] if p["id"] == "jonas")["clean"])
 
     def test_search_hides_explicit_songs(self):
         lib = Library([song("e1", "Explicit Song", genres=["Children"]), song("c1", "Explicit Clean")])
@@ -713,7 +709,7 @@ class SettingsValidationTest(unittest.TestCase):
         self.bad(minDuration="x")
         self.bad(hitsShare="0.3")
         self.bad(excludeTitles="Live")
-        self.bad(defaultPerson="nobody")
+        self.bad(familyEdit="everyone")
         self.bad(autoApply="yes")
         self.bad(kinderschutz={"allow": "abc"})
         self.bad(lyrics={"providers": [{"id": "lrclib", "on": "no"}]})

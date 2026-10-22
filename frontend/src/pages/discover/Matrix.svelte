@@ -3,7 +3,7 @@
   import Glyph from '../../components/Glyph.svelte'
   import Empty from '../../components/Empty.svelte'
   import Loading from '../../components/Loading.svelte'
-  import { S, defaultPerson, weltIds } from '../../lib/state.svelte.js'
+  import { S, defaultOwner, weltIds } from '../../lib/state.svelte.js'
   import { api } from '../../lib/api.js'
   import { go } from '../../lib/router.svelte.js'
   import { openEditor } from '../../lib/editor.js'
@@ -25,7 +25,7 @@
     && weltIds(p).join() === (w === '*' ? '' : w) && (p.stil || '*') === s)
 
   function open(w, s) {
-    openEditor({ person: defaultPerson(), welt: w === '*' ? '*' : w, stil: s, source: 'tabelle' },
+    openEditor({ person: defaultOwner()?.id, welt: w === '*' ? '*' : w, stil: s, source: 'tabelle' },
       { isNew: true, onSaved: (p) => go(`#/playlist/${encodeURIComponent(p.id)}`) })
   }
 </script>

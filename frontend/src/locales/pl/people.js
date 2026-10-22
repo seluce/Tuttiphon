@@ -12,8 +12,6 @@ export default {
     'Preferencje',
   'visible to everyone':
     'widoczne dla wszystkich',
-  'private':
-    'prywatne',
   'likes {list}':
     'lubi: {list}',
   'Icon':
@@ -24,12 +22,6 @@ export default {
     'Nazwa',
   'Navidrome user':
     'Użytkownik Navidrome',
-  'Who may see your playlists?':
-    'Kto może widzieć twoje playlisty?',
-  'Only me':
-    'Tylko ja',
-  'The whole family':
-    'Cała rodzina',
   'e.g. Schlager':
     'np. Schlager',
   'No suggestions right now':
@@ -62,10 +54,6 @@ export default {
     'Witaj w Tuttiphon',
   'For whom?':
     'Dla kogo?',
-  'Choose whose preferences you want to edit.':
-    'Wybierz, czyje preferencje chcesz edytować.',
-  'No profile yet':
-    'Jeszcze brak profilu',
   'Create profile':
     'Utwórz profil',
   'This person does not exist':
@@ -78,8 +66,8 @@ export default {
     'To nie jest twój profil',
   'You can only change your own profile.':
     'Możesz zmieniać tylko własny profil.',
-  'Who is a playlist for? The person decides the owner in Navidrome and so whose stars & favorites count, who sees it – and what never goes in.':
-    'Dla kogo jest playlista? Osoba decyduje o właścicielu w Navidrome, a więc o tym, czyje gwiazdki i ulubione się liczą, kto ją widzi – i co nigdy do niej nie trafia.',
+  'Every person has a Navidrome account of their own – their playlists end up there, and its stars & favorites count. The family’s playlists are for everyone.':
+    'Każda osoba ma własne konto Navidrome – tam trafiają jej playlisty i liczą się gwiazdki i ulubione z tego konta. Playlisty rodziny są dla wszystkich.',
   'Add person':
     'Dodaj osobę',
   'Default':
@@ -94,9 +82,6 @@ export default {
     'Wysłano wiadomość testową',
   'Delete {name}?':
     'Usunąć osobę {name}?',
-  '{n} playlist goes to “{name}”.':
-    '{n} playlista przejdzie do „{name}”.',
-  '{n} playlists go to “{name}”.': { few: '{n} playlisty przejdą do „{name}”.', many: '{n} playlist przejdzie do „{name}”.' },
   'This person has no playlists.':
     'Ta osoba nie ma playlist.',
   '{name} deleted':
@@ -115,8 +100,6 @@ export default {
     'Osoba',
   'What you enter here decides your suggestions and what ends up in your playlists. Changes apply right away.':
     'To, co tu wpiszesz, decyduje o twoich propozycjach i o tym, co trafia do twoich playlist. Zmiany działają od razu.',
-  'Playlists visible to everyone':
-    'Playlisty widoczne dla wszystkich',
   'Playlists only for you':
     'Playlisty tylko dla ciebie',
   'Playlists private':
@@ -143,14 +126,6 @@ export default {
     'np. Mia · ',
   'Goes in front of every playlist name – so you spot your playlists in Symfonium at a glance.':
     'Stoi przed nazwą każdej playlisty – dzięki temu od razu rozpoznasz swoje playlisty w Symfonium.',
-  'With “family”, everyone sees them in Navidrome and Symfonium – only you can change them.':
-    'Przy „Cała rodzina” wszyscy widzą je w Navidrome i Symfonium – zmieniać je możesz tylko ty.',
-  'Visibility':
-    'Widoczność',
-  'Default: new playlists are for this person at first.':
-    'Domyślnie nowe playlisty są najpierw dla tej osoby.',
-  'Make default':
-    'Ustaw jako domyślną',
   'Delete person':
     'Usuń osobę',
   'Your suggestions under “Discover” and “For you” are built from this.':
@@ -224,10 +199,10 @@ export default {
     'Jak ma na imię ta osoba?',
   'e.g. Mia':
     'np. Mia',
-  'Which Navidrome account does {name} use? The playlists end up there, and the stars & favorites of this account count. Kids can also use the family account.':
-    'Którego konta Navidrome używa {name}? Tam trafiają playlisty i liczą się gwiazdki i ulubione tego konta. Dzieci mogą też korzystać z konta rodzinnego.',
-  'Which Navidrome account does the person use? The playlists end up there, and the stars & favorites of this account count. Kids can also use the family account.':
-    'Którego konta Navidrome używa ta osoba? Tam trafiają playlisty i liczą się gwiazdki i ulubione tego konta. Dzieci mogą też korzystać z konta rodzinnego.',
+  'Which Navidrome account does {name} use? The playlists end up there, and the stars & favorites of this account count.':
+    'Którego konta Navidrome używa {name}? Tam trafiają playlisty i liczą się gwiazdki i ulubione z tego konta.',
+  'Which Navidrome account does the person use? The playlists end up there, and the stars & favorites of this account count.':
+    'Którego konta Navidrome używa ta osoba? Tam trafiają playlisty i liczą się gwiazdki i ulubione z tego konta.',
   'Could not load the accounts from Navidrome: {error}':
     'Nie udało się wczytać kont z Navidrome: {error}',
   'User missing? You create new accounts in Navidrome under Settings → Users, then reload here.':
@@ -244,14 +219,6 @@ export default {
     'Testuj',
   '✓ works':
     '✓ działa',
-  'Who sees the playlists?':
-    'Kto widzi playlisty?',
-  'only {name}':
-    'tylko {name}',
-  'only the person':
-    'tylko ta osoba',
-  'everyone in Navidrome':
-    'wszyscy w Navidrome',
   'Name prefix':
     'Prefiks nazwy',
   'What does {name} like to listen to? You can pick several.':
@@ -270,8 +237,8 @@ export default {
     'Więcej ulubionych światów to więcej pomysłów – albo utwórz playlistę samodzielnie.',
   'Matching playlists for {name} – tap to select.':
     'Pasujące playlisty dla osoby {name} – dotknij, aby wybrać.',
-  'already exists, visible to everyone':
-    'już istnieje, widoczna dla wszystkich',
+  'already exists for everyone':
+    'już istnieje dla wszystkich',
   'Create person & show suggestions':
     'Utwórz osobę i pokaż propozycje',
   'Create {n} playlist & finish':
@@ -311,8 +278,6 @@ export default {
     'Twoja ikona',
   'Your color':
     'Twój kolor',
-  '“Only me”: they appear only in your Navidrome account. “Family”: everyone sees them, only you can edit them.':
-    '„Tylko ja”: pojawiają się tylko na twoim koncie Navidrome. „Cała rodzina”: wszyscy je widzą, edytować możesz tylko ty.',
   'What do you like to listen to?':
     'Czego lubisz słuchać?',
   'Tap everything you like – you can pick several. A music world groups similar bands together.':
@@ -524,4 +489,67 @@ export default {
     'W inteligentnej kolejce i Instant Mix w Symfonium co kilka piosenek pojawia się taka, której jeszcze nigdy nie odtwarzano na twoim koncie – ta, która brzmieniem najbardziej przypomina to, co właśnie gra.',
   'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
     'W inteligentnej kolejce i Instant Mix w Symfonium co kilka piosenek pojawia się taka, której osoba {name} jeszcze nigdy nie odtwarzała – ta, która brzmieniem najbardziej przypomina to, co właśnie gra.',
+  'for everyone':
+    'dla wszystkich',
+  '{name} needs a Navidrome account of their own. Until then, their playlists are with {into} – create the account in Navidrome, then add {name} here.':
+    '{name} potrzebuje własnego konta Navidrome. Do tego czasu playlisty są u osoby {into} – utwórz konto w Navidrome, a potem dodaj tutaj osobę {name}.',
+  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
+    'Tuttiphon utworzy konto Navidrome dla rodziny. Jej playlisty są dla wszystkich – a wspólne urządzenia, w aucie albo na tablecie w kuchni, mogą je odtwarzać w Symfonium.',
+  'The former family playlist can move there.':
+    'Dawna playlista rodziny może się tam przenieść.',
+  'The {n} former family playlists can move there.': { few: '{n} dawne playlisty rodziny mogą się tam przenieść.', many: '{n} dawnych playlist rodziny może się tam przenieść.' },
+  'The family’s account “{account}” is ready.':
+    'Konto rodziny „{account}” jest gotowe.',
+  'Password – shown only now:':
+    'Hasło – widoczne tylko teraz:',
+  'Shared devices – in the car, on the kitchen tablet – sign in to Navidrome in Symfonium with this account and play the family playlists. Nobody signs in to Tuttiphon with it.':
+    'Wspólne urządzenia – w aucie, na tablecie w kuchni – logują się w Symfonium tym kontem do Navidrome i odtwarzają playlisty rodziny. Do Tuttiphon nikt się nim nie loguje.',
+  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – every account sees them in Navidrome and Symfonium.':
+    'Tuttiphon utworzy konto Navidrome dla rodziny. Jej playlisty są dla wszystkich – każde konto widzi je w Navidrome i Symfonium.',
+  'Navidrome account':
+    'Konto Navidrome',
+  'Letters, digits, dots, hyphens and underscores. Tuttiphon picks a random password and stores it.':
+    'Litery, cyfry, kropki, myślniki i podkreślenia. Tuttiphon wybiera losowe hasło i je zapisuje.',
+  'Move to the family':
+    'Przenieś do rodziny',
+  'These playlists were the family’s before – checked ones become family playlists again.':
+    'Te playlisty należały wcześniej do rodziny – zaznaczone znów staną się playlistami rodziny.',
+  'Every Navidrome account already has a person.':
+    'Każde konto Navidrome ma już swoją osobę.',
+  'Playlists for everyone':
+    'Playlisty dla wszystkich',
+  'The family’s playlists are in this account and for everyone. Shared devices play them with it in Symfonium – nobody signs in to Tuttiphon with it.':
+    'Playlisty rodziny są na tym koncie i są dla wszystkich. Wspólne urządzenia odtwarzają je w Symfonium przez to konto – do Tuttiphon nikt się nim nie loguje.',
+  'Delete family':
+    'Usuń rodzinę',
+  'Its {n} playlist is deleted too. The Navidrome account “{account}” stays – you can remove it in Navidrome.':
+    'Jej {n} playlista też zostanie usunięta. Konto Navidrome „{account}” pozostaje – możesz je usunąć w Navidrome.',
+  'Its {n} playlists are deleted too. The Navidrome account “{account}” stays – you can remove it in Navidrome.': { few: 'Jej {n} playlisty też zostaną usunięte. Konto Navidrome „{account}” pozostaje – możesz je usunąć w Navidrome.', many: 'Jej {n} playlist też zostanie usuniętych. Konto Navidrome „{account}” pozostaje – możesz je usunąć w Navidrome.' },
+  'The Navidrome account “{account}” stays – you can remove it in Navidrome.':
+    'Konto Navidrome „{account}” pozostaje – możesz je usunąć w Navidrome.',
+  'Their {n} playlist is deleted too.':
+    'Jej {n} playlista też zostanie usunięta.',
+  'Their {n} playlists are deleted too.': { few: 'Jej {n} playlisty też zostaną usunięte.', many: 'Jej {n} playlist też zostanie usuniętych.' },
+  'Family playlists – who may change them?':
+    'Playlisty rodziny – kto może je zmieniać?',
+  'Everyone listens to them. With “Administrators only”, users get their own version with “Copy for me”.':
+    'Słuchać ich mogą wszyscy. Przy „Tylko administratorzy” użytkownicy dostają własną wersję przez „Kopia dla mnie”.',
+  'Everyone':
+    'Wszyscy',
+  'Administrators only':
+    'Tylko administratorzy',
+  'The family’s account – for shared devices in Symfonium, nobody signs in to Tuttiphon with it':
+    'Konto rodziny – dla wspólnych urządzeń w Symfonium, do Tuttiphon nikt się nim nie loguje',
+  '“{name}” stays a person with the account “{account}”. If nobody needs it any more, delete it in its profile.':
+    '„{name}” pozostaje osobą z kontem „{account}”. Jeśli nikt już jej nie potrzebuje, usuń ją w jej profilu.',
+  'Open profile':
+    'Otwórz profil',
+  'No family':
+    'Bez rodziny',
+  'Continue without a family?':
+    'Kontynuować bez rodziny?',
+  'The former family playlists then stay with the person they belong to now – only that account sees them.':
+    'Dawne playlisty rodziny zostają wtedy u osoby, do której teraz należą – widzi je tylko jej konto.',
+  'Without a family':
+    'Bez rodziny',
 }

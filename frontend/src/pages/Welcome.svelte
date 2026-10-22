@@ -1,6 +1,7 @@
 <!--
-  Welcome assistant for users: create a profile, choose a taste, first playlists – step by step.
-  The profile is only created in step 4 ("Save profile & show suggestions"); until then everything is collected locally.
+  Welcome assistant for everyone signed in with a Navidrome account: create the account's one profile, choose a taste,
+  first playlists – step by step. The profile is only created in step 4 ("Save profile & show suggestions"); until then
+  everything is collected locally.
 -->
 <script>
   import { untrack } from 'svelte'
@@ -14,9 +15,8 @@
   import ArtistChips from '../components/ArtistChips.svelte'
   import ChipEditor from '../components/ChipEditor.svelte'
   import Field from '../components/Field.svelte'
-  import Seg from '../components/Seg.svelte'
   import TipCards from './welcome/TipCards.svelte'
-  import { S, findPerson, changed, save, loadLibrary } from '../lib/state.svelte.js'
+  import { S, findPerson, myPerson, isAdmin, changed, save, loadLibrary } from '../lib/state.svelte.js'
   import { toast } from '../lib/overlay.svelte.js'
   import { go } from '../lib/router.svelte.js'
   import { api } from '../lib/api.js'
@@ -32,10 +32,10 @@
   const noop = () => {}
 
   const me = S.me || {}
-  const existing = S.config.personen.find((p) => (me.own || []).includes(p.id))
+  const existing = myPerson()
   const start = existing ? clone(existing) : {
     id: '', name: me.name || me.user || '', icon: 'i:music', color: COLORS[Math.floor(Math.random() * COLORS.length)], user: me.user,
-    public: false, prefix: '', likes: { welten: [], stile: [], artists: [] }, dislikes: { artists: [], genres: [] },
+    prefix: '', likes: { welten: [], stile: [], artists: [] }, dislikes: { artists: [], genres: [] },
   }
   start.likes ??= { welten: [], stile: [], artists: [] }
   start.dislikes ??= { artists: [], genres: [] }
@@ -186,7 +186,7 @@
           ['smartphone', t('Simply in Symfonium'), t('Your playlists show up in Symfonium just like all the others.')],
         ]} />
         <p class="muted small">{t('This takes about two minutes. You can change everything later under “My profile”.')}</p>
-        {#if existing}
+        {#if existing || isAdmin()}
           <button class="link small muted" onclick={() => { remember(); go('#/') }}>{t('Later – look around first')}</button>
         {/if}
       </div>
@@ -205,10 +205,6 @@
               <button type="button" class="toggle swatch" class:on={p.color === c} aria-label={t('Color {n}', { n: i + 1 })} style:background={c} onclick={() => (p.color = c)}></button>
             {/each}
           </div>
-        </Field>
-        <Field label={t('Who may see your playlists?')}>
-          <Seg options={[['0', t('Only me')], ['1', t('The whole family')]]} value={p.public ? '1' : '0'} onchange={(v) => (p.public = v === '1')} />
-          <div class="hint">{t('“Only me”: they appear only in your Navidrome account. “Family”: everyone sees them, only you can edit them.')}</div>
         </Field>
       </div>
     {:else if step === 2}

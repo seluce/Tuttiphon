@@ -42,7 +42,7 @@ Both clients are in `app/navidrome.py`.
 | Authentication | token + salt (MD5) with every request, API version 1.16.1, client `tuttiphon`, JSON response | once `POST /auth/login` → token in the header `X-ND-Authorization: Bearer …`; Navidrome renews it with every response |
 | Accounts | admin account (`NAV_ADMIN_USER`/`NAV_ADMIN_PASS`) and individual accounts with `NAV_PASS_<ACCOUNT>` | admin account only |
 | Address | `_check_url()` before every connection: if `NAV_URL` is missing or doesn't start with `http://`/`https://`, an understandable `NavidromeError` is raised right away (“Navidrome address missing – Settings → Navidrome” or “Navidrome address invalid …”) – the interface keeps running | the same; if the admin access is missing: “Navidrome admin access missing – Settings → Navidrome” |
-| Calls | `ping` (sign-in, testing access, status) · `search3` with an empty query, 500 per page (all songs from one account's view incl. stars, favorites, plays) · `getScanStatus`, `startScan` · `setRating` · `createPlaylist` · `getPlaylist` (as owner: song count of a smart playlist for the self-check, `selfcheck.owner_count()`) · `getCoverArt`, `getArtistInfo2` | `GET /api/user` · `GET /api/playlist` · `PUT`/`DELETE /api/playlist/{id}` · `POST`/`DELETE /api/playlist/{id}/image` · `GET /api/playlist/{id}/tracks` + `GET /api/playlist/{id}` (song count of a mix for the self-check, `playlist_count()`) · `GET /api/album`, `/api/artist` (image present?, main color) · `GET /api/song` (real file paths, embedded lyrics) |
+| Calls | `ping` (sign-in, testing access, status) · `search3` with an empty query, 500 per page (all songs from one account's view incl. stars, favorites, plays) · `getScanStatus`, `startScan` · `setRating` · `createPlaylist` · `getPlaylist` (as owner: song count of a smart playlist for the self-check, `selfcheck.owner_count()`) · `getCoverArt`, `getArtistInfo2` | `GET /api/user` · `POST /api/user` (the family's account, `create_user()`) · `GET /api/playlist` · `PUT`/`DELETE /api/playlist/{id}` · `POST`/`DELETE /api/playlist/{id}/image` · `GET /api/playlist/{id}/tracks` + `GET /api/playlist/{id}` (song count of a mix for the self-check, `playlist_count()`) · `GET /api/album`, `/api/artist` (image present?, main color) · `GET /api/song` (real file paths, embedded lyrics) |
 
 Navidrome rate-limits sign-ins at `/auth/login` (HTTP 429). That is why `native_session()` keeps one session per address,
 user and password for the whole lifetime of the process. On HTTP 401, `NativeApi` signs in again once; on
@@ -54,7 +54,7 @@ HTTP 429 it waits up to three times (`Retry-After`, otherwise 5, 10, 15 s).
 |---|---|---|---|
 | Smart playlists | `.nsp` file (JSON rules) in the playlist folder; by default the file name starts with `Auto – ` (setting `filePrefix`) | `playlists.write()` | a playlist whose contents Navidrome builds from the rules |
 | Mixes | `.m3u` with a fixed song list and paths relative to the playlist folder; changes daily, weekly or monthly | `mixer.m3u()` | a fixed playlist that only changes at the changeover |
-| Name, description, visibility, owner | native API, after every scan | `playlists.sync_navidrome()` | the playlist belongs to the person's account; public ones are visible to everyone |
+| Name, description, visibility, owner | native API, after every scan | `playlists.sync_navidrome()` | the playlist belongs to the person's account and is private there; the family's playlists are public – every account sees them |
 | Removing paused and deleted playlists | delete the file (a taken-over file that Tuttiphon has never written is first backed up to `backup/`), then `DELETE /api/playlist/{id}` | `playlists.write()`, `sync_navidrome()` | the playlist disappears |
 | Playlist covers | native API (upload/delete image) | `covers.upload()`, `TaskRunner._refresh_covers()` | the cover |
 | “Keep this mix” / “Save as fixed playlist” | `createPlaylist` (Subsonic) + owner/visibility via the native API; no file | `playlists.snapshot()` | a fixed playlist “… – Oct 2026” |
@@ -79,8 +79,9 @@ Tuttiphon sync name, owner and visibility.
 
 ### What Tuttiphon reads from Navidrome
 
-- **Song list** (`library.CACHE`, valid for 15 minutes): from the view of the default person's account if its password
-  is stored (then stars and favorites are exact), otherwise via the admin account (stars only approximate).
+- **Song list** (`library.CACHE`, valid for 15 minutes): neutral – always via the admin account with the average
+  rating (stars only approximate, no one's favorites). A person's own view (their stars, favorites, plays) is a song
+  list of their account (`stats.songs_for()`, `mixer.person_lib()`) when its password is stored.
 - **Plays:** Symfonium reports every play to Navidrome. Tuttiphon reads `playCount` and `played` per account for
   statistics, recap and mixes – see [Intelligence](06-intelligence.md).
 - **Accounts** with the admin flag: the basis of the roles. An account that doesn't exist in Navidrome has no access
@@ -202,7 +203,7 @@ The scheduler catches errors and tries again in the next pass.
 | Navidrome accounts | `auth.navidrome_users()` | cached for 10 min; if the query fails (any exception), the last state applies, after a restart the one from `state/navidrome_users.json`, and for 60 s it doesn't ask again |
 | Sessions | `auth._load_sessions()` | `state/sessions.json` in memory until the file changes |
 | Administrator password | `Handler._pw_cache`, `localadmin._cache` | source and plain password, read again at most every 10 s (`Handler._admin()`); the hash from `state/admin_password.json` in memory until the file changes; setting a password resets both |
-| Song lists of other accounts | `stats._cache` | 10 min per account; the scheduler releases older ones every minute (`stats.purge()`). Only one request per account loads at a time, a second one waits for it. Loaded page by page and laid over the default list (`stats.overlay()`): songs with the same stars, favorites and plays are the same entries, only the rest are copies – around 15 MB per account instead of a second full list |
+| Song lists of other accounts | `stats._cache` | 10 min per account; the scheduler releases older ones every minute (`stats.purge()`). Only one request per account loads at a time, a second one waits for it. Loaded page by page and laid over the shared list (`stats.overlay()`): songs with the same stars, favorites and plays are the same entries, only the rest are copies – around 15 MB per account instead of a second full list |
 | Live log | `TaskRunner.lines` | the last up to 4,000 lines, available via `GET /api/task?since=…` |
 | Queued runs | `TaskRunner._chain` | after `pause_for()`: the apply run and the continuation; empty as long as nothing is paused |
 | Server log | `events.say()` | writes lines with a timestamp to standard output, under a lock so that lines from several threads don't get mixed up |

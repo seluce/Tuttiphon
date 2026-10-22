@@ -8,22 +8,24 @@
 // A step: go (route, navigate there first), reset (rebuild the page even if it is already open, e.g. the assistant
 // with a half-filled draft), sel (targets, the first visible one is highlighted), title, text, optional (if the target
 // is missing, the step is skipped). Without sel the hint is centered.
-import { S, isAdmin, ownPersons, defaultPerson } from './state.svelte.js'
+import { S, isAdmin, canEdit, myPerson, defaultOwner, creatablePersons, familyPerson, isFamily } from './state.svelte.js'
 import { t, translated } from './i18n.svelte.js'
 
-/** What the guides need to know about the account: role, own profile, an own playlist or mix */
+/** What the guides need to know about the account: role, own profile, a playlist or mix it may change, the family */
 function context() {
   const admin = isAdmin()
-  const persons = ownPersons()
-  const me = admin ? S.config.personen.find((p) => p.id === defaultPerson()) || persons[0] : persons[0]
-  const mine = S.config.playlists.filter((p) => (p.status || 'aktiv') === 'aktiv' && (admin || persons.some((x) => x.id === p.person)))
+  const me = admin ? defaultOwner() : myPerson()   // administrators without a person of their own: the family or the first one
+  const mine = S.config.playlists.filter((p) => (p.status || 'aktiv') === 'aktiv' && canEdit(p))
   const pl = (p) => (p ? `#/playlist/${encodeURIComponent(p.id)}` : null)
+  const creatable = creatablePersons()
   return {
     admin,
-    choosePerson: persons.length > 1,
+    choosePerson: creatable.length > 1,
     profile: me ? `#/person/${me.id}` : null,
-    playlist: pl(mine.find((p) => (p.person || defaultPerson()) === me?.id) || mine[0]),
+    playlist: pl(mine.find((p) => p.person === me?.id) || mine[0]),
     mix: pl(mine.find((p) => p.type === 'mix' && !p.review)),
+    // the family: “For whom?” offers it (share) – or its playlists can only be copied (copy)
+    family: !familyPerson() ? null : !creatable.some(isFamily) ? 'copy' : creatable.length > 1 ? 'share' : null,
   }
 }
 
@@ -51,7 +53,7 @@ export const GUIDES = translated(() => [
         text: c.choosePerson ? t('For whom, which music, which mood and finally the finishing touches. At the top you see where you are.')
           : t('Which music, which mood and finally the finishing touches. At the top you see where you are.') },
       c.choosePerson
-        ? { sel: ['.pick'], title: t('For whom?'), text: t('The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.') }
+        ? { sel: ['.pick'], title: t('For whom?'), text: t('A person’s playlist is only theirs, and their stars count; a family playlist is for everyone. Then you choose the music world.') }
         : { sel: ['.pick'], title: t('Choose music'), text: t('Tap one or more music worlds. “All” takes the whole library.') },
       { sel: ['.wiz-foot'], title: t('On to the mood'), text: t('Then you choose the mood, such as Party or Calm. In the last step you see right away which songs would be in it, and create the playlist.') },
     ],
@@ -86,8 +88,10 @@ export const GUIDES = translated(() => [
     keys: t('user account password role rights sign in person access'),
     steps: () => [
       { go: '#/einstellungen/navidrome', sel: ['[data-guide=passwoerter]'], title: t('Accounts & passwords'), text: t('With an account’s password, Tuttiphon creates playlists there and sees what is played.') },
-      { go: '#/einstellungen/benutzer', sel: ['[data-guide=rechte]'], title: t('Who may do what?'), text: t('Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account.') },
+      { go: '#/einstellungen/benutzer', sel: ['[data-guide=rechte]'], title: t('Who may do what?'), text: t('Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account – and who may change the family playlists.') },
       { go: '#/personen', sel: ['[data-guide=person-neu]'], title: t('People'), text: t('One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.') },   // i18n-ignore: selector
+      { go: '#/personen', sel: ['[data-guide=familie]'], title: t('The family'),   // i18n-ignore: selector
+        text: t('If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in Symfonium.') },
     ],
   },
   {
@@ -126,14 +130,16 @@ export const GUIDES = translated(() => [
   },
   {
     id: 'aendern', icon: 'edit', href: '#/playlists',
-    title: t('Change or share a playlist'),
-    short: [t('Tap a playlist'), t('Choose “Edit”, or “…” for the cover and more'), t('Set sharing in the profile')],
+    title: t('Change a playlist'),
+    short: [t('Tap a playlist'), t('Choose “Edit”, or “…” for the cover and more'), t('Symfonium shows the change after the next sync')],
     keys: t('edit rename name cover picture pause delete trash share family visible copy'),
     steps: (c) => [
       { go: '#/playlists', sel: ['.g-pl .pcard'], title: t('Open a playlist'), text: c.playlist ? t('Tap a playlist to open it.') : t('All playlists show up here as soon as there is a first one.') },
       ...(c.playlist ? [{ go: c.playlist, sel: ['[data-guide=pl-actions]'], title: t('Everything at a glance'), text: t('“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves Symfonium for a while and stays kept here – or move it to the trash.') }] : []),
-      ...(c.profile ? [{ go: c.profile, sel: ['[data-guide=sichtbar]'], title: t('Share with the family'),
-        text: c.admin ? t('With “visible to everyone”, all accounts see this person’s playlists in Navidrome and Symfonium.') : t('Here you set whether only you see your playlists or the whole family. Only you can change them.') }] : []),
+      ...(c.family === 'share' ? [{ sel: ['[data-guide=pl-actions]'], title: t('Share with the family'),
+        text: t('In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and Symfonium.') }] : []),
+      ...(c.family === 'copy' ? [{ title: t('Family playlists'),
+        text: t('Only administrators change the family’s playlists – with “Copy for me” you get your own version.') }] : []),
     ],
   },
   {
@@ -143,7 +149,7 @@ export const GUIDES = translated(() => [
     keys: t('kids rude swear words explicit parental clean lyrics'),
     steps: (c) => !c.profile ? [noProfile()] : [
       { go: c.profile, sel: ['[data-guide=kinderschutz]'], title: t('Kid-safe mode'),
-        text: c.admin ? t('Turn it on per person – for example for the person whose playlists the kids listen to. Detected from the lyrics.')
+        text: c.admin ? t('Turn it on per person – for a child, or for the family when the kids listen to its playlists. Detected from the lyrics.')
           : t('Turn it on, and songs with explicit lyrics stay out of all your playlists and mixes. Detected from the lyrics.') },
       ...(c.admin ? [{ go: '#/einstellungen/lyrics', sel: ['[data-guide=kinderschutz-liste]'], title: t('Detected songs'),
         text: t('Here are the songs detected by their lyrics, sorted by band and searchable, with the words found – what you allow stays in even with kid-safe mode. Songs tagged as explicit in the file stay out as well.') }] : []),

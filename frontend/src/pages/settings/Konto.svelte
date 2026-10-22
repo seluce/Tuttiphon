@@ -1,11 +1,11 @@
-<!-- Settings → My account: sign-in, own password for statistics & stars, own profiles, tour. -->
+<!-- Settings → My account: sign-in, own password for statistics & stars, own profile, tour. -->
 <script>
   import { hiddenCount } from '../../lib/discover.js'
   import Icon from '../../components/Icon.svelte'
   import PersonAvatar from '../../components/PersonAvatar.svelte'
   import Card from './Card.svelte'
   import Row from './Row.svelte'
-  import { S, findPerson, changed } from '../../lib/state.svelte.js'
+  import { S, myPerson, changed } from '../../lib/state.svelte.js'
   import { toast, confirmDialog } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
   import { logout } from '../../lib/account.js'
@@ -14,7 +14,7 @@
   import { t } from '../../lib/i18n.svelte.js'
 
   const me = $derived(S.me || {})
-  const own = $derived((me.own || []).map(findPerson).filter(Boolean))
+  const mine = $derived(myPerson())
   const roleText = $derived(me.notfall ? t('Local administrator with all rights')
     : me.role === 'admin' ? t('Administrator – may change all settings') : t('User – own playlists and own profile'))
 
@@ -65,7 +65,7 @@
 {:else}
   <Card title={t('Signed in')} icon="user">
     <div class="member-row">
-      <PersonAvatar p={own[0] || { icon: 'i:user', id: me.user }} size={48} />
+      <PersonAvatar p={mine || { icon: 'i:user', id: me.user }} size={48} />
       <div class="flex-1 min-w-0">
         <b>{me.fullName || me.name}</b>
         <div class="tiny muted">{me.notfall ? roleText : t('Navidrome account “{user}” · {role}', { user: me.user, role: roleText })}</div>
@@ -115,20 +115,13 @@
   </Card>
 
   {#if !me.notfall}
-    <Card title={t('Your profiles')} icon="heart">
-      {#if own.length}
-        <div class="grid gap-2">
-          {#each own as p (p.id)}
-            <a class="member-row no-underline" href="#/person/{p.id}">
-              <PersonAvatar {p} size={36} />
-              <div class="flex-1 min-w-0">
-                <b>{p.name}</b>
-                <div class="tiny muted">{p.public ? t('Playlists visible to everyone') : t('Playlists only for you')}</div>
-              </div>
-              <Icon name="right" size={16} />
-            </a>
-          {/each}
-        </div>
+    <Card title={t('Your profile')} icon="heart">
+      {#if mine}
+        <a class="member-row no-underline" href="#/person/{mine.id}">
+          <PersonAvatar p={mine} size={36} />
+          <b class="flex-1 min-w-0 ell">{mine.name}</b>
+          <Icon name="right" size={16} />
+        </a>
       {:else}
         <div class="btns"><a class="btn primary" href="#/willkommen"><Icon name="plus" size={16} />{t('Create profile')}</a></div>
       {/if}

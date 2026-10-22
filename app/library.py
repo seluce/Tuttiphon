@@ -7,7 +7,7 @@ import ctypes
 import threading
 import time
 
-from .config import load_config, load_env, user_password
+from .config import load_env
 from .i18n import _
 from .navidrome import Navidrome
 from .rules import Library
@@ -70,22 +70,16 @@ def release_memory():
 
 
 def _load():
-    """Song list fresh from Navidrome -> (Library, account of the stars or None)."""
+    """Song list fresh from Navidrome -> (Library, account of the stars or None). The shared list is neutral: read as
+    the Navidrome administrator with the average rating – a person's own view (their stars, plays) is
+    stats.songs_for(), mixer.person_lib()."""
     env = load_env()
-    cfg = load_config()
-    default = next((p for p in cfg.get("personen", [])
-                    if p["id"] == cfg["settings"].get("defaultPerson")), None)
-    owner = (default or {}).get("user")
-    pw = user_password(env, owner)
-    if pw:   # stars/favorites of the playlist owner -> the preview is exact
-        nav, exact, source = Navidrome(env["NAV_URL"], owner, pw), True, owner
-    else:    # without a password: average rating as an approximation
-        nav, exact, source = Navidrome(env["NAV_URL"], env.get("NAV_ADMIN_USER"), env.get("NAV_ADMIN_PASS")), False, None
-    lib = Library(nav.all_songs(), ratings_exact=exact, user=source)
+    nav = Navidrome(env["NAV_URL"], env.get("NAV_ADMIN_USER"), env.get("NAV_ADMIN_PASS"))
+    lib = Library(nav.all_songs(), ratings_exact=False, user=None)
     lib.album_meta = album_meta(env)
     lib.artist_meta = artist_meta(env)
     lib.path_loader = lambda env=env: real_paths(env)
-    return lib, source
+    return lib, None
 
 
 class LibraryCache:

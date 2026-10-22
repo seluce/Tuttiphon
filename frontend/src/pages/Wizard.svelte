@@ -15,7 +15,8 @@
   import PersonAvatar from '../components/PersonAvatar.svelte'
   import StepFinish from './wizard/StepFinish.svelte'
   import { showChosen } from '../components/Seg.svelte'
-  import { S, findPerson, findWelt, findStil, defaultPerson, outOfAll, weltIds, soundOf, ownPersons, isAdmin, snapshot, changed, MOODS } from '../lib/state.svelte.js'
+  import { S, findPerson, findWelt, findStil, outOfAll, weltIds, soundOf, creatablePersons, defaultOwner, myPerson, snapshot, changed, MOODS } from '../lib/state.svelte.js'
+  import { ownerOrder } from '../lib/playlist.js'
   import { toast } from '../lib/overlay.svelte.js'
   import { go } from '../lib/router.svelte.js'
   import { api } from '../lib/api.js'
@@ -30,9 +31,8 @@
   const GROUPS = ['Genre', 'Thema', 'Jahreszeit', 'Zeitreise', 'Spezial']   // i18n-ignore: group names are data
   const STEPS = $derived([t('For whom?'), t('Music world'), t('Vibe'), t('Finishing touches')])
   const TG = 'inline-flex align-[-3px] mr-1.5'   // icon in front of a vibe's name
-  const admin = isAdmin()
-  const persons = ownPersons()
-  const single = persons.length <= 1   // only one own profile -> skip "For whom?"
+  const persons = ownerOrder(creatablePersons())
+  const single = persons.length <= 1   // only one choice -> skip "For whom?"
   const first = single ? 1 : 0
 
   /** Before the finishing touches: sound vibes exist only as a mix; artist lists for editing. */
@@ -46,13 +46,13 @@
   const start = untrack(() => {
     const params = new URLSearchParams(query)
     const welt = params.get('welt')
-    const x = { person: params.get('person') || defaultPerson(), welt: welt ? (welt.includes(',') ? welt.split(',') : welt) : [], stil: params.get('stil') || '*', id: uid('playlist') }
+    const x = { person: params.get('person') || defaultOwner()?.id, welt: welt ? (welt.includes(',') ? welt.split(',') : welt) : [], stil: params.get('stil') || '*', id: uid('playlist') }
     const every = ['day', 'week', 'month'].includes(params.get('every')) ? params.get('every') : null   // i18n-ignore: stored values
     if (params.get('type') === 'mix') {
       x.type = 'mix'
       if (every) x.mix = { size: 40, perArtist: 3, every }
     }
-    if (!persons.some((p) => p.id === x.person)) x.person = defaultPerson()
+    if (!persons.some((p) => p.id === x.person)) x.person = defaultOwner()?.id
     const okWelten = weltIds(x).filter((w) => findWelt(w))
     x.welt = okWelten.length === 1 ? okWelten[0] : okWelten
     if (x.stil !== '*' && !findStil(x.stil)) x.stil = '*'
@@ -185,7 +185,7 @@
             {@render check()}
             <PersonAvatar {p} size={72} />
             <h3>{p.name}</h3>
-            <div class="muted small">{p.public ? t('visible to everyone') : admin ? t('private for {user}', { user: p.user }) : t('only for you')}</div>
+            <div class="muted small">{p.family ? t('visible to everyone') : p.id === myPerson()?.id ? t('only for you') : t('private for {user}', { user: p.user })}</div>
             {#if p.likes?.welten?.length}
               <div class="tiny muted">{t('likes {list}', { list: p.likes.welten.map((w) => findWelt(w)?.name).filter(Boolean).join(', ') })}</div>
             {/if}

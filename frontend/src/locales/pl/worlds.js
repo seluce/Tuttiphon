@@ -381,14 +381,8 @@ export default {
     'automatycznie',
   'For whom?':
     'Dla kogo?',
-  'Belongs to “{user}” in Navidrome, whose stars & favorites count · visible to everyone':
-    'W Navidrome należy do „{user}” – liczą się gwiazdki i ulubione tego konta · widoczna dla wszystkich',
-  'Belongs to “{user}” in Navidrome, whose stars & favorites count · private':
-    'W Navidrome należy do „{user}” – liczą się gwiazdki i ulubione tego konta · prywatna',
-  'Visible to everyone – your stars & favorites count.':
-    'Widoczna dla wszystkich – liczą się twoje gwiazdki i ulubione.',
-  'Visible only to you – your stars & favorites count.':
-    'Widoczna tylko dla ciebie – liczą się twoje gwiazdki i ulubione.',
+  'Only for you – your stars & favorites count.':
+    'Tylko dla ciebie – liczą się twoje gwiazdki i ulubione.',
   'This playlist shows the most played songs – from what is played in Symfonium. It changes on its own on the first of the month; it always stays one playlist.':
     'Ta playlista pokazuje najczęściej odtwarzane piosenki – na podstawie tego, co jest odtwarzane w Symfonium. Zmienia się sama pierwszego dnia miesiąca; zawsze pozostaje jedną playlistą.',
   'Period':

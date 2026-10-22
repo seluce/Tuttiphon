@@ -75,5 +75,7 @@
  "  (dry run) {artist} – {album}: cover from {source}": "  (simulazione) {artist} – {album}: copertina da {source}",
  "  ✓ {artist} – {album}: cover from {source}": "  ✓ {artist} – {album}: copertina da {source}",
  "{n} cover saved – Navidrome shows it after the next scan.": "{n} copertina salvata – Navidrome la mostra dopo la scansione successiva.",
- "{n} covers saved – Navidrome shows them after the next scan.": "{n} copertine salvate – Navidrome le mostra dopo la scansione successiva."
+ "{n} covers saved – Navidrome shows them after the next scan.": "{n} copertine salvate – Navidrome le mostra dopo la scansione successiva.",
+ "Stars for accounts that do not have them yet: {n} song": "Stelle per gli account che non le hanno ancora: {n} brano",
+ "Stars for accounts that do not have them yet: {n} songs": "Stelle per gli account che non le hanno ancora: {n} brani"
 }

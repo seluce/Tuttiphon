@@ -10,7 +10,7 @@
   import CompareCard from './CompareCard.svelte'
   import Ui from './Ui.svelte'
   import { t, translated } from '../../lib/i18n.svelte.js'
-  import { S } from '../../lib/state.svelte.js'
+  import { S, creatablePersons, familyPerson } from '../../lib/state.svelte.js'
 
   export const USER_TOPICS = translated(() => [
     { id: 'start', icon: 'home', title: t('“For you” – your home page'), body: start, guides: ['mix', 'geschmack'] },
@@ -51,7 +51,7 @@
   <Bullets>
     <li>{@html t('<b>Your mixes</b> – playlists that renew themselves daily, weekly or monthly.')}</li>
     <li>{@render rich(t('<b>Discovered for you</b> – ideas that match what you listen to. <Ui icon="plus" primary>Create</Ui> adds one, <Ui icon="x">✕</Ui> hides it.'))}</li>
-    <li>{@html t('<b>Your week</b>, <b>your playlists</b>, what the family shares and the latest albums.')}</li>
+    <li>{@html t('<b>Your week</b>, <b>your playlists</b>, the family playlists and the latest albums.')}</li>
   </Bullets>
   <p>{@render rich(t('On your phone, <Ui icon="more">More</Ui> at the bottom leads to all other pages.'))}</p>
 {/snippet}
@@ -63,7 +63,6 @@
     <li>{@html t('<b>Favorite music worlds, bands and vibes:</b> come up more often in your mixes, and you get matching playlist ideas.')}</li>
     <li>{@html t('<b>Dislikes:</b> bands or genres that <b>never</b> end up in your playlists.')}</li>
     <li>{@html t('<b>Not part of your taste:</b> music that plays on your account for someone else, such as children’s music.')}</li>
-    <li>{@html t('<b>Who can see your playlists:</b> “Only me” or “The whole family” – only you can change them. The <b>prefix</b>, such as “Mia · ”, goes in front of their names.')}</li>
     <li>{@html t('<b>Kid-safe mode:</b> songs with explicit lyrics stay out of all your playlists.')}</li>
     <li>{@html t('<b>To your phone:</b> “Turn on for this device” – then news from your favorite bands, what is new for you on Mondays and your monthly recap come as notifications.')}</li>
   </Bullets>
@@ -85,7 +84,7 @@
     <li>{@html t('<b>Album of the week</b> – every Monday a whole album you don’t know yet.')}</li>
     <li>{@html t('<b>Next episode</b> – for every audio play series you listen to, the episode that comes next.')}</li>
     <li>{@html t('<b>Good night</b> and <b>Good morning</b> – calming down in the evening, waking up gently in the morning.')}</li>
-    <li>{@html t('<b>Car ride</b> and <b>What everyone likes</b> – music the whole family enjoys.')}</li>
+    <li>{@html t('<b>Car ride</b> and <b>What everyone likes</b> – for the family: music everyone enjoys.')}</li>
   </Bullets>
   <p>{t('At the very bottom, “You might also like” shows bands that are not in the library yet – if you like one, let the administrator know.')}</p>
 {/snippet}
@@ -101,8 +100,15 @@
 {/snippet}
 
 {#snippet neu()}
-  <p>{@html t('With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in three short steps:')}</p>
+  {#if creatablePersons().length > 1}
+    <p>{@html t('With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in four short steps:')}</p>
+  {:else}
+    <p>{@html t('With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in three short steps:')}</p>
+  {/if}
   <Steps>
+    {#if creatablePersons().length > 1}
+      <li><span>{@html t('<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and Symfonium.')}</span></li>
+    {/if}
     <li><span>{@html t('<b>Music world</b> – which music? For example “Kids’ rock”. You can pick several; “All” takes the whole library.')}</span></li>
     <li><span>{@html t('<b>Vibe</b> – which mood or occasion? Such as “Party”, “Calm” or “Christmas”. The number shows how many songs match.')}</span></li>
     <li><span>{@html t('<b>Finishing touches</b> – name, <b>playlist or mix</b>, only the hits or everything. Right next to it you see which songs would be in it.')}</span></li>
@@ -143,7 +149,7 @@
     <li>{@render rich(t('<Ui icon="trash">Move to trash</Ui> – can be restored for 30 days.'))}</li>
   </Bullets>
   <p>{@html t('<b>Seasonal playlists</b> such as Christmas are only in Symfonium during their season and come back by themselves.')}</p>
-  <p>{@render rich(t('<b>Shared playlists</b> of others you can listen to; <Ui icon="copy">Copy for me</Ui> gives you your own version.'))}</p>
+  <p>{@render rich(t('<b>Your playlists</b> are only yours, <b>family playlists</b> are for everyone. If you may not change one, <Ui icon="copy">Copy for me</Ui> gives you your own version.'))}</p>
   <p>{@render rich(t('Almost everything can be taken back right away with <Ui icon="undo">Undo</Ui> in the message at the bottom.'))}</p>
 {/snippet}
 
@@ -153,6 +159,9 @@
     <li>{@html t('<b>Offline:</b> download a mix in Symfonium once – when it renews itself, Symfonium downloads the new songs by itself.')}</li>
     <li>{@html t('<b>Listening counts:</b> what you play in Symfonium shapes your statistics, taste and mixes.')}</li>
     <li>{@html t('<b>1 star:</b> rate a song you no longer want to hear with 1 star in Symfonium – then it no longer goes into your mixes.')}</li>
+    {#if familyPerson()}
+      <li>{@html t('<b>Shared devices</b> such as the car or a kitchen tablet can use the family account in Symfonium – the administrator sets it up.')}</li>
+    {/if}
     {#if S.status?.plugin}
       <li>{@html t('<b>Radio and smart queue by sound:</b> in Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers) and choose “Sonic Analysis” for the smart queue in the player. The next songs then come from Tuttiphon – picked for you and with variety between bands.')}</li>
       <li>{@html t('<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.')}</li>

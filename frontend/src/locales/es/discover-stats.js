@@ -188,8 +188,6 @@ export default {
     'Aún no se han contado reproducciones',
   'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.':
     'Navidrome aún no ha guardado reproducciones de «{user}». En Symfonium tiene que estar activado «Scrobbling» o «Report plays to the server».',
-  '{names} use the same Navidrome account “{account}” – so their numbers are the same.':
-    '{names} usan la misma cuenta de Navidrome «{account}» – por eso sus cifras son iguales.',
   'Plays':
     'Reproducciones',
   'from {n} different song':
@@ -338,8 +336,8 @@ export default {
     'Personas',
   'Do you like the band?':
     '¿Te gusta la banda?',
-  'Your profiles':
-    'Tus perfiles',
+  'Your profile':
+    'Tu perfil',
   'Favorite':
     'Favorita',
   '“Favorite”: shows up more often in your mixes. “never”: never gets into your playlists.':

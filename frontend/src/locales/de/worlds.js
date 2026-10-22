@@ -220,10 +220,8 @@ export default {
   'Rather few – maybe a lower selection or more music worlds?': 'Recht wenig – vielleicht eine niedrigere Auswahl oder mehr Musikwelten?',
   'automatic': 'automatisch',
   'For whom?': 'Für wen?',
-  'Belongs to “{user}” in Navidrome, whose stars & favorites count · visible to everyone': 'Gehört in Navidrome „{user}“, dessen Sterne & Favoriten zählen · für alle sichtbar',
-  'Belongs to “{user}” in Navidrome, whose stars & favorites count · private': 'Gehört in Navidrome „{user}“, dessen Sterne & Favoriten zählen · privat',
-  'Visible to everyone – your stars & favorites count.': 'Für alle sichtbar – deine Sterne & Favoriten zählen.',
-  'Visible only to you – your stars & favorites count.': 'Nur für dich sichtbar – deine Sterne & Favoriten zählen.',
+  'Only for you – your stars & favorites count.':
+    'Nur für dich – deine Sterne & Favoriten zählen.',
   'This playlist shows the most played songs – from what is played in Symfonium. It changes on its own on the first of the month; it always stays one playlist.': 'Diese Playlist zeigt die meistgehörten Songs – aus dem, was in Symfonium gehört wird. Sie wechselt am Monatsersten von selbst, es bleibt immer eine Playlist.',
   'Period': 'Zeitraum',
   'the last month': 'der letzte Monat',

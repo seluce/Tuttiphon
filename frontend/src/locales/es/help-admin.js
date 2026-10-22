@@ -120,8 +120,8 @@ export default {
     'Playlists antiguas y hechas a mano',
   'The easiest way is the assistant under <a class="link" href="#/neu">New playlist</a>. It asks step by step – “For whom?” only when there are several people:':
     'Lo más fácil es el asistente de <a class="link" href="#/neu">Nueva playlist</a>. Pregunta paso a paso – «¿Para quién?» solo cuando hay varias personas:',
-  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to; the stars of that account count.':
-    '<b>¿Para quién?</b> – la persona determina a qué cuenta de Navidrome va la playlist; cuentan las estrellas de esa cuenta.',
+  '<b>For whom?</b> – a person’s playlist is only theirs, and the stars of their account count; a family playlist is for everyone.':
+    '<b>¿Para quién?</b> – la playlist de una persona es solo suya y cuentan las estrellas de su cuenta; una playlist de la familia es para todos.',
   '<b>Music world</b> – who’s playing: e.g. “Kids’ rock”, “Medieval” or several together. “All” takes the whole library.':
     '<b>Mundo musical</b> – quién toca: p. ej. «Rock infantil», «Medieval» o varios juntos. «Todos» toma toda la biblioteca.',
   '<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.':
@@ -278,8 +278,8 @@ export default {
     '<b>Novedades de tus bandas favoritas</b> y <b>Tu octubre</b> – lo nuevo de las bandas favoritas y las canciones más escuchadas del mes.',
   '<b>Good night</b>, <b>Good morning</b> and <b>Car ride</b> – a fixed length instead of a number of songs; good morning only for accounts that often listen in the morning.':
     '<b>Buenas noches</b>, <b>Buenos días</b> y <b>De viaje</b> – una duración fija en lugar de un número de canciones; Buenos días solo para cuentas que suelen escuchar por la mañana.',
-  '<b>What everyone likes</b> – the taste of every account counts equally; what someone dislikes stays out.':
-    '<b>Lo que gusta a todos</b> – el gusto de cada cuenta cuenta lo mismo; lo que a alguien no le gusta queda fuera.',
+  '<b>What everyone likes</b> – a family playlist in which the taste of every person counts equally; what someone dislikes stays out.':
+    '<b>Lo que gusta a todos</b> – una playlist de la familia en la que el gusto de cada persona cuenta por igual; lo que no le gusta a alguien queda fuera.',
   'Mixes renew themselves at the time of the daily refresh (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>) – daily, on Mondays or on the 1st.':
     'Los mixes se renuevan a la hora de la actualización diaria (<a class="link" href="#/einstellungen/ablaeufe">Ajustes → Automatización</a>) – cada día, los lunes o el día 1.',
   '<b>Mixes learn:</b> what was skipped comes up less often, songs someone rates 1 star never – with the Navidrome plugin for every account, otherwise for accounts whose password Tuttiphon knows. Switch: “Mixes that learn” under <a class="link" href="#/einstellungen/playlists">Settings → Playlists</a>.':
@@ -310,8 +310,8 @@ export default {
     '{new} crea un mundo propio; {rebuild} vuelve a montar un mundo modificado a partir de su escena.',
   'Under <b>“Might fit too”</b>, tap bands to add them; <b>×</b> takes one out.':
     'En <b>«También podría encajar»</b>, toca bandas para añadirlas; <b>×</b> quita una.',
-  'Each person has a Navidrome account; several may share one, such as “Family”. <b>Preferences</b> steer their suggestions and mixes, <b>Dislikes</b> never appear in their playlists.':
-    'Cada persona tiene una cuenta de Navidrome; varias pueden compartir una, como «Familia». Las <b>preferencias</b> orientan sus sugerencias y mixes; lo que está en <b>No me gusta</b> nunca aparece en sus playlists.',
+  'Each person has a Navidrome account of their own, and their playlists are only theirs. <b>Preferences</b> steer their suggestions and mixes, <b>Dislikes</b> never appear in their playlists.':
+    'Cada persona tiene una cuenta propia de Navidrome, y sus playlists son solo suyas. Las <b>Preferencias</b> orientan sus sugerencias y mixes; lo que está en <b>No me gusta</b> nunca aparece en sus playlists.',
   'Store the account’s password under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a> – or the person signs in and chooses “Turn on statistics & stars”.':
     'Guarda la contraseña de la cuenta en <a class="link" href="#/einstellungen/navidrome">Ajustes → Navidrome</a> – o que la persona inicie sesión y elija «Activar estadísticas y estrellas».',
   '<b>From listening:</b> the person’s page shows what Tuttiphon has recognized from plays, favorites and stars; {all} turns it into preferences.':
@@ -382,8 +382,8 @@ export default {
     '<b>Portadas que faltan:</b> para los álbumes sin ninguna imagen, Tuttiphon busca una (Cover Art Archive o Deezer) y la guarda como cover.jpg junto a la música. Las imágenes existentes no se tocan.',
   'With the Tuttiphon plugin (Navidrome 0.64 or later), Instant Mix, song radio and the smart queue in Symfonium follow the sound of your own files – and Navidrome passes every play on.':
     'Con el plugin de Tuttiphon (Navidrome 0.64 o posterior), Instant Mix, la radio de canción y la cola inteligente de Symfonium siguen el sonido de tus propios archivos – y Navidrome le pasa cada reproducción.',
-  'Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family. Kid-safe always stays as for the family. The card shows for whom it last answered.':
-    'Navidrome no dice quién pregunta; Tuttiphon lo deduce de las reproducciones y responde para la persona que está escuchando – si no, para la familia. La protección infantil siempre se aplica como para la familia. La tarjeta muestra para quién respondió la última vez.',
+  'Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family, or for everyone if there is none. Songs with explicit lyrics stay out as soon as a person has kid-safe mode or is a child profile. The card shows for whom it last answered.':
+    'Navidrome no dice quién pregunta; Tuttiphon lo ve por las reproducciones y responde para la persona que está escuchando – si no, para la familia o, si no la hay, para todos. Las canciones con letras explícitas quedan fuera en cuanto una persona tiene activa la protección infantil o es un perfil infantil. La tarjeta muestra para quién respondió la última vez.',
   'Turn on notifications under <a class="link" href="#/einstellungen/benachrichtigungen">Settings → Notifications</a> and tap “Turn on for this device” on the phone – this needs the https address, on the iPhone the home screen. Each person turns on their devices in their profile.':
     'Activa las notificaciones en <a class="link" href="#/einstellungen/benachrichtigungen">Ajustes → Notificaciones</a> y toca «Activar en este dispositivo» en el teléfono – esto necesita la dirección https y, en el iPhone, la pantalla de inicio. Cada persona activa sus dispositivos en su perfil.',
   'Alternatively via the <b>ntfy</b> app:':
@@ -402,14 +402,14 @@ export default {
     'El <b>idioma del servidor</b> se aplica a los registros, al tema de ntfy de los administradores y a los nombres que Tuttiphon da a las playlists y los mundos musicales. Las notificaciones en el teléfono y en el navegador siguen el idioma del dispositivo.',
   'Every day Tuttiphon backs up everything that cannot be restored on its own – settings, playlists, credentials, Deezer, sound analysis and the listening history – as a ZIP file. Under <a class="link" href="#/einstellungen/sicherung">Settings → Backup</a> you back up right away, download backups and set how many are kept.':
     'Cada día, Tuttiphon hace una copia de seguridad de todo lo que no se puede recuperar por sí solo – ajustes, playlists, datos de acceso, Deezer, análisis de sonido y el historial de escucha – como archivo ZIP. En <a class="link" href="#/einstellungen/sicherung">Ajustes → Copia de seguridad</a> haces una copia al instante, descargas copias y defines cuántas se conservan.',
-  '<b>User</b> – own home page, playlists and profile; sees others’ playlists only if they are shared with everyone.':
-    '<b>Usuario</b> – página de inicio, playlists y perfil propios; ve las playlists de otros solo si están compartidas con todos.',
-  'You change the roles under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a>; new users are guided through their profile by a short assistant.':
-    'Los roles se cambian en <a class="link" href="#/einstellungen/benutzer">Ajustes → Usuarios y permisos</a>; a los usuarios nuevos los guía un breve asistente por su perfil.',
+  '<b>User</b> – own home page, playlists and profile; listens to the family playlists and changes them unless only administrators may.':
+    '<b>Usuario</b> – página de inicio, playlists y perfil propios; escucha las playlists de la familia y las cambia, salvo que solo puedan hacerlo los administradores.',
+  'Under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a> you set the roles and who may change the family playlists; new users are guided through their profile by a short assistant.':
+    'En <a class="link" href="#/einstellungen/benutzer">Ajustes → Usuarios y permisos</a> defines los roles y quién puede cambiar las playlists de la familia; un breve asistente guía a los usuarios nuevos por su perfil.',
   'The local administrator signs in under “Local administrator” on the sign-in page – also when Navidrome is not reachable.':
     'El administrador local inicia sesión con «Administrador local» en la página de inicio de sesión – también cuando no se puede conectar con Navidrome.',
-  'Symfonium syncs only now and then – wait or refresh the media source there. Private playlists are only visible to their own account.':
-    'Symfonium solo se sincroniza de vez en cuando – espera o actualiza allí el proveedor de medios. Las playlists privadas solo las ve su propia cuenta.',
+  'Symfonium syncs only now and then – wait or refresh the media source there. A person’s playlists only show up in their own account, family playlists in every account.':
+    'Symfonium solo se sincroniza de vez en cuando – espera o actualiza allí el proveedor de medios. Las playlists de una persona solo aparecen en su propia cuenta; las playlists de la familia, en todas las cuentas.',
   'The deeper it listens, the more accurate: “Deep” listens to the whole song, “Fast” only briefly. Tempo and energy are reliable; the mood is an estimate – the AI sound analysis in the Docker image makes it much better.':
     'Cuanto más a fondo escucha, más preciso: «Profundo» escucha la canción entera; «Rápido», solo un momento. El tempo y la energía son fiables; el estado de ánimo es una estimación – el análisis de sonido con IA de la imagen Docker lo mejora mucho.',
   'Mixes learn: what someone skips comes up less often for a while, songs they rate 1 star themselves not at all. Switch: Settings → Playlists → “Mixes that learn”.':
@@ -436,4 +436,30 @@ export default {
     '<b>Siguiente episodio</b> – para cuentas que escuchan audiodramas: el siguiente episodio de cada serie, nuevo cada día.',
   'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
     'Saltar canciones reorienta la cola inteligente al instante: tras dos saltos seguidos, cambia a otro sonido. Cada pocas canciones entra una que la cuenta nunca ha escuchado – la frecuencia se ajusta por persona en el perfil («Canciones nuevas en la cola»).',
+  'The family':
+    'La familia',
+  'If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in Symfonium.':
+    'Si quieres, Tuttiphon crea una cuenta de Navidrome para la familia. Sus playlists son para todos – los dispositivos compartidos, como el coche, la usan en Symfonium.',
+  '<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.':
+    '<b>La familia</b> (opcional): «Configurar la familia» le crea una cuenta propia de Navidrome. Sus playlists son para todos – los dispositivos compartidos, como el coche o la tableta de la cocina, la usan en Symfonium.',
+  'With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in four short steps:':
+    'Con <a class="link" href="#/neu">Nueva playlist</a> creas la tuya – en cuatro pasos cortos:',
+  '<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and Symfonium.':
+    '<b>¿Para quién?</b> – solo para ti o para toda la familia: las playlists de la familia las ven todos en Navidrome y Symfonium.',
+  '<b>Shared devices</b> such as the car or a kitchen tablet can use the family account in Symfonium – the administrator sets it up.':
+    'Los <b>dispositivos compartidos</b>, como el coche o una tableta en la cocina, pueden usar la cuenta de la familia en Symfonium – la configura el administrador.',
+  'Can two people share one Navidrome account?':
+    '¿Pueden dos personas compartir una cuenta de Navidrome?',
+  'No – one account, one person. Create an account of their own for everyone in Navidrome under “Users”, then add them under People. Shared devices such as the car use the family account.':
+    'No – una cuenta, una persona. Crea para cada uno una cuenta propia en Navidrome, en «Users», y luego añádelos en Personas. Los dispositivos compartidos, como el coche, usan la cuenta de la familia.',
+  'I need the password of the family account again.':
+    'Necesito otra vez la contraseña de la cuenta de la familia.',
+  'Tuttiphon shows it only once. Set a new one in Navidrome under Settings → Users and enter it under Settings → Navidrome as well – Tuttiphon needs it for the family playlists.':
+    'Tuttiphon solo la muestra una vez. Define una nueva en Navidrome, en «Settings → Users», e introdúcela también en Ajustes → Navidrome – Tuttiphon la necesita para las playlists de la familia.',
+  'Family playlist':
+    'Playlist de la familia',
+  'Family account':
+    'Cuenta de la familia',
+  'Navidrome account of the family – for shared devices such as the car or the kitchen tablet in Symfonium.':
+    'Cuenta de Navidrome de la familia – para dispositivos compartidos, como el coche o la tableta de la cocina, en Symfonium.',
 }

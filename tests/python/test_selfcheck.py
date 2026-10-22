@@ -63,7 +63,8 @@ class SelfcheckTest(unittest.TestCase):
         if limit is not None:
             nsp["limit"] = limit
         self._add({"id": pid, "person": person}, f"{pid}.nsp", nsp, actual, in_navidrome)
-        self.libs[pid] = FakeLib(expected, **lib)
+        account = next(p["user"] for p in self.cfg["personen"] if p["id"] == person)
+        self.libs[pid] = FakeLib(expected, **{"user": account, **lib})   # the owner's own view (a stored password)
 
     def mix(self, pid, entries, actual, write=True, in_navidrome=True):
         filename = f"{pid}.m3u"

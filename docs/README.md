@@ -35,7 +35,8 @@ The handbook describes the current state of the code. Whoever changes something 
 | Music world | `welt` | Who plays: a group of bands (and genres), e.g. Kinder or Mittelalter; can be linked to a scene |
 | Scene | `scene` | catalog of typical bands of a music genre (`app/scenes.json`); linked music worlds take in these bands automatically |
 | Vibe | `stil` | What is played: genre, topic, season, decade or special filter; sound vibes select by the sound analysis |
-| Person | `person` | Who the playlist is for: Navidrome owner, visibility, likes and dislikes |
+| Person | `person` | Who the playlist is for: one person per Navidrome account – the owner of its playlists (private there), with likes and dislikes |
+| Family | `family: true` | optional person with a Navidrome account of its own that Tuttiphon creates: its playlists are for everyone, “What everyone likes” exists only there; nobody signs in to Tuttiphon with its account, shared devices use it in Symfonium. Who may change its playlists: `settings.familyEdit` |
 | Smart playlist | `.nsp` | rule file; Navidrome selects anew from all matching songs on every request |
 | Mix | `type: "mix"`, `.m3u` | fixed selection that Tuttiphon puts together anew daily, weekly or monthly |
 | Radio | `radio.seed` | mix of a band and similar bands |
@@ -51,6 +52,6 @@ The handbook describes the current state of the code. Whoever changes something 
 | Mixes learn | `settings.mixLearn`, `app/feedback.py` | what gets skipped comes up less often in mixes, songs rated 1 star by hand not at all anymore |
 | Self-check | `app/selfcheck.py` | after every scan: does Navidrome show as many songs per playlist as Tuttiphon expects? Deviations → “To review” |
 | Instance | `<playlist folder>/.tuttiphon/` | a running Tuttiphon – on the PC or in the Docker container; registration and run lock live in the shared playlist folder |
-| Administrator / user | `role: admin \| user` | role in Tuttiphon; users only see their own and shared items |
+| Administrator / user | `role: admin \| user` | role in Tuttiphon; users only see their own person's and the family's items |
 | Local administrator | `@notfall`, `app/localadmin.py` | Tuttiphon's own administrator account, also when Navidrome is not running: its password is set in the browser at the first start with a setup code from the server log (only a hash in `state/admin_password.json`) – or as `TUTTIPHON_ADMIN_PASSWORD` |
 | Setup mode | `Handler.network`, `POST /api/setup` | a server on the network without an administrator password: sign-in required, the password is set with the one-time setup code from the server log and `setup-code.txt` |

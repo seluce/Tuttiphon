@@ -76,7 +76,6 @@
  "No playlist could be written.": "Aucune playlist n’a pu être écrite.",
  "  ⚠ not in Navidrome yet: {name}": "  ⚠ pas encore dans Navidrome : {name}",
  "  ⚠ User '{user}' does not exist in Navidrome ({name})": "  ⚠ L’utilisateur '{user}' n’existe pas dans Navidrome ({name})",
- "  ⚠ {name}: person without a Navidrome account – stars/favorites come from the admin account": "  ⚠ {name} : personne sans compte Navidrome – les étoiles/favoris viennent du compte admin",
  "  ⚠ {name}: not updated in Navidrome ({error})": "  ⚠ {name} : non mise à jour dans Navidrome ({error})",
  "name": "nom",
  "description": "description",

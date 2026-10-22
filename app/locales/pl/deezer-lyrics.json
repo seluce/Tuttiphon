@@ -108,5 +108,10 @@
  "{n} covers saved – Navidrome shows them after the next scan.": {
   "few": "Zapisano {n} okładki – Navidrome pokaże je po następnym skanie.",
   "many": "Zapisano {n} okładek – Navidrome pokaże je po następnym skanie."
+ },
+ "Stars for accounts that do not have them yet: {n} song": "Gwiazdki dla kont, które jeszcze ich nie mają: {n} piosenka",
+ "Stars for accounts that do not have them yet: {n} songs": {
+  "few": "Gwiazdki dla kont, które jeszcze ich nie mają: {n} piosenki",
+  "many": "Gwiazdki dla kont, które jeszcze ich nie mają: {n} piosenek"
  }
 }

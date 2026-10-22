@@ -114,5 +114,18 @@
  "config: playlist '{id}': time of day invalid": "config: playlist '{id}': hora del día no válida",
  "config: playlist '{id}': “never played” only exists as a mix": "config: playlist '{id}': «nunca escuchado» solo existe como mix",
  "config: playlist '{id}': “album of the week” only exists as a mix": "config: playlist '{id}': «álbum de la semana» solo existe como mix",
- "config: playlist '{id}': “next episode” only exists as a mix": "config: playlist '{id}': «siguiente episodio» solo existe como mix"
+ "config: playlist '{id}': “next episode” only exists as a mix": "config: playlist '{id}': «siguiente episodio» solo existe como mix",
+ "This is the family's account – it plays the family playlists on shared devices. Please sign in with your own account.": "Esta es la cuenta de la familia – reproduce las playlists de la familia en los dispositivos compartidos. Inicia sesión con tu propia cuenta.",
+ "config: there can only be one family": "config: solo puede haber una familia",
+ "config: person '{id}' needs a Navidrome account": "config: la persona '{id}' necesita una cuenta de Navidrome",
+ "config: the Navidrome account “{account}” belongs to more than one person": "config: la cuenta de Navidrome «{account}» pertenece a más de una persona",
+ "config: the family cannot be a child profile": "config: la familia no puede ser un perfil infantil",
+ "config: playlist '{id}': “What everyone likes” only exists for the family": "config: playlist '{id}': «Lo que gusta a todos» solo existe para la familia",
+ "Please add a person first – every playlist belongs to one.": "Añade primero una persona – cada playlist pertenece a una.",
+ "There already is a family.": "Ya hay una familia.",
+ "Please choose an account name of 2 to 40 letters, digits, dots, hyphens or underscores.": "Elige un nombre de cuenta de 2 a 40 letras, cifras, puntos, guiones o guiones bajos.",
+ "“{account}” already belongs to a person – please choose another name.": "«{account}» ya pertenece a una persona – elige otro nombre.",
+ "Navidrome could not create the account: {error}": "Navidrome no pudo crear la cuenta: {error}",
+ "Navidrome already has an account “{account}” – please choose another name.": "Navidrome ya tiene una cuenta «{account}» – elige otro nombre.",
+ "Family set up: Navidrome account {account}": "Familia configurada: cuenta de Navidrome {account}"
 }

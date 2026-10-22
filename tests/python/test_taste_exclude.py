@@ -1,5 +1,5 @@
-"""Music worlds a person keeps out of their taste (person.tasteExclude) – e.g. the children's music on a parent's
-account: those songs count neither as liked nor as disliked, the family person on the same account keeps them, the
+"""Music worlds a person keeps out of their taste (person.tasteExclude) – e.g. the children's music a parent plays for
+the kids: those songs count neither as liked nor as disliked, the family's playlists still take them into account, the
 morning habit ignores them, and "To review" offers it when a separate world makes up a big part of what is played."""
 from tests.python import env  # noqa: F401  (before app.*)
 
@@ -41,12 +41,12 @@ class ScoresTest(unittest.TestCase):
         self.assertFalse(kids & set(own))
         self.assertEqual(set(own), set(both) - kids)
 
-    def test_profile_per_person_on_the_same_account(self):
+    def test_with_and_without_the_exclusion(self):
         jonas = {"id": "jonas", "user": "Jonas", "tasteExclude": ["kinder"]}
-        family = {"id": "familie", "user": "Jonas"}
+        without = {"id": "jonas", "user": "Jonas"}
         with mock.patch.object(taste, "_person_lib", lambda cfg, base, user: base):
             mine = taste.for_person(self.cfg, self.lib, jonas, TODAY)
-            ours = taste.for_person(self.cfg, self.lib, family, TODAY)
+            ours = taste.for_person(self.cfg, self.lib, without, TODAY)
         self.assertNotIn("kinder", dict(mine["welten"]))
         self.assertIn("kinder", dict(ours["welten"]))
         self.assertFalse({a for a, _s in mine["artists"]} & {"Band A", "Band B"})
@@ -63,17 +63,16 @@ class ScoresTest(unittest.TestCase):
         self.assertGreater(shares["hoerspiel"], 0)
         self.assertAlmostEqual(prof["childShare"], shares["kinder"], places=3)   # not kinder + hoerspiel
 
-    def test_family_mix_keeps_the_owners_exclusion(self):
+    def test_family_mix_takes_each_member_with_their_exclusion(self):
         self.cfg["personen"][1]["tasteExclude"] = ["kinder"]
-        self.cfg["personen"].append({"id": "jonas-fam", "name": "Familie Jonas", "user": "jonas", "public": True})
-        p = {"id": "fm", "person": "jonas", "welt": "*", "stil": "*", "type": "mix", "together": ["jonas-fam", "oma"],
+        p = {"id": "fm", "person": "familie", "welt": "*", "stil": "*", "type": "mix", "together": ["jonas", "oma"],
              "mix": {"every": "week"}}
         seen = []
         with mock.patch.object(taste, "for_person", lambda cfg, base, person, today=None: seen.append(person["id"])), \
                 mock.patch.object(mixer, "person_lib", lambda cfg, playlist, base: base):
             mixer.pick(self.cfg, self.lib, p, rules.build_nsp(self.cfg, p, rules.BuildContext(self.lib, TODAY)), TODAY)
-        self.assertIn("jonas", seen)          # the playlist's own person – with its exclusion
-        self.assertNotIn("jonas-fam", seen)   # not the other profile of the same account
+        self.assertEqual(seen, ["familie", "jonas", "oma"])   # the family's own account and every member – each as
+        #                                                        for_person() sees them (Jonas with his exclusion)
 
     def test_family_suggestions_keep_the_children_music(self):
         self.cfg["personen"][1]["tasteExclude"] = ["kinder"]
@@ -119,7 +118,7 @@ class HintTest(unittest.TestCase):
         got = self.hints(cfg, 0.45)
         keys = [x[0] for x in got]
         self.assertIn("taste-world|jonas|kinder", keys)
-        self.assertFalse(any(k.startswith("taste-world|familie") for k in keys))   # never for the shared person
+        self.assertFalse(any(k.startswith("taste-world|familie") for k in keys))   # never for the family
         self.assertFalse(any(k.endswith("|metal") for k in keys))                  # only separate worlds
         hint = next(x for x in got if x[0] == "taste-world|jonas|kinder")
         self.assertEqual(hint[2], "„Kinder“ zählt zum Geschmack von Jonas")

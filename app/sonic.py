@@ -6,14 +6,14 @@ Answers come from the sound vectors of the AI sound analysis (similar.py); a son
 (Last.fm's similar bands and genres, classify.radio_artists()) ordered by the features we measured. Songs are
 Navidrome's own ids, so the plugin can hand them on as they are.
 
-Navidrome does not say who asks. So the songs come from the whole library as for the shared person: "All" (without
-the separate worlds such as children's music and audio plays – unless the song asked for is in one of them), without
-the shared person's dislikes, without live recordings and the like (settings.excludeTitles, minDuration) – and
-without explicit songs as soon as a profile is kid-safe. But Tuttiphon knows from the live plays (listen.py) who is
-playing what: if the song asked about (or a song of the band or album) is playing on exactly one account – or only
-one account is playing at all – the answer is for that person (_listener()): their "All" and dislikes, without what
-they heard in the last hours or rated 1 star by hand, songs they skip further down. Kid-safe stays as for the
-family – never loosened on a guess. The smart queue learns in the moment: what was skipped in the last minutes steers
+Navidrome does not say who asks. But Tuttiphon knows from the live plays (listen.py) who is playing what: if the
+song asked about (or a song of the band or album) is playing on exactly one account – or only one account is playing
+at all – the answer is for that account's person (_listener(), one person per account): their "All" (without the
+separate worlds such as children's music and audio plays – unless the song asked for is in one of them) and dislikes,
+without what they heard in the last hours or rated 1 star by hand, songs they skip further down. When that is unclear,
+the answer is the family's (its dislikes; without a family nobody's) – and always without live recordings and the
+like (settings.excludeTitles, minDuration) and without explicit songs as soon as a person is kid-safe, never loosened
+on a guess. The smart queue learns in the moment: what was skipped in the last minutes steers
 the next answer away from its sound (_steer()). And every few songs one the account has never played comes in
 (_mix_new(), the person's "newEvery").
 
@@ -58,7 +58,7 @@ _memo = {}
 _seen = {"at": None, "calls": 0, "for": None, "forAt": None, "guess": False}   # the plugin's last call (settings page)
 _stars = {}   # account (lower case) -> (time, song ids rated 1 star by hand) – loaded in the background (_rated_one())
 STARS_AGE = 3600
-_FAMILY = (None, frozenset(), {}, None)   # (view, indices to leave out, {index: factor}, me): an answer for the family
+_FAMILY = (None, frozenset(), {}, None)   # (view, indices to leave out, {index: factor}, me): unclear who listens
 _given = {}   # account (lower case) -> {song id: time} the answers brought as never played (_mix_new())
 _last = threading.local()
 
@@ -139,21 +139,20 @@ def status():
 # ---------------------------------------------------------------------------- the songs that may come
 
 def _view(cfg, who=None):
-    """The configuration as the plugin sees the library: the person listening or the shared person – kid-safe as soon
-    as any profile is a child profile or has kid-safe mode on. Without a shared person a stand-in without dislikes.
-    who: (person id, ids of people whose dislikes count too, plain) from _who() – plain: without the children's music
-    of a child profile (a guess, an account shared with the family). -> (configuration, person id)"""
-    pid, also, plain = who or (None, (), False)
-    default = pid or cfg["settings"].get("defaultPerson")
-    clean = any(p.get("child") or p.get("clean") for p in cfg.get("personen", []))
+    """The configuration as the plugin sees the library: the person listening – or, when that is unclear, the family
+    (without one a stand-in without dislikes) – kid-safe as soon as any person is a child profile or has kid-safe mode
+    on (the family's kid-safe mode only for the family's answers: it is the default for its playlists).
+    who: (person id, plain) from _who() – plain: without the children's music of a child profile (a guess).
+    -> (configuration, person id)"""
+    pid, plain = who or (None, False)
+    default = pid or next((p["id"] for p in cfg.get("personen", []) if p.get("family")), None)
+    clean = any(p.get("child") or (p.get("clean") and (not p.get("family") or p["id"] == default))
+                for p in cfg.get("personen", []))
     personen = [dict(p) for p in cfg.get("personen", [])]
     me = next((p for p in personen if p["id"] == default), None)
     if me is None:
         me = {"id": "_sonic", "name": "", "user": ""}
         personen.append(me)
-    for other in (p for p in personen if p["id"] in also):   # what the family dislikes stays out as well
-        mine, theirs = me.get("dislikes") or {}, other.get("dislikes") or {}
-        me["dislikes"] = {k: sorted(set(mine.get(k) or []) | set(theirs.get(k) or [])) for k in ("artists", "genres")}
     if plain:
         me["child"] = False
     if clean:
@@ -185,7 +184,7 @@ def _recall(kind, key):
 
 
 def _pool(cfg, lib, worlds=(), who=None):
-    """Indices of the songs that may come: "All" for the person listening (who, see _view()) or the shared person
+    """Indices of the songs that may come: "All" for the person listening (who, see _view()) or the family
     (minimum rating 0) – plus the separate worlds `worlds` (those of the song asked for)."""
     key = (ml.lib_key(lib), _cfg_key(cfg), tuple(sorted(worlds)), who)
     hit = _recall("pool", key)
@@ -223,26 +222,18 @@ def _all_batch():
 
 
 def _listener(cfg, ids):
-    """The person listening to one of these songs (listen.listener()) -> (person, sure, shared): the person of that
-    account; if the shared person uses the account too ("Family" on a parent's account), the account's own person –
-    and the shared person in `shared`. (None, False, ()) if that is unclear (also: two accounts behind one folder
-    name)."""
+    """The person listening to one of these songs (listen.listener()) -> (person, sure) – the person of that account
+    (one person per account; the family's on a shared device), (None, False) if that is unclear or the account's plays
+    are not kept (listen.allowed())."""
     from . import listen
     from .config import slug
     folder, sure = listen.listener(ids)
     if not folder:
-        return None, False, ()
+        return None, False
     people = [p for p in cfg.get("personen", []) if p.get("user") and slug(p["user"]) == folder]
-    if len({p["user"].lower() for p in people}) > 1:
-        return None, False, ()
-    shared = ()
-    if len(people) > 1:
-        default = cfg["settings"].get("defaultPerson")
-        shared = tuple(p for p in people if p["id"] == default)
-        people = [p for p in people if p["id"] != default]
     if len(people) != 1 or not listen.allowed(cfg, people[0]["user"]):
-        return None, False, ()
-    return people[0], sure, shared
+        return None, False   # also: two accounts whose names give the same folder name
+    return people[0], sure
 
 
 def _rated_one(lib, user):
@@ -313,19 +304,20 @@ def _variety(lib, user, seed):
 
 def _who(cfg, lib, ids, personal, seed=None):
     """For whom the answer is: (view, indices to leave out, {index: factor}, me) – view for _pool()/_view(): (person
-    id, ids of people whose dislikes count too, plain); me: {"person", "user", "sure"} of the one listening, None for
-    the family. For the person listening to one of these song ids:
+    id, plain); me: {"person", "user", "sure"} of the one listening, None when that is unclear (then the family's
+    answer, _view()). For the person listening to one of these song ids:
     * sure (the song is playing on their account right now): their "All" and dislikes; what they heard in the last
       hours (listen.heard()) or rated 1 star by hand stays out, what they skip comes further down
       (feedback.factors(), with "Mixes that learn" on), and for the songs like `seed` (the smart queue) variety
       between bands (_variety());
     * a guess: their dislikes, what they just heard and skip – but no children's music of a child profile, no 1-stars,
-      no variety (it may be someone else asking);
-    * an account the shared person uses too: the dislikes of both, no children's music.
+      no variety (it may be someone else asking).
     _FAMILY if not asked or unclear."""
     _last.person, _last.guess = None, False
-    person, sure, shared = _listener(cfg, ids) if personal else (None, False, ())
+    person, sure = _listener(cfg, ids) if personal else (None, False)
     if not person:
+        fam = next((p for p in cfg.get("personen", []) if p.get("family")), None)
+        _last.person = (fam.get("name") or fam["id"]) if fam else None   # the family's answer
         return _FAMILY
     from . import feedback, listen
     _last.person, _last.guess = person.get("name") or person["id"], not sure
@@ -339,8 +331,7 @@ def _who(cfg, lib, ids, personal, seed=None):
     if seed is not None and sure:
         for j, f in _variety(lib, user, seed).items():
             factor[j] = factor.get(j, 1.0) * f
-    return (person["id"], tuple(p["id"] for p in shared), not sure or bool(shared)), leave, factor, \
-        {"person": person, "user": user, "sure": sure}
+    return (person["id"], not sure), leave, factor, {"person": person, "user": user, "sure": sure}
 
 
 def _favour(scored, factor):

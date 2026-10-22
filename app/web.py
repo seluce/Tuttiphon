@@ -373,14 +373,9 @@ def artist_counts(lib):
 
 
 def _my_favorites(cfg, lib):
-    """Favorite bands of the signed-in person – administrators: those of the shared person and of their own account."""
-    m = auth.current()
-    user = (m.get("user") or "").lower()
-    if m["role"] == "admin":
-        mine = [p for p in cfg["personen"] if p["id"] == cfg["settings"].get("defaultPerson")
-                or (user and (p.get("user") or "").lower() == user)]
-    else:
-        mine = [p for p in cfg["personen"] if p["id"] in m["own"]]
+    """Favorite bands of the signed-in account's person (administrators without one: the family's)."""
+    pid = _default_person(cfg)
+    mine = [p for p in cfg["personen"] if p["id"] == pid]
     ctx = BuildContext(lib)
     out = set()
     for p in mine:
@@ -461,7 +456,8 @@ def api_playlist(query):
 
 def _preview_config(sent):
     """Configuration for preview/song counts. Administrators: as sent from the interface (changes not saved yet).
-    Users: the server state – their own people from the interface, other people without likes and dislikes."""
+    Users: the server state – their own person from the interface, the family as it is (its playlists are theirs to
+    change too), other people without likes and dislikes."""
     m = auth.current()
     if m["role"] == "admin":
         return sent or load_config()
@@ -475,28 +471,23 @@ def _preview_config(sent):
                 mine[p["id"]] = {**server, **{k: p[k] for k in auth.PERSON_FIELDS if k in p}}
                 if server.get("clean"):   # as when saving: only the administrator turns kid-safe mode off
                     mine[p["id"]]["clean"] = True
-    cfg["personen"] = [mine.get(p["id"], p) if p["id"] in m["own"]
+    cfg["personen"] = [mine.get(p["id"], p) if p["id"] in m["own"] else p if p.get("family")
                        else {k: v for k, v in p.items() if k not in ("likes", "dislikes", "push")} for p in cfg["personen"]]
     return normalize_persons(cfg)
 
 
 def _guard_preview(body, cfg):
-    """Preview for users: only for their own people, without fields only the server sets, family mix only with their
-    own people and those visible to everyone, sizes limited – otherwise other people's listening could be queried."""
+    """Preview for users: only for the people they may create playlists for (their own, the family's), without fields
+    only the server sets, sizes limited – otherwise other people's listening could be queried."""
     m = auth.current()
     body["sampleSize"] = max(1, min(100, int(body.get("sampleSize", 15) or 15)))
     if isinstance(body.get("mix"), dict) and isinstance(body["mix"].get("size"), (int, float)):
         body["mix"]["size"] = max(5, min(500, int(body["mix"]["size"])))
     if m["role"] == "admin":
         return
-    _own_person(auth.person_id(body, cfg))
+    _own_person(auth.person_id(body, cfg), write=True)
     for k in auth.SERVER_PLAYLIST_FIELDS:
         body.pop(k, None)
-    if isinstance(body.get("together"), list):
-        allowed = set(m["own"]) | {p["id"] for p in cfg["personen"] if p.get("public")}
-        body["together"] = [x for x in body["together"] if x in allowed]
-        if len(body["together"]) < 2:
-            body.pop("together")
 
 
 def api_preview(body):
@@ -775,9 +766,11 @@ def api_suggestions(query=None):
     items = _memoized("suggestions", build)
     if m["role"] == "admin":
         return items
-    own = set(m["own"])   # users: only suggestions for their own people (no creating new music worlds)
-    hidden = set(((load_config().get("accounts") or {}).get((m["user"] or "").lower()) or {}).get("dismissed", []))
-    return [x for x in items if x.get("kind") != "scene" and x.get("person") in own and x["key"] not in hidden]
+    # users: only suggestions they can take – for their own person and the family's if they may (no new music worlds)
+    cfg = load_config()
+    mine = auth.editable_persons(cfg, m)
+    hidden = set(((cfg.get("accounts") or {}).get((m["user"] or "").lower()) or {}).get("dismissed", []))
+    return [x for x in items if x.get("kind") != "scene" and x.get("person") in mine and x["key"] not in hidden]
 
 
 def api_taste(query):
@@ -967,8 +960,7 @@ def _search_themes(q, cfg, lib):
     for x in ml.search_themes(q, lib):
         st = _theme_vibe(cfg, x["id"], words + [text.replace(" ", "")])
         if st:
-            m = auth.current()
-            person = m["own"][0] if m["role"] != "admin" and m["own"] else cfg["settings"].get("defaultPerson")
+            person = _default_person(cfg)
             p = {"person": person, "welt": ALL, "stil": st["id"], "type": "mix", "mix": {"size": 40, "perArtist": 3, "every": "week"}}
             try:
                 x = {**x, "stil": st["id"], "stilName": st["name"], "count": rules.count(cfg, lib, p, BuildContext(lib))}
@@ -1036,8 +1028,7 @@ def _search_combos(q, cfg, lib):
             themes = [y for y in themes if y != t] or None
     if sum(1 for x in (welten, moods, stile, instruments, themes) if x) < 2:
         return []
-    m = auth.current()
-    person = (m["own"][0] if m["role"] != "admin" and m["own"] else cfg["settings"].get("defaultPerson"))
+    person = _default_person(cfg)
     ctx = BuildContext(lib)
     out = []
     for w in welten[:2] or [None]:
@@ -1104,8 +1095,11 @@ def api_takeover_preview(body):
 
 
 def api_takeover(body):
+    """Take over a handmade playlist – for the person chosen (body["person"]), otherwise the signed-in administrator's
+    own one, the family's or the first."""
     out = {}
-    update_config(lambda cfg: out.update(p=playlists.takeover(cfg, body["file"], body.get("mode", "unveraendert"))))
+    update_config(lambda cfg: out.update(p=playlists.takeover(cfg, body["file"], body.get("mode", "unveraendert"),
+                                                              person=body.get("person") or _default_person(cfg))))
     AUTO.schedule()
     return {"ok": True, "playlist": out["p"]}
 
@@ -1126,15 +1120,25 @@ def api_snapshot(body):
 
 
 def _default_person(cfg):
+    """Whose view a page shows when none is asked for: the signed-in account's person; administrators without one
+    the family's, otherwise the first person's. None for a user without a person (yet)."""
     m = auth.current()
-    if m["role"] != "admin" and m["own"]:
+    if m["own"]:
         return m["own"][0]
-    return cfg["settings"].get("defaultPerson")
+    if m["role"] != "admin":
+        return None
+    return auth.family_id(cfg) or next((p["id"] for p in cfg["personen"]), None)
 
 
-def _own_person(pid):
+def _own_person(pid, write=False):
+    """May the signed-in account see (write: create playlists for) this person? Its own one; the family's for reading,
+    and for writing unless only administrators may (auth.editable_persons)."""
     m = auth.current()
-    if m["role"] != "admin" and pid not in m["own"]:
+    if m["role"] == "admin":
+        return
+    cfg = load_config()
+    allowed = auth.editable_persons(cfg, m) if write else set(m["own"]) | {auth.family_id(cfg)} - {None}
+    if pid not in allowed:
         raise PermissionError(_("This belongs to another account."))
 
 
@@ -1164,11 +1168,10 @@ def user_inbox(m):
         likes = p.get("likes") or {}
         if not likes.get("welten") and not likes.get("artists") and not heard(p):
             fresh = not any(pl.get("person") == p["id"] for pl in cfg["playlists"])
-            items.append({"key": f"likes|{p['id']}", "level": "info",
-                          "title": _("What do you like to listen to?") if len(own) == 1
-                          else _("What does “{name}” like to listen to?", name=p["name"]),
+            items.append({"key": f"likes|{p['id']}", "level": "info", "title": _("What do you like to listen to?"),
                           "text": _("Choose favorite worlds and bands – that makes the suggestions much better."),
-                          "actions": [{"label": _("Choose your taste"), "do": "goto", "href": "#/willkommen" if fresh and len(own) == 1 else f"#/person/{p['id']}"}]})
+                          "actions": [{"label": _("Choose your taste"), "do": "goto",
+                                       "href": "#/willkommen" if fresh else f"#/person/{p['id']}"}]})
     if own and not any(pl.get("person") in m["own"] and pl.get("status", "aktiv") == "aktiv" for pl in cfg["playlists"]):
         items.append({"key": "erste-playlist", "level": "info", "title": _("Your first playlist"),
                       "text": _("Under “Discover” there are ready-made suggestions for you – one click creates them."),
@@ -1224,6 +1227,7 @@ def api_accounts():
         out.append({"name": u["name"], "fullName": u["fullName"], "navidromeAdmin": u["admin"], "role": auth.role_of(u["name"], cfg),
                     "override": acc.get("role"), "lastLogin": acc.get("lastLogin"),
                     "persons": auth.persons_of(u["name"], cfg),
+                    "family": (u["name"].lower() == auth.family_account(cfg)),
                     "passwordStored": bool(user_password(load_env(), u["name"])),
                     "passwordRejected": bool(user_password(load_env(), u["name"])) and auth.password_rejected(u["name"])})
     return out
@@ -1418,7 +1422,7 @@ def api_rueckblick_keep(body):
     person = next((p for p in cfg["personen"] if p["id"] == (body.get("person") or _default_person(cfg))), None)
     if not person:
         raise ValueError(_("Unknown person"))
-    _own_person(person["id"])
+    _own_person(person["id"], write=True)
     kind = body.get("kind", "monat")
     if kind not in ("woche", "monat", "jahr"):
         raise ValueError(_("Unknown period"))
@@ -1440,7 +1444,7 @@ def api_rueckblick_keep(body):
         raise ValueError(_("“{name}” already exists in Navidrome.", name=name))
     playlists.save_fixed(load_env(), person, name, ids,
                          _s("The most played songs from {start:%m/%d/%Y} to {end:%m/%d/%Y} (Tuttiphon)", start=start, end=end),
-                         person.get("public", False))
+                         rules.is_family(person))
     return {"name": name, "count": len(ids)}
 
 
@@ -1484,7 +1488,8 @@ def api_notify_test(body):
         raise ValueError(_("Please use only letters, digits, - and _ for the topic."))
     m = auth.current()
     if body.get("person"):
-        _own_person(body["person"])
+        if m["role"] != "admin" and body["person"] not in m["own"]:   # the own topic only
+            raise PermissionError(_("This belongs to another account."))
         person = next((p for p in cfg["personen"] if p["id"] == body["person"]), None)
         topic = body.get("topic") or (person or {}).get("push")
         if m["role"] != "admin":
@@ -1587,7 +1592,7 @@ def api_stats(query):
     _own_person(pid)
     lib = stats.songs_for(person["user"], CACHE.get())
     out = _memoized("stats", lambda: stats.compute(cfg, lib), person["user"].lower(), ml.lib_key(lib))
-    return {**out, "person": pid, "personsSameUser": [p["id"] for p in cfg["personen"] if p["user"].lower() == person["user"].lower()]}
+    return {**out, "person": pid}
 
 
 def _navidrome_playlist(p):
@@ -1691,6 +1696,69 @@ def api_plugin_key(body):
 def api_plugin_key_remove(body):
     sonic.remove_key()
     return {"ok": True}
+
+
+FAMILY_ACCOUNT = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{1,39}")
+
+
+def api_family(body):
+    """Set up the family: Tuttiphon creates its Navidrome account (native API, random password – stored like any
+    account password, so its stars, plays and recap work) and adds the entry {"family": true}. Left over from the update
+    to one person per account (settings.familySetup): its look and preferences are taken over, and the playlists chosen
+    in body["playlists"] move to the family (with their “What everyone likes” members). -> {"person", "account",
+    "password"} – the password only now, for shared devices in Symfonium."""
+    import secrets
+    from .config import FAMILY_NAME, slug
+    cfg = load_config()
+    if auth.family_id(cfg):
+        raise ValueError(_("There already is a family."))
+    setup = cfg["settings"].get("familySetup") if isinstance(cfg["settings"].get("familySetup"), dict) else {}
+    name = " ".join(str(body.get("name") or "").split())[:60] or _s(FAMILY_NAME)   # i18n-ignore – N_ constant
+    account = str(body.get("account") or "").strip() or slug(name)
+    if not FAMILY_ACCOUNT.fullmatch(account):
+        raise ValueError(_("Please choose an account name of 2 to 40 letters, digits, dots, hyphens or underscores."))
+    if any((p.get("user") or "").lower() == account.lower() for p in cfg["personen"]):
+        raise ValueError(_("“{account}” already belongs to a person – please choose another name.", account=account))
+    password = secrets.token_urlsafe(18)
+    try:
+        playlists.native_api(load_env()).create_user(account, name, password)
+    except NavidromeError as e:
+        if "unique" in str(e):
+            raise ValueError(_("Navidrome already has an account “{account}” – please choose another name.",
+                               account=account)) from None
+        raise ValueError(_("Navidrome could not create the account: {error}", error=i18n.said(e))) from None
+    save_env({pass_key(account): password})
+    auth.navidrome_users(force=True)
+    ids = {p["id"] for p in cfg["personen"]}
+    pid = next(x for x in ["familie"] + [f"familie-{n}" for n in range(2, 100)] if x not in ids)   # i18n-ignore – id
+    move = set(body.get("playlists") or []) & set(setup.get("playlists") or [])
+
+    def add(c):
+        person = {"id": pid, "name": name, "icon": setup.get("icon") or "i:home", "user": account, "family": True,
+                  "clean": setup.get("clean", True), "prefix": "",
+                  "likes": setup.get("likes") or {"welten": [], "stile": [], "artists": []},
+                  "dislikes": setup.get("dislikes") or {"artists": [], "genres": []}}
+        if setup.get("color"):
+            person["color"] = setup["color"]
+        c["personen"].append(person)
+        members = {p["id"] for p in c["personen"] if not p.get("family")}
+        for pl in c["playlists"]:
+            if pl["id"] in move:
+                pl["person"] = pid
+                together = [x for x in (setup.get("together") or {}).get(pl["id"], []) if x in members]
+                if len(together) >= 2:
+                    pl["together"] = together
+        c["settings"].pop("familySetup", None)
+        deezer = c["settings"].get("deezer")
+        if isinstance(deezer, dict) and isinstance(deezer.get("users"), list) and account not in deezer["users"]:
+            deezer["users"].append(account)   # Deezer stars for the family's account too (its rules use them)
+    update_config(add)
+    events.say(_s("Family set up: Navidrome account {account}", account=account))
+    try:   # its stars (deezer._catch_up) and the moved playlists under its account – now, or after the running task
+        RUNNER.start(["deezer", "playlists", "scan"], deezer_mode="new")
+    except RuntimeError:
+        AUTO.schedule()
+    return {"person": pid, "account": account, "password": password}
 
 
 def api_task_status(query):
@@ -2148,6 +2216,7 @@ class Handler(BaseHTTPRequestHandler):
         "/api/push/test": api_push_test,
         "/api/plugin/key": api_plugin_key,
         "/api/plugin/key/remove": api_plugin_key_remove,
+        "/api/family": api_family,
     }
     PUT_ROUTES = {
         "/api/config": api_save_config,
@@ -2158,7 +2227,7 @@ class Handler(BaseHTTPRequestHandler):
                   "/api/accounts", "/api/takeover/preview", "/api/takeover", "/api/mapping", "/api/env/test", "/api/paths/check",
                   "/api/lastfm/test", "/api/task/cancel", "/api/env", "/api/backups", "/api/backups/now", "/api/backups/file",
                   "/api/kinderschutz", "/api/pflege", "/api/liedtexte/update", "/api/welt/neu", "/api/admin-password",   # i18n-ignore – routes
-                  "/api/plugin", "/api/plugin/key", "/api/plugin/key/remove", "/plugin/tuttiphon.ndp"}   # i18n-ignore – routes; /api/task: status for everyone, api_task_start checks starting
+                  "/api/plugin", "/api/plugin/key", "/api/plugin/key/remove", "/plugin/tuttiphon.ndp", "/api/family"}   # i18n-ignore – routes; /api/task: status for everyone, api_task_start checks starting
 
     def _handle(self, method):
         url = urllib.parse.urlparse(self.path)

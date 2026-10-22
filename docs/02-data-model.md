@@ -52,7 +52,7 @@ In addition, there is a folder outside the data folder that all instances share:
 
 | Key | Type | Content | Written by |
 |---|---|---|---|
-| `version` | number | format version, currently `12` (`CONFIG_VERSION`) | server (template, migration); the interface sends the value back unchanged |
+| `version` | number | format version, currently `13` (`CONFIG_VERSION`) | server (template, migration); the interface sends the value back unchanged |
 | `settings` | object | all settings, see [settings](#settings) | interface (Settings); server only during migration |
 | `personen` | list | people, see [personen](#personen) | interface; users only their own |
 | `welten` | list | music worlds, see [welten](#welten) | interface; server adds `artists` during automatic classification |
@@ -69,9 +69,10 @@ In addition, there is a folder outside the data folder that all instances share:
 
 ```json
 {
-  "version": 10,
-  "settings": { "defaultPerson": "familie", "autoApply": true, "...": "..." },
-  "personen": [ { "id": "familie", "name": "Familie", "user": "familie", "public": true, "...": "..." } ],
+  "version": 13,
+  "settings": { "familyEdit": "all", "autoApply": true, "...": "..." },
+  "personen": [ { "id": "familie", "name": "Familie", "user": "familie", "family": true, "...": "..." },
+                { "id": "anna", "name": "Anna", "user": "anna-lena", "...": "..." } ],
   "welten": [ { "id": "kinder", "name": "Kinder", "...": "..." } ],
   "stile": [ { "id": "rock", "name": "Rock & Punk", "...": "..." } ],
   "playlists": [ { "id": "kinder-rock", "person": "familie", "welt": "kinder", "stil": "rock", "...": "..." } ],
@@ -81,9 +82,10 @@ In addition, there is a folder outside the data folder that all instances share:
 }
 ```
 
-The template for a fresh start is `app/default_config.json`: `version: 10`, all settings with default values
-(`language: "en"`, `setup.done: false` – the setup assistant is still to come, conversion off), a single neutral
-person `familie` (“Family”; public, without an account – `user` is empty – and without preferences), no music worlds
+The template for a fresh start is `app/default_config.json`: `version: 13`, all settings with default values
+(`language: "en"`, `setup.done: false` – the setup assistant is still to come, conversion off, `familyEdit: "all"`),
+no people – every person belongs to a Navidrome account and comes from the welcome assistant of that account or from
+People → “Add person”, the family from People → “Set up the family” (`POST /api/family`) –, no music worlds
 (they are created automatically from the scene catalog), 40 vibes with English names (groups Genre, Thema, Jahreszeit,
 Zeitreise, Spezial, Klang – the group names are data) and no playlists. The German names come from
 `app/locales/de/defaults.json` when the server language is German (`localize_defaults()`).
@@ -115,7 +117,7 @@ the migration to v10 writes the value they had ([Version and migration](#version
 
 | Key | Type | Default | Meaning | Validation |
 |---|---|---|---|---|
-| `language` | string | `"en"` (existing installations after the migration to v6: `"de"`) | Server language: run logs, notifications, names and descriptions that Tuttiphon assigns itself (`i18n._s()`); the server log (`docker logs`) is always English. Messages to the interface follow the language of the request (header `X-Lang`). A switch also renames the bundled vibes, the person “Family” and `allName`, as long as they still carry their bundled name (`config.localize_defaults()`). A new installation takes the language of the first administrator in the setup (`POST /api/setup`); notifications to devices follow each device's language (`push.json`), a person's ntfy topic that of their account's devices, the administrators' topic the server language | one of `en`, `de`, `fr`, `nl`, `es`, `it`, `pt`, `pl` (`i18n.LANGS`) – otherwise `400` “Settings: unknown language” |
+| `language` | string | `"en"` (existing installations after the migration to v6: `"de"`) | Server language: run logs, notifications, names and descriptions that Tuttiphon assigns itself (`i18n._s()`); the server log (`docker logs`) is always English. Messages to the interface follow the language of the request (header `X-Lang`). A switch also renames the bundled vibes, the family entry (`config.FAMILY_NAME`, “Family”) and `allName`, as long as they still carry their bundled name (`config.localize_defaults()`). A new installation takes the language of the first administrator in the setup (`POST /api/setup`); notifications to devices follow each device's language (`push.json`), a person's ntfy topic that of their account's devices, the administrators' topic the server language | one of `en`, `de`, `fr`, `nl`, `es`, `it`, `pt`, `pl` (`i18n.LANGS`) – otherwise `400` “Settings: unknown language” |
 
 Each device stores the interface language itself (`localStorage` `tuttiphon-lang`, Settings → General → Language);
 without a choice, the browser language applies.
@@ -124,7 +126,7 @@ without a choice, the browser language applies.
 
 | Key | Type | Default | Meaning |
 |---|---|---|---|
-| `defaultPerson` | string | `"familie"` | default person: applies to playlists without `person`, is entered when handmade playlists are taken over; with the password of its account, the library loads exact stars (`library.py`); must be an existing person |
+| `familyEdit` | string | `"all"` | who may create, change and delete the family's playlists: `all` (administrators and users) or `admins` (administrators only) – `auth.editable_persons()`. The family entry itself (name, look, preferences, kid-safe mode) only administrators change. Users see the value (`auth.USER_SETTINGS`); validation: one of the two values (`config.FAMILY_EDIT`) |
 | `namePattern` | string | `"{welt} · {stil}"` | name from music world and vibe (placeholders `{welt}`, `{stil}`); at most 200 characters, no other placeholders and no format details (`{welt:>9}`) – otherwise no playlist name could be built |
 | `allName` | string | `"All"` (German: `"Alle"`) | word for “no music world” in the description (`rules.describe()`) |
 | `filePrefix` | string | `"Auto – "` | start of new file names in the playlist folder (at most 60 characters) |
@@ -133,7 +135,6 @@ without a choice, the browser language applies.
 | `allMinRating` | number 0–5 | `3` | minimum rating for playlists without a music world |
 | `hitsShare` | number 0–1 | `0.3` | share for “Only the hits” (interface: 0.2–0.5) |
 | `excludeTitles` | list | live, unplugged, instrumental, karaoke and playback markers | title keywords that are left out of every playlist (list of strings) |
-| `public` | boolean | `true` | visibility if a playlist has no valid person |
 | `mixLearn` | boolean | `true` | mixes learn from listening (Settings → Playlists, “Mixes that learn”): skipped songs come up less often, songs rated 1 star by hand not at all anymore ([Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy)). The mix history is kept even with `false` |
 | `smoothTransitions` | boolean | `true` | mixes in an order where one song leads into the next: similar sound, close tempo, compatible key, similar energy (`mixer.smooth()`, [Intelligence](06-intelligence.md#smooth-transitions-in-mixes)). Needs the AI sound analysis; without sound vectors or keys, and in mixes with an arc (falling asleep, good morning), the order stays as before. A change applies from the next mix period |
 | `playlistDir` | string | `"Music/00_SmartPlaylists"` | only a fallback for the playlist folder if neither `PLAYLIST_DIR` nor `paths.playlists` is set (if the value starts with `Music/`, the rest is relative to the music folder, otherwise relative to `BASE`) |
@@ -190,7 +191,7 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 | Key | Type | Default | Meaning | Validation |
 |---|---|---|---|---|
 | `deezer.thresholds` | list | `[10000, 100000, 300000, 600000, 850000]` | rank levels: below `thresholds[k]` a song gets `k` stars, from the last value on 5 | five ascending integers ≥ 0 |
-| `deezer.users` | list or `null` | `null` | accounts for which stars are set; `null` = `RATING_USERS`, otherwise every `user` of the people (`rating_users()`) | list of strings |
+| `deezer.users` | list or `null` | `null` | accounts for which stars are set; `null` = `RATING_USERS`, otherwise every `user` of the people (`rating_users()`). `POST /api/family` adds the family's account to a list (its smart playlists use its stars) | list of strings |
 | `deezer.overwriteManual` | boolean | `false` | also overwrite stars changed by hand | – |
 | `deezer.pipelineMode` | string | `"new"` | mode of the `deezer` step if the run doesn't specify its own: `new` (new songs) or `missing` (new songs **and** songs not found so far; the step then runs in mode `both`) | one of the two values |
 | `deezer.topBoost` | boolean | `true` | one star more for the top songs of each band when too many songs would otherwise share the highest star count | – |
@@ -264,35 +265,54 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 Of these, users see only `notify.enabled` and `notify.server` (`auth.view_config()`), so that the profile knows whether
 to show the field for their own topic.
 
+#### Left over from the update to one person per account
+
+The migration to v13 ([Version and migration](#version-and-migration)) writes these two keys when the old configuration
+had a shared default person or several people on one account; “To review” then offers what is left to do
+([Playlists](04-playlists.md#to-review-inbox)). Only the server writes them; users never get them (`auth.USER_SETTINGS`).
+
+| Key | Type | Meaning | Validation |
+|---|---|---|---|
+| `familySetup` | object | the old default person (“Familie”), to become the family: `name`, `icon`, `color`, `likes`, `dislikes`, `clean` (as far as it had them), `playlists` (ids of its former playlists), `together` (`{playlist id: [person ids]}` – the members of its “What everyone likes” playlists, already mapped to the people that remain) and `person` (only if it was alone on its account: it stayed a person with this id and still owns `playlists`). As long as it exists, its `playlists` stay for everyone (`rules.for_everyone()`: public in Navidrome, visible to every account), so nobody loses them in Symfonium before the family is set up; “No family” on the People page removes it (they become the owner's own). `POST /api/family` takes icon, color, likes, dislikes and kid-safe mode over (the setup sheet prefills the name), moves the playlists chosen there (with their members) and removes the key; while there is a family, “To review” no longer offers it | an object |
+| `mergedPersons` | list | people merged into another person of the same account: `{name, into, child, playlists}` – name, id of the person they became part of, whether it was a child profile, ids of the playlists that moved. “To review” shows one notice per entry (“{name} needs an account of their own”), People one with “Add person” (prefilled) and “hide” – hiding removes the entry (the administrator's save) | a list |
+
 ### personen
+
+One person per Navidrome account: every person has an account of its own, and the family – if there is one – is a
+person too, with an account Tuttiphon created for it.
 
 | Field | Type | Meaning |
 |---|---|---|
-| `id` | string | unique, not `*`. If a user creates their profile themselves, the `id` must match the pattern `[a-z0-9][a-z0-9_-]{0,40}` and must not be `neu` |
+| `id` | string | unique, not `*`. If a user creates their profile themselves, the `id` must match the pattern `[a-z0-9][a-z0-9_-]{0,40}` and must not be `neu`; the family entry gets `familie` (`familie-2` … if taken) |
 | `name` | string | display name |
 | `icon` | string | icon as `i:<name>` (e.g. `i:home`) |
 | `color` | string | avatar color (interface only; without a value, the interface computes one from the `id`) |
-| `user` | string | Navidrome account: owner of the playlists, whose stars and favorites count; maps people to sign-ins (`auth.persons_of()`) |
-| `public` | boolean | playlists are public in Navidrome; in addition, other accounts in Tuttiphon see these playlists (`auth.visible_playlist()`) and the person with name, icon, color and prefix (`auth.view_config()`). If the value is missing, the person counts as private everywhere (`rules.build_nsp()`, `auth.visible_playlist()`, `auth.view_config()`) |
-| `prefix` | string | is put in front of the playlist names, e.g. `"Anna · "` |
+| `user` | string | **required** – Navidrome account, unique among the people (case-insensitive): owner of the playlists, whose stars, favorites and plays count; maps the account to its person (`auth.persons_of()`) |
+| `family` | boolean | `true` = the family entry, at most one. Its account belongs to Tuttiphon (`POST /api/family` creates it; nobody signs in to Tuttiphon with it, shared devices can use it in Symfonium). Its playlists are for everyone: public in Navidrome (`rules.build_nsp()`) and visible to every account in Tuttiphon (`auth.visible_playlist()`); only its playlists can be “What everyone likes” (`together`); the names of its formats say “Our …”. Never a child profile. Only administrators change the entry |
+| `prefix` | string | is put in front of the playlist names, e.g. `"Anna · "` (the family: `""`) |
 | `likes.welten` / `likes.stile` / `likes.artists` | lists | favorite worlds, vibes and bands: basis for suggestions, radio and “You’re still missing” |
 | `dislikes.artists` / `dislikes.genres` | lists | dislikes: left out of every playlist of this person |
-| `clean` | boolean | kid-safe mode: songs with explicit lyrics are left out of all playlists and mixes of the person (`rules.clean_rules()`, [Intelligence](06-intelligence.md#lyrics-search-and-kid-safe-mode)) |
+| `clean` | boolean | kid-safe mode: songs with explicit lyrics are left out of all playlists and mixes of the person (`rules.clean_rules()`, [Intelligence](06-intelligence.md#lyrics-search-and-kid-safe-mode)); the family starts with `true` |
 | `push` | string | own ntfy topic for notifications (`[A-Za-z0-9_-]{1,64}`): news from the favorite bands, new for you this week, monthly recap ([Operations](08-operations.md#notifications)); other accounts never see it. Notifications via the app need no topic – there the account's devices count (`state/push.json`) |
-| `child` | boolean | child profile – only the administrator sets it: the children's music belongs to the whole library for this person ([Playlists](04-playlists.md#music-world-welt)), kid-safe mode is always on – for every profile of its account (`config.normalize_persons()` sets `clean` when loading and saving) –, `tasteExclude` has no effect, no card or hint to keep children's music out of the taste. A further profile a user creates on the same account gets it too |
-| `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. Other people on the same account (the family) keep them, and so do the family playlists ([Intelligence](06-intelligence.md#taste-per-person)). No effect on a child profile. Users set it for their own people; ids of worlds that no longer exist are removed when the configuration is loaded or saved |
-| `newEvery` | number | never played songs in the plugin's answers (smart queue, Instant Mix, song and artist radio in Symfonium): every n-th song one the account has never played – `0` never, `5` now and then, `3` often; missing = 5 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Users set it for their own people (Profile → “New songs in the queue”, only while the plugin is in use); validation: `0`, `3` or `5` |
+| `child` | boolean | child profile – only the administrator sets it: the children's music belongs to the whole library for this person ([Playlists](04-playlists.md#music-world-welt)), kid-safe mode is always on (`config.normalize_persons()` sets `clean` when loading and saving), `tasteExclude` has no effect, no card or hint to keep children's music out of the taste. Never on the family |
+| `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. The family playlists keep them ([Intelligence](06-intelligence.md#taste-per-person)). No effect on a child profile; the interface does not offer it for the family. Users set it for their own person; ids of worlds that no longer exist are removed when the configuration is loaded or saved |
+| `newEvery` | number | never played songs in the plugin's answers (smart queue, Instant Mix, song and artist radio in Symfonium): every n-th song one the account has never played – `0` never, `5` now and then, `3` often; missing = 5 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Users set it for their own person (Profile → “New songs in the queue”, only while the plugin is in use); validation: `0`, `3` or `5` |
 
-Several people may share the same account (e.g. a personal profile and the shared family).
+There is no visibility per person (the field `public` and `settings.public` are gone since v13): a person's
+playlists are private – only their account sees them in Navidrome, in Tuttiphon the account and the administrators –,
+the family's are for everyone.
 
-`validate_config()` checks types (`_validate_types()`): `name`, `icon`, `color`, `prefix`, `user` must be strings,
-`public`, `clean` and `child` booleans, `push` empty or a topic made of letters, digits, `-` and `_`, `likes`/`dislikes` an
-object of string lists, `tasteExclude` a list of at most 50 strings of at most 100 characters (ids of worlds that no
-longer exist are ignored, not refused). Lengths: `name` at most 120, `prefix` 40, `icon` 64 characters, lists at most 2,000 entries of
-at most 300 characters; `color` empty, `#rgb`, `#rrggbb` or `hsl(…)` (it goes into the page's styles).
+`validate_config()` checks the people (`_validate_persons()`): every person needs a non-empty `user` (“needs a
+Navidrome account”), an account belongs to at most one person (case-insensitive), at most one person has `family:
+true`, and the family is never a child profile. It checks types (`_validate_types()`): `name`, `icon`, `color`,
+`prefix`, `user` must be strings, `clean`, `child` and `family` booleans, `push` empty or a topic made of letters,
+digits, `-` and `_`, `likes`/`dislikes` an object of string lists, `tasteExclude` a list of at most 50 strings of at
+most 100 characters (ids of worlds that no longer exist are ignored, not refused). Lengths: `name` at most 120,
+`prefix` 40, `icon` 64 characters, lists at most 2,000 entries of at most 300 characters; `color` empty, `#rgb`,
+`#rrggbb` or `hsl(…)` (it goes into the page's styles).
 
 ```json
-{ "id": "familie", "name": "Familie", "icon": "i:home", "user": "familie", "public": true, "prefix": "",
+{ "id": "familie", "name": "Familie", "icon": "i:home", "user": "familie", "family": true, "clean": true, "prefix": "",
   "likes": { "welten": ["kinder"], "stile": [], "artists": [] },
   "dislikes": { "artists": [], "genres": [] } }
 ```
@@ -375,7 +395,7 @@ unchanged (`rules`). The interface's playlist editor removes empty fields instea
 |---|---|---|---|---|
 | `id` | string | – | unique, not `*` | interface, takeover |
 | `name` | string | – | custom name; without it, the name is built from prefix, music world and vibe (`rules.playlist_name()`) | interface |
-| `person` | string | `settings.defaultPerson` | person (must exist) | interface |
+| `person` | string | – (required) | the person the playlist belongs to – it must exist (`_validate_owners()`); there is no fallback any more. Its account owns the playlist in Navidrome; the family's playlists are public there | interface, takeover |
 | `status` | string | `aktiv` | `aktiv` (active), `pausiert` (paused) or `papierkorb` (trash); only active playlists are in Navidrome | interface |
 | `created` | date | – | creation date (`YYYY-MM-DD`); not evaluated | interface, takeover |
 | `source` | string | – | origin: `assistent`, `vorschlag`, `willkommen`, `radio`, `statistik`, `tabelle`, `eigene`, `handgemacht`; not evaluated | interface, takeover |
@@ -397,7 +417,7 @@ unchanged (`rules`). The interface's playlist editor removes empty fields instea
 
 In addition, `validate_config()` checks the types (`_validate_types()`): `name`, `file`, `person`, `stil`, `sort`, `icon`,
 `color`, `status`, `source`, `created`, `sortRaw`, `originalName` must be strings, `excludeArtists`, `addArtists`,
-`excludeTitles` lists of strings, `public` and `hits` booleans, `welt` a string or a list of strings, `rules` a list,
+`excludeTitles` lists of strings, `public` (no longer read), `hits` and `yearRound` booleans, `welt` a string or a list of strings, `rules` a list,
 `rulesExtra` and `takeover` objects, `mix.flavor` a string; `name` at most 120 characters, `color` as for people.
 Otherwise a wrong type would make writing all playlists fail. A playlist stored before with a value that can't be
 built is left out when writing (its file stays) and shows `state: "fehler"` – it never stops the others.
@@ -441,7 +461,7 @@ mix: `type: "mix"` and, if `mix` is missing, `{"size": 40, "perArtist": 3, "ever
 | Field | Type | Meaning | Validation |
 |---|---|---|---|
 | `fav` | object | “New from your favorite bands”: `{days}` – what the person's favorite bands added in the last `days` days; `rules.favorite_artists()` determines the bands | `days` 7–365, default 60 |
-| `together` | list | family mix “What everyone likes”: people whose taste counts equally; everyone's dislikes and 1-star songs apply | at least two known people; users only their own and those visible to everyone (`auth.merge_user_changes()`) |
+| `together` | list | family mix “What everyone likes”: people whose taste counts equally; everyone's dislikes and 1-star songs apply | at least two known people, and only on a playlist of the family (`_validate_owners()`); members are people other than the family – `auth.merge_user_changes()` drops the family and unknown ids, and the field on a playlist of anyone else |
 | `album` | boolean | `true`: “Album of the week” – one whole album the person's account has never played, by its taste, in album order, new every period (`mixer.album_order()`); “All × Everything” is allowed | only `true`, mix only |
 | `episodes` | boolean | `true`: “Next episode” – for every audio play series the person's account listened to lately the episode that comes next, new every day (`mixer.episode_order()`, [Playlists](04-playlists.md#playlists-from-listening)); `welt`: the audio play worlds | only `true`, mix only |
 | `unheard` | boolean | `true`: “Discovered for you” – only songs the person's account has never played, the taste decides (`mixer.unheard()`); “All × Everything” is allowed | only `true`, mix only |
@@ -458,7 +478,8 @@ mix: `type: "mix"` and, if `mix` is missing, `{"size": 40, "perArtist": 3, "ever
 | `rulesExtra` | object | further keys of the `.nsp` (e.g. `order`) |
 | `originalName` | string | original name |
 
-In addition, the takeover (`playlists.takeover()`) sets `name`, `person` (= `settings.defaultPerson`), `status: "aktiv"`,
+In addition, the takeover (`playlists.takeover()`) sets `name`, `person` (the one chosen; without a choice the signed-in
+administrator's own person, otherwise the family, otherwise the first person – `web._default_person()`), `status: "aktiv"`,
 `file` (the existing file), `created`, `source: "handgemacht"`, `takeover`, `welt: "*"`, `stil: "*"` and `limit` from
 the `.nsp`. With “Switch to the builder”, `welt`, `stil` (and possibly `minRating`, `limit`) are derived from the
 recognized rules instead of the rule fields; if Tuttiphon recognizes nothing, the playlist is taken over unchanged.
@@ -496,7 +517,7 @@ users' hide lists from `dismissed`/`ignored`.
 
 | Field | Type | Meaning | Written by |
 |---|---|---|---|
-| `role` | string | `admin`, `user` or `none` (no access); if missing: Navidrome admins are `admin`, everyone else `user`. If the account is missing from the known list of Navidrome accounts, `none` applies regardless | `api_accounts_save()` |
+| `role` | string | `admin`, `user` or `none` (no access); if missing: Navidrome admins are `admin`, everyone else `user`. If the account is missing from the known list of Navidrome accounts, or it is the family's account, `none` applies regardless (`auth.role_of()`) | `api_accounts_save()` |
 | `lastLogin` | string | last sign-in, `YYYY-MM-DD HH:MM` | `auth.login()` |
 | `dismissed` / `ignored` | lists | hide lists of this user (at most 500 entries) | `auth.merge_user_changes()` |
 | `dismissedAt` | object | as above: since when each entry in `dismissed` has been hidden | `auth.merge_user_changes()` |
@@ -511,7 +532,7 @@ those in `accounts.<account>`; `/api/config` delivers each person their own unde
 | List | Keys (examples) |
 |---|---|
 | `dismissed` – suggestions (`suggest.key_of()`) | `<person>\|<welt>\|<stil>\|<hits>[\|mix][\|radio:<bands>]`, e.g. `familie\|kinder\|*\|` or `familie\|kinder\|*\|\|mix`; several worlds joined with `+`; also `likes\|<person>` and `scene\|<scene>` |
-| `ignored` – notices under “To review” | administrators: `cred`, `deezer-<n>`, `hand\|<file>`, `new\|<band>`, `class\|<band>`, `scenes-<n>`, `check\|<playlist>\|<songs in Navidrome>`, `low\|<playlist>\|<n>`, `gone\|<welt>\|<n>`, `untagged-<n>`; users: `profil`, `likes\|<person>`, `erste-playlist`, `passwort` |
+| `ignored` – notices under “To review” | administrators: `cred`, `deezer-<n>`, `hand\|<file>`, `new\|<band>`, `class\|<band>`, `scenes-<n>`, `check\|<playlist>\|<songs in Navidrome>`, `low\|<playlist>\|<n>`, `gone\|<welt>\|<n>`, `untagged-<n>`, `familySetup`, `merged\|<name>`; users: `profil`, `likes\|<person>`, `erste-playlist`, `passwort` |
 
 Keys containing a number reappear as soon as the number changes. Hidden suggestions come back after
 180 days ([long-term maintenance](05-maintenance.md#long-term-maintenance), `langzeit.expire_dismissed()`), so that “Discover” never
@@ -548,9 +569,10 @@ through) is read as `null`, so the value falls back to its default and `GET /api
 | 9 → 10 | setup assistant: an existing installation counts as set up – `settings.setup.done = true` (other keys in `setup` stay, no `at`). Defaults that changed for new installations keep their earlier effective value: if `settings.opus.enabled` is missing, it becomes `true` (before `_fill()` could bring the new default `false`); an explicit value stays |
 | 10 → 11 | new files no longer get the owner `1000:10` by default (new installations: empty = the user Tuttiphon runs as). If `settings.opus.owner` is missing, it becomes `"1000:10"` – an existing installation keeps its earlier behavior; an explicit value stays |
 | 11 → 12 | the weekly notification “New for you this week”: `settings.notify.events.weekly = true` where it is missing (a missing `notify` or `events` object is created); an explicit value stays |
+| 12 → 13 | one person per Navidrome account (`_one_person_per_account()`, no network – nothing is created in Navidrome). `settings.defaultPerson` and `settings.public` are removed; a playlist whose `person` doesn't exist gets the old default person (the old fallback, resolved once). A person without `user` gets the Navidrome administrator's account (`NAV_ADMIN_USER` from `.env` – it owns that person's playlists in Navidrome today; without one, the person's `id`) or, without playlists, is removed. Of several people on one account, the first that is not the old default person stays; the others are merged into it: their playlists move to it – where the other prefix would change a built name, the name it has now is frozen in `name` (not for recaps) –, nothing else is merged (no likes, no dislikes). The old default person never becomes the family by itself (that needs an account of its own): it is remembered in `settings.familySetup` with its look, preferences, kid-safe mode and the ids of its former playlists – if it was merged into another person, it is gone as a person; if it was alone on its account, it stays a person and `familySetup.person` names it. Merged child or extra profiles go into `settings.mergedPersons`. `together` is removed from every playlist and kept in `familySetup.together` (members mapped to the people that remain); an “All × Everything” playlist without its members becomes a mix by the own taste (`mix.flavor: "geschmack"`). A playlist that still has no person (no default person was set) gets the first person, without any person it is dropped. Finally `public` and `family` are removed from every person. “To review” then offers “Set up the family” and “{name} needs an account of their own” ([Playlists](04-playlists.md#to-review-inbox)) |
 
 After the last stage, `migrate()` calls `localize_defaults()` with `settings.language`: whatever a stage added gets its
-name in the server language, and bundled vibes, the person “Family” and `allName` that still carry a bundled name in
+name in the server language, and bundled vibes, the family entry and `allName` that still carry a bundled name in
 another language follow it too. Names someone chose stay as they are.
 
 ### Loading and saving
@@ -591,7 +613,7 @@ flowchart TD
   UI["Interface: PUT /api/config<br/>(whole configuration)"] --> R{Role}
   R -- Administrator --> A["save_from_ui(body)"]
   R -- User --> A2["save_from_ui(function, keep_accounts=True)"]
-  A2 --> U["auth.merge_user_changes()<br/>on the current state, under the lock:<br/>only own people, own playlists,<br/>own hide lists"]
+  A2 --> U["auth.merge_user_changes()<br/>on the current state, under the lock:<br/>only the own person, the playlists<br/>they may edit, own hide lists"]
   A --> M["merge_server_fields()<br/>file, takeover, cover from the server state<br/>(for administrators also accounts)"]
   U --> M
   M --> NP["normalize_playlists()<br/>sound filter → mix"]
@@ -607,11 +629,14 @@ flowchart TD
   music world from it (`mergeServerFields()` in `frontend/src/lib/state.svelte.js`).
 - **Users:** `save_from_ui()` gets a function that applies `auth.merge_user_changes()` to the current server state
   under the lock – so changes the server made in the meantime (e.g. `lastLogin`, roles) are not lost. Only these are
-  applied: the fields `name`, `icon`, `color`, `prefix`, `likes`, `dislikes`, `public`, `clean`, `push`, `tasteExclude` of the user's
-  own people (or the newly created own profile), the playlists of their own people (create, change, delete –
-  without `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName`, which only the server and administrators set)
-  and `dismissed`/`ignored` into `accounts.<account>`. `child` is never taken from a user (only the administrator
-  sets it); as with `clean`, a new own profile on the account of a child profile gets it. The song preview for users
+  applied: the fields `name`, `icon`, `color`, `prefix`, `likes`, `dislikes`, `clean`, `push`, `tasteExclude`,
+  `newEvery` (`auth.PERSON_FIELDS`) of the user's own person – or, if their account has none yet, the one person they
+  create for it (welcome assistant; `user` is set to their account) –, the playlists they may edit
+  (`auth.editable_persons()`: their own person's, and the family's unless `settings.familyEdit` is `admins`; create,
+  change, delete – without `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName`, which only the server and
+  administrators set; `together` only on the family's playlists) and `dismissed`/`ignored` into
+  `accounts.<account>`. `user`, `family` and `child` are never taken from a user (only the administrator sets them),
+  and kid-safe mode once on stays on. The song preview for users
   (`web._preview_config()`) keeps `clean` from the server as well. Settings, music worlds, vibes and other people's playlists
   stay as they are. What `/api/config` delivers to users and why: [Security](07-security.md).
 
@@ -640,7 +665,7 @@ locks these fields. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) ar
 | `NAV_URL` | Navidrome address, e.g. `http://192.168.1.10:4533` | Settings → Navidrome, environment |
 | `NAV_PUBLIC_URL` | address for “Open in Navidrome” links; empty = `NAV_URL` | Settings → Navidrome, environment |
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | admin access: song list, scan, playlist sync, accounts, covers | Settings → Navidrome, environment |
-| `NAV_PASS_<ACCOUNT>` | password of a Navidrome account (for stars, personal statistics, mixes from the person's perspective, exact preview) | administrators: password dialog (e.g. Settings → Navidrome), “New person” assistant; users: Settings → My account (`/api/me/password`); sign-in with “Turn on statistics & stars” (not for the admin account) |
+| `NAV_PASS_<ACCOUNT>` | password of a Navidrome account (for stars, personal statistics, mixes from the person's perspective, exact preview). The family's account gets a random password from `POST /api/family` (shown once, for shared devices in Symfonium), so its stars, plays and recap work like any account's | administrators: password dialog (e.g. Settings → Navidrome), “New person” assistant; users: Settings → My account (`/api/me/password`); sign-in with “Turn on statistics & stars” (not for the admin account); the family's: `POST /api/family` |
 | `RATING_USERS` | accounts for Deezer stars, comma-separated; applies only if `settings.deezer.users` is not set | by hand, environment |
 | `TUTTIPHON_ADMIN_PASSWORD` | optional: password of the [local administrator](07-security.md#local-administrator) in plain text; if it is set, Tuttiphon requires sign-in, and it wins over a password set in the browser (`state/admin_password.json`, see [admin_password.json](#admin_passwordjson)). On the network it must not be weak (`config.weak_password()`): at least 8 characters and not the placeholder (`config.PASSWORD_PLACEHOLDERS`: `change-me`), compared without surrounding spaces and in lowercase; otherwise the start fails and a running server stays locked ([Security](07-security.md#running-without-a-password)). Read via `config.admin_password()` | environment (docker-compose), by hand – not via `PUT /api/env` (“Unknown key”) |
 | `NTFY_TOKEN` | access token for protected topics on your own ntfy server; `/api/status` only reports whether one exists (`env.ntfyToken`) | by hand, environment |

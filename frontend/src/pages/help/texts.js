@@ -3,7 +3,7 @@
 import { t, translated } from '../../lib/i18n.svelte.js'
 
 export const ADMIN_FAQ = translated(() => [
-  [t('I don’t see a new playlist in Symfonium.'), t('Symfonium syncs only now and then – wait or refresh the media source there. Private playlists are only visible to their own account.')],
+  [t('I don’t see a new playlist in Symfonium.'), t('Symfonium syncs only now and then – wait or refresh the media source there. A person’s playlists only show up in their own account, family playlists in every account.')],
   [t('Why does a smart playlist only change when I open it?'), t('That’s how Navidrome works: smart playlists are reshuffled when their owner loads them. Mixes, on the other hand, are put together by Tuttiphon itself.')],
   [t('My mix has fewer songs than I set.'), t('Only a few songs per band are allowed, 3 by default. If the music world has only 10 bands, at most 30 songs are possible. To fix it: add more music worlds or raise “At most per band”.')],
   [t('What does “waiting for scan” mean?'), t('The file is written, but Navidrome hasn’t read it in yet. That happens automatically at the next scan – or right away with “Update everything”.')],
@@ -20,7 +20,9 @@ export const ADMIN_FAQ = translated(() => [
   [t('Can I undo something?'), t('Yes: “Undo” in the message at the bottom, the trash for playlists, and a daily backup of all settings under Settings → Backup.')],
   [t('Where do the music worlds come from?'), t('Tuttiphon detects them itself from genres, Last.fm, AI style and language. Deleted worlds don’t come back; turn it off under Settings → Intelligence.')],
   [t('A band is in the wrong music world.'), t('Click the band name – in the window under “In which music worlds?”, select or deselect the worlds. Or remove the band from the music world with ×.')],
-  [t('What do users see of each other?'), t('Only playlists of profiles that are “visible to everyone” – and only to view, listen to and copy them. Statistics, profile and private playlists stay with each person. Administrators see everything.')],
+  [t('What do users see of each other?'), t('Only the family playlists – they can change them too, unless only administrators may. Statistics, profile and playlists of each person stay with them. Administrators see everything.')],
+  [t('Can two people share one Navidrome account?'), t('No – one account, one person. Create an account of their own for everyone in Navidrome under “Users”, then add them under People. Shared devices such as the car use the family account.')],
+  [t('I need the password of the family account again.'), t('Tuttiphon shows it only once. Set a new one in Navidrome under Settings → Users and enter it under Settings → Navidrome as well – Tuttiphon needs it for the family playlists.')],
   [t('Kid-safe mode removes a harmless song.'), t('Kid-safe mode leaves out songs with explicit lyrics and songs tagged as explicit in the file; songs found by their lyrics can be allowed under Settings → Lyrics. They go back in the next time the playlists are written.')],
   [t('When does the search find lyrics?'), t('The first time, Tuttiphon reads in all lyrics in the background; with around 20,000 songs this takes a few minutes. After that, only new ones are added at each scan.')],
   [t('Is a new recap playlist added every month?'), t('No – “Your October” becomes “Your November” on the 1st; it stays one playlist. “Keep this mix” in the “…” menu keeps one forever.')],
@@ -30,12 +32,12 @@ export const ADMIN_FAQ = translated(() => [
 ])
 
 export const USER_FAQ = translated(() => [
-  [t('I don’t see my new playlist in Symfonium.'), t('Symfonium only syncs with Navidrome now and then. Wait a bit or refresh the media source in Symfonium. Also: be signed in to Symfonium with your own account – only that account sees private playlists.')],
+  [t('I don’t see my new playlist in Symfonium.'), t('Symfonium only syncs with Navidrome now and then. Wait a bit or refresh the media source in Symfonium. Also: be signed in to Symfonium with your own account – only it sees your playlists.')],
   [t('What’s the difference between a playlist and a mix?'), t('Navidrome reshuffles a smart playlist every time you open it. A mix stays the same for a day, a week or a month and then renews itself – ideal for downloading.')],
   [t('My mix has fewer songs than I set.'), t('Only a few songs per band go into it. With more music worlds, and so more bands, it gets longer – or raise “At most per band” under “Edit”.')],
   [t('A song comes up less often or not at all in my mix.'), t('Your mixes learn: what you skip comes up less often for a while, songs you rate with 1 star don’t come at all. Like a song after all? Give it more stars.')],
-  [t('Can I change the family playlists?'), t('Not directly – they belong to someone else. But with “Copy for me” you get your own version that you can adjust as you like.')],
-  [t('Can others see my playlists?'), t('Only if you chose “The whole family” in your profile. Even then they can’t change them. Apart from you, only the administrator sees your statistics and your profile.')],
+  [t('Can I change the family playlists?'), t('Yes, unless only administrators may – then “Copy for me” gives you your own version that you can adjust as you like.')],
+  [t('Can others see my playlists?'), t('No – your playlists are only yours; the family playlists are for everyone. Apart from you, only the administrator sees your statistics and your profile.')],
   [t('My statistics are empty.'), t('Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.')],
   [t('Where do the music worlds come from?'), t('Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.')],
   [t('A band is missing or in the wrong place.'), t('The administrator looks after the music worlds for everyone – just let them know. For yourself, you can mark a band as “Favorite” or “never” in the band window.')],
@@ -60,7 +62,8 @@ export const GLOSSAR = translated(() => [
   [t('Apply'), t('Write playlists to Navidrome and let Navidrome do a quick scan.')],
   [t('Scan'), t('Navidrome reads in new files and playlists.'), true],
   [t('Keep this mix'), t('In the “…” menu of a mix: save the current selection as a fixed playlist that never changes. For a smart playlist it is called “Save as fixed playlist”.')],
-  [t('Shared'), t('Playlist of a profile that is “visible to everyone” – others can listen to it and copy it.')],
+  [t('Family playlist'), t('Playlist for everyone – every account sees it in Navidrome and Symfonium.')],
+  [t('Family account'), t('Navidrome account of the family – for shared devices such as the car or the kitchen tablet in Symfonium.')],
   ['LRCLIB', t('Free lyrics database; provides synced and plain lyrics.'), true],
   ['Opus', t('Modern, very efficient audio format – at 160 kbit/s hardly distinguishable from the original.'), true],
   ['AAC', t('Widespread audio format that Apple devices play everywhere – at 224 kbit/s hardly distinguishable from the original.'), true],

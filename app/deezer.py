@@ -320,6 +320,47 @@ def stats(state=None, songs=None):
     return out
 
 
+def _catch_up(songs, done, entries, state, users, dry_run, overwrite_manual, result, log, stop):
+    """Accounts new to the stars (a new person, the family's new account – not in state["caughtUp"]): the stars of the
+    songs rated before, from the saved ranks – in every run, whatever its mode, until done. A star set by hand in that
+    account stays (unless overwrite_manual). The accounts known before this existed count as done."""
+    known = state["caughtUp"]
+    users = {u: v for u, v in users.items() if u not in known}
+    if not users:
+        return
+    late = [x for x in songs if x["id"] not in done and (entries.get(x["id"]) or {}).get("s")
+            and any(u not in (entries[x["id"]].get("u") or {}) for u in users)]
+    if not late:
+        known += [u for u in users if u not in known]
+        return
+    log(_sn(len(late), "Stars for accounts that do not have them yet: {n} song",
+            "Stars for accounts that do not have them yet: {n} songs"))
+    for song in late:
+        if stop is not None and stop.is_set():
+            result["stopped"] = True
+            return
+        e = entries[song["id"]]
+        mine = e.setdefault("u", {})
+        for user, (nav, current) in users.items():
+            if user in mine:
+                continue
+            cur = current.get(song["id"], 0) or 0
+            if cur and cur != e["s"] and not overwrite_manual:
+                result["kept"] += 1   # set by hand there: stays (and is checked again next time)
+                continue
+            if cur != e["s"] and not dry_run:
+                try:
+                    nav.set_rating(song["id"], e["s"])
+                except NavidromeError as err:   # Navidrome briefly gone: the rest next time
+                    log(_s("  ⚠ {artist} – {title}: star for {user} not set ({error})", artist=song.get("artist"),
+                           title=song.get("title"), user=user, error=err))
+                    return
+                current[song["id"]] = e["s"]
+                result["set"] += 1
+            mine[user] = e["s"]
+    known += [u for u in users if u not in known]
+
+
 def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overwrite_manual=None, cfg=None):
     cfg = cfg or load_config()
     dz = settings(cfg)
@@ -331,6 +372,8 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
     log(_sn(len(songs), "{n} song in Navidrome.", "{n} songs in Navidrome."))
 
     state = _load_for_run(log)
+    # accounts that have Tuttiphon's stars (_catch_up): those known before this was remembered count as done
+    state.setdefault("caughtUp", sorted({u for e in state.get("songs", {}).values() for u in (e.get("u") or {})}))
 
     users = {}
     for user in rating_users(env, cfg):
@@ -430,6 +473,8 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
                 if e.get("r") and sid in by_id and _stars(e["r"], thresholds, sid in boosted) != e.get("s"):
                     _apply(by_id[sid], e["r"], entries, users, "top", dry_run, overwrite_manual, result, log, thresholds,
                            boosted=boosted, isrc=e.get("i"))
+        if not result["stopped"]:
+            _catch_up(songs, {s["id"] for s in todo}, entries, state, users, dry_run, overwrite_manual, result, log, stop)
     finally:   # also when an error stops the run: save what was done, otherwise our own stars later count as "manual"
         if not dry_run:
             save_state(state)

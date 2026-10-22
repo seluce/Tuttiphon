@@ -1,6 +1,5 @@
 {
  "You can have at most {n} playlists – please delete some you no longer listen to (also from the trash).": "Vous pouvez avoir au plus {n} playlists – veuillez en supprimer que vous n’écoutez plus (y compris dans la corbeille).",
- "You can have at most {n} profiles.": "Vous pouvez avoir au plus {n} profils.",
  "This topic belongs to someone else – please choose your own.": "Ce sujet appartient à quelqu’un d’autre – veuillez choisir le vôtre.",
  "Something went wrong – the details are in the server log.": "Quelque chose s’est mal passé – les détails se trouvent dans le journal du serveur.",
  "⚠ The configuration {file} is damaged ({error}) – Tuttiphon keeps working with the last good state and writes it back with the next save. Copy of the damaged file: {copy}": "⚠ La configuration {file} est endommagée ({error}) – Tuttiphon continue avec le dernier état correct et le réécrit au prochain enregistrement. Copie du fichier endommagé : {copy}",
@@ -14,7 +13,6 @@
  "config: music world '{id}': {key} must be a number between {lo} and {hi}": "config : univers musical '{id}' : {key} doit être un nombre entre {lo} et {hi}",
  "Settings: {key} invalid": "Paramètres : {key} invalide",
  "Settings: {key} must be yes/no": "Paramètres : {key} doit valoir oui/non",
- "Settings: the default person does not exist": "Paramètres : la personne par défaut n’existe pas",
  "Settings: the name pattern may only contain {welt} and {stil}": "Paramètres : le modèle de nom ne peut contenir que {welt} et {stil}",
  "Max. songs per playlist": "Titres max. par playlist",
  "Minimum length": "Durée minimale",

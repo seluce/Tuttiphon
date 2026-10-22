@@ -56,7 +56,7 @@
 {#snippet neu()}
   <p>{@html t('The easiest way is the assistant under <a class="link" href="#/neu">New playlist</a>. It asks step by step – “For whom?” only when there are several people:')}</p>
   <Steps>
-    <li><span>{@html t('<b>For whom?</b> – the person decides which Navidrome account the playlist goes to; the stars of that account count.')}</span></li>
+    <li><span>{@html t('<b>For whom?</b> – a person’s playlist is only theirs, and the stars of their account count; a family playlist is for everyone.')}</span></li>
     <li><span>{@html t('<b>Music world</b> – who’s playing: e.g. “Kids’ rock”, “Medieval” or several together. “All” takes the whole library.')}</span></li>
     <li><span>{@html t('<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.')}</span></li>
     <li><span>{@html t('<b>Finishing touches</b> – name, <b>smart playlist or mix</b>, hits only or everything, add or remove single bands. On the right you see right away what comes out.')}</span></li>
@@ -87,7 +87,7 @@
     <li>{@html t('<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.')}</li>
     <li>{@html t('<b>New from your favorite bands</b> and <b>Your October</b> – what is new from the favorite bands, the most played songs of the month.')}</li>
     <li>{@html t('<b>Good night</b>, <b>Good morning</b> and <b>Car ride</b> – a fixed length instead of a number of songs; good morning only for accounts that often listen in the morning.')}</li>
-    <li>{@html t('<b>What everyone likes</b> – the taste of every account counts equally; what someone dislikes stays out.')}</li>
+    <li>{@html t('<b>What everyone likes</b> – a family playlist in which the taste of every person counts equally; what someone dislikes stays out.')}</li>
   </Bullets>
   <p>{@html t('Mixes renew themselves at the time of the daily refresh (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>) – daily, on Mondays or on the 1st.')}</p>
   <p>{@html t('<b>Mixes learn:</b> what was skipped comes up less often, songs someone rates 1 star never – with the Navidrome plugin for every account, otherwise for accounts whose password Tuttiphon knows. Switch: “Mixes that learn” under <a class="link" href="#/einstellungen/playlists">Settings → Playlists</a>.')}</p>
@@ -150,7 +150,7 @@
 {/snippet}
 
 {#snippet personen()}
-  <p>{@html t('Each person has a Navidrome account; several may share one, such as “Family”. <b>Preferences</b> steer their suggestions and mixes, <b>Dislikes</b> never appear in their playlists.')}</p>
+  <p>{@html t('Each person has a Navidrome account of their own, and their playlists are only theirs. <b>Preferences</b> steer their suggestions and mixes, <b>Dislikes</b> never appear in their playlists.')}</p>
   <Steps>
     <li><span>{@html t('Under <a class="link" href="#/personen">People</a>, “Add person”.')}</span></li>
     <li><span>{t('Choose the Navidrome account – it must already exist in Navidrome under “Users”.')}</span></li>
@@ -162,6 +162,7 @@
     <li>{@html t('<b>Kid-safe mode:</b> “Leave out songs with explicit lyrics” in the profile; songs detected wrongly can be allowed under <a class="link" href="#/einstellungen/lyrics">Settings → Lyrics</a>.')}</li>
     <li>{@html t('<b>Child profile:</b> for a child with an account of their own – children’s music belongs to their whole library, and kid-safe mode stays on.')}</li>
     <li>{@html t('<b>To the phone:</b> with notifications on, every person turns on their devices in their profile.')}</li>
+    <li>{@html t('<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.')}</li>
   </Bullets>
   <p>{@html t('With their own sign-in, everyone maintains their own profile – more under <a class="link" href="#/hilfe/konten">Users & sign-in</a>.')}</p>
 {/snippet}
@@ -244,7 +245,7 @@
     <li><span>{t('In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.')}</span></li>
     <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.')}</span></li>
   </Steps>
-  <p>{t('Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family. Kid-safe always stays as for the family. The card shows for whom it last answered.')}</p>
+  <p>{t('Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family, or for everyone if there is none. Songs with explicit lyrics stay out as soon as a person has kid-safe mode or is a child profile. The card shows for whom it last answered.')}</p>
   <p>{t('Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).')}</p>
 {/snippet}
 
@@ -288,10 +289,10 @@
   <p>{@html t('Everyone in the family can sign in with their own <b>Navidrome account</b> – with the same name and password as in Symfonium. Tuttiphon checks the password directly with Navidrome; there are no separate passwords.')}</p>
   <Bullets>
     <li>{@html t('<b>Administrator</b> – sees and changes everything. Default for Navidrome admins such as root.')}</li>
-    <li>{@html t('<b>User</b> – own home page, playlists and profile; sees others’ playlists only if they are shared with everyone.')}</li>
+    <li>{@html t('<b>User</b> – own home page, playlists and profile; listens to the family playlists and changes them unless only administrators may.')}</li>
     <li>{@html t('<b>No access</b> – cannot sign in to Tuttiphon; Navidrome and Symfonium keep working.')}</li>
   </Bullets>
-  <p>{@html t('You change the roles under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a>; new users are guided through their profile by a short assistant.')}</p>
+  <p>{@html t('Under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a> you set the roles and who may change the family playlists; new users are guided through their profile by a short assistant.')}</p>
   <Steps>
     <li><span>{@html t('At the first start you set the password of the <b>local administrator</b> in the browser – with the setup code from the container log. It turns on sign-in; you change it later under Settings → Users & permissions.')}</span></li>
     <li><span>{t('From then on Tuttiphon asks everyone for their username and password.')}</span></li>

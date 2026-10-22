@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 13,
   "settings": {
     "language": "en",
     "playlistDir": "Music/00_SmartPlaylists",
@@ -9,7 +9,7 @@
     "limit": 100,
     "minDuration": 120,
     "allMinRating": 3,
-    "public": true,
+    "familyEdit": "all",
     "excludeTitles": [
       "(Live",
       "[Live",
@@ -27,7 +27,6 @@
       "Karaoke",
       "Playback"
     ],
-    "defaultPerson": "familie",
     "hitsShare": 0.3,
     "autoApply": true,
     "dailyMode": "playlists",
@@ -192,25 +191,7 @@
       "done": false
     }
   },
-  "personen": [
-    {
-      "id": "familie",
-      "name": "Family",
-      "icon": "i:home",
-      "user": "",
-      "public": true,
-      "prefix": "",
-      "likes": {
-        "welten": [],
-        "stile": [],
-        "artists": []
-      },
-      "dislikes": {
-        "artists": [],
-        "genres": []
-      }
-    }
-  ],
+  "personen": [],
   "welten": [],
   "stile": [
     {

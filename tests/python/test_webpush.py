@@ -116,13 +116,11 @@ class WebPushTest(unittest.TestCase):
             notify.after_run({"name": "Nacht", "results": {"scan": "fehler"}}, cfg)
         self.assertEqual(hits, [admin_sub["endpoint"]])               # errors only to administrator devices
 
-    def test_one_message_per_device_even_with_two_persons(self):
+    def test_one_message_per_device_and_album(self):
         _, _, _, sub = browser()
         webpush.add("niklas", sub)
         cfg = base_config()
         cfg["settings"]["notify"] = {"enabled": True}
-        cfg["personen"][0]["user"] = "niklas"                          # family and Niklas on the same account
-        cfg["personen"][0]["likes"]["artists"] = ["Band A"]
         cfg["personen"][2]["likes"]["artists"] = ["Band A"]
         from app.rules import Library
         from tests.python.factory import iso_days_ago, song

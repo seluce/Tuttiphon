@@ -1,11 +1,12 @@
 <!--
   Discover: ready-made suggestions, new music worlds, bands still missing, a table of all combinations.
-  Administrators choose whose suggestions they see (All | <people>), starting with the family's.
+  Groups: yours, the season, the family's, the other people's (administrators), new music worlds.
+  Administrators choose whose suggestions they see (All | <people>), starting with their own.
 -->
 <script module>
   // Suggestions from the last visit – visible at once until the fresh ones arrive
   let cache = null
-  // Person filter (administrators) – kept when coming back; null = the family's
+  // Person filter (administrators) – kept when coming back; null = your own (else the family's, else the first)
   const remember = { filter: null }
 </script>
 
@@ -21,7 +22,8 @@
   import SuggestionCard from './discover/SuggestionCard.svelte'
   import Missing from './discover/Missing.svelte'
   import Matrix from './discover/Matrix.svelte'
-  import { S, isAdmin, ownPersons, defaultPerson, findPerson, save } from '../lib/state.svelte.js'
+  import { S, isAdmin, myPerson, familyPerson, defaultOwner, findPerson, isFamily, save } from '../lib/state.svelte.js'
+  import { ownerOrder } from '../lib/playlist.js'
   import { api } from '../lib/api.js'
   import { hiddenCount, showHidden } from '../lib/discover.js'
   import { t, tn } from '../lib/i18n.svelte.js'
@@ -60,26 +62,22 @@
     save().then(load)
   }
 
-  /* Person filter (administrators, as on "Playlists"): All | the family | the other people */
-  const filterPersons = $derived(admin ? [findPerson(S.config.settings.defaultPerson), ...ownPersons().filter((p) => p.id !== S.config.settings.defaultPerson)].filter(Boolean) : [])
-  let filter = $state(admin ? remember.filter || S.config.settings.defaultPerson || 'alle' : 'alle')   // i18n-ignore: filter id
+  /* Person filter (administrators, as on "Playlists"): All | you | the family | the other people */
+  const people = $derived(ownerOrder(admin ? S.config.personen : [myPerson(), familyPerson()].filter(Boolean)))
+  const filterPersons = $derived(admin ? people : [])
+  let filter = $state(admin ? remember.filter || defaultOwner()?.id || 'alle' : 'alle')   // i18n-ignore: filter id
   $effect(() => {
     if (filter !== 'alle' && !filterPersons.some((p) => p.id === filter)) filter = 'alle'   // person deleted in the meantime (i18n-ignore: filter id)
     remember.filter = filter
   })
   /** Whose suggestion: the playlist's person – the season's without one and a new music world (it comes with a mix
-   *  for the family) count as the family's */
-  const whose = (s) => s.person || (s.group === 'welten' || s.group === 'saison' ? defaultPerson() : s.group)
+   *  for the family) count as the family's, without a family as yours */
+  const whose = (s) => s.person || (s.group === 'welten' || s.group === 'saison' ? (familyPerson() || defaultOwner())?.id : s.group)
 
-  /** Order: first the account's own person (not the shared one, even if it belongs to the same account),
-   *  then the season, then the shared one and the rest */
+  /** Order: first your own person, then the season, then the family and the other people, then new music worlds */
   const groups = $derived.by(() => {
-    const def = defaultPerson()
-    const shared = S.config.settings.defaultPerson
-    const me = (S.me?.user || '').toLowerCase()
-    const personal = ownPersons().filter((p) => me && (p.user || '').toLowerCase() === me && p.id !== shared).map((p) => p.id)
-    const rest = [def, ...ownPersons().map((p) => p.id)].filter((id) => !personal.includes(id))
-    const order = [...new Set([...personal, 'saison', ...rest, 'welten'])]
+    const ids = people.map((p) => p.id)
+    const order = [...new Set([...ids.slice(0, ids[0] === myPerson()?.id ? 1 : 0), 'saison', ...ids, 'welten'])]
     const shown = filter === 'alle' ? items : items.filter((s) => whose(s) === filter)   // i18n-ignore: filter id
     return order.map((g) => [g, shown.filter((s) => s.group === g)]).filter(([, l]) => l.length)
   })
@@ -135,7 +133,7 @@
                   <span class="hi"><Icon name="compass" size={18} /></span>{t('New music worlds discovered')}
                 {:else}
                   {@const p = findPerson(g)}
-                  <PersonAvatar {p} size={36} />{!admin && ownPersons().length === 1 ? t('For you') : t('For {name}', { name: p?.name || g })}
+                  <PersonAvatar {p} size={36} />{g === myPerson()?.id ? t('For you') : isFamily(g) ? t('For the family') : t('For {name}', { name: p?.name || g })}
                 {/if}
                 {#if !open}<span class="pill text-[.78rem] font-semibold">{list.length}</span>{/if}
                 <Icon name={open ? 'up' : 'down'} size={18} class="muted shrink-0" />
@@ -143,7 +141,7 @@
             </h2>
             {#if g === 'welten' && open}<span class="muted small">{t('Scenes whose typical bands are already on your shelf')}</span>{/if}
           </div>
-          {#if open && g !== 'saison' && g !== 'welten'}
+          {#if open && g !== 'saison' && g !== 'welten' && (admin || g === myPerson()?.id)}
             <a href="#/person/{g}">{admin ? t('Preferences →') : t('Change taste →')}</a>
           {/if}
         </div>

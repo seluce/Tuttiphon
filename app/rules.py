@@ -179,24 +179,31 @@ def filter_rules(filters):
 # --------------------------------------------------------------------------- names
 
 def person_of(cfg, playlist):
-    pid = playlist.get("person") or cfg["settings"].get("defaultPerson")
-    return next((p for p in cfg.get("personen", []) if p["id"] == pid), None)
+    """The playlist's person – None for a neutral view (e.g. counts of a music world: no one's dislikes)."""
+    pid = playlist.get("person")
+    return next((p for p in cfg.get("personen", []) if p["id"] == pid), None) if pid else None
+
+
+def is_family(person):
+    return bool(person and person.get("family"))
+
+
+def for_everyone(cfg, playlist):
+    """Is the playlist for every account (public in Navidrome, visible to everyone in Tuttiphon)? The family's – and,
+    until the family is set up after the update to one person per account, the former family playlists
+    (settings.familySetup), so that nobody loses them in Symfonium meanwhile."""
+    if is_family(person_of(cfg, playlist)):
+        return True
+    setup = cfg.get("settings", {}).get("familySetup")
+    return isinstance(setup, dict) and playlist.get("id") in (setup.get("playlists") or [])
 
 
 def together_of(cfg, playlist):
-    """People of a family mix whose taste may count: those visible to everyone, those with the same account as the
-    playlist's person – and all of them if the playlist belongs to the shared person (the administrator looks after
-    it). This way a profile that has become private no longer flows into other people's mixes."""
+    """People of “What everyone likes” whose taste counts – only on the family's playlists, never the family itself."""
     ids = playlist.get("together") or []
-    if not ids:
+    if not ids or not is_family(person_of(cfg, playlist)):
         return []
-    owner = person_of(cfg, playlist) or {}
-    shared = owner.get("id") == cfg["settings"].get("defaultPerson")
-    out = []
-    for p in cfg.get("personen", []):
-        if p["id"] in ids and (shared or p.get("public") or (p.get("user") or "").lower() == (owner.get("user") or "").lower()):
-            out.append(p)
-    return out
+    return [p for p in cfg.get("personen", []) if p["id"] in ids and not p.get("family")]
 
 
 MONTH_NAMES = [N_("January"), N_("February"), N_("March"), N_("April"), N_("May"), N_("June"), N_("July"),
@@ -244,7 +251,7 @@ def review_name(cfg, playlist, day=None):
     from .mixer import mix_day
     person = person_of(cfg, playlist) or {}
     _start, _end, title = review_period((playlist.get("review") or {}).get("period", "month"), day or mix_day())
-    if person.get("id") == cfg["settings"].get("defaultPerson"):   # the shared person: the whole family
+    if is_family(person):   # the family: all of us
         return person.get("prefix", "") + _s("Our {period}", period=title)
     return person.get("prefix", "") + _s("Your {period}", period=title)
 
@@ -346,8 +353,8 @@ def build_nsp(cfg, playlist, ctx=None):
     ctx = ctx or BuildContext()
     S = cfg["settings"]
     person = person_of(cfg, playlist)
-    # Without "public" the person counts as private – as with the visibility in Tuttiphon (auth.visible_playlist)
-    public = bool(person.get("public", False)) if person else bool(S.get("public", True))
+    # the family's playlists are for every account, a person's are their own (as auth.visible_playlist)
+    public = for_everyone(cfg, playlist)
     head = {
         "name": playlist_name(cfg, playlist),
         "comment": f"{MARKER}: {describe(cfg, playlist)}",

@@ -1,6 +1,8 @@
 <!--
-  "New person" assistant (administrators): Who? → Navidrome account → favorite worlds → vibes → matching playlists.
-  The person only enters S.config at the fourth step; before that everything lives only here in the assistant.
+  "New person" assistant (administrators): Who? → Navidrome account (one without a person) → favorite worlds → vibes →
+  matching playlists. The person only enters S.config at the fourth step; before that everything lives only here in the
+  assistant. From People → “Add person” of a merged profile (settings.mergedPersons) it starts with its name and drops
+  the entry once the person is created.
 -->
 <script>
   import { SvelteSet } from 'svelte/reactivity'
@@ -26,16 +28,18 @@
   import { slug, uid, today, clone } from '../../lib/format.js'
   import { plEmoji } from '../../lib/playlist.js'
   import { genreSuggestions } from '../../lib/richtungen.js'
-  import { COLORS, users, pwOk } from './shared.js'
+  import { COLORS, users, pwOk, takenAccounts, takeDraft } from './shared.js'
   import { t, tn } from '../../lib/i18n.svelte.js'
 
   const STEPS = $derived([t('Who?'), 'Navidrome', t('Favorite worlds'), t('Vibes'), t('Playlists')])
   const noop = () => {}
 
-  /** Navidrome accounts (null = still loading) */
+  /** Navidrome accounts without a person (null = still loading) – the family's has one */
   let us = $state.raw(null)
-  const p = $state({ id: '', name: '', icon: 'i:music', color: COLORS[Math.floor(Math.random() * COLORS.length)], user: '',
-    public: false, prefix: '', likes: { welten: [], stile: [], artists: [] }, dislikes: { artists: [], genres: [] } })
+  const draft = takeDraft()   // a merged profile from People (settings.mergedPersons)
+  const p = $state({ id: '', name: draft?.name || '', icon: 'i:music', color: COLORS[Math.floor(Math.random() * COLORS.length)], user: '',
+    prefix: '', likes: { welten: [], stile: [], artists: [] }, dislikes: { artists: [], genres: [] },
+    ...(draft?.child ? { child: true, clean: true } : {}) })
   let step = $state(0)
   let pw = $state('')
   let pwState = $state(null)
@@ -43,7 +47,9 @@
   let sugg = $state.raw(null)
 
   let usersError = $state('')
-  users().then((list) => {
+  users().then((all) => {
+    const taken = takenAccounts()
+    const list = all.filter((u) => !taken.has(u.name.toLowerCase()))
     p.user = list.find((u) => !u.admin)?.name || list[0]?.name || ''
     us = list
     usersError = users.error
@@ -76,6 +82,11 @@
       const i = S.config.personen.findIndex((x) => x.id === p.id)
       if (i >= 0) S.config.personen[i] = clone(p)
       else S.config.personen.push(clone(p))
+      if (draft) {   // the merged profile has its own person now
+        const rest = (S.config.settings.mergedPersons || []).filter((x) => x?.name !== draft.name)
+        if (rest.length) S.config.settings.mergedPersons = rest
+        else delete S.config.settings.mergedPersons
+      }
       changed()
       await save()
       loadStatus()
@@ -134,16 +145,21 @@
       {:else if step === 1}
         <div class="card pad-lg grid gap-[18px] max-w-[640px]">
           <p class="muted">{p.name
-            ? t('Which Navidrome account does {name} use? The playlists end up there, and the stars & favorites of this account count. Kids can also use the family account.', { name: p.name })
-            : t('Which Navidrome account does the person use? The playlists end up there, and the stars & favorites of this account count. Kids can also use the family account.')}</p>
-          <label class="f">{t('Navidrome user')}
-            <Select options={us.map((u) => [u.name, u.name + (u.admin ? ' · Admin' : '')])} value={p.user} onchange={(v) => { p.user = v; pwState = null }} />
-          </label>
-          {#if !us.length && usersError}
+            ? t('Which Navidrome account does {name} use? The playlists end up there, and the stars & favorites of this account count.', { name: p.name })
+            : t('Which Navidrome account does the person use? The playlists end up there, and the stars & favorites of this account count.')}</p>
+          {#if us.length}
+            <label class="f">{t('Navidrome user')}
+              <Select options={us.map((u) => [u.name, u.name + (u.admin ? ' · Admin' : '')])} value={p.user} onchange={(v) => { p.user = v; pwState = null }} />
+            </label>
+          {:else if usersError}
             <div class="err-t small">{t('Could not load the accounts from Navidrome: {error}', { error: usersError })}</div>
+          {:else}
+            <div class="note">{t('Every Navidrome account already has a person.')}</div>
           {/if}
           <div class="hint">{t('User missing? You create new accounts in Navidrome under Settings → Users, then reload here.')}{#if S.status?.env?.webUrl}{' '}<a href="{S.status.env.webUrl}/app/#/user" target="_blank" rel="noopener">{t('Open Navidrome ↗')}</a>{/if}</div>
-          {#if pwOk(p.user)}
+          {#if !p.user}
+            <!-- no account to choose -->
+          {:else if pwOk(p.user)}
             <div class="note">{t('✓ A password is already stored for this account.')}</div>
           {:else}
             <div class="field">
@@ -155,14 +171,9 @@
               {#if pwState}<div class="small {pwState === 'ok' ? 'ok-t' : 'err-t'}">{pwState === 'ok' ? t('✓ works') : `✕ ${pwState}`}</div>{/if}
             </div>
           {/if}
-          <div class="frow">
-            <label class="f">{t('Who sees the playlists?')}
-              <Select options={[['0', p.name ? t('only {name}', { name: p.name }) : t('only the person')], ['1', t('everyone in Navidrome')]]} value={p.public ? '1' : '0'} onchange={(v) => (p.public = v === '1')} />
-            </label>
-            <label class="f">{t('Name prefix')}
-              <input class="input" value={p.prefix || `${p.name} · `} onchange={(e) => (p.prefix = e.currentTarget.value)} />
-            </label>
-          </div>
+          <label class="f">{t('Name prefix')}
+            <input class="input" value={p.prefix || `${p.name} · `} onchange={(e) => (p.prefix = e.currentTarget.value)} />
+          </label>
         </div>
       {:else if step === 2}
         <div>
@@ -193,7 +204,7 @@
                   <div class="min-w-0">
                     <b>{s.title}</b>
                     <div class="muted small">{s.why}</div>
-                    {#if s.shared}<span class="pill mt-1.5">{t('already exists, visible to everyone')}</span>{/if}
+                    {#if s.shared}<span class="pill mt-1.5">{t('already exists for everyone')}</span>{/if}
                   </div>
                 </div>
               </button>

@@ -66,6 +66,8 @@
   {/if}
 {:else if task?.running}
   {#if !away}
+    <!-- swiping is a shortcut for ✕ (the button keyboards and screen readers use) -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="applybar swipe" class:dragging={drag} style:--dx="{drag?.dx ?? 0}px" style:--dy="{drag?.dy ?? 0}px"
       style:opacity={drag ? Math.max(0.2, 1 - Math.max(Math.abs(drag.dx) / 160, drag.dy / 80)) : null}
       onpointerdown={down} onpointermove={move} onpointerup={up} onpointercancel={() => (drag = null)}>

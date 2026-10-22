@@ -8,7 +8,7 @@
   import Collage from '../../components/Collage.svelte'
   import Section from '../../components/Section.svelte'
   import PlaylistCard from '../../components/PlaylistCard.svelte'
-  import { S, findPerson, defaultPerson, changed, snapshot } from '../../lib/state.svelte.js'
+  import { S, myPerson, changed, snapshot } from '../../lib/state.svelte.js'
   import { toast } from '../../lib/overlay.svelte.js'
   import { go } from '../../lib/router.svelte.js'
   import { openArtist } from '../../lib/artist.js'
@@ -17,7 +17,7 @@
 
   let { w, d } = $props()
 
-  const me = $derived(findPerson(defaultPerson()))
+  const me = $derived(myPerson())
   const liked = $derived((me?.likes?.welten || []).includes(w.id))
   const mine = $derived(d.playlists.map((p) => S.config.playlists.find((x) => x.id === p.id)).filter(Boolean))
   const myMix = $derived(me ? S.config.playlists.find((p) => p.person === me.id && p.type === 'mix' && p.welt === w.id
@@ -25,7 +25,7 @@
 
   /** Daily Mix from this world – with one tap (or go to the existing one) */
   function makeMix() {
-    if (!me || !(S.me?.own || []).includes(me.id)) { go('#/willkommen'); return }   // needs an own profile first
+    if (!me) { go('#/willkommen'); return }   // needs an own profile first
     if (myMix) { go(`#/playlist/${encodeURIComponent(myMix.id)}`); return }
     snapshot()
     const id = uid(`${w.id}-mix`)

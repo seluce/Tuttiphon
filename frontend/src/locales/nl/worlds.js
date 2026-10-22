@@ -390,14 +390,8 @@ export default {
     'automatisch',
   'For whom?':
     'Voor wie?',
-  'Belongs to “{user}” in Navidrome, whose stars & favorites count · visible to everyone':
-    'Hoort in Navidrome bij “{user}”, wiens sterren & favorieten meetellen · zichtbaar voor iedereen',
-  'Belongs to “{user}” in Navidrome, whose stars & favorites count · private':
-    'Hoort in Navidrome bij “{user}”, wiens sterren & favorieten meetellen · privé',
-  'Visible to everyone – your stars & favorites count.':
-    'Zichtbaar voor iedereen – jouw sterren & favorieten tellen mee.',
-  'Visible only to you – your stars & favorites count.':
-    'Alleen voor jou zichtbaar – jouw sterren & favorieten tellen mee.',
+  'Only for you – your stars & favorites count.':
+    'Alleen voor jou – je sterren & favorieten tellen.',
   'This playlist shows the most played songs – from what is played in Symfonium. It changes on its own on the first of the month; it always stays one playlist.':
     'Deze playlist toont de meest gespeelde nummers – op basis van wat er in Symfonium wordt gespeeld. Hij wisselt vanzelf op de eerste van de maand; het blijft altijd één playlist.',
   'Period':

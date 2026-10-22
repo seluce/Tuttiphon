@@ -2,7 +2,7 @@
 <script>
   import Icon from '../components/Icon.svelte'
   import PersonAvatar from '../components/PersonAvatar.svelte'
-  import { S, isAdmin, myPerson } from '../lib/state.svelte.js'
+  import { S, myPerson } from '../lib/state.svelte.js'
   import { openSheet, closeSheet } from '../lib/overlay.svelte.js'
   import { logout } from '../lib/account.js'
   import { t } from '../lib/i18n.svelte.js'
@@ -26,7 +26,7 @@
           : me.role === 'admin' ? t('Navidrome account “{user}” · Administrator', { user: me.user }) : t('Navidrome account “{user}” · User', { user: me.user })}</div>
       </div>
     </div>
-    {#if !isAdmin()}
+    {#if !me.notfall}<!-- every Navidrome account has (or creates) its one profile – administrators too -->
       <a class="member-row p-3 no-underline" href="#/profil" onclick={closeSheet}><Icon name="user" /><b>{t('My profile & preferences')}</b></a>
     {/if}
     <a class="member-row p-3 no-underline" href="#/einstellungen/konto" onclick={closeSheet}><Icon name="key" /><b>{t('My account')}</b></a>

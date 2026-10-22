@@ -95,8 +95,11 @@ Every song is listened to – locally, at night, gently on a few cores:
 <img src="images/playlists.png" alt="Playlists by person" width="900">
 
 Everyone signs in with their own **Navidrome account** and gets their own view: their mixes, their statistics, their
-profile with likes and dislikes. Administrators see and change everything; users can create their own playlists and
-see what others share with everyone – but cannot change it. A **local administrator** works even when Navidrome is
+profile with likes and dislikes – one person per account, and their playlists are their own. The **family** can have an
+account of its own, which Tuttiphon creates: its playlists are for everyone – shared devices in the car or on the
+kitchen tablet play them in Symfonium –, and mixes like “What everyone likes” bring everyone's taste together.
+Administrators see and change everything; users create their own playlists and change the family's too, unless only
+administrators may. A **local administrator** works even when Navidrome is
 down. The interface speaks **English, German, French, Dutch, Spanish, Italian, Portuguese and Polish**, works on the phone and can be installed as an app; "Show me"
 guides walk through each task right on the page.
 

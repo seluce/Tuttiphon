@@ -126,8 +126,8 @@ export default {
     'Administrador de Navidrome',
   'Navidrome user':
     'Usuario de Navidrome',
-  'Profiles: {names}':
-    'Perfiles: {names}',
+  'Profile: {name}':
+    'Perfil: {name}',
   'no profile yet':
     'aún sin perfil',
   'last signed in {when}':
@@ -144,8 +144,8 @@ export default {
     'Cada uno inicia sesión con su propia cuenta de Navidrome – con el mismo nombre y contraseña que en Symfonium.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.':
     'Lo ve y lo cambia todo: todas las playlists, mundos musicales, ambientes, personas y todos los ajustes – incluidos Deezer, letras y conversión.',
-  'Has their own “For you” home page, their own playlists and their own profile. Sees other people’s playlists only if they share them with everyone – but cannot change them.':
-    'Tiene su propia página de inicio «Para ti», sus propias playlists y su propio perfil. Ve las playlists de otros solo si las comparten con todos – pero no puede cambiarlas.',
+  'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
+    'Tiene su propia página de inicio «Para ti», sus propias playlists y su propio perfil. Escucha las playlists de la familia – y las cambia, salvo que solo puedan hacerlo los administradores.',
   'Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.':
     'No puede iniciar sesión en Tuttiphon. Navidrome y Symfonium siguen funcionando.',
   'you':

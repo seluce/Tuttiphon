@@ -16,7 +16,7 @@
   import AdminOnly from './shell/AdminOnly.svelte'
   import Tour from './components/Tour.svelte'
   import MiniPlayer from './components/MiniPlayer.svelte'
-  import { S, isAdmin, ownPersons, loadStatus, loadLibrary, loadPlaylists, startPolling, save } from './lib/state.svelte.js'
+  import { S, isAdmin, myPerson, loadStatus, loadLibrary, loadPlaylists, startPolling, save } from './lib/state.svelte.js'
   import { route, replace } from './lib/router.svelte.js'
   import { O, closeSheet } from './lib/overlay.svelte.js'
   import { api } from './lib/api.js'
@@ -107,13 +107,17 @@
     })
   })
 
-  /** User without a profile – or with a profile but without preferences and playlists (and never saw the assistant). */
+  /** Signed in with a Navidrome account (not the local administrator) and no profile yet – administrators only until
+   *  they skipped the assistant once. Users also with a profile but without preferences and playlists (and never saw
+   *  the assistant). */
   function needsWelcome() {
-    if (!S.me.own.length) return true
+    if (!S.me.user || S.me.notfall) return false
     let seen = !!S.me.welcomeSeen   // remembered on the server per account – applies to all devices
     try { seen ||= !!localStorage.getItem(`tuttiphon-welcome:${(S.me.user || '').toLowerCase()}`) } catch { /* private mode */ }
-    const own = ownPersons()
-    return !seen && !own.some((p) => p.likes?.welten?.length || p.likes?.artists?.length) && !S.config.playlists.some((x) => S.me.own.includes(x.person))
+    const mine = myPerson()
+    if (!mine) return !isAdmin() || !seen
+    if (isAdmin()) return false
+    return !seen && !(mine.likes?.welten?.length || mine.likes?.artists?.length) && !S.config.playlists.some((x) => x.person === mine.id)
   }
 
   /** New installation, not set up yet (settings.setup.done false): administrators go to the setup assistant –
@@ -142,7 +146,7 @@
     }
     // New here (no profile yet or nothing set up at all)? Then the welcome assistant first
     // (replacing the address: "back" must not lead to the page that sent here)
-    if (!isAdmin() && needsWelcome() && !/^#\/(willkommen|hilfe)/.test(location.hash)) {
+    if (needsWelcome() && !/^#\/(willkommen|hilfe)/.test(location.hash)) {
       replace('#/willkommen')   // right away – otherwise "For you" briefly builds before the assistant takes over
     }
     if (!/^#\/(einrichtung|hilfe)/.test(location.hash) && needsSetup()) {

@@ -125,9 +125,8 @@ class SuggestionTest(unittest.TestCase):
         self.cfg["personen"].append({"id": "jonas-familie", "name": "Familie Jonas", "user": "Jonas", "prefix": "",
                                      "likes": {"welten": ["kinder"], "stile": [], "artists": []},
                                      "dislikes": {"artists": [], "genres": []}})
-        with with_profiles("Jonas"), mock.patch("app.listenclock.morning_of", lambda *a, **k: self.INFO):
-            out = suggest.suggestions(self.cfg, self.lib, today=NOW.date())
-        self.assertEqual([s["person"] for s in out if "daytime" in s["key"]], ["jonas"])
+        with self.assertRaises(ValueError):   # a second person on the same account is not possible
+            config.validate_config(self.cfg)
 
     def test_valid_configuration(self):
         p = {"id": "m", "person": "jonas", "welt": "*", "stil": "*", "type": "mix", "daytime": "morning",

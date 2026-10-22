@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Test server with a COPY of the data – never test against the real data.
 #
-#   tools/testserver.sh <port> <work-dir> [--auth [--user <account>]] [--web <dir>]
+#   tools/testserver.sh <port> <work-dir> [--auth [--user <account>]] [--web <dir>] [--family]
 #
 # Copies data/ to <work-dir>/data (only the first time), switches off auto-apply and folder watching
 # there, and starts Tuttiphon without schedules on 127.0.0.1:<port>.
@@ -9,6 +9,8 @@
 #                 admin = local administrator, user = a user account (--user <account>, otherwise TUTTIPHON_TEST_USER
 #                 from dev.local.env, otherwise the first user account of the copied configuration)
 #   --web <dir>   own build folder (otherwise web/ in the project) – e.g. after `npx vite build --outDir <dir>`
+#   --family      the copy gets a family (only in its configuration – no account in Navidrome, nothing is written
+#                 there): what "Set up the family" leaves, with the former family playlists moved to it (e2e)
 # Output with --auth: the lines "admin-cookie: tuttiphon=…" and "user-cookie:  tuttiphon=…" (tests/e2e/setup.js reads them).
 # Stop: PID from `ss -ltnp | grep :<port>` – never pkill -f.
 set -euo pipefail
@@ -16,10 +18,11 @@ cd "$(dirname "$(readlink -f "$0")")/.."
 port="${1:?port missing}"; work="${2:?work dir missing}"; shift 2
 # Personal settings (not in Git): TUTTIPHON_BASE (Navidrome folder), TUTTIPHON_TEST_USER (account for --auth)
 if [ -f dev.local.env ]; then set -a; . ./dev.local.env; set +a; fi
-auth=0; web="$PWD/web"; user="${TUTTIPHON_TEST_USER:-}"
+auth=0; family=0; web="$PWD/web"; user="${TUTTIPHON_TEST_USER:-}"
 while [ $# -gt 0 ]; do
   case "$1" in
     --auth) auth=1 ;;
+    --family) family=1 ;;
     --web) web="$(readlink -f "$2")"; shift ;;
     --user) user="$2"; shift ;;
     *) echo "unknown option: $1" >&2; exit 1 ;;
@@ -43,6 +46,23 @@ s["autoApply"] = False
 w = s.get("watch") if isinstance(s.get("watch"), dict) else {}
 w["enabled"] = False; s["watch"] = w
 json.dump(c, open(p, "w"), ensure_ascii=False, indent=1)
+PY
+fi
+if [ "$family" = 1 ]; then
+  TUTTIPHON_DATA="$data" TUTTIPHON_SHARED_DIR="$(readlink -f "$work")/shared" python3 - <<'PY'
+from app import config
+def family(c):   # as POST /api/family, without the Navidrome account (the copy never writes to Navidrome)
+    if any(p.get("family") for p in c["personen"]):
+        return
+    setup = c["settings"].pop("familySetup", None) or {}
+    c["personen"].append({"id": "familie", "name": setup.get("name") or "Familie", "icon": setup.get("icon") or "i:home",
+                          "user": "tuttiphon-test-familie", "family": True, "clean": setup.get("clean", True), "prefix": "",
+                          "likes": setup.get("likes") or {"welten": [], "stile": [], "artists": []},
+                          "dislikes": setup.get("dislikes") or {"artists": [], "genres": []}})
+    for pl in c["playlists"]:
+        if pl["id"] in (setup.get("playlists") or []):
+            pl["person"] = "familie"
+config.update_config(family)
 PY
 fi
 # sign-in needs an administrator password – a random one for the copy

@@ -46,8 +46,8 @@ export default {
     'Welke muziek, welke stemming en tot slot de afwerking. Bovenaan zie je waar je bent.',
   'For whom?':
     'Voor wie?',
-  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
-    'De persoon bepaalt in welk Navidrome-account de playlist terechtkomt – de sterren van dat account tellen mee. Daarna kies je de muziekwereld.',
+  'A person’s playlist is only theirs, and their stars count; a family playlist is for everyone. Then you choose the music world.':
+    'De playlist van een persoon is alleen van die persoon, en diens sterren tellen; een gezinsplaylist is voor iedereen. Daarna kies je de muziekwereld.',
   'Choose music':
     'Kies muziek',
   'Tap one or more music worlds. “All” takes the whole library.':
@@ -116,8 +116,8 @@ export default {
     'Met het wachtwoord van een account maakt Tuttiphon daar playlists en ziet het wat er wordt afgespeeld.',
   'Who may do what?':
     'Wie mag wat?',
-  'Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account.':
-    'Iedereen logt in met een eigen Navidrome-account. Hier kies je per account: beheerder, gebruiker of geen toegang.',
+  'Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account – and who may change the family playlists.':
+    'Iedereen logt in met een eigen Navidrome-account. Hier kies je per account beheerder, gebruiker of geen toegang – en wie de gezinsplaylists mag wijzigen.',
   'People':
     'Personen',
   'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
@@ -184,14 +184,14 @@ export default {
     'Losse nummers',
   'Rate a song 1 star in Symfonium. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
     'Geef een nummer 1 ster in Symfonium. Dan komt het niet meer in je mixen. Wat je in de mix vaak overslaat, komt vanzelf minder vaak.',
-  'Change or share a playlist':
-    'Een playlist wijzigen of delen',
+  'Change a playlist':
+    'Een playlist wijzigen',
   'Tap a playlist':
     'Tik op een playlist',
   'Choose “Edit”, or “…” for the cover and more':
     'Kies “Bewerken”, of “…” voor de cover en meer',
-  'Set sharing in the profile':
-    'Delen instellen in het profiel',
+  'Symfonium shows the change after the next sync':
+    'Symfonium toont de wijziging na de volgende synchronisatie',
   'edit rename name cover picture pause delete trash share family visible copy':
     'bewerken hernoemen naam cover afbeelding pauzeren verwijderen prullenbak delen gezin zichtbaar kopiëren',
   'Open a playlist':
@@ -206,10 +206,8 @@ export default {
     '“Bewerken” wijzigt muziek en naam. Onder “…” ontwerp je de cover, pauzeer je de playlist – hij verdwijnt dan een tijdje uit Symfonium en blijft hier bewaard – of verplaats je hem naar de prullenbak.',
   'Share with the family':
     'Delen met het gezin',
-  'With “visible to everyone”, all accounts see this person’s playlists in Navidrome and Symfonium.':
-    'Met “zichtbaar voor iedereen” zien alle accounts de playlists van deze persoon in Navidrome en Symfonium.',
-  'Here you set whether only you see your playlists or the whole family. Only you can change them.':
-    'Hier stel je in of alleen jij je playlists ziet of het hele gezin. Alleen jij kunt ze wijzigen.',
+  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and Symfonium.':
+    'Kies in “Bewerken” bij “Voor wie?” het gezin – dan ziet iedereen de playlist in Navidrome en Symfonium.',
   'Turn on kid-safe mode':
     'Kindveilige modus inschakelen',
   'Open the profile':
@@ -222,8 +220,8 @@ export default {
     'kinderen grof scheldwoorden expliciet ouderlijk toezicht netjes songteksten',
   'Kid-safe mode':
     'Kindveilige modus',
-  'Turn it on per person – for example for the person whose playlists the kids listen to. Detected from the lyrics.':
-    'Schakel hem per persoon in – bijvoorbeeld voor de persoon naar wiens playlists de kinderen luisteren. Herkend aan de songteksten.',
+  'Turn it on per person – for a child, or for the family when the kids listen to its playlists. Detected from the lyrics.':
+    'Schakel hem per persoon in – voor een kind, of voor het gezin als de kinderen naar de gezinsplaylists luisteren. Herkend aan de songteksten.',
   'Turn it on, and songs with explicit lyrics stay out of all your playlists and mixes. Detected from the lyrics.':
     'Schakel hem in, en nummers met grove teksten blijven uit al je playlists en mixen. Herkend aan de songteksten.',
   'Detected songs':
@@ -296,8 +294,8 @@ export default {
     'Muziek­werelden',
   'Who plays what: kids’ rock, medieval, … Tuttiphon recognizes typical bands by itself.':
     'Wie speelt wat: kinderrock, middeleeuws, … Typische bands herkent Tuttiphon zelf.',
-  'Who the playlists are for: Navidrome account, favorite worlds, dislikes. On the phone under “More”.':
-    'Voor wie de playlists zijn: Navidrome-account, favoriete werelden, “Liever niet”. Op de telefoon onder “Meer”.',
+  'Who the playlists are for: one person per Navidrome account, with favorite worlds and dislikes – and if you like the family, whose playlists are for everyone. On the phone under “More”.':
+    'Voor wie de playlists zijn: één persoon per Navidrome-account, met favoriete werelden en “Liever niet” – en als je wilt het gezin, waarvan de playlists voor iedereen zijn. Op de telefoon onder “Meer”.',
   'Statistics & recap':
     'Statistieken & terugblik',
   'Most played bands, “Played this week” and your yearly recap. On the phone under “More”.':
@@ -322,8 +320,8 @@ export default {
     'Een assistent vraagt stap voor stap: Welke muziek? Welke stemming? Gewone playlist of mix? Je ziet meteen welke nummers erin zouden komen. Op de telefoon onder “Meer”.',
   'My playlists':
     'Mijn playlists',
-  'All your playlists – and those others share with you. Tap: listen in, change the cover or adjust.':
-    'Al je playlists – en die anderen met je delen. Tik: even luisteren, de cover wijzigen of aanpassen.',
+  'Your playlists and the family playlists. Tap: listen in, change the cover or adjust.':
+    'Je playlists en de gezinsplaylists. Tik erop: even luisteren, de cover wijzigen of aanpassen.',
   'Ready-made suggestions matching your taste and the season. “Create” adds them, ✕ hides them.':
     'Kant-en-klare suggesties die passen bij je smaak en het seizoen. “Maken” voegt ze toe, ✕ verbergt ze.',
   'Your music sorted by kind, for example children’s songs or medieval. Here you see which bands belong to it and can make a playlist from it.':
@@ -368,8 +366,6 @@ export default {
     'Nieuw in jullie bibliotheek',
   'Recently added albums':
     'Recent toegevoegde albums',
-  'All of your playlists':
-    'Jullie playlists',
   'All active playlists as a carousel':
     'Alle actieve playlists als carrousel',
   'Deezer & library':

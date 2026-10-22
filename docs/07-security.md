@@ -1,7 +1,7 @@
 # 07 – Security
 
 Tuttiphon runs either only on your own PC (without sign-in) or in the home network, e.g. as a Docker container on the NAS
-(with sign-in via the family's Navidrome accounts). This chapter describes how the server implements sign-in, roles and
+(with sign-in via the household's own Navidrome accounts). This chapter describes how the server implements sign-in, roles and
 sessions, what it filters out for users, where credentials are stored and what to watch out for with new
 endpoints. Code: `app/auth.py` and `Handler._handle()` in `app/web.py`; endpoints in detail:
 [03 – API](03-api.md).
@@ -92,9 +92,13 @@ a request (background threads, runs, precomputation), `auth.current()` returns t
    or 41 → “User name or password is wrong …”, any other error → “Navidrome is not reachable right now. If needed,
    sign in as local administrator.”
 4. The name is adopted in the spelling used by Navidrome (account list freshly loaded via the admin account).
-5. If the account has the role `none` → “Tuttiphon is not enabled for this account …”.
-6. If `remember` is set (the default), the password is stored – see the next section.
-7. `accounts.<account>.lastLogin` in `config.json` gets the date and time.
+5. If it is the family's account (`auth.family_account()`: the account of the person with `family: true`) → “This is
+   the family's account – it plays the family playlists on shared devices. Please sign in with your own account.”
+   (doesn't count toward the lockout). Nobody signs in to Tuttiphon with it; Tuttiphon created it for the family
+   ([Data model](02-data-model.md#personen)).
+6. If the account has the role `none` → “Tuttiphon is not enabled for this account …”.
+7. If `remember` is set (the default), the password is stored – see the next section.
+8. `accounts.<account>.lastLogin` in `config.json` gets the date and time.
 
 The server then creates a new session and sets the session cookie ([Sessions](#sessions)). Tuttiphon
 doesn't manage its own passwords for accounts; Navidrome is always authoritative. All errors respond with `401` and the
@@ -111,7 +115,7 @@ in `.env` under `pass_key(name)` = `NAV_PASS_` + the name in uppercase, with non
 stored password is kept.
 
 The password is needed for everything that is read or written “from the point of view” of an account: personal
-statistics and recap, the account's own Deezer stars, the exact preview with the default person's stars. It can be stored
+statistics and recap, the account's own Deezer stars, mixes from the person's point of view. It can be stored
 later under Settings → My account, card “Statistics & stars” (“Turn on”, `POST /api/me/password`, verified with
 Navidrome), or removed there with “Turn off” (the same call with `password: null`) – and by an admin for any account
 via `PUT /api/env`.
@@ -266,6 +270,7 @@ There are three roles (`auth.ROLES`): `admin`, `user`, `none`. `auth.role_of()` 
 | Order | Condition | Role |
 |---|---|---|
 | 1 | user is `@notfall` | `admin` |
+| 1a | the account is the family's (`auth.family_account()`) | `none` |
 | 2 | Tuttiphon knows Navidrome accounts (list not empty), but this account isn't among them (case-insensitive) | `none` |
 | 3 | `config.json` → `accounts.<account in lowercase>.role` is `admin`, `user` or `none` | this value |
 | 4 | the account is an administrator in Navidrome (`isAdmin`) | `admin` |
@@ -291,9 +296,14 @@ There are three roles (`auth.ROLES`): `admin`, `user`, `none`. `auth.role_of()` 
   lost device; after being enabled again, the account has to sign in again. If the role falls to `none` for another reason
   (account deleted in Navidrome), the sessions stay stored and become valid again as soon as the account
   has a role again.
-- **Own people** (`own`) of an account are all people whose `user` field matches the account name
-  (`auth.persons_of()`, case-insensitive); the default person comes last. Admins see all people
-  (`persons`), users only their own.
+- **Own person** (`own`) of an account: one person per Navidrome account – the person whose `user` matches the account
+  name (`auth.persons_of()`, case-insensitive; never the family entry): `[id]` or `[]`. An account without a person
+  gets the welcome assistant, which creates exactly one ([Writing](#writing-merge_user_changes)). Admins see all
+  people (`persons`), users only their own; the local administrator has `own: []`.
+- **The family** (optional, `auth.family_id()`): a person with `family: true` and an account of its own that Tuttiphon
+  created (`POST /api/family`, admins only). Its account has the role `none` – nobody signs in with it; shared devices
+  (car, kitchen tablet) can use it in Symfonium. Its playlists are for everyone; who may change them is
+  `settings.familyEdit` (see [What the server filters for users](#what-the-server-filters-for-users)).
 
 ## Sessions
 
@@ -422,26 +432,28 @@ endpoint.
 
 | Endpoint | Users get |
 |---|---|
-| `GET /api/config` | `auth.view_config()`: only visible playlists; their own people in full, other people only if they are `public`, and then only `id`, `name`, `icon`, `color`, `prefix`, `public` (`PUBLIC_PERSON_FIELDS` – without preferences, dislikes and account names); from `settings` only `autoApply`, `defaultPerson`, `namePattern`, `allName`, `limit`, `minDuration`, `allMinRating`, `public`, `seasonRest` (`USER_SETTINGS` – no paths, accounts, owners), plus from `notify` only `enabled` and `server`; no `accounts`; `dismissed`/`ignored` from their own account, no `dismissedAt` |
+| `GET /api/config` | `auth.view_config()`: only visible playlists (their own person's and the family's); their own person in full, every other person – the family, the members of “What everyone likes” – only with `id`, `name`, `icon`, `color`, `prefix`, `family` (`PUBLIC_PERSON_FIELDS` – without preferences, dislikes, kid-safe mode, ntfy topic and account names); from `settings` only `autoApply`, `namePattern`, `allName`, `limit`, `minDuration`, `allMinRating`, `seasonRest`, `familyEdit` (`USER_SETTINGS` – no paths, accounts, owners), plus from `notify` only `enabled` and `server`; no `accounts`; `dismissed`/`ignored` from their own account, no `dismissedAt` |
 | `GET /api/status` | reachability, version and scan state of Navidrome, the link address `webUrl`, only their own accounts under `env.users`; no access address, no admin name, no paths, no steps, no other instances, no Navidrome error message |
 | `GET /api/playlists` | only visible playlists, no handmade ones, no orphaned files |
-| `GET /api/playlist`, `/api/welt`, `/api/artist` | only visible playlists; `/api/playlist` for other people's playlists without `nsp` and without the lines “Never included: …” (dislikes), “New from the favorite bands in the last …” (favorite bands) and “Prefers what …” (family mix) in `summary`; for artists “Favorite”/“never” only for their own people; `forMe` in `/api/welt` always from the taste of the signed-in account (local administrator: `null`) |
-| `GET /api/taste` | `person` only their own (`_own_person()`, otherwise `403`); `me=1` always the signed-in account (local administrator and without sign-in: `available: false`) |
-| `GET /api/search` | songs, styles, moods and lyrics matches from the whole library; combo suggestions (`combos`) for the first own person. If one of their own people has kid-safe mode on, explicit songs (rude lyrics and songs tagged as explicit, `web._child_blocked()` like the song window) are missing from `songs` and `lyrics`. If there is no lyrics index yet, the search triggers reading the lyrics – at most every 6 hours (`liedtext.update_soon()`) |
-| `GET /api/song`, `/api/song/more`, `/api/stream` | songs from the whole library (as in Symfonium), playlists in the song window only visible ones; the server fetches audio via the admin account, credentials never leave it. If one of their own people has kid-safe mode on, explicit songs can neither be played nor shown in the song window (`403`, `web._child_blocked()`); “More like this” uses the dislikes and kid-safe mode of their own person. Listening in doesn't count as a play in Navidrome |
-| `GET /api/suggestions`, `/api/inbox` | only suggestions for their own people (no new music worlds), their own hide lists, their own “To review” list |
+| `GET /api/playlist`, `/api/welt`, `/api/artist` | only visible playlists; `/api/playlist` for a playlist they may not change (the family's while `settings.familyEdit` is `admins`) without `nsp`, without `usage` and without the lines “Never included: …” (dislikes), “New from the favorite bands in the last …” (favorite bands) and “Prefers what …” (family mix) in `summary`; for artists “Favorite”/“never” only for their own person; `forMe` in `/api/welt` always from the taste of the signed-in account (local administrator: `null`) |
+| `GET /api/taste` | `person` only their own or the family (`_own_person()`, otherwise `403`); `me=1` always the signed-in account (local administrator and without sign-in: `available: false`) |
+| `GET /api/search` | songs, styles, moods and lyrics matches from the whole library; combo suggestions (`combos`) for their own person. If their own person has kid-safe mode on, explicit songs (rude lyrics and songs tagged as explicit, `web._child_blocked()` like the song window) are missing from `songs` and `lyrics`. If there is no lyrics index yet, the search triggers reading the lyrics – at most every 6 hours (`liedtext.update_soon()`) |
+| `GET /api/song`, `/api/song/more`, `/api/stream` | songs from the whole library (as in Symfonium), playlists in the song window only visible ones; the server fetches audio via the admin account, credentials never leave it. If their own person has kid-safe mode on, explicit songs can neither be played nor shown in the song window (`403`, `web._child_blocked()`); “More like this” uses the dislikes and kid-safe mode of their own person. Listening in doesn't count as a play in Navidrome |
+| `GET /api/suggestions`, `/api/inbox` | only suggestions they can take – for their own person and the family's unless `settings.familyEdit` is `admins` (`auth.editable_persons()`) –, no new music worlds, their own hide lists, their own “To review” list |
 | `GET /api/task`, `POST /api/apply/now` | whether and what is running, but no log lines |
-| `POST /api/preview`, `/api/counts` | computed with the stored state instead of the `config` sent along: for their own people only the storable fields (`PERSON_FIELDS`) come from the interface – `id` and account stay as on the server –, other people without `likes`/`dislikes`/`push` (`_preview_config()`). The playlist must belong to one of their own people (`_guard_preview()`, otherwise `403`) – otherwise recap, favorite-band or rule playlists could be used to query the listening, stars and favorites of other accounts; fields that only the server sets (`rules` …) are dropped, `together` only with their own and visible people, `sampleSize` at most 100, `mix.size` at most 500 |
-| `POST /api/rueckblick/keep` | only their own people; a playlist with the same name can exist only once (`400`) |
-| `GET /api/stats`, `/api/rueckblick`, `/api/missing` | only their own people, otherwise `403` |
+| `POST /api/preview`, `/api/counts` | computed with the stored state instead of the `config` sent along: for their own person only the storable fields (`PERSON_FIELDS`) come from the interface – `id` and account stay as on the server –, other people (the family too) without `likes`/`dislikes`/`push` (`_preview_config()`). The playlist must belong to their own person or – unless `settings.familyEdit` is `admins` – the family (`_guard_preview()` with `_own_person(…, write=True)`, otherwise `403`) – otherwise recap, favorite-band or rule playlists could be used to query the listening, stars and favorites of other accounts; fields that only the server sets (`rules` …) are dropped, `sampleSize` at most 100, `mix.size` at most 500. `/api/counts` (song counts for the wizard) accepts their own person and the family |
+| `POST /api/rueckblick/keep` | only their own person, and the family's while they may change its playlists; a playlist with the same name can exist only once (`400`) |
+| `GET /api/stats`, `/api/rueckblick`, `/api/missing` | only their own person and the family, otherwise `403` |
 | everything in `ADMIN_ONLY` | `403` |
 
-A playlist is **visible** if it belongs to one of the user's own people or its person has `public: true`
-(`auth.visible_playlist()`; if `person` is missing, the default person counts (`auth.person_id()`), if `public` is missing, the
-person is private; if the person doesn't exist at all, the `public` setting applies, as in `build_nsp()`).
-Users may **change** only their own (`auth.own_playlist()`): `/api/snapshot`, `/api/cover/*` and `/cover` check this with
-`_own_playlist_id()`. `own_playlist()` and `merge_user_changes()` use the same assignment (`person_id()`): a
-playlist without `person` belongs to the default person – its account and admins may see and change it.
+A playlist is **visible** if it belongs to the user's own person or is for everyone – the family's, and until the family is set up after the update the former family playlists (`rules.for_everyone()`, `auth.visible_playlist()` – the
+same rule as `public` in `build_nsp()`: a person's playlists are private, the family's are for everyone). Every
+playlist has a `person` (`auth.person_id()`); there is no fallback.
+Users may **change** (`auth.own_playlist()`) the playlists of `auth.editable_persons()`: their own person's, and the
+family's unless `settings.familyEdit` is `"admins"` – the family entry itself (name, look, preferences, kid-safe mode)
+only administrators change. `/api/snapshot`, `/api/cover/*` and `/cover` check this with `_own_playlist_id()`;
+`_own_person(pid, write=True)` does the same for endpoints that create something for a person (preview, recap kept as
+a playlist); `_own_person(pid)` for reading allows their own person and the family.
 
 Not filtered (they concern the whole library or shared data): `/api/library`, `/api/home`,
 `/api/matrix`, `/api/cover/styles` without `id` (with `id` it is checked like `_own_playlist_id()`), `/api/changelog`, `/img/…`, `/live/…`, and in `/api/config` the music worlds and vibes. `POST /api/apply/now` (apply playlists right away) may deliberately be triggered by everyone
@@ -460,12 +472,12 @@ incoming state, `merge_user_changes()` takes only:
 
 | Area | allowed |
 |---|---|
-| own people | the fields `name`, `icon`, `color`, `prefix`, `likes`, `dislikes`, `public`, `clean`, `push` (`auth.PERSON_FIELDS`) – not `id`, not `user` |
-| new person | if `id` is new and matches `^[a-z0-9][a-z0-9_-]{0,40}$` (not `neu`), `user` is their own account and `name` is not empty (welcome assistant); at most `MAX_USER_PERSONS` (20) people per account. If one of the account's people has kid-safe mode on, the new one gets it too – a second own profile is no way around it |
-| limits | at most `MAX_USER_PLAYLISTS` (200) playlists for the account's people (trash included) – otherwise `400` “You can have at most …”; an account that already has more keeps them, but can't add any. Texts and lists are limited by `validate_config()` (name 120, prefix 40, icon 64 characters, lists 2,000 entries) |
-| playlists of their own people | change, delete (missing from the incoming state), create; giving one of their own playlists to someone else's person is ignored. The fields `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName` (`auth.SERVER_PLAYLIST_FIELDS`) are set only by the server and administrators: existing playlists keep the server's state, new ones lose them (only the server creates takeovers of handmade playlists) |
+| own person | the fields `name`, `icon`, `color`, `prefix`, `likes`, `dislikes`, `clean`, `push`, `tasteExclude`, `newEvery` (`auth.PERSON_FIELDS`) – not `id`, `user`, `family` or `child` |
+| new person | only while their account has no person (one person per account; never for the family's account, which can't sign in, nor for the local administrator): if `id` is new and matches `^[a-z0-9][a-z0-9_-]{0,40}$` (not `neu`), `user` is their own account and `name` is not empty (welcome assistant) – exactly one, with the fields of `PERSON_FIELDS` and `user` = their account; anything further is ignored |
+| limits | at most `MAX_USER_PLAYLISTS` (200) playlists of the people whose playlists they may change (trash included) – otherwise `400` “You can have at most …”; an account that already has more keeps them, but can't add any. Texts and lists are limited by `validate_config()` (name 120, prefix 40, icon 64 characters, lists 2,000 entries) |
+| playlists they may change | their own person's and – unless `settings.familyEdit` is `admins` – the family's (`auth.editable_persons()`): change, delete (missing from the incoming state), create; playlists of anyone else stay unchanged, and giving one to a person they may not edit is ignored. The fields `rules`, `rulesExtra`, `sortRaw`, `takeover`, `originalName` (`auth.SERVER_PLAYLIST_FIELDS`) are set only by the server and administrators: existing playlists keep the server's state, new ones lose them (only the server creates takeovers of handmade playlists) |
 | their own hide lists | `dismissed` and `ignored` → `accounts.<account>`, strings only, at most 500 |
-| family mix (`together`) | only their own people and people visible to everyone; others drop out, and if fewer than two remain, the field is dropped – so the taste of private profiles never flows into mixes of other accounts. In addition, `rules.together_of()` checks on every evaluation: the taste of members who have since become private and have a different account no longer counts (except in the mix of the shared person, which the administrator maintains). Their dislikes, 1-star songs and kid-safe mode still apply – protection comes first. If no member remains for an “All × Everything” playlist, it becomes a mix based on the user's own taste (`mix.flavor: "geschmack"`) |
+| family mix (`together`) | only on the family's playlists; members are existing people other than the family – unknown ids and the family drop out, on any other playlist the field is dropped (`config._validate_owners()` refuses it there too). If fewer than two members remain, the field is dropped; an “All × Everything” playlist then becomes a mix based on the own taste (`mix.flavor: "geschmack"`). `rules.together_of()` checks the same on every evaluation. The family mix is the one place where the taste of several accounts meets – on the family's playlist, for everyone; the members' dislikes, 1-star songs and kid-safe mode apply – protection comes first |
 | kid-safe mode (`clean`) | anyone may turn it on, only the administrator may turn it off – a stored `clean: true` stays in place when users save. The exclusion rules are built without account-dependent rules (stars, favorites, plays), so that explicit favorite songs of the account drop out too ([04](04-playlists.md#playlists-from-listening)) |
 
 Everything else – other people's persons and playlists, music worlds, vibes, settings, global lists, other accounts –
@@ -538,8 +550,8 @@ The browser never talks to Navidrome directly (apart from “Open in Navidrome�
 - Cover uploads go through Navidrome's own API with the admin account; only JPEG, PNG and WebP are accepted, detected
   by their first bytes (no SVG).
 - Subsonic calls (`app/navidrome.py`, `Navidrome.call()`) use token authentication: per call `md5(password + salt)`
-  with a fresh salt, without the password itself. Navidrome's own API (`NativeApi`, for accounts, playlist owners and
-  covers), on the other hand, signs in at `/auth/login` with the admin account's name and password and then works with its
+  with a fresh salt, without the password itself. Navidrome's own API (`NativeApi`, for accounts – including creating
+  the family's account –, playlist owners and covers), on the other hand, signs in at `/auth/login` with the admin account's name and password and then works with its
   token.
 
 Tuttiphon itself doesn't encrypt: without a [reverse proxy](#behind-a-reverse-proxy) with https, the sign-in password
@@ -550,16 +562,18 @@ travels over HTTP within the home network to Tuttiphon (with one, only from the 
 The plugin (`navidrome-plugin/`) does not sign in with a password or a session but with a key of its own
 (`sonic.new_key()`: `tp_` + 32 random bytes, URL-safe). Only its SHA-256 is stored (`state/plugin_key.json`); the
 interface shows the key once, after creating it. `sonic.check_key()` compares in constant time. It opens only
-`GET /api/sonic/…` – song ids, titles, bands and albums of the whole library, as the shared person sees them (without
-separate worlds unless asked for one of their songs, without the shared person's dislikes, kid-safe as soon as a
-profile has kid-safe mode or is a child profile) – and `POST /api/sonic/listen`, which only adds plays of an account
+`GET /api/sonic/…` – song ids, titles, bands and albums of the whole library, as the family sees them (without
+separate worlds unless asked for one of their songs, without the family's dislikes – without a family nobody's –,
+kid-safe as soon as a person other than the family has kid-safe mode or a person is a child profile, and for the
+family's answers also with the family's kid-safe mode) – and `POST /api/sonic/listen`, which only adds plays of an account
 with a person in Tuttiphon that is not blocked (`listen.allowed()`; whoever has the key could add made-up plays, never
 read any; the day files `plays/<account>/live-….jsonl` with permissions 0640); nothing of accounts, people, playlists
 or settings. The answers are personal all the same: for a song that one account is playing, `/api/sonic/…` answers
-for that account's person – without their dislikes and without what they just heard or rated 1 star –, so whoever
-has the key can read from the answers roughly what was played lately. Keep the key like a password. Where it is
+for that account's person (one person per account; on a shared device the family's) – without their dislikes and
+without what they just heard or rated 1 star –, so whoever has the key can read from the answers roughly what was
+played lately. Keep the key like a password. Where it is
 unclear who is listening, Tuttiphon guesses from the plays (a guess leaves the 1-star songs in and never brings a
-child profile's music) or answers for the family. Wrong keys count toward a lockout like passwords, but only per address (`_limited()`, key
+child profile's music) or answers for the family (without a family: for everyone, without anyone's dislikes). Wrong keys count toward a lockout like passwords, but only per address (`_limited()`, key
 `plugin|<address>`, 30 in 10 minutes) – the right key always passes, so wrong guesses from elsewhere never shut the
 plugin out. Creating, removing and the status
 (`/api/plugin…`) and the download of the plugin are admin only. In Navidrome the key is in the plugin's settings
@@ -585,7 +599,7 @@ in there – since Navidrome 0.64 a host name alone never allows a private addre
 | `api_env_test()` | a stored password is only sent to the stored `NAV_URL`; for a new address the password must be sent along – so “Test connection” can't be used to send a stored password to a foreign server |
 | `api_accounts_save()` | self-protection: one's own account can't take away its own admin role (see [Roles](#roles)); role `none` ends all sessions of the account |
 | `api_env_save()` | `NAV_URL` and `NAV_PUBLIC_URL` only with `http://` or `https://` – the link address of the interface (`nav_web_url()`) also ignores any other value from the environment (no `javascript:` links); `TUTTIPHON_ADMIN_PASSWORD` can't be set or deleted this way (`save_env()`: “Unknown key”) |
-| `POST /api/notify/test` | at most one test message per 30 seconds and account, topic only from letters, digits, `-`, `_`; users only with one of their own people and only to that person's topic (also the one just being entered) – never to the administrator's topic or one another person uses, and without a topic there is no fallback to the administrator's (`notify.test(fallback=False)`); without a person only administrators. `view_config()` gives users only `enabled` and `server` of `settings.notify` – never the administrator's topic; other people's ntfy topics stay private, like all person fields except name, icon, color, prefix |
+| `POST /api/notify/test` | at most one test message per 30 seconds and account, topic only from letters, digits, `-`, `_`; users only with their own person and only to its topic (also the one just being entered) – never to the administrator's topic or one another person uses, and without a topic there is no fallback to the administrator's (`notify.test(fallback=False)`); without a person only administrators. `view_config()` gives users only `enabled` and `server` of `settings.notify` – never the administrator's topic; other people's ntfy topics stay private, like all person fields except name, icon, color, prefix |
 | `POST /api/push/*` | devices always apply to the signed-in account; “administrator device” only with role `admin`. Only push addresses via `https` at the known push services are accepted (`webpush.PUSH_HOSTS`: Google, Mozilla, Apple, Microsoft) – so no subscription can make Tuttiphon request addresses in the local network; the subscription's keys are checked for length and form; at most 10 devices per account; test message at most every 30 seconds |
 | Notifications through the app | content end-to-end encrypted (RFC 8291) – the push service only sees size and time; sender key `state/push_keys.json` with permissions 0600, never in a response (only the public part via `GET /api/push/key`) |
 | Notifications via ntfy | go only to the configured ntfy server; content: band name, album name, music world, name of a run and, as the target when tapped, the configured address of Tuttiphon with the page – no credentials, no paths. `NTFY_TOKEN` is only sent over `https`. Anyone who knows a topic can read along on ntfy.sh; protected topics on your own server with `NTFY_TOKEN` |
@@ -603,7 +617,8 @@ in there – since Navidrome 0.64 a host name alone never allows a private addre
    automatically.
 2. **Admins only?** Add the path to `Handler.ADMIN_ONLY`. If only one method of the path needs admin rights,
    call `auth.require_admin()` at the start of the function instead.
-3. **For everyone, but personal?** Check every parameter that names a person with `_own_person()`; fetch every playlist
+3. **For everyone, but personal?** Check every parameter that names a person with `_own_person()` (reading: their own
+   person and the family; `write=True` when something is created for the person: `auth.editable_persons()`); fetch every playlist
    that gets changed with `_own_playlist_id()`; filter lists with `auth.visible_playlist()`. Trim responses that
    contain admin details (paths, logs, account names) for `auth.current()["role"] != "admin"`.
 4. **Cache:** use `_memoized()` only for the admin view and filter afterwards – or add the account to the

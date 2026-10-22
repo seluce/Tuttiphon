@@ -26,12 +26,13 @@
   import Switch from '../Switch.svelte'
   import SoundPicker from '../SoundPicker.svelte'
   import { narrowsLibrary } from '../../lib/sound.svelte.js'
-  import { S, findPerson, defaultPerson, outOfAll, weltIds, changed, snapshot, findStil, findWelt, soundOf, mixWording,
-    ownPersons, isAdmin } from '../../lib/state.svelte.js'
+  import { S, findPerson, outOfAll, weltIds, changed, snapshot, findStil, findWelt, soundOf, mixWording,
+    creatablePersons, defaultOwner, myPerson, isFamily } from '../../lib/state.svelte.js'
   import { toast, confirmDialog } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
   import { fmt, plural, clone, uid, today, debounce } from '../../lib/format.js'
   import { SORTS, AUSWAHL, stilOptions, openEditor } from '../../lib/editor.js'
+  import { ownerOrder, fixTogether } from '../../lib/playlist.js'
   import { t, tn } from '../../lib/i18n.svelte.js'
 
   let { p0, isNew = false, onSaved = null } = $props()
@@ -39,7 +40,7 @@
   function start(x) {
     const q = clone(x || {})
     q.id ??= uid('playlist')
-    q.person ??= defaultPerson()
+    q.person ??= defaultOwner()?.id
     q.welt ??= '*'
     q.stil ??= '*'
     if (!q.rules) {
@@ -67,7 +68,7 @@
   let auto = $state('')         // automatic name from the preview
   let hint = $state('')
 
-  const person = $derived(findPerson(p.person || defaultPerson()))
+  const person = $derived(findPerson(p.person))
   const ids = $derived(weltIds(p))
   const mix = $derived(p.type === 'mix')
   const rv = $derived(p.hits ? 'hits' : p.minRating != null ? String(p.minRating) : '')
@@ -78,7 +79,10 @@
   const isInvalid = () => !p.rules && !p.fav && !p.review && !p.together && !p.radio && !p.daytime && !p.unheard && !p.album && !p.episodes && !narrowsLibrary(p.sound)
     && !(p.type === 'mix' && p.mix?.flavor === 'geschmack') && weltIds(p).length === 0 && (p.stil || '*') === '*'
   const invalid = $derived(isInvalid())
-  const togetherOptions = $derived(S.config.personen.filter((x) => isAdmin() || ownPersons().includes(x) || x.public))
+  // “What everyone likes” belongs to the family – its members are the other people
+  const togetherOptions = $derived(S.config.personen.filter((x) => !x.family))
+  /** For whom: the people you may create playlists for – “What everyone likes” stays with the family */
+  const owners = $derived(ownerOrder(creatablePersons().filter((x) => !p.together || x.family)))
   function toggleTogether(id) {
     const next = p.together.includes(id) ? p.together.filter((x) => x !== id) : [...p.together, id]
     if (next.length >= 2) p.together = next
@@ -178,7 +182,7 @@
     }
     saved = true
     const then = onSaved   // props can no longer be read after closeSheet()
-    const out = $state.snapshot(p)
+    const out = fixTogether($state.snapshot(p))
     for (const k of ['addArtists', 'excludeArtists']) if (Array.isArray(out[k]) && !out[k].length) delete out[k]
     if (out.type !== 'mix') delete out.mix
     else { delete out.sort; delete out.limit; delete out.notPlayedDays }
@@ -250,21 +254,23 @@
     <input class="input" value={startName} placeholder={auto || t('automatic')} oninput={(e) => set('name', e.currentTarget.value.trim())} />
   </label>
 
-  {#if ownPersons().length > 1}
+  {#if owners.length > 1}
     <Field label={t('For whom?')}>
       <div class="seg">
-        {#each ownPersons() as x (x.id)}
-          <button type="button" class:on={(p.person || defaultPerson()) === x.id} onclick={() => (p.person = x.id)}>
+        {#each owners as x (x.id)}
+          <button type="button" class:on={p.person === x.id} onclick={() => (p.person = x.id)}>
             <Glyph value={x.icon} size={15} class="mr-1.5" />{x.name}
           </button>
         {/each}
       </div>
       <div class="hint">
-        {isAdmin()
-          ? person?.public
-            ? t('Belongs to “{user}” in Navidrome, whose stars & favorites count · visible to everyone', { user: person?.user })
-            : t('Belongs to “{user}” in Navidrome, whose stars & favorites count · private', { user: person?.user })
-          : person?.public ? t('Visible to everyone – your stars & favorites count.') : t('Visible only to you – your stars & favorites count.')}
+        {isFamily(person)
+          ? S.config.settings.familyEdit === 'admins'
+            ? t('For the whole family – everyone sees it in Navidrome and Symfonium. Only administrators may change it.')
+            : t('For the whole family – everyone sees it in Navidrome and Symfonium. Everyone may change it.')
+          : person && person.id === myPerson()?.id
+            ? t('Only for you – your stars & favorites count.')
+            : t('Only for {name} – their stars & favorites count.', { name: person?.name || '?' })}
       </div>
     </Field>
   {/if}

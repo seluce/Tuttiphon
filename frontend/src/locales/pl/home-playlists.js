@@ -52,12 +52,6 @@ export default {
     'Tuttiphon liczy od {date} – gdy tylko zaczniesz słuchać, zobaczysz tu, co grało najczęściej.',
   'You haven’t listened to anything this week yet – or Symfonium hasn’t reported the plays yet.':
     'W tym tygodniu nie było jeszcze u ciebie odtworzeń – albo Symfonium jeszcze ich nie zgłosiło.',
-  'Your own playlists':
-    'Twoje własne playlisty',
-  'Shared by the family':
-    'Udostępnione przez rodzinę',
-  'Others have shared these playlists with everyone. You can listen to them in Symfonium – and create your own copy here to adjust.':
-    'Inni udostępnili te playlisty wszystkim. Możesz ich słuchać w Symfonium – i utworzyć tu własną kopię, żeby ją dostosować.',
   'Nothing new has been added lately.':
     'Ostatnio nie dodano nic nowego.',
   'How it works':
@@ -70,10 +64,10 @@ export default {
     'Słuchaj w Symfonium',
   'New playlists go to Navidrome automatically. They show up in Symfonium after the next sync.':
     'Nowe playlisty trafiają do Navidrome automatycznie. Pojawiają się w Symfonium po następnej synchronizacji.',
-  'Just for you or for everyone':
-    'Tylko dla ciebie albo dla wszystkich',
-  'You choose in your profile whether others see your playlists. Only you can edit them.':
-    'W profilu wybierasz, czy inni widzą twoje playlisty. Edytować je możesz tylko ty.',
+  'Who sees what':
+    'Kto co widzi',
+  'Your playlists are just for you. The family playlists are for everyone.':
+    'Twoje playlisty są tylko dla ciebie. Playlisty rodziny są dla wszystkich.',
   'Mix':
     'Mix',
   'for {name}':
@@ -218,12 +212,10 @@ export default {
     'Moje playlisty',
   'Everything Tuttiphon looks after for you. Navidrome reshuffles smart playlists on every request – paused and deleted ones are kept here.':
     'Wszystko, czym Tuttiphon się dla ciebie zajmuje. Navidrome przy każdym zapytaniu na nowo miesza inteligentne playlisty – wstrzymane i usunięte są przechowywane tutaj.',
-  'Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium. Further down: what others share with you.':
-    'Twoje playlisty – Tuttiphon dba o ich aktualność, a słuchać ich możesz w Symfonium. Niżej: to, co udostępniają ci inni.',
+  'Your playlists and the family’s – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.':
+    'Twoje playlisty i playlisty rodziny – Tuttiphon dba o ich aktualność, a słuchać ich możesz w Symfonium.',
   'All':
     'Wszystkie',
-  'Shared':
-    'Udostępnione',
   'Search playlists …':
     'Szukaj playlist …',
   'Search playlists':
@@ -240,8 +232,6 @@ export default {
     'Gust →',
   'No playlists for {name} yet.':
     'Brak jeszcze playlist dla osoby {name}.',
-  '{name} shares':
-    '{name} udostępnia',
   'to listen to in Symfonium, can be copied and adjusted':
     'do słuchania w Symfonium, można skopiować i dostosować',
   'Not in Navidrome, but kept here – one click brings them back.':
@@ -300,8 +290,6 @@ export default {
     'Przejęta inteligentna playlista',
   'Smart playlist':
     'Inteligentna playlista',
-  'private':
-    'prywatne',
   'Open in Navidrome':
     'Otwórz w Navidrome',
   'Move to trash':
@@ -324,10 +312,6 @@ export default {
   'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.':
     'Mix jest krótszy niż ustawiona długość, bo dozwolona jest najwyżej {n} piosenka na zespół – więcej zespołów z innych światów muzycznych go wydłuży.',
   'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.': { few: 'Mix jest krótszy niż ustawiona długość, bo dozwolone są najwyżej {n} piosenki na zespół – więcej zespołów z innych światów muzycznych go wydłuży.', many: 'Mix jest krótszy niż ustawiona długość, bo dozwolonych jest najwyżej {n} piosenek na zespół – więcej zespołów z innych światów muzycznych go wydłuży.' },
-  'This playlist belongs to {name} and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.':
-    'Ta playlista należy do osoby {name} i jest udostępniona wszystkim. Możesz jej słuchać w Symfonium – albo utworzyć własną wersję przez „Kopia dla mnie” i ją dostosować.',
-  'This playlist belongs to someone else and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.':
-    'Ta playlista należy do kogoś innego i jest udostępniona wszystkim. Możesz jej słuchać w Symfonium – albo utworzyć własną wersję przez „Kopia dla mnie” i ją dostosować.',
   'Copy for me':
     'Kopia dla mnie',
   'Reshuffle':
@@ -506,4 +490,24 @@ export default {
   '{n} track':
     '{n} utwór',
   '{n} tracks': { few: '{n} utwory', many: '{n} utworów' },
+  'For the whole family – everyone sees it in Navidrome and Symfonium. Only administrators may change it.':
+    'Dla całej rodziny – wszyscy widzą ją w Navidrome i Symfonium. Zmieniać ją mogą tylko administratorzy.',
+  'For the whole family – everyone sees it in Navidrome and Symfonium. Everyone may change it.':
+    'Dla całej rodziny – wszyscy widzą ją w Navidrome i Symfonium. Zmieniać ją może każdy.',
+  'Only for {name} – their stars & favorites count.':
+    'Tylko dla osoby {name} – liczą się jej gwiazdki i ulubione.',
+  'For the family':
+    'Dla rodziny',
+  'For the whole family – everyone hears them in Symfonium, and you can change them here too.':
+    'Dla całej rodziny – wszyscy słuchają ich w Symfonium, a ty możesz je też tutaj zmieniać.',
+  'For the whole family – everyone hears them in Symfonium. With “Copy for me” you get your own version to adjust.':
+    'Dla całej rodziny – wszyscy słuchają ich w Symfonium. Przez „Kopia dla mnie” dostajesz własną wersję do dostosowania.',
+  'Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.':
+    'Twoje playlisty – Tuttiphon dba o ich aktualność, a słuchać ich możesz w Symfonium.',
+  'Yours':
+    'Twoje',
+  'Only administrators change the family’s playlists – with “Copy for me” you get your own version.':
+    'Playlisty rodziny zmieniają tylko administratorzy – przez „Kopia dla mnie” dostajesz własną wersję.',
+  'Family playlist · for everyone':
+    'Playlista rodziny · dla wszystkich',
 }

@@ -163,23 +163,25 @@ def takeover_preview(cfg, file, lib):
     mapping = guess_mapping(cfg, nsp)
     out = {"file": file, "name": hm["name"], "originalCount": original, "limit": nsp.get("limit"), "mapping": None}
     if mapping:
-        p = {"person": cfg["settings"].get("defaultPerson"), "name": hm["name"], **mapping}
+        p = {"person": None, "name": hm["name"], **mapping}   # neutral: nobody's dislikes
         out["mapping"] = {**mapping, "count": rules.count(cfg, lib, p, rules.BuildContext(lib)),
                           "describe": rules.describe(cfg, p)}
     return out
 
 
-def takeover(cfg, file, mode, lib=None):
-    """Take a handmade .nsp over into the tool. File & Navidrome playlist stay the same."""
+def takeover(cfg, file, mode, lib=None, person=None):
+    """Take a handmade .nsp over into the tool for `person` (an id). File & Navidrome playlist stay the same."""
     hm = next((h for h in handmade(cfg) if h["file"] == file), None)
     if not hm:
         raise ValueError(_("{file} is not a handmade playlist (any more)", file=file))
+    if not any(x["id"] == person for x in cfg["personen"]):
+        raise ValueError(_("Please add a person first – every playlist belongs to one."))
     nsp = hm["nsp"]
     base = slug(hm["name"])
     pid, n = base, 2
     while any(p["id"] == pid for p in cfg["playlists"]):
         pid, n = f"{base}-{n}", n + 1
-    p = {"id": pid, "name": hm["name"], "person": cfg["settings"].get("defaultPerson"), "status": "aktiv",
+    p = {"id": pid, "name": hm["name"], "person": person, "status": "aktiv",
          "file": file, "created": dt.date.today().isoformat(), "source": "handgemacht",
          "takeover": {"original": file, "date": dt.date.today().isoformat(), "backup": None}}
     mapping = guess_mapping(cfg, nsp) if mode == "baukasten" else None
@@ -441,9 +443,6 @@ def sync_navidrome(cfg, env, ctx, log=print):
             want["ownerId"] = users[owner.lower()]
         elif owner:
             log(_s("  ⚠ User '{user}' does not exist in Navidrome ({name})", user=owner, name=nsp["name"]))
-        elif not owner:   # without an account the playlist stays with the admin – Navidrome then uses the admin's stars
-            log(_s("  ⚠ {name}: person without a Navidrome account – stars/favorites come from the admin account",
-                   name=nsp["name"]))
         diff = {k: v for k, v in want.items() if np.get(k) != v}
         if diff:
             try:

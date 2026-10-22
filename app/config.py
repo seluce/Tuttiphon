@@ -53,7 +53,7 @@ WEB_DIR = Path(env_var("WEB") or ROOT / "web")
 PATH_ENV = {"music": "MUSIC_DIR", "playlists": "PLAYLIST_DIR", "archive": "ARCHIVE_DIR"}
 
 MARKER = "Tuttiphon"   # start of the "comment" of every generated playlist
-CONFIG_VERSION = 12
+CONFIG_VERSION = 13
 
 _lock = threading.RLock()
 
@@ -532,13 +532,10 @@ def save_from_ui(incoming, keep_accounts=False):
 
 
 def normalize_persons(cfg):
-    """A child profile always has kid-safe mode – and so does every other profile of its account (otherwise a second
-    profile would be a way around it). Music worlds that no longer exist leave tasteExclude."""
+    """A child profile always has kid-safe mode. Music worlds that no longer exist leave tasteExclude."""
     persons = [p for p in cfg.get("personen") or [] if isinstance(p, dict)]
-    account = lambda p: p["user"].lower() if isinstance(p.get("user"), str) and p["user"] else None   # noqa: E731
-    children = {account(p) for p in persons if p.get("child") is True and account(p)}
     for p in persons:
-        if p.get("child") is True or account(p) in children:
+        if p.get("child") is True:
             p["clean"] = True
     worlds = {w.get("id") for w in cfg.get("welten") or [] if isinstance(w, dict)}
     for p in persons:
@@ -554,9 +551,8 @@ def localize_defaults(cfg, lang):
     from .i18n import LANGS, tr
     defaults = default_config()
     names = {s["id"]: s["name"] for s in defaults["stile"]}
-    names.update({p["id"]: p["name"] for p in defaults["personen"]})
     for item in cfg.get("stile", []) + cfg.get("personen", []):
-        en = names.get(item.get("id"))
+        en = FAMILY_NAME if isinstance(item, dict) and item.get("family") else names.get(item.get("id"))
         if en and item.get("name") in {tr(en, x) for x in LANGS}:
             item["name"] = tr(en, lang)
     st = cfg.setdefault("settings", {})
@@ -603,6 +599,7 @@ def _validate_config(cfg):
     welten = {w["id"] for w in cfg["welten"]}
     stile = {s["id"] for s in cfg["stile"]} | {"*"}
     personen = {p["id"] for p in cfg["personen"]}
+    _validate_persons(cfg)
     for p in cfg["playlists"]:
         if p.get("rules") is not None:          # playlist taken over unchanged
             continue
@@ -625,8 +622,6 @@ def _validate_config(cfg):
         st_ = next((x for x in cfg["stile"] if x["id"] == p.get("stil")), None)
         if (p.get("sound") or (st_ or {}).get("sound")) and p.get("type") != "mix":
             raise ValueError(_("config: playlist '{id}': sound vibes only exist as a mix", id=p.get('id')))
-        if p.get("person") and p["person"] not in personen:
-            raise ValueError(_("config: playlist '{id}' refers to an unknown person", id=p.get('id')))
         fav = p.get("fav")
         if fav is not None and not (isinstance(fav, dict) and isinstance(fav.get("days", 60), int)
                                     and not isinstance(fav.get("days", 60), bool) and 7 <= fav.get("days", 60) <= 365):
@@ -697,12 +692,46 @@ def _validate_config(cfg):
     if not isinstance(settings, dict):
         raise ValueError(_("config: {kind} invalid", kind="settings"))
     _validate_settings(settings)
-    if settings.get("defaultPerson") not in (None, "") and settings["defaultPerson"] not in personen:
-        raise ValueError(_("Settings: the default person does not exist"))
+    if settings.get("familyEdit", "all") not in FAMILY_EDIT:
+        raise ValueError(_("config: {kind} invalid", kind="familyEdit"))
+    for key in ("familySetup", "mergedPersons"):   # what the update to one person per account left to review
+        v = settings.get(key)
+        if v is not None and not isinstance(v, dict if key == "familySetup" else list):
+            raise ValueError(_("config: {kind} invalid", kind=key))
     if settings.get("dailyMode", "playlists") not in ("playlists", "alles", "aus"):   # i18n-ignore
         raise ValueError(_("config: dailyMode unknown"))
     if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", str(settings.get("dailyAt") or "05:30")):
         raise ValueError(_("config: please give dailyAt as HH:MM"))
+    _validate_owners(cfg)
+
+
+def _validate_persons(cfg):
+    """One person per Navidrome account: every person has an account of its own, at most one is the family (its own
+    account, never a child profile)."""
+    seen = set()
+    for p in cfg["personen"]:
+        account = p.get("user")
+        if not isinstance(account, str) or not account.strip():
+            raise ValueError(_("config: person '{id}' needs a Navidrome account", id=p.get('id')))
+        if account.strip().lower() in seen:
+            raise ValueError(_("config: the Navidrome account “{account}” belongs to more than one person", account=account))
+        seen.add(account.strip().lower())
+        if p.get("family") is not None and not isinstance(p["family"], bool):
+            raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key="family"))
+        if p.get("family") and p.get("child"):
+            raise ValueError(_("config: the family cannot be a child profile"))
+    if sum(1 for p in cfg["personen"] if p.get("family")) > 1:
+        raise ValueError(_("config: there can only be one family"))
+
+
+def _validate_owners(cfg):
+    """Every playlist belongs to a person that exists; “What everyone likes” only for the family."""
+    persons = {p["id"]: p for p in cfg["personen"]}
+    for p in cfg["playlists"]:
+        if p.get("person") not in persons:
+            raise ValueError(_("config: playlist '{id}' refers to an unknown person", id=p.get('id')))
+        if p.get("together") is not None and not persons[p["person"]].get("family"):
+            raise ValueError(_("config: playlist '{id}': “What everyone likes” only exists for the family", id=p.get('id')))
 
 
 def _validate_types(cfg):
@@ -726,7 +755,7 @@ def _validate_types(cfg):
                 raise ValueError(_("config: person '{id}': {key} is too long", id=p['id'], key=k))
         if p.get("color") and not COLOR.fullmatch(p["color"]):
             raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key="color"))
-        for k in ("public", "clean", "child"):
+        for k in ("clean", "child", "family"):
             if p.get(k) is not None and not isinstance(p[k], bool):
                 raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key=k))
         if p.get("push") not in (None, "") and not (isinstance(p["push"], str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", p["push"])):
@@ -829,7 +858,7 @@ def _validate_settings(st):
     _num(st, "minDuration", 0, 3600, N_("Minimum length"))
     _num(st, "hitsShare", 0, 1, N_("“Only the hits”"))
     _num(st, "allMinRating", 0, 5, N_("Minimum rating for “All”"))
-    for key in ("autoApply", "public", "seasonRest", "smoothTransitions", "mixLearn"):
+    for key in ("autoApply", "seasonRest", "smoothTransitions", "mixLearn"):
         if st.get(key) is not None and not isinstance(st[key], bool):
             raise ValueError(_("Settings: {key} must be yes/no", key=key))
     for key, n in (("namePattern", 200), ("allName", 120), ("filePrefix", 60)):
@@ -969,6 +998,9 @@ def _validate_settings(st):
         raise ValueError(_("Settings: notifications – events invalid"))
 
 
+FAMILY_NAME = N_("Family")       # name of a new family entry (server language; follows a language switch)
+FAMILY_EDIT = ("all", "admins")  # settings.familyEdit: who may create, change and delete the family's playlists
+
 # For migrating very old configurations (v1 had no people yet): a neutral person „Familie“ (stored data)
 DEFAULT_PERSONEN = [
     {"id": "familie", "name": "Familie", "icon": "i:home", "user": "", "public": True, "prefix": "",
@@ -1080,8 +1112,99 @@ def migrate(cfg):
             st["notify"]["events"] = {}
         st["notify"]["events"].setdefault("weekly", True)
         cfg["version"] = 12
+    if version < 13:   # v13: one person per Navidrome account – the family becomes an entry with an account of its own
+        _one_person_per_account(cfg)
+        cfg["version"] = 13
     if version < CONFIG_VERSION:   # whatever a stage added gets its name in the server language (chosen names stay)
         localize_defaults(cfg, cfg.get("settings", {}).get("language") or "en")
+    return cfg
+
+
+def _one_person_per_account(cfg):
+    """Migration to v13 (no network): the old fallback "playlist without a person = the default person" resolved; a
+    person without an account gets the Navidrome administrator's (who owns its playlists today); of several persons on
+    one account the first that is not the old default person stays and the others are merged into it (their
+    playlists move, names frozen where the prefix changes). Nothing becomes the family by itself – that needs an account
+    of its own (created by Tuttiphon): the old default person is remembered in settings.familySetup (its look,
+    preferences and playlists – "To review" offers to set up the family and move them), merged child or extra profiles
+    in settings.mergedPersons. "Visible to everyone" (person.public, settings.public) is gone: the family's playlists
+    are for everyone, a person's are their own. "What everyone likes" stays only on the family's playlists (kept in
+    familySetup for when they move there)."""
+    from . import rules
+    st = cfg.setdefault("settings", {})
+    default = st.pop("defaultPerson", None)
+    st.pop("public", None)
+    persons = [p for p in cfg.get("personen", []) if isinstance(p, dict)]
+    playlists = [p for p in cfg.get("playlists", []) if isinstance(p, dict)]
+    known = {p.get("id") for p in persons}
+    for pl in playlists:   # the old fallback, resolved once
+        if pl.get("person") not in known:
+            pl["person"] = default if default in known else None
+    admin = (load_env().get("NAV_ADMIN_USER") or "").strip()
+    for p in list(persons):   # without an account: the Navidrome administrator owns its playlists today
+        if not (isinstance(p.get("user"), str) and p["user"].strip()):
+            if any(pl.get("person") == p["id"] for pl in playlists):
+                p["user"] = admin or p["id"]
+            else:
+                persons.remove(p)
+    by_account = {}
+    for p in persons:
+        by_account.setdefault(p["user"].strip().lower(), []).append(p)
+    remap, merged, setup = {}, [], None
+    for group in by_account.values():
+        keep = next((p for p in group if p["id"] != default), group[0])
+        for p in group:
+            if p is keep:
+                continue
+            remap[p["id"]] = keep
+            ids = [pl["id"] for pl in playlists if pl.get("person") == p["id"]]
+            if p["id"] == default:
+                setup = {k: p[k] for k in ("name", "icon", "color", "likes", "dislikes", "clean") if k in p}
+                setup["playlists"] = ids
+            else:
+                merged.append({"name": p.get("name") or p["id"], "into": keep["id"], "child": bool(p.get("child")),
+                               "playlists": ids})
+    if setup is None and default and any(p["id"] == default for p in persons):   # alone on its account: stays a person
+        old = next(p for p in persons if p["id"] == default)
+        setup = {k: old[k] for k in ("name", "icon", "color", "likes", "dislikes", "clean") if k in old}
+        setup["playlists"] = [pl["id"] for pl in playlists if pl.get("person") == default]
+        setup["person"] = default
+    by_id = {p["id"]: p for p in persons}
+    for pl in playlists:   # move – the name it has in Navidrome now stays where the prefix would change it
+        new = remap.get(pl.get("person"))
+        if new is None:
+            continue
+        old = by_id[pl["person"]]
+        if not pl.get("name") and not pl.get("review") and (old.get("prefix") or "") != (new.get("prefix") or ""):
+            try:
+                pl["name"] = rules.playlist_name(cfg, pl)
+            except (KeyError, StopIteration, ValueError):
+                pass   # an unknown world: the name follows the new person
+        pl["person"] = new["id"]
+    together = {}
+    for pl in playlists:
+        if pl.get("together") is not None:
+            together[pl["id"]] = pl.pop("together")
+            if pl.get("welt", "*") == "*" and pl.get("stil", "*") == "*" and not (pl.get("radio") or pl.get("fav")
+                                                                                  or pl.get("review")):
+                pl["type"] = "mix"   # without members “All × Everything” becomes a mix by the own taste (as before)
+                pl["mix"] = {**(pl.get("mix") if isinstance(pl.get("mix"), dict) else {}), "flavor": "geschmack"}
+    for pl in playlists:
+        if pl.get("person") is None and persons:   # a playlist of nobody (no default person was set): the first person
+            pl["person"] = persons[0]["id"]
+    cfg["playlists"] = [pl for pl in playlists if pl.get("person")]
+    if setup is not None and together:   # the members, as persons that remain
+        setup["together"] = {k: list(dict.fromkeys(remap[x]["id"] if x in remap else x for x in v if x in by_id))
+                             for k, v in together.items()}
+    removed = set(remap)
+    cfg["personen"] = [p for p in persons if p["id"] not in removed]
+    for p in cfg["personen"]:
+        p.pop("public", None)
+        p.pop("family", None)
+    if setup is not None:
+        st["familySetup"] = setup
+    if merged:
+        st["mergedPersons"] = merged
     return cfg
 
 

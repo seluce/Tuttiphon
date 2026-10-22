@@ -9,7 +9,7 @@ export const STATE = join(tmpdir(), 'tuttiphon-e2e.json')
 
 export default async function setup() {
   const work = mkdtempSync(join(tmpdir(), 'tuttiphon-e2e-'))
-  const out = execFileSync('tools/testserver.sh', [String(PORT), work, '--auth'], { encoding: 'utf8' })
+  const out = execFileSync('tools/testserver.sh', [String(PORT), work, '--auth', '--family'], { encoding: 'utf8' })
   const cookie = (role) => out.match(new RegExp(`${role}-cookie:\\s+tuttiphon=(\\S+)`))[1]
   const cfg = JSON.parse(readFileSync(join(work, 'data', 'config.json'), 'utf8'))
   // Warm up like a server that is already running: load the library and lists once (otherwise the first pages
@@ -32,6 +32,7 @@ export default async function setup() {
     userAccount: await account('user'),
     playlist: cfg.playlists.find((p) => (p.status || 'aktiv') === 'aktiv')?.id,
     welt: cfg.welten[0]?.id,
-    person: cfg.personen[0]?.id,
+    person: (cfg.personen.find((p) => !p.family) ?? cfg.personen[0])?.id,   // a person's profile shows more than the family's
+    personName: (cfg.personen.find((p) => !p.family) ?? cfg.personen[0])?.name,
   }))
 }

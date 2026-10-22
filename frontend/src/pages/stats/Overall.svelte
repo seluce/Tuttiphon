@@ -7,18 +7,17 @@
   import ArtistRows from './ArtistRows.svelte'
   import SongRows from './SongRows.svelte'
   import Bars from './Bars.svelte'
-  import { S, findPerson, snapshot, changed } from '../../lib/state.svelte.js'
+  import { S, creatablePersons, snapshot, changed } from '../../lib/state.svelte.js'
   import { toast } from '../../lib/overlay.svelte.js'
   import { go } from '../../lib/router.svelte.js'
   import { fmt, plural, relTime, uid, today } from '../../lib/format.js'
-  import { t, tn, locale } from '../../lib/i18n.svelte.js'
+  import { t, tn } from '../../lib/i18n.svelte.js'
   import { compact } from './util.js'
 
   let { d, person } = $props()
   const tot = $derived(d.totals)
-  const same = $derived(d.personsSameUser.filter((x) => x !== person.id).map((x) => findPerson(x)?.name).filter(Boolean))
-  // "Family and Niklas" – everyone with this account, in the words of the language
-  const sharing = $derived(new Intl.ListFormat(locale(), { type: 'conjunction' }).format([person.name, ...same]))
+  // users see the family's numbers too – a playlist from them only if they may create the family's playlists
+  const canCreate = $derived(creatablePersons().some((x) => x.id === person.id))
   let created = $state(false)   // against double clicks
 
   function createForgotten() {
@@ -38,9 +37,6 @@
   <Empty icon="headphones" title={t('No plays counted yet')}
     text={t('Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.', { user: d.user })} />
 {:else}
-  {#if same.length}
-    <p class="muted small -mt-2.5 mb-4">{t('{names} use the same Navidrome account “{account}” – so their numbers are the same.', { names: sharing, account: d.user })}</p>
-  {/if}
   <div class="kpis">
     <div class="kpi">
       <div class="l">{t('Plays')}</div>
@@ -110,7 +106,7 @@
       </div>
       <p class="muted small mb-3">{t('Favorites and well-liked hits that have not played in over 90 days.')}</p>
       <SongRows list={d.forgotten.sample.slice(0, 8)} right={(s) => (s.played ? relTime(s.played) : t('never'))} />
-      {#if d.forgotten.count}
+      {#if d.forgotten.count && canCreate}
         <div class="btns mt-3.5">
           <button class="btn primary sm" disabled={created} onclick={createForgotten}><Icon name="plus" size={16} />{t('Create as playlist')}</button>
         </div>

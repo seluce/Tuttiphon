@@ -152,15 +152,16 @@ class PlaylistKindsTest(unittest.TestCase):
 
 
 class PermissionsTest(unittest.TestCase):
-    def test_user_family_mix_only_with_public_or_own_persons(self):
+    def test_what_everyone_likes_is_the_family_s(self):
         cfg = base_config()
         incoming = copy.deepcopy(cfg)
-        incoming["playlists"] = [{"id": "t", "person": "jonas", "welt": ["kinder"], "stil": "*", "type": "mix",
-                                  "together": ["jonas", "niklas", "oma"]}]
-        out = auth.merge_user_changes(cfg, incoming, JONAS)
-        self.assertEqual(out["playlists"][0]["together"], ["jonas", "oma"])   # Niklas is private
-        incoming["playlists"][0]["together"] = ["jonas", "niklas"]
-        self.assertNotIn("together", auth.merge_user_changes(cfg, incoming, JONAS)["playlists"][0])
+        incoming["playlists"] = [{"id": "t", "person": "familie", "welt": ["kinder"], "stil": "*", "type": "mix",
+                                  "together": ["jonas", "niklas", "oma", "familie", "gibtsnicht"]},
+                                 {"id": "u", "person": "jonas", "welt": ["kinder"], "stil": "*", "type": "mix",
+                                  "together": ["jonas", "oma"]}]
+        out = {p["id"]: p for p in auth.merge_user_changes(cfg, incoming, JONAS)["playlists"]}
+        self.assertEqual(out["t"]["together"], ["jonas", "niklas", "oma"])   # people – not the family, nobody unknown
+        self.assertNotIn("together", out["u"])                              # a person's own playlist: no family mix
 
     def test_person_fields_clean_and_push(self):
         cfg = base_config()

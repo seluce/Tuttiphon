@@ -27,11 +27,16 @@ class PreviewTest(unittest.TestCase):
         with self.assertRaises(PermissionError):
             web._guard_preview({"person": "niklas", "welt": "*", "stil": "*", "type": "mix", "review": {"period": "month"}}, self.cfg)
         body = {"person": "jonas", "welt": "kinder", "stil": "*", "type": "mix", "rules": [{"is": {"loved": True}}],
-                "together": ["jonas", "niklas", "oma"], "sampleSize": 99999, "mix": {"size": 99999}}
+                "sampleSize": 99999, "mix": {"size": 99999}}
         web._guard_preview(body, self.cfg)
         self.assertNotIn("rules", body)
-        self.assertEqual(body["together"], ["jonas", "oma"])   # Niklas is private
         self.assertEqual((body["sampleSize"], body["mix"]["size"]), (100, 500))
+        family = {"person": "familie", "welt": "kinder", "stil": "*"}
+        web._guard_preview(family, self.cfg)                       # the family's: everyone may create them …
+        self.cfg["settings"]["familyEdit"] = "admins"
+        config.save_config(self.cfg)
+        with self.assertRaises(PermissionError):                   # … unless only administrators may
+            web._guard_preview(family, self.cfg)
 
     def test_preview_config_keeps_account_from_server(self):
         from app import web
@@ -47,14 +52,15 @@ class PreviewTest(unittest.TestCase):
 
 
 class FamilyMixTest(unittest.TestCase):
-    def test_private_member_drops_out_at_runtime(self):
+    def test_what_everyone_likes_only_for_the_family(self):
         cfg = base_config()
-        p = {"id": "t", "person": "jonas", "welt": "kinder", "stil": "*", "type": "mix", "together": ["jonas", "oma", "niklas"]}
-        self.assertEqual([x["id"] for x in rules.together_of(cfg, p)], ["jonas", "oma"])
-        cfg["personen"][3]["public"] = False                       # grandma switches to private
-        self.assertEqual([x["id"] for x in rules.together_of(cfg, p)], ["jonas"])
-        shared = {**p, "person": "familie"}                         # the administrator maintains the shared person's mix
-        self.assertEqual([x["id"] for x in rules.together_of(cfg, shared)], ["jonas", "niklas", "oma"])
+        p = {"id": "t", "person": "familie", "welt": "kinder", "stil": "*", "type": "mix",
+             "together": ["jonas", "oma", "niklas", "familie"]}
+        self.assertEqual([x["id"] for x in rules.together_of(cfg, p)], ["jonas", "niklas", "oma"])   # never the family
+        self.assertEqual(rules.together_of(cfg, {**p, "person": "jonas"}), [])   # a person's playlist: no family mix
+        cfg["playlists"] = [{**p, "person": "jonas"}]
+        with self.assertRaises(ValueError):
+            config.validate_config(cfg)
 
 
 class KidSafeTest(unittest.TestCase):

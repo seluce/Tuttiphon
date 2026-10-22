@@ -20,7 +20,7 @@
   const addressHtml = address.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])   // into {@html}
   // for whom the last similar songs were chosen – with its own time: other requests (cover, biography) are for nobody
   const forWhom = $derived(!st?.lastForAt ? ''
-    : !st.lastFor ? t('{when} · for the family', { when: relTime(st.lastForAt) })
+    : !st.lastFor ? t('{when} · for everyone', { when: relTime(st.lastForAt) })
       : st.lastGuess ? t('{when} · probably for {name}', { when: relTime(st.lastForAt), name: st.lastFor })
         : t('{when} · for {name}', { when: relTime(st.lastForAt), name: st.lastFor }))
   // Navidrome's agents with Tuttiphon first – in front of Navidrome's defaults (0.64: deezer,lastfm,listenbrainz)
@@ -133,7 +133,7 @@
       <li>{@html t('In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.')}</li>
     </ol>
   </div>
-  <div class="hint">{t('Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.')}</div>
+  <div class="hint">{t('Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family – without a family for everyone. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a person has kid-safe mode or is a child profile.')}</div>
 </Card>
 
 <style>

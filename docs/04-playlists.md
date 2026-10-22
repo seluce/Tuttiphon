@@ -59,7 +59,7 @@ includes albums via `contains` – so exactly what the separate world includes d
 playlist's `addArtists` get no `isNot` rules (`welt_negation(keep=…)`); the album and genre exclusions still apply to
 them.
 
-**Child profile.** For a person with `child: true` (set only by the administrator) the children's music belongs to *All*:
+**Child profile.** For a person with `child: true` (set only by the administrator, never on the family) the children's music belongs to *All*:
 `rules.child_worlds()` names the separate worlds that are not negated for them – every separate world except audio
 plays & audiobooks (`scene: "hoerspiel"`, `SPOKEN_SCENE`), which do not belong in a music mix. So discovered, album of
 the week, own sound, good morning, rediscover and every “All × vibe” playlist of a child include children's songs;
@@ -112,18 +112,23 @@ a season begins or ends.
 
 ### Person
 
+Every playlist belongs to a person (`person`, required – `config._validate_owners()`), and every person to a Navidrome
+account of its own (one person per account, [Data model](02-data-model.md#personen)). The family is an optional person
+of its own with `family: true` and an account Tuttiphon created for it.
+
 | Field | Contribution |
 |---|---|
 | `user` | Navidrome account that **owns** the playlist. Navidrome evaluates `rating`/`loved` with that account's stars and favorites; mixes pick from that account's point of view (see [Mixes](#person-and-view)) |
-| `public` | visibility in Navidrome (the playlist's `public`) and for other Tuttiphon users (`auth.visible_playlist`, see [Security](07-security.md)); if the value is missing, the person is private in both cases |
-| `prefix` | prepended to the built name, e.g. `"Kind · "` |
+| `family` | the family's playlists are **for everyone** (`rules.for_everyone()` – also the former family playlists while `settings.familySetup` is left from the update): `public: true` in the `.nsp` and in Navidrome, and every account sees them in Tuttiphon. A person's playlists are **private**: only their account in Navidrome, in Tuttiphon that account and the administrators (`rules.build_nsp()`, `auth.visible_playlist()`, see [Security](07-security.md)). Who may change the family's playlists: `settings.familyEdit` |
+| `prefix` | prepended to the built name, e.g. `"Kind · "` (the family has none) |
 | `likes` | `welten`, `stile`, `artists` – the basis of the [suggestions](#suggestions) |
 | `dislikes` | dislikes: `artists` (`isNot artist`/`albumartist`) and `genres` (`notContains genre`) in **every** playlist of the person |
 
-If a playlist has no `person`, `settings.defaultPerson` applies (`person_of()`) – also for visibility in Tuttiphon
-(`auth.visible_playlist()`). The default person also determines from whose point of view the
-[library cache](#library-cache-applibrarypy) loads. If the default person does not exist either, `public` in the
-`.nsp` falls back to `settings.public`.
+`person_of()` finds the playlist's person; there is no fallback any more. A definition without `person` – the neutral
+view of a page, e.g. the song counts of a music world or of the matrix, a new music world's suggestion or the
+recognized rules of a handmade playlist – gets `None`: no one's
+dislikes, no child's worlds, no kid-safe mode. `is_family()` tells the family entry; `together_of()` returns the
+members of “What everyone likes” – only on the family's playlists and never the family itself.
 
 ### Playlist entry
 
@@ -188,7 +193,7 @@ In addition:
 
 `build_nsp(cfg, playlist, ctx)` creates the JSON that Navidrome reads as a smart playlist. `ctx` is a
 `BuildContext` with the library (for scene bands, radio and the hits threshold) and the date (for seasons).
-At the top are `name`, `comment` (`Tuttiphon: …`) and `public`, then an `all` block (all rules must match)
+At the top are `name`, `comment` (`Tuttiphon: …`) and `public` (`true` only for the family's playlists), then an `all` block (all rules must match)
 in this order:
 
 | # | Block | Content |
@@ -220,7 +225,7 @@ without a world `settings.minDuration`. 0 or empty = no rule.
 ### Example
 
 Music world “kinder” (two bands, genre “Children”, `separate`, `minDuration: 45`, `minRating: 0`, one title and one
-album exclusion) × vibe “Tanzen & Toben” (keywords) for the person “familie” (dislike “Band X”); another
+album exclusion) × vibe “Tanzen & Toben” (keywords) for the family “familie” (dislike “Band X”; hence `public: true`); another
 vibe “Weihnachten” has `excludeElsewhere`; `settings.excludeTitles` is shortened to three entries here.
 Output of `build_nsp()` (example data from a German-language installation; formatted compactly for readability only,
 content unchanged):
@@ -336,7 +341,7 @@ Mixes have no sort order; their order is set by the [mixer](#selection).
 ### Rules taken over unchanged
 
 If a playlist has `rules` (takeover “unchanged”), `build_nsp()` builds nothing itself: header (name = `name`, otherwise
-`originalName`; comment `Tuttiphon: custom rules (taken over unchanged)`, `public` of the person) + `rulesOp`
+`originalName`; comment `Tuttiphon: custom rules (taken over unchanged)`, `public` as for every playlist of the person – `true` for the family) + `rulesOp`
 (`all`/`any`) with the original rules + `sortRaw` + `limit` + all other original keys from `rulesExtra`
 (e.g. `order`).
 
@@ -363,14 +368,15 @@ supported in the preview”) – for handmade rules, the takeover then shows no 
 per rule (as a JSON key, a bit mask) in the `Library` object; `all` intersects, `any` unites. A rule part is not
 tested song by song but looked up in an index of the field's distinct values (value → songs, lowercased text →
 songs), built once per field – a band rule takes microseconds, so music worlds with hundreds of bands cost little.
-Account lists with the same songs in the same order as the default list share these caches for the fields that do not
+Account lists with the same songs in the same order as the shared list share these caches for the fields that do not
 depend on the account (bands, genres, album, title, year, length, date added – not `filepath`, not “in the last n
 days”) – see [Statistics](06-intelligence.md#statistics).
 
-**Accuracy.** The library is loaded from the default person's point of view (see [Library cache](#library-cache-applibrarypy)).
-If that person's password is stored, the ratings are exact (`ratings_exact`); otherwise the local evaluation uses the
-average rating as an approximation. Smart playlists of other people are also precomputed with the stars of the
-default person – Navidrome uses the owner's. Mixes compute from their person's point of view.
+**Accuracy.** The shared song list is neutral (see [Library cache](#library-cache-applibrarypy)): read via the admin
+account with the average rating as an approximation (`ratings_exact: false`) and nobody's favorites. Preview and song
+counts of smart playlists compute on it – Navidrome uses the owner's stars and favorites. Mixes compute from their
+person's point of view (`mixer.person_lib()`: the song list of the person's account when its password is stored,
+`ratings_exact: true`).
 
 **Functions built on this:**
 
@@ -378,7 +384,7 @@ default person – Navidrome uses the owner's. Mixes compute from their person's
 |---|---|
 | `preview()` | name, song count, limit, `nsp`, top artists, cover, main color, sample (with tempo/mood from the sound analysis) and `summary()`. For mixes exactly the current selection (`mixer.pick()`), plus `pool` = size of the pool |
 | `count()` | song count of a playlist (incl. sound filter) |
-| `matrix()` | song count for every combination world × vibe (incl. *All*/*Everything*, without *All* × *Everything*), person = default person; plus the active seasons |
+| `matrix()` | song count for every combination world × vibe (incl. *All*/*Everything*, without *All* × *Everything*), without a person (neutral: no one's dislikes); plus the active seasons |
 | `similar_artists()` | bands without a world that fit a world by genre (TF-IDF cosine: rare genres count more; ≥ 5 songs; threshold 0.35; a world genre found in the name of a band genre counts at least 0.9) |
 | `untagged_artists()` | bands with ≥ 5 songs of which ≥ 80 % have no genre |
 | `library_index()` | artists, genres, albums, formats, MP3 albums, favorites, played songs |
@@ -488,11 +494,11 @@ dry run (`dry_run`), scan and sync are skipped entirely.
 
 1. `navidrome_index()`: Navidrome playlists whose file is in the playlist folder (the name of the
    parent folder is compared), as file name → playlist.
-2. For each active playlist, the target values `name`, `comment`, `public` and – if the person's account exists in
-   Navidrome – `ownerId`. Only differing fields are set via `PUT /api/playlist/{id}`. If the account does not
-   exist, a warning appears in the log; likewise if the person has no Navidrome account at all (“person without a
-   Navidrome account – stars/favorites come from the admin account”: the playlist stays with the admin, Navidrome
-   evaluates the admin's stars). If setting the values fails for a playlist (`NavidromeError`), the log reports “⚠ …: not
+2. For each active playlist, the target values `name`, `comment`, `public` (`true` only for the family's) and – if the
+   person's account exists in Navidrome – `ownerId`. Only differing fields are set via `PUT /api/playlist/{id}`. If
+   the account does not exist, a warning appears in the log (“User '…' does not exist in Navidrome”) and the
+   playlist stays with its current owner. (The warning “person without a Navidrome account” is left over from before
+   v13 – every person has an account now.) If setting the values fails for a playlist (`NavidromeError`), the log reports “⚠ …: not
    updated in Navidrome”, and the sync continues with the others.
 3. If a playlist is missing in Navidrome (e.g. deleted there by hand), its file gets a new modification time
    (`os.utime`) so the next scan reads it in again. The step then starts a second, quick scan
@@ -544,7 +550,7 @@ These actions only change the configuration (interface → `PUT /api/config`); t
 | **Delete permanently** | the entry disappears from the configuration; a file that still exists is in `current` and is removed on the next run |
 | **Pause from “To review”** | `pause`/`pauseAll`: playlists from which no song has played on any account for 90 days (`suggest.unused_playlists()` – only once the recap has been counting that long, only for playlists that old, never for seasonal playlists), with “Undo”; duplicate playlists of the same person with exactly the same selection are reported by `duplicate_playlists()` – all fields that select or order are compared (`suggest.CONTENT_FIELDS`, lists regardless of order) |
 | **Empty trash** | on the Playlists page: like “Delete permanently” for all playlists the trash currently shows (with filter by person and search; users only their own), after a confirmation and with “Undo” (`purgeAll()`) |
-| **Duplicate** | only in the interface: copy without `file`, `takeover`, `cover`, `deletedAt`, with a new ID and the name “… (copy)” (for other people's playlists, for the user's own person) – gets its own file |
+| **Duplicate** | only in the interface: copy without `file`, `takeover`, `cover`, `deletedAt`, with a new ID and the name “… (copy)”, for your own person (`myPerson()`; administrators without one: `defaultOwner()` – the family, otherwise the first person) – gets its own file |
 | **Undo** | restores the previous state including `file`; the playlist ends up in its old file again |
 
 ### Fields owned by the server
@@ -563,8 +569,11 @@ file name that no other playlist uses and that is not a handmade file in the pla
 after a takeover. Handmade `.m3u` files are not recognized.
 
 `takeover_preview()` shows the song count of the original rules (local; `null` if they cannot be recomputed) and
-a guessed mapping. `takeover(cfg, file, mode)` creates a playlist entry (ID from the name, person =
-default person, `file` = the existing file, `source: "handgemacht"`, `takeover: {original, date, backup: null}`):
+a guessed mapping. `takeover(cfg, file, mode, person=…)` creates a playlist entry (ID from the name, `person` = the one
+in the request (`POST /api/takeover`, body `person`) – the interface sends none, then the signed-in administrator's
+own person, otherwise the family, otherwise the first person (`web._default_person()`); without any person `400` “Please add a person first –
+every playlist belongs to one.” –, `file` = the existing file, `source: "handgemacht"`, `takeover: {original, date,
+backup: null}`). In Navidrome the next sync gives it the owner and visibility of that person (the family's: public):
 
 | Mode | Result |
 |---|---|
@@ -595,7 +604,8 @@ playlist ([Interface](09-interface.md#playlist-page-and-playlist-cards)).
   `dateadded`/`rating`/`lastplayed` in that order, otherwise random; at most `limit`.
 - Name `<name> – <month> <year>`, e.g. “Kinder · Tanzen & Toben – Oct 2026”.
 - Created via Subsonic `createPlaylist` (admin, POST with all song IDs), then comment
-  (“Saved mix from …”), `public` and owner are set via the native API.
+  (“Saved mix from …”), `public` (as the person's playlists: `true` only for the family) and owner (the person's
+  account) are set via the native API.
 
 The comment does not start with the marker, and the playlist has no file in the playlist folder – Tuttiphon never
 touches it again.
@@ -682,10 +692,10 @@ the next run writes a different selection.
 
 ### Person and view
 
-`person_lib()`: if the mix belongs to a person with a different Navidrome account than the library cache, the mixer loads
-the song list from that account's point of view (`stats.songs_for()`: its stars, favorites, plays; cached for 10 minutes).
-Without a stored password for the account, it uses the default library. The selection is then mapped back to the
-indices of the default library.
+`person_lib()`: the shared song list of the library cache is neutral (admin account, average ratings), so the mixer loads
+the song list from the point of view of the mix's person's account (`stats.songs_for()`: its stars, favorites, plays;
+cached for 10 minutes) – the family's too, with the password stored when it was set up. Without a stored password for
+the account, it uses the shared list. The selection is then mapped back to the indices of the shared list.
 
 ### Mixes that learn (`app/feedback.py`)
 
@@ -770,8 +780,8 @@ by hand if
 
 Entries without accounts in `u` do not say who got which star; there the star counts as
 automatic – otherwise machine-assigned 1 stars would drop out of the mixes for good. This only works if the song list
-contains exactly this account's stars (`person_lib()` with a stored password, or the default library with
-exact stars of the same account); otherwise nothing is excluded.
+contains exactly this account's stars (`person_lib()` with a stored password); the shared list (average ratings)
+excludes nothing.
 
 Because the selection of a period stays remembered (`state/mixes.json`), what was learned – and also switching
 `mixLearn` – only takes effect in the next newly compiled mix. For mixes, `summary()` shows “Learns as you listen: skipped songs
@@ -836,9 +846,10 @@ The sound vibe `klang-morgen` (“Good morning”, mood cheerful, liveliness 0.2
 `calm_down(rise=True)` orders ascending – start calm, then livelier, never the same band twice in a row.
 Suggestion “Good morning · <world>”: 30 minutes, new every day – only for people without listening data (no stored
 password); for the others “Good morning” comes from the listening clock (`daytime: "morning"`, see
-[Playlists from listening](#playlists-from-listening)). The **Car ride** suggestion for the shared person
-takes the family's favorite and played worlds (with children's songs), the sound filter liveliness ≥ 0.35
-(nothing for falling asleep), 60 minutes, new every day – and with `together` as soon as two accounts have listened enough.
+[Playlists from listening](#playlists-from-listening)). The **Car ride** suggestion – only with a family, for the
+family – takes the favorite and played worlds of the family and of every person with enough listening (with
+children's songs), the sound filter liveliness ≥ 0.35 (nothing for falling asleep), 60 minutes, new every day – and
+with `together` (those people as members) as soon as two of them have listened enough.
 
 ### Radio
 
@@ -859,14 +870,14 @@ editor.
 
 | Kind | Field | How | Suggestion |
 |---|---|---|---|
-| New from the favorite bands | `fav: {days}` | smart playlist: `build_nsp()` replaces the world block with the person's favorite bands (`rules.favorite_artists()`: those chosen by hand, plus the most played from `taste.profile()` with at least a 1 % share, without dislikes, at most 30) and requires `inTheLast dateadded days`. Without favorite bands it stays empty. Newest first, `minRating` 0 (new songs have no stars yet) | “New from our favorite bands” or “New from Mia’s favorite bands”, from 5 songs |
-| What everyone likes | `together: [people]` | mix of the shared person: dislikes and kid-safe mode of everyone involved in the rules, 1-star songs of all accounts drop out (`mixer._never()`) – also from people who are private by now (protection comes first). Taste counts only with consent (`rules.together_of()`: visible to everyone, the same account, or a mix of the default person), then every account counts equally – weight × (product of the `taste.factor()`)^(3/count) | for the default person, as soon as two accounts have listened enough; worlds = favorite worlds and played worlds of everyone; weekly, 50 songs, 2 per band |
+| New from the favorite bands | `fav: {days}` | smart playlist: `build_nsp()` replaces the world block with the person's favorite bands (`rules.favorite_artists()`: those chosen by hand, plus the most played from `taste.profile()` with at least a 1 % share, without dislikes, at most 30) and requires `inTheLast dateadded days`. Without favorite bands it stays empty. Newest first, `minRating` 0 (new songs have no stars yet) | “New from our favorite bands” (the family) or “New from Mia’s favorite bands”, from 5 songs |
+| What everyone likes | `together: [people]` | a mix of the family – `together` exists only on the family's playlists (`config._validate_owners()`), its members are people other than the family. Dislikes and kid-safe mode of the family and every member in the rules, 1-star songs of all their accounts drop out (`mixer._never()`). Taste: the family's account and every member's (`rules.together_of()`) count equally – weight × (product of the `taste.factor()`)^(3/count) | only with a family (`suggest.family_mix()`), as soon as two people other than the family have listened enough – they become the members; worlds = favorite worlds and played worlds of the family and everyone; weekly, 50 songs, 2 per band |
 | Good night | `mix.minutes` | see [Falling asleep](#falling-asleep-and-good-night) | per favorite world (children's worlds preferred) |
-| Album of the week | `album: true` | one whole album instead of a selection (`mixer.album_order()`): candidates (`album_candidates()`) are albums with at least 6 songs (`ALBUM_MIN_TRACKS`), at most 3 bands (`ALBUM_MAX_ARTISTS`, no compilations), at least half of them in the playlist's selection (music world, filters, dislikes) and not a single song played on the account; weight = `taste.factor()` of the mean taste similarity of its songs (sound as for “Your sound”)³ × 2 for a favorite band × (0.5 + 0.25 × mean stars). One album per period by weighted random choice with a value fixed for (period, playlist, `salt`), in album order (disc, track); remembered in `state/mixes.json`, so it stays all week even once played | one per account with a listening profile and at least 5 candidates (`MIN_ALBUMS`); weekly; the card counts the candidate albums and shows the 12 best fitting; name “Our album of the week” (shared person) or “Album of the week for <name>”, score 2.5, core set |
-| Next episode | `episodes: true` | the audio plays (the worlds of the scene `hoerspiel`, `rules.SPOKEN_SCENE`): for every series (album artist) the account listened to in the last 90 days (`mixer.EPISODE_DAYS`) its next episode (`mixer.episode_order()`): episodes are the albums of the series in the playlist's selection, ordered by the episode number in the album name (`episode_number()`: “Folge 12”, “012/…”, “Episode 3”, “Vol. 4”, “… - 125 - …”, “#7”), without one by year and name. When the account last began a song and which songs it played to the end (`_listened()`): the live plays, the recap's counts (`rueckblick.played_ever()`) and, with a stored password, Navidrome's counters and `played`. The rest of the episode heard last while it is not finished (its tracks not played to the end), otherwise the first episode after it that was never begun – after the last one the first never begun; a series heard to the end drops out. The tracks in album order (disc, track), the series heard last first, at most 12 (`EPISODE_SERIES`); remembered in `state/mixes.json`, so it stays the same for the day | one per account (its own person before the shared one) whose plays go on in an audio play series – also without a stored password and without favorites (the live plays); daily; the card counts the series; name “Next episode” (shared person) or “Next episode for <name>”, score 2.6, core set |
-| Discovered for you | `unheard: true` | mix of the whole library (`allMinRating` applies) restricted to the songs the person's account has **never played** (`mixer.unheard()`: `playCount` 0 in its song list); the taste counts as with “Your sound” (sound share `FLAVOR_SOUND`, power 3) – like Spotify's Discover Weekly, but inside the own library | one per account (its own person before the shared one) with a listening profile and at least 60 such songs (`MIN_UNHEARD`); 30 songs, 2 per band, 1 per album, weekly (new on Monday); name “Discovered for us” (shared person) or “Discovered for <name>”, score 2.6 |
-| Good morning | `daytime: "morning"` | mix in the order calm → livelier (`calm_down(rise=True)`, without a sound vibe); `mixer.morning_sound()` multiplies the weight of every song with a sound vector by `taste.factor()` of its closeness to the **sound of the mornings** (`listenclock.morning_taste()`: sound prototypes of the account's morning plays, `soundtaste.compute()`) to the power of 3 – without sound vectors only the order | only from the [listening clock](06-intelligence.md#listening-clock-applistenclockpy): one per account (its own person before the shared one) when it listens in the morning; length = its usual morning round, worlds = those with ≥ 20 % of the morning plays (at most three, otherwise the whole library), daily, 2 per band, recently played (3 days) rarely; name “Good morning” (shared person) or “Good morning, <name>” |
-| Recap | `review: {period}` | mix without randomness: `mixer.review_order()` takes the most played songs of the period from `rueckblick.plays_between()` (most first, `size` songs) – without dislike bands and genres, without songs rated 1 star and, with kid-safe mode, without explicit songs. `month` = last full month, `year` = year up to the end of last month (in January the whole previous year), each counted from the mix day (`rules.review_period()`). Name “<prefix>Your October 2026” or “Our …” for the default person (`rules.review_name()`) – it moves along, Navidrome keeps the playlist | “Your October 2026” from 20 played songs, “Your year 2026” |
+| Album of the week | `album: true` | one whole album instead of a selection (`mixer.album_order()`): candidates (`album_candidates()`) are albums with at least 6 songs (`ALBUM_MIN_TRACKS`), at most 3 bands (`ALBUM_MAX_ARTISTS`, no compilations), at least half of them in the playlist's selection (music world, filters, dislikes) and not a single song played on the account; weight = `taste.factor()` of the mean taste similarity of its songs (sound as for “Your sound”)³ × 2 for a favorite band × (0.5 + 0.25 × mean stars). One album per period by weighted random choice with a value fixed for (period, playlist, `salt`), in album order (disc, track); remembered in `state/mixes.json`, so it stays all week even once played | one per account with a listening profile and at least 5 candidates (`MIN_ALBUMS`); weekly; the card counts the candidate albums and shows the 12 best fitting; name “Our album of the week” (the family) or “Album of the week for <name>”, score 2.5, core set |
+| Next episode | `episodes: true` | the audio plays (the worlds of the scene `hoerspiel`, `rules.SPOKEN_SCENE`): for every series (album artist) the account listened to in the last 90 days (`mixer.EPISODE_DAYS`) its next episode (`mixer.episode_order()`): episodes are the albums of the series in the playlist's selection, ordered by the episode number in the album name (`episode_number()`: “Folge 12”, “012/…”, “Episode 3”, “Vol. 4”, “… - 125 - …”, “#7”), without one by year and name. When the account last began a song and which songs it played to the end (`_listened()`): the live plays, the recap's counts (`rueckblick.played_ever()`) and, with a stored password, Navidrome's counters and `played`. The rest of the episode heard last while it is not finished (its tracks not played to the end), otherwise the first episode after it that was never begun – after the last one the first never begun; a series heard to the end drops out. The tracks in album order (disc, track), the series heard last first, at most 12 (`EPISODE_SERIES`); remembered in `state/mixes.json`, so it stays the same for the day | one per person (= per account; the family's from the plays on its account) whose plays go on in an audio play series – also without a stored password and without favorites (the live plays); daily; the card counts the series; name “Next episode” (the family) or “Next episode for <name>”, score 2.6, core set |
+| Discovered for you | `unheard: true` | mix of the whole library (`allMinRating` applies) restricted to the songs the person's account has **never played** (`mixer.unheard()`: `playCount` 0 in its song list); the taste counts as with “Your sound” (sound share `FLAVOR_SOUND`, power 3) – like Spotify's Discover Weekly, but inside the own library | one per person (= per account, the family included) with a listening profile and at least 60 such songs (`MIN_UNHEARD`); 30 songs, 2 per band, 1 per album, weekly (new on Monday); name “Discovered for us” (the family) or “Discovered for <name>”, score 2.6 |
+| Good morning | `daytime: "morning"` | mix in the order calm → livelier (`calm_down(rise=True)`, without a sound vibe); `mixer.morning_sound()` multiplies the weight of every song with a sound vector by `taste.factor()` of its closeness to the **sound of the mornings** (`listenclock.morning_taste()`: sound prototypes of the account's morning plays, `soundtaste.compute()`) to the power of 3 – without sound vectors only the order | only from the [listening clock](06-intelligence.md#listening-clock-applistenclockpy): one per person (= per account, the family included) when the account listens in the morning; length = its usual morning round, worlds = those with ≥ 20 % of the morning plays (at most three, otherwise the whole library), daily, 2 per band, recently played (3 days) rarely; name “Good morning” (the family) or “Good morning, <name>” |
+| Recap | `review: {period}` | mix without randomness: `mixer.review_order()` takes the most played songs of the period from `rueckblick.plays_between()` (most first, `size` songs) – without dislike bands and genres, without songs rated 1 star and, with kid-safe mode, without explicit songs. `month` = last full month, `year` = year up to the end of last month (in January the whole previous year), each counted from the mix day (`rules.review_period()`). Name “<prefix>Your October 2026”, for the family “Our October 2026” (`rules.review_name()`) – it moves along, Navidrome keeps the playlist | “Your October 2026” (the family: “Our …”) from 20 played songs, “Your year 2026”; for every person with an account |
 
 A **recap playlist** changes by itself on the first of the month; there is always just one. Anyone who wants to keep a
 period saves it in the statistics with “Keep as playlist” (`POST /api/rueckblick/keep`) or on the
@@ -914,28 +925,35 @@ complete playlist entry that can be applied with one click.
 **What is not suggested.** Key `key_of()` = `person|world|vibe|hits[|mix][|radio:…]`. Ideas are left out
 if they already exist (playlists except the trash and except taken-over rules), were dismissed
 (`cfg.dismissed` – they come back after 180 days, see [Data model](02-data-model.md#dismissed-and-ignored)), have fewer than 25 songs or are essentially just one band (fewer than 2 bands, or one
-band with over 80 % among fewer than 4 bands). Content that already exists as a public playlist (of a person with `public`) or as a
-handmade playlist is not suggested a second time – except for a non-public person
-with dislikes. In `only_person` mode they appear anyway, marked with `shared` and ranked lower.
+band with over 80 % among fewer than 4 bands). Content that already exists for everyone – as a playlist of the family
+(`_shared_content()`) – or as a handmade playlist is not suggested a second time – except for a person other than the
+family who has dislikes. In `only_person` mode they appear anyway, marked with `shared` and ranked lower.
 
 **Ideas per person** (based on `likes` and – for people with an account and enough listening – the taste profile
 `taste.profile()`, see [Intelligence](06-intelligence.md#taste-per-account-apptastepy)). Favorite worlds are the
-`likes.welten` plus up to three worlds with at least 8 % of what was played. Without favorite worlds and vibes, people
-other than the default person only get the card “What does … like to listen to?”:
+`likes.welten` plus up to three worlds with at least 8 % of what was played. Every person gets the ideas of its own
+account – the family too, from the plays on the family's account; the family comes first, and the formats from
+listening are named “Our …” for it. Without favorite worlds and vibes, people other than the family only get the card
+“What does … like to listen to?”:
 
 | Idea | Condition |
 |---|---|
 | World × Everything (`<world> · All Sorts`, smart playlist) | per favorite world; for a world recognized from listening with `because: "Played often"` |
 | World – The Hits | if the hits are ≤ 75 % of the world playlist |
 | World × vibe | vibes except Zeitreise/Spezial (time travel/special); season vibes only if the season begins within ≤ 21 days or is running; ≥ 25 songs; not almost the same as the world mix (share ≤ 60 %, for `separate` worlds ≤ 85 %; does not apply to seasons); for normal worlds coherence ≥ 50 % (`coherence()`: share of songs by bands that lie at least half in this vibe) |
-| All × vibe | for the default person or the favorite vibes; without the aggregate vibe, without topics with `excludeElsewhere.albums` (except seasons), “Not heard in a while” only from 100 played songs, “Favorite songs” from 15 marked songs |
+| All × vibe | for the family or the favorite vibes; without the aggregate vibe, without topics with `excludeElsewhere.albums` (except seasons), “Not heard in a while” only from 100 played songs, “Favorite songs” from 15 marked songs |
 | Daily Mix per favorite world | 50 songs, 3 per band |
-| `<name>’s Daily Mix`, `Discoveries for <name>` | from two favorite worlds on, not for the default person |
+| `<name>’s Daily Mix`, `Discoveries for <name>` | from two favorite worlds on, not for the family |
 | Radio | up to three favorite bands (without dislikes), otherwise the three most played bands from the profile (`because: "Played often"`), otherwise the two largest bands of the first favorite world; weekly |
-| “Your sound” (`<name>’s sound`, for the default person “Our sound”) | with a taste profile: mix `flavor: geschmack` across the whole library, 50 songs, 2 per band, daily, `avoidRecent` 14, `minRating` 0; `because: "From listening"` |
+| “Your sound” (`<name>’s sound`, for the family “Our sound”) | with a taste profile: mix `flavor: geschmack` across the whole library, 50 songs, 2 per band, daily, `avoidRecent` 14, `minRating` 0; `because: "From listening"` |
 | All × Not heard in a while | with a taste profile, if the vibe `wiederentdecken` exists; `because: "From listening"` |
 | Sound mixes | Falling asleep, Running wild, Good mood for the first two favorite worlds; weekly |
-| `<name>’s All Sorts` (smart playlist from ★★★, German “<Name> Querbeet”), `New for <name>` | from two favorite worlds on, not for the default person |
+| `<name>’s All Sorts` (smart playlist from ★★★, German “<Name> Querbeet”), `New for <name>` | from two favorite worlds on, not for the family |
+
+**Ideas for the family** (`family_mix()`, only if there is a family and not in `only_person` mode): “Car ride” (see
+[Good morning](#good-morning)) and “What everyone likes” (from two people other than the family with a listening
+profile – they become the members, [Playlists from listening](#playlists-from-listening)). Without a family these
+family-wide ideas are not offered.
 
 **New music worlds** (not in `only_person` mode): every scene of the catalog that is not linked to a world and
 not dismissed, of which at least 4 bands are in the library and which yields at least 25 songs as a trial world (`minRating` 3).
@@ -950,15 +968,20 @@ services too: “Discovered for you”, “Album of the week”, “Your sound�
 “Your October” (not “Your year”), “Good morning” from the listening clock, “What everyone likes” and the Daily Mixes
 of the person's two most played worlds (`core_worlds`: worlds by their share of what was played, then the liked ones),
 plus the request “What does … like to listen to?”. They come first and don't count against the limit; the other
-ideas (worlds × vibes, “The Hits”, radio, sound mixes …) follow by score – per group (person) at most `per_person`
-(10), in the groups `saison` and `welten` at most 12. Discover shows them folded under “n more ideas”. Users only get ideas for their own people and no new
-music worlds (filter in `web.api_suggestions()`).
+ideas (worlds × vibes, “The Hits”, radio, sound mixes …) follow by score – per group at most `per_person`
+(10), in the groups `saison` and `welten` at most 12. Discover shows them folded under “n more ideas”. Every idea
+names its `person` (a new music world: `null`); `group` is the person's id, `saison` for seasonal ideas and `welten`
+for new music worlds. Users only get ideas they can take – for their own person and for the family unless
+`settings.familyEdit` is `admins` (`auth.editable_persons()`) – and no new music worlds (filter in
+`web.api_suggestions()`).
 
 ### “To review” (`inbox()`)
 
 | Entry | When | Action |
 |---|---|---|
 | Passwords missing | an account from `rating_users` without a password | “Enter” (settings) |
+| Set up the family (`familySetup`) | `settings.familySetup` exists and there is no family yet – left by the update to one person per account ([Data model](02-data-model.md#left-over-from-the-update-to-one-person-per-account)); the text says how many of the old shared person's playlists can move | “Set up” (`#/personen`: the setup sheet, `POST /api/family`) |
+| <name> needs an account of their own (`merged\|<name>`) | per entry in `settings.mergedPersons`: the person used the Navidrome account of another person and is now part of that person – every person needs an account of its own | “People” (`#/personen`) |
 | new songs without a rating | according to the Deezer state | “Rate now” (starts the Deezer step) |
 | handmade playlist | per file from `handmade()` | “Take over …” |
 | New: band (`new\|<band>`) | added in the last 45 days, ≥ 3 songs, in no world (not even taken out) | `fits <scene> (new world)` if the band is in an unlinked scene; otherwise, if classification finds a world, `→ <world> (<match rate> %)` to add it directly (the text then names the reason); always “Assign music world …” (`do: "artist"`: opens the band window, where the world is chosen) |
@@ -978,8 +1001,9 @@ world action for “New”, no `class|…` entries. The `auto|…` entries do no
 is in a world and therefore no longer appears as “New”. Because a band that was taken back is then in `excludedArtists` and
 stays in `state/auto_assigned.json`, classification never assigns it by itself again. Titles and texts name music worlds and scenes only by name, without
 an icon. Entries whose key is in `cfg.ignored` are dropped. `web.api_inbox()` prepends a warning
-if an instance of another installation reports in ([Operations](08-operations.md#multiple-instances)). Users get `web.user_inbox()` instead (profile, preferences, first
-playlist, password, tidying up and the taste hints of their own people – never the child question). How classification calculates is described in [Intelligence](06-intelligence.md).
+if an instance of another installation reports in ([Operations](08-operations.md#multiple-instances)). Users get `web.user_inbox()` instead (profile – while their account
+has no person –, preferences, first playlist, password, tidying up and the taste hints of their own person – never
+the child question). The taste hints and the child question are never about the family or a child profile. How classification calculates is described in [Intelligence](06-intelligence.md).
 
 ### Combined search
 
@@ -1027,9 +1051,9 @@ instrument or theme even both (“ruhige Klaviermusik” = the whole library, ca
 recognized worlds are combined with the first two vibes; if there are world, vibe **and** mood, instrument or theme,
 the variant without vibe is added per world. If there are vibes and the first world has already produced suggestions, it stays
 with that world. Every entry is counted with `rules.count()` and only taken from **15 songs** on; title “world · vibe ·
-mood · instrument · theme” (only the recognized parts, no duplicate titles), at most **three** suggestions. The person is, for
-users, their first own person, for administrators (and accounts without their own person)
-`settings.defaultPerson`.
+mood · instrument · theme” (only the recognized parts, no duplicate titles), at most **three** suggestions. The person is the
+signed-in account's own person; for administrators without one the family, otherwise the first person
+(`web._default_person()`); for a user without a person yet none (neutral counts).
 
 The interface shows the suggestions as the group “Create as mix” at the very top; a tap opens the last step of the
 assistant with the preview – person, world, vibe and mood as URL parameters, the title as the suggested name – and
@@ -1081,7 +1105,7 @@ via the native API.
 
 | Style | Content | needs Pillow |
 |---|---|---|
-| `format` | only for the formats (`format_kind()`): its own gradient per format (`FORMAT_COLORS`), the wordmark, three fanned album covers (album of the week: the album itself, as big as fits above the text), the format's name large (`format_title()`: “Discovered”, “Album of the week”, “Good morning” …, own sound and “your month” keep their name), above it for whom (album of the week: band – album), below it the rhythm (“new every Monday”, “25 minutes every morning”) | yes |
+| `format` | only for the formats (`format_kind()`): its own gradient per format (`FORMAT_COLORS`), the wordmark, three fanned album covers (album of the week: the album itself, as big as fits above the text), the format's name large (`format_title()`: “Discovered”, “Album of the week”, “Good morning” …, own sound and “your month” keep their name), above it for whom (“for <name>”; nothing for the family; album of the week: band – album), below it the rhythm (“new every Monday”, “25 minutes every morning”) | yes |
 | `mosaik` | 2 × 2 album covers (from 4 covers on, otherwise the first one large, otherwise a gradient), darkening at the bottom, title | yes |
 | `band` | photo of the largest band with a real image (otherwise a gradient), tinted 22 % in the main color, title | yes |
 | `farbe` | gradient from the main color with a light spot, up to four round band photos, title at the top | yes |
@@ -1120,7 +1144,7 @@ do not stop the run.
 **Formats get their cover by themselves.** A format without `cover` gets the style of `default_style()` in the same
 pass – but only if Navidrome reports no image of its own for it (`uploadedImage` empty, so an image set in Navidrome
 stays) and not after it was removed (`none`). It is noted as `cover = {style: "format", auto: true, at, sig, nid, img}`.
-For the format style the signature also covers its texts (format, title, the person's name, default person, minutes,
+For the format style the signature also covers its texts (format, title, the person's name, whether it is the family, minutes,
 rhythm, server language), so a renamed person or another language gets a new cover. A playlist that is no longer a
 format (e.g. rediscover moved to one world) loses its format cover again: the image in Navidrome is deleted and
 `cover` removed. The checklist (“Give a playlist a cover”) does not count `auto` covers.
@@ -1183,9 +1207,10 @@ and keeps them for a week in `state/cache/artist_info.json`; if the request fail
 
 `CACHE` (`LibraryCache`) holds the song list as `rules.Library` for preview, matrix, suggestions and writing.
 
-- **Loading:** Subsonic `search3` with an empty query in pages of 500 (`Navidrome.all_songs()`). If a password is stored
-  for the default person's account, from that account's point of view (exact ratings, `source` = account); otherwise with the
-  admin access and average ratings as an approximation.
+- **Loading:** Subsonic `search3` with an empty query in pages of 500 (`Navidrome.all_songs()`) – always with the admin
+  access and the average rating as an approximation (`ratings_exact: false`, `user` and `source` `None`): the shared
+  list is neutral, nobody's stars, favorites or plays. A person's own view is the song list of their account
+  (`stats.songs_for()`, laid over this list; `mixer.person_lib()` for mixes) when its password is stored.
 - **Additional data** via the native API: `album_meta()` (album → has cover, `dominantColor`) and `artist_meta()`
   (artist → has image); if they fail, all count as “with image”. Real file paths and embedded lyrics are loaded by
   `real_paths()` only when needed (`path_loader`).
@@ -1216,4 +1241,5 @@ are reused per account (`native_session()`).
 | `DELETE /api/playlist/{id}` | native | delete removed playlists |
 | `POST`/`DELETE /api/playlist/{id}/image` | native | upload or remove covers |
 | `GET /api/user` | native | accounts → IDs for `ownerId`; the same list determines roles (`auth.navidrome_users()`, [Security](07-security.md#roles)) |
+| `POST /api/user` | native | the family's account when it is set up (`NativeApi.create_user()`, `POST /api/family` – [API](03-api.md#settings--credentials)) |
 | `GET /api/album`, `/api/artist`, `/api/song` | native | image info, main color, real file paths |

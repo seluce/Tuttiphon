@@ -27,8 +27,7 @@ def config_with_playlists():
         {"id": "pi", "name": "Jonas eins", "person": "jonas", "welt": "kinder", "stil": "*", "file": "pi.nsp",
          "takeover": {"backup": "pi.orig"}},
         {"id": "pi2", "name": "Jonas zwei", "person": "jonas", "welt": "kinder", "stil": "tanzen"},
-        {"id": "pf", "name": "Familie", "person": "familie", "welt": "metal", "stil": "*"},
-        {"id": "pd", "name": "ohne Person", "welt": "metal", "stil": "80er"},      # default person familie
+        {"id": "pf", "name": "Familie", "person": "familie", "welt": "metal", "stil": "*"},   # the family's: everyone's
         {"id": "pr", "name": "Niklas privat", "person": "niklas", "welt": "metal", "stil": "*"},
         {"id": "po", "name": "Oma", "person": "oma", "welt": "mittelalter", "stil": "*"},
         {"id": "pg", "name": "Geist", "person": "geist", "welt": "metal", "stil": "*"},   # person does not exist
@@ -160,36 +159,42 @@ class TestVisibility(unittest.TestCase):
         self.by_id = {p["id"]: p for p in self.cfg["playlists"]}
 
     def test_visible_playlist(self):
+        """Own playlists and the family's (for everyone) – a person's are their own."""
         visible = {pid for pid, p in self.by_id.items() if auth.visible_playlist(p, self.cfg, JONAS)}
-        self.assertEqual(visible, {"pi", "pi2", "pf", "pd", "po", "pg"})
+        self.assertEqual(visible, {"pi", "pi2", "pf"})
         self.assertTrue(all(auth.visible_playlist(p, self.cfg, ADMIN) for p in self.cfg["playlists"]))
-        self.cfg["settings"]["public"] = False   # person does not exist -> the setting, like build_nsp
-        self.assertFalse(auth.visible_playlist(self.by_id["pg"], self.cfg, JONAS))
 
-    def test_default_person_counts_for_playlists_without_person(self):
-        family = {"user": "familie-konto", "role": "user", "own": ["familie"], "local": False}
-        self.assertTrue(auth.own_playlist(self.by_id["pd"], family, self.cfg))
-        self.assertFalse(auth.own_playlist(self.by_id["pd"], JONAS, self.cfg))
-        self.cfg["settings"]["defaultPerson"] = "niklas"   # private
-        self.assertFalse(auth.visible_playlist(self.by_id["pd"], self.cfg, JONAS))
-        self.assertTrue(auth.own_playlist(self.by_id["pd"], ADMIN, self.cfg))
-        self.cfg["settings"]["defaultPerson"] = "jonas"
-        self.assertTrue(auth.own_playlist(self.by_id["pd"], JONAS, self.cfg))
+    def test_who_may_change_the_family_playlists(self):
+        self.assertTrue(auth.own_playlist(self.by_id["pf"], JONAS, self.cfg))     # everyone, by default
+        self.assertFalse(auth.own_playlist(self.by_id["po"], JONAS, self.cfg))
+        self.cfg["settings"]["familyEdit"] = "admins"
+        self.assertFalse(auth.own_playlist(self.by_id["pf"], JONAS, self.cfg))
+        self.assertTrue(auth.visible_playlist(self.by_id["pf"], self.cfg, JONAS))  # still for everyone to hear
+        self.assertTrue(auth.own_playlist(self.by_id["pf"], ADMIN, self.cfg))
+
+    def test_one_person_per_account_and_no_sign_in_for_the_family(self):
+        self.assertEqual(auth.persons_of("JONAS", self.cfg), ["jonas"])
+        self.assertEqual(auth.persons_of("familie", self.cfg), [])     # the family is nobody's own person
+        self.assertEqual(auth.family_account(self.cfg), "familie")
+        with mock.patch.object(auth, "navidrome_users", lambda force=False: USERS + [
+                {"name": "familie", "admin": False, "fullName": "Familie"}]):
+            self.assertEqual(auth.role_of("Familie", self.cfg), "none")
 
     def test_view_config_for_users(self):
         before = copy.deepcopy(self.cfg)
         out = auth.view_config(self.cfg, JONAS)
         self.assertEqual(self.cfg, before)   # the original stays unchanged
-        self.assertEqual([p["id"] for p in out["playlists"]], ["pi", "pi2", "pf", "pd", "po", "pg"])
+        self.assertEqual([p["id"] for p in out["playlists"]], ["pi", "pi2", "pf"])
         self.assertNotIn("accounts", out)
         self.assertLessEqual(set(out["settings"]), set(auth.USER_SETTINGS) | {"notify"})
         self.assertEqual(set(out["settings"]["notify"]), {"enabled", "server"})   # without the administrator's topic
         self.assertNotIn("paths", out["settings"])
         persons = {p["id"]: p for p in out["personen"]}
-        self.assertEqual(set(persons), {"familie", "jonas", "oma"})   # niklas is private
+        self.assertEqual(set(persons), {"familie", "jonas", "niklas", "oma"})   # names of everyone (family mix)
         self.assertEqual(persons["jonas"], self.cfg["personen"][1])    # own person complete
-        self.assertEqual(persons["oma"], {"id": "oma", "name": "Oma", "public": True, "prefix": "Oma · ",
+        self.assertEqual(persons["oma"], {"id": "oma", "name": "Oma", "prefix": "Oma · ",
                                           "color": "#aa0000"})        # without likes, no-gos, account
+        self.assertEqual(persons["familie"], {"id": "familie", "name": "Familie", "prefix": "", "family": True})
         self.assertEqual((out["dismissed"], out["ignored"]), (["a"], ["b"]))
 
     def test_view_config_for_admins(self):
@@ -239,53 +244,60 @@ class TestMergeUserChanges(unittest.TestCase):
 
     def test_only_own_persons_change(self):
         inc = self.persons(self.incoming)
-        inc["jonas"].update(name="Jonas neu", user="niklas", public=True, dislikes={"artists": [], "genres": []})
+        inc["jonas"].update(name="Jonas neu", user="niklas", family=True, dislikes={"artists": [], "genres": []})
         inc["familie"]["name"] = "Gekapert"
-        inc["oma"]["public"] = False
+        inc["oma"]["name"] = "Omi"
         out = self.persons(self.merged())
         self.assertEqual(out["jonas"]["name"], "Jonas neu")
-        self.assertTrue(out["jonas"]["public"])
+        self.assertNotIn("family", out["jonas"])
         self.assertEqual(out["jonas"]["user"], "Jonas")              # account stays
-        self.assertEqual(out["familie"], self.current["personen"][0])
-        self.assertTrue(out["oma"]["public"])
-        self.assertEqual(out["niklas"], self.current["personen"][2])   # the user does not even know it
+        self.assertEqual(out["familie"], self.current["personen"][0])  # only administrators change the family
+        self.assertEqual(out["oma"], self.current["personen"][3])
+        self.assertEqual(out["niklas"], self.current["personen"][2])
 
-    def test_new_person_only_for_own_account(self):
-        self.incoming["personen"] += [
-            {"id": "jonas-kind", "name": "Jonas Kind", "user": "jonas", "public": True, "role": "admin"},
+    def test_one_own_person_for_an_account_without_one(self):
+        self.incoming["personen"].append({"id": "jonas-kind", "name": "Jonas Kind", "user": "Jonas"})
+        self.assertNotIn("jonas-kind", self.persons(self.merged()))   # Jonas has his person already
+        mia = {"user": "mia", "role": "user", "own": [], "local": False}
+        incoming = copy.deepcopy(auth.view_config(self.current, mia))
+        incoming["personen"] += [
             {"id": "fremd", "name": "Fremd", "user": "niklas"},
-            {"id": "neu", "name": "Neu", "user": "Jonas"},
-            {"id": "Böse!", "name": "Böse", "user": "Jonas"},
-            {"id": "leer", "name": "  ", "user": "Jonas"},
+            {"id": "neu", "name": "Neu", "user": "mia"},
+            {"id": "Böse!", "name": "Böse", "user": "mia"},
+            {"id": "leer", "name": "  ", "user": "mia"},
+            {"id": "mia", "name": "Mia", "user": "mia", "family": True, "child": True, "role": "admin"},
+            {"id": "mia-2", "name": "Mia zwei", "user": "mia"},
             "kein dict",
         ]
-        out = self.persons(self.merged())
-        self.assertEqual(out["jonas-kind"], {"id": "jonas-kind", "name": "Jonas Kind", "user": "Jonas", "public": True})
-        for pid in ("fremd", "neu", "Böse!", "leer"):
+        out = {p["id"]: p for p in auth.merge_user_changes(self.current, incoming, mia)["personen"]}
+        self.assertEqual(out["mia"], {"id": "mia", "name": "Mia", "user": "mia"})   # her one person, nothing else
+        for pid in ("fremd", "neu", "Böse!", "leer", "mia-2"):
             self.assertNotIn(pid, out)
 
     def test_only_own_playlists_change(self):
         inc = self.playlists(self.incoming)
         inc["pi"]["name"] = "Jonas umbenannt"
-        inc["pf"]["name"] = "Familie gekapert"
+        inc["pf"]["name"] = "Familie neu"       # the family's: everyone may (settings.familyEdit "all")
         inc["pi2"]["person"] = "oma"           # giving away is not possible
-        inc["po"]["person"] = "jonas"           # taking over someone else's is not either
-        self.incoming["playlists"] = [p for p in self.incoming["playlists"] if p["id"] != "pf"]   # delete someone else's?
+        self.incoming["playlists"].append({**self.playlists(self.current)["po"], "person": "jonas"})   # taking over neither
         out = self.playlists(self.merged())
         self.assertEqual(out["pi"]["name"], "Jonas umbenannt")
-        self.assertEqual(out["pf"], self.playlists(self.current)["pf"])
+        self.assertEqual(out["pf"]["name"], "Familie neu")
         self.assertEqual(out["pi2"], self.playlists(self.current)["pi2"])
         self.assertEqual(out["po"], self.playlists(self.current)["po"])
         self.assertIn("pr", out)   # the user does not see it – it stays anyway
+        self.current["settings"]["familyEdit"] = "admins"
+        self.incoming = copy.deepcopy(auth.view_config(self.current, JONAS))
+        self.incoming["playlists"] = [p for p in self.incoming["playlists"] if p["id"] != "pf"]   # deleting it
+        self.assertEqual(self.playlists(self.merged())["pf"], self.playlists(self.current)["pf"])
 
     def test_delete_own_and_add_new_playlists(self):
         self.incoming["playlists"] = [p for p in self.incoming["playlists"] if p["id"] != "pi2"]
-        self.incoming["personen"].append({"id": "jonas-kind", "name": "Kind", "user": "Jonas"})
         self.incoming["playlists"] += [
             {"id": "n1", "person": "jonas", "welt": "kinder", "stil": "*", "takeover": {"backup": "x"}},
-            {"id": "n2", "person": "jonas-kind", "welt": "kinder", "stil": "*"},
+            {"id": "n2", "person": "familie", "welt": "kinder", "stil": "*"},   # for the family: everyone may
             {"id": "n3", "person": "oma", "welt": "kinder", "stil": "*"},
-            {"id": "n4", "welt": "kinder", "stil": "*"},          # default person familie: someone else's
+            {"id": "n4", "welt": "kinder", "stil": "*"},          # without a person: nobody's
             {"welt": "kinder", "stil": "*"},                       # without id
         ]
         out = self.merged()

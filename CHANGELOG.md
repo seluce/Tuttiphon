@@ -7,6 +7,18 @@ released.
 
 ## Unreleased
 
+- **One person per Navidrome account – the family on its own:** every account has exactly one person now; there is no
+  shared “Family” on someone's account any more, no default person and no extra profiles. The family is an optional
+  entry with a Navidrome account of its own that Tuttiphon creates (People → Set up the family). Its playlists are for
+  everyone and use neutral Deezer stars instead of one person's; shared devices such as a car tablet can use its
+  account in Symfonium, so what plays there no longer shapes anyone's own taste. Whether everyone or only
+  administrators may change the family playlists is set under Users & permissions. A person's playlists are their
+  own.
+- **Updating from an earlier version:** people who shared one Navidrome account are merged – the old shared “Family”
+  into the account's own person; its playlists stay visible to everyone until you set up the family. “To review” then
+  offers to set up the family and lets you choose which of its playlists move there (or “No family”). A merged
+  profile, such as a child on a parent's account, shows up as “needs an account of their own”.
+
 - **Next episode:** a new playlist for audio plays – for every series someone listens to (“Die drei ???”, “TKKG” …)
   the episode that comes next: the rest of the one begun, otherwise the next one never heard, by episode number. New
   every day, the series heard last first. Offered under Discover as soon as an account listens to audio plays – also

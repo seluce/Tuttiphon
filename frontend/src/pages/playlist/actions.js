@@ -1,13 +1,13 @@
 // Actions of the playlist page: change status, delete permanently, copy, keep this mix (smart playlists: save as a
 // fixed playlist), reshuffle, cover.
 // p is always the playlist from S.config (findPl) – changes to it redraw the page by themselves.
-import { S, defaultPerson, findPerson, canEdit, changed, snapshot } from '../../lib/state.svelte.js'
+import { S, defaultOwner, findPerson, canEdit, changed, snapshot } from '../../lib/state.svelte.js'
 import { openSheet, toast, confirmDialog } from '../../lib/overlay.svelte.js'
 import { go } from '../../lib/router.svelte.js'
 import { api } from '../../lib/api.js'
 import { clone, uid, today } from '../../lib/format.js'
 import { t, tn, tword, locale, translated } from '../../lib/i18n.svelte.js'
-import { plName } from '../../lib/playlist.js'
+import { plName, fixTogether } from '../../lib/playlist.js'
 import { openEditor } from '../../lib/editor.js'
 import CoverSheet from '../../components/sheets/CoverSheet.svelte'
 
@@ -79,11 +79,12 @@ export function duplicate(p, d) {
   delete copy.file; delete copy.takeover; delete copy.deletedAt; delete copy.cover
   copy.id = uid(p.id)
   copy.name = t('{name} (copy)', { name: d.name })
-  if (!canEdit(copy)) {   // copy of a shared playlist: then it belongs to oneself, name with one's own prefix
-    copy.person = defaultPerson()
+  if (!canEdit(copy)) {   // copy of a family playlist you may not change: it becomes yours, name with your own prefix
+    copy.person = defaultOwner()?.id
     copy.status = 'aktiv'
     if (p.name) copy.name = (findPerson(copy.person)?.prefix || '') + p.name
     else delete copy.name
+    fixTogether(copy)   // “What everyone likes” stays with the family
   }
   openEditor(copy, { isNew: true, onSaved: (x) => go(`#/playlist/${encodeURIComponent(x.id)}`) })
 }

@@ -7,7 +7,7 @@
   import Mosaic from '../../components/Mosaic.svelte'
   import Collage from '../../components/Collage.svelte'
   import PersonAvatar from '../../components/PersonAvatar.svelte'
-  import { S, findPerson, findWelt, defaultPerson, mixWording, snapshot, changed } from '../../lib/state.svelte.js'
+  import { S, findPerson, findWelt, familyPerson, defaultOwner, mixWording, snapshot, changed } from '../../lib/state.svelte.js'
   import { toast } from '../../lib/overlay.svelte.js'
   import { go } from '../../lib/router.svelte.js'
   import { accept } from '../../lib/discover.js'
@@ -32,16 +32,18 @@
     openEditor({ ...clone(s.playlist), id: uid(s.name), source: 'vorschlag' },
       { isNew: true, onSaved: (p) => go(`#/playlist/${encodeURIComponent(p.id)}`) })
   }
-  /** New music world from a scene – including a mix playlist for it. */
+  /** New music world from a scene – including a mix playlist for it: the family's, without a family yours. */
   function acceptScene() {
     snapshot()
     let id = s.welt.id
     while (findWelt(id)) id += '-2'
     S.config.welten.push({ ...clone(s.welt), id })
-    S.config.playlists.push({ id: uid(`${id}-mix`), person: defaultPerson(), welt: id, stil: '*', status: 'aktiv', created: today(), source: 'vorschlag' })
+    const owner = (familyPerson() || defaultOwner())?.id
+    if (owner) S.config.playlists.push({ id: uid(`${id}-mix`), person: owner, welt: id, stil: '*', status: 'aktiv', created: today(), source: 'vorschlag' })
     onaccepted()
     changed()
-    toast(t('{name} created – with a mix playlist', { name: s.welt.name }), { undo: true, action: { label: t('View'), run: () => go(`#/welt/${id}`) } })
+    toast(owner ? t('{name} created – with a mix playlist', { name: s.welt.name }) : t('{name} created', { name: s.welt.name }),
+      { undo: true, action: { label: t('View'), run: () => go(`#/welt/${id}`) } })
   }
   /** The small line under a playlist suggestion: for whom, hits only, size. */
   function details(p, mix) {

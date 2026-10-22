@@ -248,5 +248,16 @@
  "new every month": "nowy co miesiąc",
  "Next episode – the next episode of every audio play series being listened to, new every day": "Następny odcinek – kolejny odcinek każdej aktualnie słuchanej serii słuchowisk, codziennie nowy",
  "Next episode: for every series this account listened to in the last 3 months, the next episode – the rest of the one begun, otherwise the next one never heard, by episode number": "Następny odcinek: dla każdej serii, której to konto słuchało w ostatnich 3 miesiącach, kolejny odcinek – reszta rozpoczętego, a w przeciwnym razie następny jeszcze nigdy niesłuchany, według numeru odcinka",
- "New every day – the series heard last come first": "Codziennie nowy – najpierw ostatnio słuchane serie"
+ "New every day – the series heard last come first": "Codziennie nowy – najpierw ostatnio słuchane serie",
+ "Set up the family": "Skonfiguruj rodzinę",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it.": "Rodzina dostaje teraz własne konto Navidrome, zamiast korzystać z cudzego. Tuttiphon je utworzy.",
+ "{name} needs an account of their own": "{name} potrzebuje własnego konta",
+ "{name} used the Navidrome account of {into} and is now part of {into} – every person has an account of their own. Create one for {name} in Navidrome, then add {name} under People.": "Osoba {name} korzystała z konta Navidrome osoby {into} i została teraz włączona do osoby {into} – każda osoba ma własne konto. Utwórz konto dla osoby {name} w Navidrome, a potem dodaj ją w „Osoby”.",
+ "Set up": "Skonfiguruj",
+ "People": "Osoby",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose whether its playlist moves there.": "Rodzina dostaje teraz własne konto Navidrome, zamiast korzystać z cudzego. Tuttiphon je utworzy – a ty wybierasz, czy jej playlista się tam przeniesie.",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose which of its {n} playlists move there.": {
+  "few": "Rodzina dostaje teraz własne konto Navidrome, zamiast korzystać z cudzego. Tuttiphon je utworzy – a ty wybierasz, które z jej {n} playlist się tam przeniosą.",
+  "many": "Rodzina dostaje teraz własne konto Navidrome, zamiast korzystać z cudzego. Tuttiphon je utworzy – a ty wybierasz, które z jej {n} playlist się tam przeniosą."
+ }
 }

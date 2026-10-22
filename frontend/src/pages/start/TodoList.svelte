@@ -13,7 +13,7 @@
   import { t, tn } from '../../lib/i18n.svelte.js'
 
   const ICONS = { cred: 'lock', deezer: 'star', hand: 'folder', new: 'sparkles', auto: 'check', scenes: 'globe', low: 'alert', gone: 'trash', untagged: 'sliders',
-    unused: 'pause', dup: 'copy', autowelt: 'globe', autowelten: 'globe', taste: 'sliders', child: 'baby' }
+    unused: 'pause', dup: 'copy', autowelt: 'globe', autowelten: 'globe', taste: 'sliders', child: 'baby', familySetup: 'home', merged: 'user' }
   const kind = (k) => k.split(/[|-]/)[0]
   const items = $derived(cache.inbox || [])
   const list = $derived(items.slice(0, cache.todoAll ? 99 : 5))

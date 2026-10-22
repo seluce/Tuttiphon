@@ -25,13 +25,14 @@ test.describe('Administrator', () => {
     await expect(sheet).toHaveCount(0)
   })
 
-  test('Discover: person filter starts with the family, ✕ in the corner of the card', async ({ page }) => {
+  test('Discover: person filter starts with the family (without one: the first person), ✕ in the corner of the card', async ({ page }) => {
     expect(await visit(page, '#/entdecken')).toEqual([])
     const seg = page.locator('main .seg')
     test.skip(!(await seg.count()), 'no suggestions or only one person in the test data')
     const cfg = config()
-    const family = cfg.personen.find((p) => p.id === cfg.settings.defaultPerson)
-    await expect(seg.getByRole('button', { name: family.name, exact: true })).toHaveClass(/\bon\b/)
+    // the local administrator has no person of their own: the family first – the test data may have none
+    const first = cfg.personen.find((p) => p.family) ?? cfg.personen[0]
+    await expect(seg.getByRole('button', { name: first.name, exact: true })).toHaveClass(/\bon\b/)
     const before = await page.locator('main section h2 button[aria-expanded]').count()
     await seg.getByRole('button', { name: 'Alle', exact: true }).click()
     expect(await page.locator('main section h2 button[aria-expanded]').count()).toBeGreaterThanOrEqual(before)

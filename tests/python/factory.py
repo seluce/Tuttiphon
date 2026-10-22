@@ -89,7 +89,6 @@ def base_config():
     S["minDuration"] = 120
     S["allMinRating"] = 3
     S["limit"] = 100
-    S["defaultPerson"] = "familie"
     S["allName"] = "Alle"   # the test data is a German family installation
     cfg["welten"] = [
         {"id": "kinder", "name": "Kinder", "artists": ["Band A", "Band B"], "genres": ["Children"], "separate": True,
@@ -112,14 +111,15 @@ def base_config():
         {"id": "klang-ruhig", "name": "Ruhig", "sound": {"moods": ["ruhig"]}},
     ]
     cfg["personen"] = [
-        {"id": "familie", "name": "Familie", "user": "", "public": True, "prefix": "",
+        # the family: an entry with a Navidrome account of its own (one person per account)
+        {"id": "familie", "name": "Familie", "user": "familie", "family": True, "prefix": "",
          "likes": {"welten": [], "stile": [], "artists": []}, "dislikes": {"artists": ["Band X"], "genres": []}},
-        {"id": "jonas", "name": "Jonas", "user": "Jonas", "public": False, "prefix": "Jonas · ",
+        {"id": "jonas", "name": "Jonas", "user": "Jonas", "prefix": "Jonas · ",
          "likes": {"welten": ["kinder"], "stile": [], "artists": []},
          "dislikes": {"artists": ["Nordwind"], "genres": ["Metal"]}},
-        {"id": "niklas", "name": "Niklas", "user": "niklas", "prefix": "",   # without "public" -> private
+        {"id": "niklas", "name": "Niklas", "user": "niklas", "prefix": "",
          "likes": {"welten": [], "stile": [], "artists": []}, "dislikes": {"artists": [], "genres": []}},
-        {"id": "oma", "name": "Oma", "user": "oma", "public": True, "prefix": "Oma · ", "color": "#aa0000",
+        {"id": "oma", "name": "Oma", "user": "oma", "prefix": "Oma · ", "color": "#aa0000",
          "likes": {"welten": ["mittelalter"], "stile": [], "artists": ["Spielleute"]},
          "dislikes": {"artists": ["Iron Test"], "genres": []}},
     ]

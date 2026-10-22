@@ -14,6 +14,7 @@
   import Icon from '../../components/Icon.svelte'
   import { api } from '../../lib/api.js'
   import { toast } from '../../lib/overlay.svelte.js'
+  import { creatablePersons } from '../../lib/state.svelte.js'
   import { t, tn, tword, locale } from '../../lib/i18n.svelte.js'
 
   let { d, kind } = $props()
@@ -25,7 +26,9 @@
     ? dayLabel(d.busiest.day, year ? { day: 'numeric', month: 'long' } : { weekday: 'long', day: 'numeric', month: 'long' }) : null)
   const top = $derived(d.topArtists[0])
 
-  /** Keep the recap as a fixed playlist in Navidrome – the most played songs, never changes again */
+  /** Keep the recap as a fixed playlist in Navidrome – the most played songs, never changes again (users: for the
+   *  family only if they may create its playlists) */
+  const canKeep = $derived(creatablePersons().some((x) => x.id === d.person))
   let keeping = $state(false)
   async function keep() {
     keeping = true
@@ -67,9 +70,11 @@
       {#if tot.newSongs}{@render fact(t('{n} newly discovered'), fmt(tot.newSongs))}{/if}
       {#if busiest}{@render fact(t('most music on {n}'), busiest)}{/if}
     </div>
-    <div class="btns">
-      <button class="btn sm" disabled={keeping} onclick={keep}><Icon name="pin" size={15} />{t('Keep as playlist')}</button>
-    </div>
+    {#if canKeep}
+      <div class="btns">
+        <button class="btn sm" disabled={keeping} onclick={keep}><Icon name="pin" size={15} />{t('Keep as playlist')}</button>
+      </div>
+    {/if}
     {#if top}
       <button type="button" class="wrap-top" onclick={() => openArtist(top.name)}>
         <Avatar name={top.name} id={top.id} size={72} />

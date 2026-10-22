@@ -13,9 +13,9 @@ and the AI music styles. Used for suggestions (suggest.py), "From your listening
 mixes (mixer.pick): songs that sound like the person's taste come more often. With the AI's sound vectors there is
 also the sound taste (soundtaste.py, profile["soundTaste"]): a few typical sounds of what the account plays.
 
-A person can keep music worlds out of their taste (person.tasteExclude, e.g. the children's music that plays on a
-parent's account): their songs count neither as liked nor as disliked – profile(…, exclude=…). The same account can
-thus have a taste with them (the family person) and one without (the parent's own person).
+A person can keep music worlds out of their taste (person.tasteExclude, e.g. the children's music a parent plays for
+the kids on their own phone): their songs count neither as liked nor as disliked – profile(…, exclude=…). The family's
+playlists still take them into account (suggest.played_worlds()).
 """
 import datetime as dt
 import json

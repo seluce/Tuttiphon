@@ -1,5 +1,5 @@
 <!--
-  "For you" – the start page for users: own mixes, recommendations, own and shared playlists,
+  "For you" – the start page for users: own mixes, recommendations, own and family playlists,
   listening week, new music and a short explanation.
 -->
 <script>
@@ -16,7 +16,7 @@
   import NewAlbums from './start/NewAlbums.svelte'
   import IdeaCard from './home/IdeaCard.svelte'
   import TipCards from './welcome/TipCards.svelte'
-  import { S, defaultPerson, changed, snapshot } from '../lib/state.svelte.js'
+  import { S, myPerson, familyPerson, isFamily, changed, snapshot } from '../lib/state.svelte.js'
   import { toast } from '../lib/overlay.svelte.js'
   import { api } from '../lib/api.js'
   import { accept } from '../lib/discover.js'
@@ -28,7 +28,8 @@
   const me = $derived(S.me || {})
   const own = $derived(new Set(me.own || []))
   const mine = $derived(S.config.playlists.filter((p) => own.has(p.person) && isActive(p)))
-  const shared = $derived(S.config.playlists.filter((p) => !own.has(p.person) && isActive(p)))
+  const family = $derived(S.config.playlists.filter((p) => isFamily(p.person) && isActive(p)))
+  const familyEditable = $derived((S.config.settings.familyEdit || 'all') === 'all')
   const mixes = $derived(mine.filter((p) => p.type === 'mix'))
   const date = $derived(new Date().toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' }))
 
@@ -62,7 +63,7 @@
   let woche = $state(null)   // { d } | { error, noPw } | { none: true }
   const loadSuggestions = () => api('/api/suggestions').then((d) => { cache.sg = d; sgError = null }).catch((e) => (sgError = e.message))
   function loadWoche() {
-    const pid = defaultPerson()
+    const pid = myPerson()?.id
     if (!pid) { woche = { none: true }; return }
     api(`/api/rueckblick?kind=woche&person=${encodeURIComponent(pid)}`).then((d) => (woche = { d }))
       .catch((e) => (woche = { error: e.message, noPw: /passwor[dt]/i.test(e.message) }))   // the server's error text, German or English
@@ -169,7 +170,7 @@
       {:else}
         <div class="g-cards">
           {#each ideas as s (s)}
-            <IdeaCard {s} multi={own.size > 1} onaccept={() => take(s)} ondismiss={() => dismiss(s)} />
+            <IdeaCard {s} onaccept={() => take(s)} ondismiss={() => dismiss(s)} />
           {/each}
         </div>
       {/if}
@@ -201,15 +202,17 @@
   {/if}
 
   {#if mine.length}
-    <Section title={t('Your own playlists')} icon="playlists" action={allSee}>
+    <Section title={t('Your playlists')} icon="playlists" action={allSee}>
       <Carousel>{#each mine as p (p.id)}<PlaylistCard {p} />{/each}</Carousel>
     </Section>
   {/if}
 
-  {#if shared.length}
-    <Section title={t('Shared by the family')} icon="users">
-      <p class="muted small -mt-1.5 mb-3">{t('Others have shared these playlists with everyone. You can listen to them in Symfonium – and create your own copy here to adjust.')}</p>
-      <Carousel>{#each shared as p (p.id)}<PlaylistCard {p} />{/each}</Carousel>
+  {#if family.length}
+    <Section title={t('Family playlists')} icon="users">
+      <p class="muted small -mt-1.5 mb-3">{familyEditable
+        ? t('For the whole family – everyone hears them in Symfonium, and you can change them here too.')
+        : t('For the whole family – everyone hears them in Symfonium. With “Copy for me” you get your own version to adjust.')}</p>
+      <Carousel>{#each family as p (p.id)}<PlaylistCard {p} />{/each}</Carousel>
     </Section>
   {/if}
 
@@ -234,7 +237,7 @@
       <TipCards items={[
         ['heart', t('Your taste'), t('In “My profile” you set your favorite worlds, favorite bands and dislikes. The suggestions are based on them.')],
         ['smartphone', t('Listen in Symfonium'), t('New playlists go to Navidrome automatically. They show up in Symfonium after the next sync.')],
-        ['eye', t('Just for you or for everyone'), t('You choose in your profile whether others see your playlists. Only you can edit them.')],
+        ...(familyPerson() ? [['eye', t('Who sees what'), t('Your playlists are just for you. The family playlists are for everyone.')]] : []),
       ]} />
     </Section>
   {/if}

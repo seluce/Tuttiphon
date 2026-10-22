@@ -15,7 +15,7 @@ test.describe('User', () => {
     await expect(page).toHaveURL(/#\/neu/)
     await expect(tip(page)).toContainText('1 / 3')
     await tip(page).getByRole('button', { name: 'Weiter' }).click()
-    await expect(tip(page)).toContainText('Musik wählen')
+    await expect(tip(page)).toContainText(/Für wen\?|Musik wählen/)   // with a family the user may choose for whom
     await tip(page).getByRole('button', { name: 'Weiter' }).click()
     await expect(tip(page)).toContainText('3 / 3')
     await tip(page).getByRole('button', { name: 'Zurück zur Hilfe' }).click()
@@ -37,19 +37,21 @@ test.describe('User', () => {
     await page.locator('h1').getByRole('link', { name: 'Hilfe' }).click()
     const sheet = page.locator('.sheet')
     await expect(sheet).toContainText('Deine Playlists')
-    await expect(sheet.getByRole('button', { name: /Playlist ändern oder teilen/ })).toBeVisible()
+    await expect(sheet.getByRole('button', { name: /Playlist ändern(?! oder)/ })).toBeVisible()
     await expect(page).toHaveURL(/#\/playlists/)
   })
 
   test('a guide started in the assistant starts it from scratch', async ({ page }) => {
     expect(await visit(page, '#/neu')).toEqual([])
     const cards = page.locator('.pick .pickcard')
+    const choose = page.locator('.stepper button.on', { hasText: 'Für wen?' })   // with a family: who first
+    if (await choose.count()) await cards.first().click()
     await cards.nth(1).click()   // a music world instead of “All”
     await expect(cards.first()).not.toHaveClass(/\bon\b/)
     await page.locator('h1').getByRole('link', { name: 'Hilfe' }).click()
     await page.locator('.sheet').getByRole('button', { name: /Eigene Playlist zusammenstellen/ }).click()
     await expect(tip(page)).toContainText('1 / 3')
-    await expect(cards.first()).toHaveClass(/\bon\b/)
+    await expect(cards.first()).toHaveClass(/\bon\b/)   // from scratch: the first choice of the first step
   })
 
   test('child protection in the profile', async ({ page }) => {
@@ -79,6 +81,9 @@ test.describe('Administrator', () => {
     await tip(page).getByRole('button', { name: 'Weiter' }).click()
     await expect(page).toHaveURL(/#\/einstellungen\/benutzer/)
     await tip(page).getByRole('button', { name: 'Weiter' }).click()
+    await expect(page).toHaveURL(/#\/personen/)
+    await tip(page).getByRole('button', { name: 'Weiter' }).click()
+    await expect(tip(page)).toContainText('Die Familie')   // with or without a family in the test data
     await expect(page).toHaveURL(/#\/personen/)
     await tip(page).getByRole('button', { name: 'Fertig' }).click()
     await expect(tip(page)).toHaveCount(0)

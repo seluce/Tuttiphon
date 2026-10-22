@@ -100,13 +100,16 @@ class SettingTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             config.validate_config(bad)
 
-    def test_kid_safe_mode_for_the_whole_account_and_old_exclusions(self):
+    def test_kid_safe_mode_and_old_exclusions(self):
         cfg = base_config()
-        cfg["personen"].append({"id": "jonas-2", "name": "Noch ich", "user": "jonas"})   # an older second profile
         cfg["personen"][1].update(child=True, tasteExclude=["kinder", "weg"])
         out = config.normalize_persons(copy.deepcopy(cfg))
-        self.assertTrue(out["personen"][-1]["clean"])                      # kid-safe mode for the whole account
+        self.assertTrue(out["personen"][1]["clean"])                       # a child profile is always kid-safe
         self.assertNotIn("clean", out["personen"][3])                      # others stay as they are
+        family = copy.deepcopy(cfg)
+        family["personen"][0]["child"] = True
+        with self.assertRaises(ValueError):
+            config.validate_config(family)                                 # the family is never a child profile
         self.assertEqual(out["personen"][1]["tasteExclude"], ["kinder"])   # worlds that no longer exist go
         self.assertEqual(taste.excluded(cfg["personen"][1]), ())            # a child: children's music is its taste
 
@@ -130,9 +133,6 @@ class SettingTest(unittest.TestCase):
         incoming = copy.deepcopy(cfg)
         incoming["personen"][1]["child"] = False
         self.assertTrue(auth.merge_user_changes(cfg, incoming, JONAS)["personen"][1]["child"])
-        incoming["personen"].append({"id": "jonas-2", "name": "Noch ich", "user": "Jonas"})   # a second own profile
-        fresh = auth.merge_user_changes(cfg, incoming, JONAS)["personen"][-1]
-        self.assertEqual((fresh["id"], fresh.get("child"), fresh.get("clean")), ("jonas-2", True, True))
 
 
 if __name__ == "__main__":

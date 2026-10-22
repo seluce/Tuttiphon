@@ -82,14 +82,21 @@ export const passKey = (user) => (S.status?.env?.users || []).find((u) => u.name
 export const isAdmin = () => !S.me || S.me.role === 'admin'
 /** A run that only applies changes to Navidrome (writing playlists + scan) – told by its steps, its name is translated. */
 export const isApplyRun = (task) => !!task?.steps?.length && task.steps.every((s) => s === 'playlists' || s === 'scan')
-/** People you may manage yourself (administrators: all). */
-export const ownPersons = () => (isAdmin() ? S.config.personen : S.config.personen.filter((p) => S.me.own.includes(p.id)))
-/** May you edit this playlist? */
-export const canEdit = (p) => isAdmin() || (S.me?.own || []).includes(p?.person)
-/** Default person: for users their own, for administrators the family's. */
-export const defaultPerson = () => (!isAdmin() && S.me?.own?.length ? S.me.own[0] : S.config.settings.defaultPerson)
-/** Your own profile (picture in the account menu) – administrators without their own profile have none. */
+/** Your own person – one person per Navidrome account (the local administrator and accounts without one: null). */
 export const myPerson = () => S.config?.personen.find((p) => (S.me?.own || [])[0] === p.id) || null
+/** The family – an entry with a Navidrome account of its own (or null). */
+export const familyPerson = () => S.config?.personen.find((p) => p.family) || null
+/** Is this person (object or id) the family? */
+export const isFamily = (p) => !!(typeof p === 'string' ? findPerson(p) : p)?.family
+/** May you create, change and delete the family's playlists? (settings.familyEdit) */
+const familyEditable = () => isAdmin() || (S.config?.settings.familyEdit || 'all') === 'all'
+/** May you edit this playlist? Administrators all; users their own and – unless only administrators may – the family's. */
+export const canEdit = (p) => isAdmin() || (S.me?.own || []).includes(p?.person) || (isFamily(p?.person) && familyEditable())
+/** People you may create playlists for: administrators everyone; users their own person and the family (if allowed). */
+export const creatablePersons = () => (isAdmin() ? S.config.personen
+  : [myPerson(), familyEditable() ? familyPerson() : null].filter(Boolean))
+/** The owner of a new playlist when none is chosen: your own person, otherwise the family, otherwise the first one. */
+export const defaultOwner = () => myPerson() || (isAdmin() ? familyPerson() || S.config.personen[0] || null : null)
 
 /* ------------------------------------------------------------------ Saving (with undo) */
 let saveTimer

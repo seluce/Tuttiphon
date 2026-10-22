@@ -12,8 +12,6 @@ export default {
     'Voorkeuren',
   'visible to everyone':
     'zichtbaar voor iedereen',
-  'private':
-    'privé',
   'likes {list}':
     'houdt van {list}',
   'Icon':
@@ -24,12 +22,6 @@ export default {
     'Naam',
   'Navidrome user':
     'Navidrome-gebruiker',
-  'Who may see your playlists?':
-    'Wie mag je playlists zien?',
-  'Only me':
-    'Alleen ik',
-  'The whole family':
-    'Het hele gezin',
   'e.g. Schlager':
     'bijv. Schlager',
   'No suggestions right now':
@@ -62,10 +54,6 @@ export default {
     'Welkom bij Tuttiphon',
   'For whom?':
     'Voor wie?',
-  'Choose whose preferences you want to edit.':
-    'Kies van wie je de voorkeuren wilt bewerken.',
-  'No profile yet':
-    'Nog geen profiel',
   'Create profile':
     'Profiel maken',
   'This person does not exist':
@@ -78,8 +66,8 @@ export default {
     'Dit is niet jouw profiel',
   'You can only change your own profile.':
     'Je kunt alleen je eigen profiel wijzigen.',
-  'Who is a playlist for? The person decides the owner in Navidrome and so whose stars & favorites count, who sees it – and what never goes in.':
-    'Voor wie is een playlist? De persoon bepaalt de eigenaar in Navidrome en dus wiens sterren & favorieten meetellen, wie hem ziet – en wat er nooit in komt.',
+  'Every person has a Navidrome account of their own – their playlists end up there, and its stars & favorites count. The family’s playlists are for everyone.':
+    'Elke persoon heeft een eigen Navidrome-account – daar komen diens playlists terecht, en de sterren & favorieten van dat account tellen. De playlists van het gezin zijn voor iedereen.',
   'Add person':
     'Persoon toevoegen',
   'Default':
@@ -94,10 +82,6 @@ export default {
     'Testbericht verstuurd',
   'Delete {name}?':
     '{name} verwijderen?',
-  '{n} playlist goes to “{name}”.':
-    '{n} playlist gaat naar “{name}”.',
-  '{n} playlists go to “{name}”.':
-    '{n} playlists gaan naar “{name}”.',
   'This person has no playlists.':
     'Deze persoon heeft geen playlists.',
   '{name} deleted':
@@ -116,8 +100,6 @@ export default {
     'Persoon',
   'What you enter here decides your suggestions and what ends up in your playlists. Changes apply right away.':
     'Wat je hier invult, bepaalt je suggesties en wat er in je playlists terechtkomt. Wijzigingen gelden meteen.',
-  'Playlists visible to everyone':
-    'Playlists zichtbaar voor iedereen',
   'Playlists only for you':
     'Playlists alleen voor jou',
   'Playlists private':
@@ -144,14 +126,6 @@ export default {
     'bijv. Mia · ',
   'Goes in front of every playlist name – so you spot your playlists in Symfonium at a glance.':
     'Komt voor elke playlistnaam – zo herken je je playlists in Symfonium in één oogopslag.',
-  'With “family”, everyone sees them in Navidrome and Symfonium – only you can change them.':
-    'Met “Het hele gezin” ziet iedereen ze in Navidrome en Symfonium – alleen jij kunt ze wijzigen.',
-  'Visibility':
-    'Zichtbaarheid',
-  'Default: new playlists are for this person at first.':
-    'Standaard: nieuwe playlists zijn eerst voor deze persoon.',
-  'Make default':
-    'Als standaard instellen',
   'Delete person':
     'Persoon verwijderen',
   'Your suggestions under “Discover” and “For you” are built from this.':
@@ -226,10 +200,10 @@ export default {
     'Hoe heet de persoon?',
   'e.g. Mia':
     'bijv. Mia',
-  'Which Navidrome account does {name} use? The playlists end up there, and the stars & favorites of this account count. Kids can also use the family account.':
-    'Welk Navidrome-account gebruikt {name}? Daar komen de playlists terecht, en de sterren & favorieten van dit account tellen mee. Kinderen kunnen ook het gezinsaccount gebruiken.',
-  'Which Navidrome account does the person use? The playlists end up there, and the stars & favorites of this account count. Kids can also use the family account.':
-    'Welk Navidrome-account gebruikt de persoon? Daar komen de playlists terecht, en de sterren & favorieten van dit account tellen mee. Kinderen kunnen ook het gezinsaccount gebruiken.',
+  'Which Navidrome account does {name} use? The playlists end up there, and the stars & favorites of this account count.':
+    'Welk Navidrome-account gebruikt {name}? Daar komen de playlists terecht, en de sterren & favorieten van dit account tellen.',
+  'Which Navidrome account does the person use? The playlists end up there, and the stars & favorites of this account count.':
+    'Welk Navidrome-account gebruikt de persoon? Daar komen de playlists terecht, en de sterren & favorieten van dit account tellen.',
   'Could not load the accounts from Navidrome: {error}':
     'Kon de accounts niet uit Navidrome laden: {error}',
   'User missing? You create new accounts in Navidrome under Settings → Users, then reload here.':
@@ -246,14 +220,6 @@ export default {
     'Testen',
   '✓ works':
     '✓ werkt',
-  'Who sees the playlists?':
-    'Wie ziet de playlists?',
-  'only {name}':
-    'alleen {name}',
-  'only the person':
-    'alleen de persoon',
-  'everyone in Navidrome':
-    'iedereen in Navidrome',
   'Name prefix':
     'Voorvoegsel voor de naam',
   'What does {name} like to listen to? You can pick several.':
@@ -272,8 +238,8 @@ export default {
     'Meer favoriete werelden brengen meer ideeën – of maak zelf een playlist.',
   'Matching playlists for {name} – tap to select.':
     'Passende playlists voor {name} – tik om te selecteren.',
-  'already exists, visible to everyone':
-    'bestaat al, zichtbaar voor iedereen',
+  'already exists for everyone':
+    'bestaat al voor iedereen',
   'Create person & show suggestions':
     'Persoon maken & suggesties tonen',
   'Create {n} playlist & finish':
@@ -314,8 +280,6 @@ export default {
     'Jouw pictogram',
   'Your color':
     'Jouw kleur',
-  '“Only me”: they appear only in your Navidrome account. “Family”: everyone sees them, only you can edit them.':
-    '“Alleen ik”: ze verschijnen alleen in jouw Navidrome-account. “Het hele gezin”: iedereen ziet ze, alleen jij kunt ze bewerken.',
   'What do you like to listen to?':
     'Waar luister je graag naar?',
   'Tap everything you like – you can pick several. A music world groups similar bands together.':
@@ -530,4 +494,70 @@ export default {
     'In de slimme wachtrij en de Instant Mix van Symfonium zit er om de paar nummers een tussen dat je nog nooit hebt gespeeld – het nummer dat het meest klinkt als wat er nu speelt.',
   'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
     'In de slimme wachtrij en de Instant Mix van Symfonium zit er om de paar nummers een tussen dat {name} nog nooit heeft gespeeld – het nummer dat het meest klinkt als wat er nu speelt.',
+  'for everyone':
+    'voor iedereen',
+  '{name} needs a Navidrome account of their own. Until then, their playlists are with {into} – create the account in Navidrome, then add {name} here.':
+    '{name} heeft een eigen Navidrome-account nodig. Tot dan staan de playlists bij {into} – maak het account aan in Navidrome en voeg {name} daarna hier toe.',
+  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
+    'Tuttiphon maakt een Navidrome-account voor het gezin aan. De playlists van het gezin zijn voor iedereen – en gedeelde apparaten, in de auto of op de tablet in de keuken, kunnen ze afspelen in Symfonium.',
+  'The former family playlist can move there.':
+    'De vroegere gezinsplaylist kan daarheen verhuizen.',
+  'The {n} former family playlists can move there.':
+    'De {n} vroegere gezinsplaylists kunnen daarheen verhuizen.',
+  'The family’s account “{account}” is ready.':
+    'Het gezinsaccount “{account}” is klaar.',
+  'Password – shown only now:':
+    'Wachtwoord – alleen nu getoond:',
+  'Shared devices – in the car, on the kitchen tablet – sign in to Navidrome in Symfonium with this account and play the family playlists. Nobody signs in to Tuttiphon with it.':
+    'Gedeelde apparaten – in de auto, op de tablet in de keuken – loggen in Symfonium met dit account in bij Navidrome en spelen de gezinsplaylists. In Tuttiphon logt niemand ermee in.',
+  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – every account sees them in Navidrome and Symfonium.':
+    'Tuttiphon maakt een Navidrome-account voor het gezin aan. De playlists van het gezin zijn voor iedereen – elk account ziet ze in Navidrome en Symfonium.',
+  'Navidrome account':
+    'Navidrome-account',
+  'Letters, digits, dots, hyphens and underscores. Tuttiphon picks a random password and stores it.':
+    'Letters, cijfers, punten, koppeltekens en underscores. Tuttiphon kiest een willekeurig wachtwoord en slaat het op.',
+  'Move to the family':
+    'Naar het gezin verplaatsen',
+  'These playlists were the family’s before – checked ones become family playlists again.':
+    'Deze playlists waren eerder van het gezin – de aangevinkte worden weer gezinsplaylists.',
+  'Every Navidrome account already has a person.':
+    'Elk Navidrome-account heeft al een persoon.',
+  'Playlists for everyone':
+    'Playlists voor iedereen',
+  'The family’s playlists are in this account and for everyone. Shared devices play them with it in Symfonium – nobody signs in to Tuttiphon with it.':
+    'De playlists van het gezin staan in dit account en zijn voor iedereen. Gedeelde apparaten spelen ze ermee af in Symfonium – in Tuttiphon logt niemand ermee in.',
+  'Delete family':
+    'Gezin verwijderen',
+  'Its {n} playlist is deleted too. The Navidrome account “{account}” stays – you can remove it in Navidrome.':
+    'De {n} playlist van het gezin wordt ook verwijderd. Het Navidrome-account “{account}” blijft – je kunt het in Navidrome verwijderen.',
+  'Its {n} playlists are deleted too. The Navidrome account “{account}” stays – you can remove it in Navidrome.':
+    'De {n} playlists van het gezin worden ook verwijderd. Het Navidrome-account “{account}” blijft – je kunt het in Navidrome verwijderen.',
+  'The Navidrome account “{account}” stays – you can remove it in Navidrome.':
+    'Het Navidrome-account “{account}” blijft – je kunt het in Navidrome verwijderen.',
+  'Their {n} playlist is deleted too.':
+    'Ook de {n} playlist van deze persoon wordt verwijderd.',
+  'Their {n} playlists are deleted too.':
+    'Ook de {n} playlists van deze persoon worden verwijderd.',
+  'Family playlists – who may change them?':
+    'Gezinsplaylists – wie mag ze wijzigen?',
+  'Everyone listens to them. With “Administrators only”, users get their own version with “Copy for me”.':
+    'Iedereen luistert ernaar. Bij “Alleen beheerders” krijgen gebruikers met “Kopie voor mij” een eigen versie.',
+  'Everyone':
+    'Iedereen',
+  'Administrators only':
+    'Alleen beheerders',
+  'The family’s account – for shared devices in Symfonium, nobody signs in to Tuttiphon with it':
+    'Het account van het gezin – voor gedeelde apparaten in Symfonium, in Tuttiphon logt niemand ermee in',
+  '“{name}” stays a person with the account “{account}”. If nobody needs it any more, delete it in its profile.':
+    '“{name}” blijft een persoon met het account “{account}”. Heeft niemand die persoon nog nodig, verwijder die dan in het profiel.',
+  'Open profile':
+    'Profiel openen',
+  'No family':
+    'Geen gezin',
+  'Continue without a family?':
+    'Doorgaan zonder gezin?',
+  'The former family playlists then stay with the person they belong to now – only that account sees them.':
+    'De vroegere gezinsplaylists blijven dan bij de persoon van wie ze nu zijn – alleen dat account ziet ze.',
+  'Without a family':
+    'Zonder gezin',
 }

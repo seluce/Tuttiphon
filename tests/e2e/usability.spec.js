@@ -1,7 +1,7 @@
 // Phone usability: band names in rankings readable, swipe away notices at the bottom, bring back hidden suggestions,
 // settings as a list of sections with a page per section.
 import { test, expect } from '@playwright/test'
-import { login, visit } from './helpers.js'
+import { login, state, visit } from './helpers.js'
 
 test.describe('Administrator', () => {
   test.beforeEach(async ({ context }) => login(context, 'admin'))
@@ -9,6 +9,9 @@ test.describe('Administrator', () => {
   test('band names in the statistics are readable on a phone', async ({ page }, info) => {
     test.skip(info.project.name !== 'phone', 'phone only')
     expect(await visit(page, '#/statistik')).toEqual([])
+    // the local administrator has no person of their own: the family's comes first – its test account has no plays
+    const who = page.getByRole('button', { name: state().personName, exact: true })
+    if (await who.count()) await who.click()
     const name = page.locator('.arow .ell').first()
     await expect(name).toBeVisible()
     expect((await name.boundingBox()).width).toBeGreaterThan(150)

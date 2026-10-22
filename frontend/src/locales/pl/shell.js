@@ -46,8 +46,8 @@ export default {
     'Jaka muzyka, jaki nastrój i na koniec ostatnie szlify. Na górze widzisz, gdzie jesteś.',
   'For whom?':
     'Dla kogo?',
-  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
-    'Osoba decyduje, na które konto Navidrome trafia playlista – liczą się gwiazdki tego konta. Potem wybierasz świat muzyczny.',
+  'A person’s playlist is only theirs, and their stars count; a family playlist is for everyone. Then you choose the music world.':
+    'Playlista osoby należy tylko do niej i liczą się jej gwiazdki; playlista rodziny jest dla wszystkich. Potem wybierasz świat muzyczny.',
   'Choose music':
     'Wybierz muzykę',
   'Tap one or more music worlds. “All” takes the whole library.':
@@ -116,8 +116,8 @@ export default {
     'Z hasłem konta Tuttiphon tworzy tam playlisty i widzi, co jest odtwarzane.',
   'Who may do what?':
     'Kto może co robić?',
-  'Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account.':
-    'Każdy loguje się własnym kontem Navidrome. Tutaj wybierasz dla każdego konta: administrator, użytkownik albo brak dostępu.',
+  'Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account – and who may change the family playlists.':
+    'Każdy loguje się własnym kontem Navidrome. Tutaj wybierasz dla każdego konta: administrator, użytkownik albo brak dostępu – oraz to, kto może zmieniać playlisty rodziny.',
   'People':
     'Osoby',
   'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
@@ -184,14 +184,14 @@ export default {
     'Pojedyncze piosenki',
   'Rate a song 1 star in Symfonium. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
     'Oceń piosenkę na 1 gwiazdkę w Symfonium. Wtedy nie trafi już do twoich mixów. To, co często pomijasz w mixie, samo pojawia się rzadziej.',
-  'Change or share a playlist':
-    'Zmień lub udostępnij playlistę',
+  'Change a playlist':
+    'Zmień playlistę',
   'Tap a playlist':
     'Dotknij playlisty',
   'Choose “Edit”, or “…” for the cover and more':
     'Wybierz „Edytuj” albo „…” dla okładki i innych opcji',
-  'Set sharing in the profile':
-    'Ustaw udostępnianie w profilu',
+  'Symfonium shows the change after the next sync':
+    'Symfonium pokaże zmianę po następnej synchronizacji',
   'edit rename name cover picture pause delete trash share family visible copy':
     'edytuj zmień nazwę nazwa okładka obraz wstrzymaj pauza usuń kosz udostępnij rodzina widoczne kopia',
   'Open a playlist':
@@ -206,10 +206,8 @@ export default {
     '„Edytuj” zmienia muzykę i nazwę. W „…” projektujesz okładkę, wstrzymujesz playlistę – wtedy na jakiś czas znika z Symfonium, a tutaj zostaje zachowana – albo przenosisz ją do kosza.',
   'Share with the family':
     'Udostępnij rodzinie',
-  'With “visible to everyone”, all accounts see this person’s playlists in Navidrome and Symfonium.':
-    'Przy „widoczne dla wszystkich” wszystkie konta widzą playlisty tej osoby w Navidrome i Symfonium.',
-  'Here you set whether only you see your playlists or the whole family. Only you can change them.':
-    'Tutaj ustawiasz, czy twoje playlisty widzisz tylko ty, czy cała rodzina. Zmieniać je możesz tylko ty.',
+  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and Symfonium.':
+    'W „Edytuj” wybierz rodzinę w „Dla kogo?” – wtedy wszyscy zobaczą playlistę w Navidrome i Symfonium.',
   'Turn on kid-safe mode':
     'Włącz tryb dla dzieci',
   'Open the profile':
@@ -222,8 +220,8 @@ export default {
     'dzieci wulgarne przekleństwa wulgaryzmy explicit kontrola rodzicielska czyste teksty',
   'Kid-safe mode':
     'Tryb dla dzieci',
-  'Turn it on per person – for example for the person whose playlists the kids listen to. Detected from the lyrics.':
-    'Włączasz go osobno dla każdej osoby – np. dla osoby, której playlist słuchają dzieci. Rozpoznawane po tekstach.',
+  'Turn it on per person – for a child, or for the family when the kids listen to its playlists. Detected from the lyrics.':
+    'Włączasz go osobno dla każdej osoby – dla dziecka albo dla rodziny, gdy dzieci słuchają jej playlist. Rozpoznawane po tekstach.',
   'Turn it on, and songs with explicit lyrics stay out of all your playlists and mixes. Detected from the lyrics.':
     'Włącz go, a piosenki z wulgarnymi tekstami nie trafią do żadnej z twoich playlist ani mixów. Rozpoznawane po tekstach.',
   'Detected songs':
@@ -296,8 +294,8 @@ export default {
     'Światy muzyczne',
   'Who plays what: kids’ rock, medieval, … Tuttiphon recognizes typical bands by itself.':
     'Kto gra co: rock dla dzieci, średniowiecze, … Tuttiphon sam rozpoznaje typowe zespoły.',
-  'Who the playlists are for: Navidrome account, favorite worlds, dislikes. On the phone under “More”.':
-    'Dla kogo są playlisty: konto Navidrome, ulubione światy, „Nie lubię”. Na telefonie w „Więcej”.',
+  'Who the playlists are for: one person per Navidrome account, with favorite worlds and dislikes – and if you like the family, whose playlists are for everyone. On the phone under “More”.':
+    'Dla kogo są playlisty: jedna osoba na konto Navidrome, z ulubionymi światami i listą „Nie lubię” – a jeśli chcesz, także rodzina, której playlisty są dla wszystkich. Na telefonie w „Więcej”.',
   'Statistics & recap':
     'Statystyki i podsumowanie',
   'Most played bands, “Played this week” and your yearly recap. On the phone under “More”.':
@@ -322,8 +320,8 @@ export default {
     'Kreator pyta krok po kroku: Jaka muzyka? Jaki nastrój? Zwykła playlista czy mix? Od razu widzisz, które piosenki się w niej znajdą. Na telefonie w „Więcej”.',
   'My playlists':
     'Moje playlisty',
-  'All your playlists – and those others share with you. Tap: listen in, change the cover or adjust.':
-    'Wszystkie twoje playlisty – i te, które udostępniają ci inni. Dotknij: posłuchaj, zmień okładkę albo dostosuj.',
+  'Your playlists and the family playlists. Tap: listen in, change the cover or adjust.':
+    'Twoje playlisty i playlisty rodziny. Dotknij: posłuchaj, zmień okładkę albo dostosuj.',
   'Ready-made suggestions matching your taste and the season. “Create” adds them, ✕ hides them.':
     'Gotowe propozycje pasujące do twojego gustu i pory roku. „Utwórz” je dodaje, ✕ ukrywa.',
   'Your music sorted by kind, for example children’s songs or medieval. Here you see which bands belong to it and can make a playlist from it.':
@@ -368,8 +366,6 @@ export default {
     'Nowe w twojej bibliotece',
   'Recently added albums':
     'Ostatnio dodane albumy',
-  'All of your playlists':
-    'Wszystkie twoje playlisty',
   'All active playlists as a carousel':
     'Wszystkie aktywne playlisty jako karuzela',
   'Deezer & library':

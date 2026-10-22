@@ -8,7 +8,7 @@
   import Mosaic from '../../components/Mosaic.svelte'
   import PlaylistArt from '../../components/PlaylistArt.svelte'
   import StatePill from '../../components/StatePill.svelte'
-  import { plStatus, findPerson, defaultPerson, canEdit } from '../../lib/state.svelte.js'
+  import { plStatus, findPerson, canEdit } from '../../lib/state.svelte.js'
   import { openSheet, closeSheet } from '../../lib/overlay.svelte.js'
   import { plEmoji } from '../../lib/playlist.js'
   import { fmt, plural } from '../../lib/format.js'
@@ -20,20 +20,19 @@
   let { p, d, onreload } = $props()
 
   const st = $derived(plStatus(p.id) || {})
-  const person = $derived(findPerson(p.person || defaultPerson()))
+  const person = $derived(findPerson(p.person))
   const status = $derived(p.status || 'aktiv')
   const mix = $derived(p.type === 'mix')
   const every = $derived(MIXEVERY[p.mix?.every || 'day'])
-  // someone else's shared playlist: view and copy only
+  // a family playlist only administrators change: view and copy only
   const own = $derived(d.own !== false && canEdit(p))
   const nav = $derived(d.navidrome)
   const eyebrow = $derived([
     p.review ? t('Recap · changes on the first of the month') : p.album ? t('Album of the week · new every Monday')
       : p.episodes ? t('Next episode · new every day') : mix ? every.eyebrow : p.rules ? t('Taken-over smart playlist') : t('Smart playlist'),
-    t('for {name}', { name: person?.name || '?' }),
-    // in the trash it is in no one's Navidrome – the state pill says so
-    status === 'papierkorb' ? null : person?.public ? t('visible to everyone') : t('private'),
-  ].filter(Boolean).join(' · '))
+    // the family's is for everyone – except in the trash: then it is in no one's Navidrome (the state pill says so)
+    person?.family && status !== 'papierkorb' ? t('Family playlist · for everyone') : t('for {name}', { name: person?.name || '?' }),
+  ].join(' · '))
   const tint = $derived(d.color
     ? `linear-gradient(160deg, color-mix(in srgb, ${d.color} 55%, var(--surface)) 0%, color-mix(in srgb, ${d.color} 22%, var(--surface)) 50%, var(--surface) 100%)`
     : null)
@@ -117,12 +116,10 @@
       {#if mix && !p.review && !p.album && !p.episodes && !p.mix?.minutes && (p.mix?.perArtist ?? 3) > 0 && d.count < (p.mix?.size || 50) && d.pool >= 15 && status === 'aktiv'}
         <div class="muted small">{tn(p.mix?.perArtist ?? 3, 'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.', 'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.')}</div>
       {/if}
-      {#if !own}
+      {#if !own && person?.family}
         <div class="small flex gap-2.5 items-center px-3.5 py-3 rounded-card bg-surface-2 text-text-2">
           <Icon name="eye" size={18} />
-          <span>{person?.name
-            ? t('This playlist belongs to {name} and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.', { name: person.name })
-            : t('This playlist belongs to someone else and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.')}</span>
+          <span>{t('Only administrators change the family’s playlists – with “Copy for me” you get your own version.')}</span>
         </div>
       {/if}
       <div class="btns mt-2.5" data-guide="pl-actions">

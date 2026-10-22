@@ -37,15 +37,16 @@ class KidSafeTest(unittest.TestCase):
 
 
 class FamilyMixTest(unittest.TestCase):
-    def test_private_member_still_protects(self):
+    def test_every_member_protects(self):
         cfg = base_config()
-        cfg["personen"][1]["clean"] = True                         # Jonas: child protection, private
-        p = {"id": "t", "person": "oma", "welt": ["kinder"], "stil": "*", "type": "mix", "together": ["oma", "jonas"]}
+        cfg["personen"][1]["clean"] = True                         # Jonas: child protection
+        p = {"id": "t", "person": "familie", "welt": ["kinder"], "stil": "*", "type": "mix", "together": ["oma", "jonas"]}
         lib = Library([song("s1", genres=["Children"])])
         with mock.patch.object(liedtext, "derb", return_value=frozenset()):
             nsp = rules.build_nsp(cfg, p, BuildContext(lib))
-        self.assertIn({"isNot": {"artist": "Nordwind"}}, nsp["all"])   # Jonas's no-go still applies
-        self.assertEqual([x["id"] for x in rules.together_of(cfg, p)], ["oma"])   # her taste does not count
+        self.assertIn({"isNot": {"artist": "Nordwind"}}, nsp["all"])   # Jonas's no-go applies
+        self.assertIn({"isNot": {"artist": "Band X"}}, nsp["all"])     # and the family's own
+        self.assertEqual([x["id"] for x in rules.together_of(cfg, p)], ["jonas", "oma"])
 
     def test_review_skips_nogos(self):
         cfg = base_config()

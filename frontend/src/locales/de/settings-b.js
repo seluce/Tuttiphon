@@ -71,7 +71,8 @@ export default {
   'No access': 'Kein Zugang',
   'Navidrome admin': 'Navidrome-Admin',
   'Navidrome user': 'Navidrome-Benutzer',
-  'Profiles: {names}': 'Profile: {names}',
+  'Profile: {name}':
+    'Profil: {name}',
   'no profile yet': 'noch kein Profil',
   'last signed in {when}': 'zuletzt angemeldet {when}',
   'never signed in': 'noch nie angemeldet',
@@ -80,7 +81,8 @@ export default {
   'Who may do what?': 'Wer darf was?',
   'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.': 'Jede:r meldet sich mit dem eigenen Navidrome-Konto an – mit demselben Namen und Passwort wie in Symfonium.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.': 'Sieht und ändert alles: alle Playlists, Musikwelten, Richtungen, Personen und alle Einstellungen – auch Deezer, Lyrics und Umwandlung.',
-  'Has their own “For you” home page, their own playlists and their own profile. Sees other people’s playlists only if they share them with everyone – but cannot change them.': 'Hat eine eigene Startseite „Für dich“, eigene Playlists und ein eigenes Profil. Sieht Playlists anderer nur, wenn diese sie für alle freigeben – ändern kann er sie nicht.',
+  'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
+    'Hat eine eigene Startseite „Für dich“, eigene Playlists und ein eigenes Profil. Hört die Familien-Playlists – und ändert sie, wenn das nicht nur Administrator:innen dürfen.',
   'Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.': 'Kann sich in Tuttiphon nicht anmelden. Navidrome und Symfonium funktionieren weiter.',
   'you': 'du',
   'Default: {role}': 'Standard: {role}',

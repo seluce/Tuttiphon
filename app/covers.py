@@ -310,7 +310,7 @@ def _format_cover(cfg, lib, playlist, pv, title, kind):
         x += draw.textlength(ch, font=mark) + 4
     covers = pv["covers"]
     person = rules.person_of(cfg, playlist)
-    who = _s("for {name}", name=person["name"]) if person and person["id"] != cfg["settings"].get("defaultPerson") else ""
+    who = _s("for {name}", name=person["name"]) if person and not rules.is_family(person) else ""
     if kind == "album" and pv["topArtists"]:
         song = (pv.get("sample") or [{}])[0]
         detail = " – ".join(x for x in (pv["topArtists"][0][0], song.get("album")) if x)
@@ -383,7 +383,8 @@ def signature(cfg, lib, playlist, style=None):
         from .mixer import options
         o = options(playlist)
         parts += [str(x) for x in (format_kind(playlist), format_title(cfg, playlist, pv["name"]),
-                                   (rules.person_of(cfg, playlist) or {}).get("name"), cfg["settings"].get("defaultPerson"),
+                                   (rules.person_of(cfg, playlist) or {}).get("name"),
+                                   rules.is_family(rules.person_of(cfg, playlist)),
                                    o.get("minutes"), o.get("every"), _s("new every day"))]
     return hashlib.sha1("|".join(parts).encode()).hexdigest()[:12]
 

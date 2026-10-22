@@ -99,7 +99,7 @@ and `/assets/…` are reachable without a session. The check uses the normalized
 | signed in | any valid session (role `admin` or `user`). Without an administrator password (neither `TUTTIPHON_ADMIN_PASSWORD` nor one set in the browser) and bound to loopback, every access via localhost is a local admin; on the network that is setup mode, where only the public paths work until the setup ([07](07-security.md#setup-mode)). |
 | Admin | path is in `Handler.ADMIN_ONLY` → otherwise `403` |
 | Admin (function) | path is open to everyone, the function calls `auth.require_admin()` |
-| own | signed in, but only for one's own people or playlists (`_own_person()`, `_own_playlist_id()`) – otherwise `403` |
+| own | signed in, but only for one's own person – for reading also the family, for creating and saving the family's playlists unless `settings.familyEdit` is `admins` – or for the playlists one may change (`_own_person()`, `_own_playlist_id()`) – otherwise `403` |
 
 The “Users” column in the tables below lists what the server leaves out for the role `user`.
 
@@ -159,6 +159,7 @@ The “Users” column in the tables below lists what the server leaves out for 
 | GET | `/api/users` | Admin | [Settings & credentials](#settings--credentials) |
 | GET | `/api/accounts` | Admin | [Settings & credentials](#settings--credentials) |
 | PUT | `/api/accounts` | Admin | [Settings & credentials](#settings--credentials) |
+| POST | `/api/family` | Admin | [Settings & credentials](#settings--credentials) |
 | POST | `/api/admin-password` | Admin | [Settings & credentials](#settings--credentials) |
 | GET | `/api/intel` | Admin | [Settings & credentials](#settings--credentials) |
 | GET | `/api/opus/info` | Admin | [Settings & credentials](#settings--credentials) |
@@ -203,8 +204,13 @@ The “Users” column in the tables below lists what the server leaves out for 
 | `POST /api/seen` | signed in, affects only one's own account | Body `{"what": "tour"}` or `{"what": "welcome"}` | `{"ok": true}`; any other value → `400 "Unknown"` |
 | `POST /api/tour/seen` | signed in, own account only | – | `{"ok": true}` – older form of `{"what": "tour"}` |
 
-- `persons` are the people the account sees (admin: all), `own` its own people (people whose `user` is the account;
-  the default person comes last).
+- `own` is the account's person – one person per Navidrome account: `[id]` or `[]` (none yet; `auth.persons_of()`,
+  never the family entry). `persons`: administrators all people, users their own (`= own`). The local administrator
+  has `own: []` and `persons` = all.
+- `POST /api/login` refuses the family's account (the account of the entry with `family: true`,
+  `auth.family_account()`) with `401` “This is the family's account – it plays the family playlists on shared
+  devices. Please sign in with your own account.” – after the password check, without counting toward the lockout;
+  `auth.role_of()` gives the account the role `none`, so an existing session no longer works either.
 - `tourSeen` / `welcomeSeen`: has the account already completed the tour or the welcome assistant? Stored on the
   server in `state/seen.json` (`auth.mark_seen()`), so it applies on all devices and under every address; without
   sign-in the account is `""`, and `welcomeSeen` is then always `true`. `POST /api/seen` records the **signed-in** account
@@ -242,9 +248,9 @@ On `GET`, users get (`auth.view_config()`):
 
 | Part | Content |
 |---|---|
-| `playlists` | visible ones only: their own and those of people with `public: true` (without `person`, the default person counts) |
-| `personen` | their own people in full; other people only with `public: true` and only with `id`, `name`, `icon`, `color`, `prefix`, `public` (`auth.PUBLIC_PERSON_FIELDS`); other people's private profiles are missing entirely |
-| `settings` | only `autoApply`, `defaultPerson`, `namePattern`, `allName`, `limit`, `minDuration`, `allMinRating`, `public` (`auth.USER_SETTINGS`) |
+| `playlists` | visible ones only: their own person's and the family's (`auth.visible_playlist()`) |
+| `personen` | all people – their own person in full, every other person (the family, the members of “What everyone likes”) only with `id`, `name`, `icon`, `color`, `prefix`, `family` (`auth.PUBLIC_PERSON_FIELDS` – without likes, dislikes, kid-safe mode and account) |
+| `settings` | only `autoApply`, `namePattern`, `allName`, `limit`, `minDuration`, `allMinRating`, `seasonRest`, `familyEdit` (`auth.USER_SETTINGS`), plus from `notify` only `enabled` and `server` |
 | `accounts` | missing |
 | `dismissed`, `ignored` | their own lists from `accounts.<account>` |
 | `dismissedAt` | missing (the dates of the administrator's hidden suggestions) |
@@ -256,8 +262,8 @@ On `PUT`, the server applies:
   server maintains to the current state: `accounts` entirely, and `file`, `takeover` and `cover` of each existing playlist.
 - **Users:** only their own things: `save_from_ui()` applies `auth.merge_user_changes()` under the lock to
   the current server state (details in [07](07-security.md#writing-merge_user_changes)). Anything they didn't
-  receive (other people, the remaining settings) therefore stays unchanged. More than 200 playlists or 20 people for
-  one account → `400` (“You can have at most …”).
+  receive (other people, the remaining settings) therefore stays unchanged. More than 200 playlists for one account
+  (counting the ones they may edit) → `400` (“You can have at most …”).
 
 In both cases `normalize_playlists()` then turns every playlist with a sound filter into a mix
 ([02](02-data-model.md#playlists)). Then `validate_config()` checks the result (`400` with `"config: …"` or
@@ -269,11 +275,11 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
 | `GET /api/status` | signed in | – | `env` (`url`, `webUrl`, `admin`, `adminOk`, `users[{name, ok, key, rejected}]`, `auth`, `adminPassword`, `publicUrl`, `lastfm`, `locked`), `deezer`, `steps`, `allSteps`, `daily`, `watch`, `paths`, `instance{docker, others[{host, docker, running}]}`, `navidrome{ok, version, scan}` or `{ok: false, error}`, `plugin` (bool: the Navidrome plugin has a key and is in use – a request or a play since the start, or live plays of the last 30 days), `names` (`all`, `hits`, `everything`: the names the server language gives generated playlists – the interface names new ones the same way) | only `navidrome{ok, version, scan}`, `env{users (own accounts only), auth, webUrl, lastfm}`, `daily`, `instance{docker, others: []}`, `plugin`, `names`; `steps`/`allSteps` empty |
-| `GET /api/home` | signed in | – | `{"newAlbums", "favNew", "songs", "albums", "artists", "playlists", "personen"}` (numbers, `playlists` = active playlists of all people). Each album carries `fav`: by a favorite band of the signed-in person (administrators: of the default person and of their own account, `rules.favorite_artists()`); those from the last 45 days come first, `favNew` counts them | `fav` from one's own people |
+| `GET /api/home` | signed in | – | `{"newAlbums", "favNew", "songs", "albums", "artists", "playlists", "personen"}` (numbers, `playlists` = active playlists of all people). Each album carries `fav`: by a favorite band of the signed-in account's person (administrators without one: the family's, otherwise the first person's – `web._default_person()`, `rules.favorite_artists()`); those from the last 45 days come first, `favNew` counts them | `fav` from one's own person |
 | `GET /api/library` | signed in | `refresh=1` reloads the library from Navidrome | Index: `artists[[name, songs, id]]`, `genres`, `albums`, `songs`, `suffix`, `mp3Albums`, `loved`, `played`, `similar`, `untagged`, `autoArtists`, `weltInfo`, `scenes`, `ratingsExact`, `ratingSource`, `deezer` | unfiltered |
 | `GET /api/welt` | signed in | `id` of the music world | `members`, `songs`, `covers`, `artists`, `memberList[{name, id, songs, auto}]`, `similar`, `playlists`, `excluded`, `scene`, `forMe` | `playlists` visible ones only; `forMe` always from one's own account |
 | `GET /api/welt/neu` | Admin | `id` of the music world | Preview for “Rebuild”: `name`, `icon` (from the scene), `before`, `after` (bands), `dropped`, `added`, `renamed[[old, new]]` – changes nothing; without a scene `400` | – |
-| `GET /api/artist` | signed in | `name` | `name`, `id`, `songs`, `albums`, `genres`, `welten[{id, state}]`, `stile`, `likedBy`, `dislikedBy`, `playlists`, `bio`, `similar`, `plays`, `tags`, `missing`, `sound`, `soundsLike`, `lastfm`, `scenes`, `rating`, `top` (the five most played songs as song rows, see [below](#songs--listening-in)) | `playlists` only visible active ones; `likedBy`/`dislikedBy` only one's own people; `top` without songs hidden by kid-safe mode |
+| `GET /api/artist` | signed in | `name` | `name`, `id`, `songs`, `albums`, `genres`, `welten[{id, state}]`, `stile`, `likedBy`, `dislikedBy`, `playlists`, `bio`, `similar`, `plays`, `tags`, `missing`, `sound`, `soundsLike`, `lastfm`, `scenes`, `rating`, `top` (the five most played songs as song rows, see [below](#songs--listening-in)) | `playlists` only visible active ones; `likedBy`/`dislikedBy` only one's own person; `top` without songs hidden by kid-safe mode |
 
 - `env.users` in `/api/status` are the accounts for which stars are set (`rating_users()`); `ok` means “password
   stored”, `rejected` “stored, but Navidrome no longer accepts it” (checked in the background, at most every 6 hours;
@@ -311,37 +317,37 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
 | `GET /api/playlists` | signed in | – | `playlists[{id, name, status, state, count, limit, describe, mix, topArtists, covers, navidrome, cover}]`, `navidromeError`, `orphans`, `handmade[{file, name}]`, `webUrl` | visible playlists only; `handmade` and `orphans` empty |
-| `GET /api/playlist` | signed in | `id` | preview (see below, 25 sample songs) plus `own`, `state`, `navidrome`, `webUrl`; for mixes, own playlists and administrators also `usage` (`feedback.usage()`: `every`, `periods`, `heard`, `songs`, `played`, `days`, `last` – or `null` without a finished, counted edition) | someone else's private playlist → `400 "Playlist not found"`; for other people's visible playlists, `nsp` and the line “Never included: …” in `summary` are missing (the person's dislikes stay private) |
-| `POST /api/preview` | signed in | Body: a playlist definition (fields as in `config.json`), plus optionally `config` (the whole configuration instead of the stored one), `date` (`YYYY-MM-DD`, reference date), `sampleSize` (default 15) | preview | computed with the server state; from `config` only one's own people count, other people without `likes`/`dislikes` (`_preview_config()`) |
+| `GET /api/playlist` | signed in | `id` | preview (see below, 25 sample songs) plus `own`, `state`, `navidrome`, `webUrl`; for mixes, own playlists and administrators also `usage` (`feedback.usage()`: `every`, `periods`, `heard`, `songs`, `played`, `days`, `last` – or `null` without a finished, counted edition) | another person's playlist → `400 "Playlist not found"` (visible: their own person's and the family's); for a family playlist they may not change (`settings.familyEdit: "admins"`), `nsp` and the line “Never included: …” in `summary` are missing (the dislikes stay private) |
+| `POST /api/preview` | signed in | Body: a playlist definition (fields as in `config.json`), plus optionally `config` (the whole configuration instead of the stored one), `date` (`YYYY-MM-DD`, reference date), `sampleSize` (default 15) | preview | computed with the server state; from `config` only one's own person counts, other people (the family too) without `likes`/`dislikes` (`_preview_config()`); only for their own person and the family's when they may change its playlists (`_guard_preview()`) |
 | `POST /api/counts` | signed in | Body: `welt`, `person`, `hits`, `minRating`, optional `config` | `{"*": n, "<style-id>": n, …}` – song count per vibe | like `/api/preview` |
 | `POST /api/snapshot` | own | Body `{"id"}` | `{"name", "count"}` | own playlists only |
 | `POST /api/takeover/preview` | Admin | Body `{"file"}` (handmade `.nsp`) | `{"file", "name", "originalCount", "limit", "mapping"}` | – |
-| `POST /api/takeover` | Admin | Body `{"file", "mode"}`, `mode` = `unveraendert` (default, keeps the original rules) or `baukasten` (maps them to music world × vibe) | `{"ok": true, "playlist": {…}}` | – |
+| `POST /api/takeover` | Admin | Body `{"file", "mode", "person"}`, `mode` = `unveraendert` (default, keeps the original rules) or `baukasten` (maps them to music world × vibe); `person` = the owner – without it the signed-in administrator's own person, otherwise the family, otherwise the first person (`web._default_person()`) | `{"ok": true, "playlist": {…}}` | – |
 | `POST /api/mapping` | Admin | Body `{"rules", "name", "person"}` | `{"mapping": null}` or `{"mapping": {…, "count", "describe"}}` | – |
 
 - **Preview** (`rules.preview()`): `name`, `count`, `limit`, `nsp`, `topArtists`, `artistCount`, `covers`, `color`,
   `sample`, `summary`; for mixes additionally `pool` and `mix: true`.
 - `config` in `/api/preview` and `/api/counts` (`_preview_config()`): admins compute with the configuration sent
   along, i.e. including changes that haven't been saved yet. Users compute with the stored state;
-  from their `config` the server takes only their own people, other people enter the calculation without `likes` and `dislikes`
+  from their `config` the server takes only their own person, other people enter the calculation without `likes` and `dislikes`
   – so song counts reveal no preferences or dislikes of others.
 - `state` per playlist: `neu` (new), `aktuell` (up to date), `geändert` (changed), `scan`, `entfernen` (remove),
   `fehler` (error) – or, for playlists that aren't active, the status itself. `navidrome` is `{id, owner, public, songCount}`
   or `null`, `cover` `{style, v}` or `null`. Meaning of the states: [04 – Playlists](04-playlists.md).
 - `/api/snapshot` creates a new, fixed playlist in Navidrome with the current selection (via the admin account,
-  owner = the person's account). Empty playlist → `400`.
+  owner = the person's account; private, the family's public). Empty playlist → `400`.
 - `/api/takeover` changes `config.json` and schedules the auto-apply. Errors: `400` “… is not a handmade playlist
-  (any more)”.
+  (any more)”, and without any person `400` “Please add a person first – every playlist belongs to one.”
 
 ## Suggestions
 
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
-| `GET /api/suggestions` | signed in | optional `person` | list of suggestions (`key`, `kind`, `person`, `group`, `score`, `title`, `name`, `count`, `core` – part of the core set, listed first …) | without `person`: only suggestions for their own people, no new music worlds (`kind: scene`), without the ones they hid; with `person`: own person only (`403`), their own hide list |
+| `GET /api/suggestions` | signed in | optional `person` | list of suggestions (`key`, `kind`, `person`, `group`, `score`, `title`, `name`, `count`, `core` – part of the core set, listed first …) | without `person`: only suggestions they can take – for their own person and, unless only administrators may change the family's playlists (`settings.familyEdit`), for the family (`auth.editable_persons()`); no new music worlds (`kind: scene`), without the ones they hid; with `person`: their own person or the family (otherwise `403`), their own hide list |
 | `GET /api/inbox` | signed in | – | “To review”: list `{key, level, title, text, actions[]}` ([04](04-playlists.md#to-review-inbox)); if another installation's instance has checked in, an `instance` entry comes first | their own, simple list from `user_inbox()` (create profile, preferences, first playlist, store password) without the items they ignored |
 | `GET /api/matrix` | signed in | optional `date` (`YYYY-MM-DD`) | `{"counts": {"<world>\|<style>": n}, "activeSeason": [...]}` | unfiltered |
-| `GET /api/missing` | own | optional `person` (default: first own person or the default person) | `{"seeds", "missing[{artist, score, because}]", "lastfm"}` | own person only |
-| `GET /api/taste` | signed in | `person` or `me=1` | `{available, enough, basis, artists, welten, moods, styles, disliked, sound, hasAccount}` – taste from plays, favorites and stars set by hand ([Intelligence](06-intelligence.md#taste-per-account-apptastepy)); `sound`: the [sound taste](06-intelligence.md#sound-taste-appsoundtastepy) is active | own person or own account only |
+| `GET /api/missing` | own | optional `person` (default: the account's person; administrators without one: the family, otherwise the first person) | `{"seeds", "missing[{artist, score, because}]", "lastfm"}` | own person or the family |
+| `GET /api/taste` | signed in | `person` or `me=1` | `{available, enough, basis, artists, welten, moods, styles, disliked, sound, hasAccount}` – taste from plays, favorites and stars set by hand ([Intelligence](06-intelligence.md#taste-per-account-apptastepy)); `sound`: the [sound taste](06-intelligence.md#sound-taste-appsoundtastepy) is active | own person, the family or own account only |
 | `GET /api/search` | signed in | `q` (at least 2 characters, otherwise everything is empty) | `{songs, styles, moods, instruments, themes, combos, lyrics}` – songs by title, AI music styles with bands, moods with song count and matching sound vibe, AI instruments and themes with song count, combo suggestions as a mix, matches in the lyrics | `combos` with one's own person |
 | `GET /api/changelog` | signed in | – | sections from `CHANGELOG.md`: `[{version, date, items, levels}]`, newest first; file missing → `[]` | unfiltered (the interface shows them to administrators only) |
 
@@ -402,18 +408,20 @@ other indented lines are appended to the previous item. `levels` runs parallel t
 
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
-| `GET /api/stats` | own | optional `person` | `user`, `totals`, `topArtists`, `topSongs`, `topAlbums`, `recent`, `welten`, `decades`, `genres`, `forgotten`, `neverPlayed`, plus `person` and `personsSameUser` |
+| `GET /api/stats` | own | optional `person` | `user`, `totals`, `topArtists`, `topSongs`, `topAlbums`, `recent`, `welten`, `decades`, `genres`, `forgotten`, `neverPlayed`, plus `person` |
 | `GET /api/rueckblick` | own | optional `person`, `kind` = `woche` (week, default), `monat` (month), `jahr` (year); `year` for `jahr` | `kind`, `title`, `from`, `to`, `user`, `since`, `lastSnapshot`, `totals`, `topArtists`, `topSongs`, `topAlbums`, `series`, `busiest`, `discoveries`, `welten`, `decades`, `person` |
 
-- Without `person`, users get their first own person, admins `settings.defaultPerson`.
-- Both need the Navidrome password of the person's account (unless it is the account of the default person, with which
-  the library is loaded anyway); otherwise `400` “No password is stored for ‘…’ …”. Unknown person or
-  period → `400`.
+- Without `person`, the account's own person counts; administrators without one get the family, otherwise the first
+  person (`web._default_person()`). Users may ask for their own person and the family (`_own_person()`, otherwise
+  `403`). A user without a person yet and without `person` → `400` (“Unknown person”).
+- Both need the Navidrome password of the person's account (the family's is stored when it is set up); otherwise
+  `400` “No password is stored for ‘…’ …”. Unknown person or period → `400`.
 - `/api/rueckblick` first records the current play counts if the last snapshot is older than 30 minutes. Background:
   [06 – Intelligence](06-intelligence.md).
 - `POST /api/rueckblick/keep` (body `person`, `kind` = `woche`, `monat` or `jahr`, optional `year`) saves up
-  to 50 of the most played songs of the period as a fixed playlist in Navidrome, in the person's account and with their
-  visibility (`playlists.save_fixed()`): “<prefix>Recap 09/14–10/13/2026” or “<prefix>Recap 2026” →
+  to 50 of the most played songs of the period as a fixed playlist in Navidrome, in the person's account – private,
+  for the family public (`playlists.save_fixed()`); users for their own person and the family's when they may change
+  its playlists (`_own_person(…, write=True)`): “<prefix>Recap 09/14–10/13/2026” or “<prefix>Recap 2026” →
   `{name, count}`. Nothing played → `400 "Nothing has been played in this period yet."`
 
 ## Settings & credentials
@@ -427,7 +435,8 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `POST /api/paths/check` | Body `{"music", "playlists", "archive"}` (proposed locations) | per folder `{path, source, exists, writable}`, for `playlists` and `archive` additionally `insideMusic`; an archive that is the music folder or inside it → 400 with `error` |
 | `POST /api/lastfm/test` | Body optional `key` (otherwise the stored key) | `{"ok": true, "tags"}` or `{"ok": false, "error"}` |
 | `GET /api/users` | – | `[{name, admin, fullName}]` of the Navidrome accounts; Navidrome unreachable → `400 {"error"}` |
-| `GET /api/accounts` | – | `[{name, fullName, navidromeAdmin, role, override, lastLogin, persons, passwordStored, passwordRejected}]` |
+| `GET /api/accounts` | – | `[{name, fullName, navidromeAdmin, role, override, lastLogin, persons, family, passwordStored, passwordRejected}]` – `persons`: the account's person (`[id]` or `[]`, `auth.persons_of()`), `family`: it is the family's account (its role is always `none`) |
+| `POST /api/family` | Body `{"name"?, "account"?, "playlists"?}` | `{"person", "account", "password"}` – sets up the family (see below) |
 | `PUT /api/accounts` | Body `{"user", "role"}`, `role` = `admin`, `user`, `none` or `null` (remove the override) | `{"ok": true}` |
 | `POST /api/admin-password` | Body `{"current", "password"}` – `current` only needed when the password was set in the browser | `{"ok": true}`, for the local administrator itself (and on the PC without sign-in) with `Set-Cookie: tuttiphon=…` – see below |
 | `GET /api/intel` | – | `{"lastfm", "audio", "ml", "classify", "stile", "moods", "fingerprints"}` – status of Last.fm, sound analysis, AI sound analysis, classification and audio fingerprints (see below) |
@@ -469,8 +478,25 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
   if the account is not an administrator in Navidrome – to remove the override (`role: null`); both would cost the
   account its own admin role. Unknown role → `400`. The role `none` additionally ends all sessions of the account
   (`auth.end_sessions_of()`).
+- `POST /api/family` (`api_family()`, in `ADMIN_ONLY`) sets up the family – an entry with a Navidrome account of its
+  own ([02](02-data-model.md#personen)). `400` “There already is a family.” if there is one. `name`: spaces
+  collapsed, at most 60 characters, default “Family” in the server language (`config.FAMILY_NAME`). `account`:
+  default the slug of the name (`config.slug()`); it must be 2–40 letters, digits, `.`, `-`, `_` (`FAMILY_ACCOUNT`) –
+  otherwise `400` “Please choose an account name of 2 to 40 letters …” –, and no person may use it yet (`400` ““…”
+  already belongs to a person – please choose another name.”). Tuttiphon then creates the account as the Navidrome
+  administrator (`NativeApi.create_user()`: `POST /api/user` with `userName`, `name`, a random `password` from
+  `secrets.token_urlsafe(18)`, `isAdmin: false`); a name Navidrome already has → `400` “Navidrome already has an
+  account “…” – please choose another name.”, other errors `400` “Navidrome could not create the account: …”. The
+  password goes to `.env` as `NAV_PASS_<ACCOUNT>` (so its stars, plays and recap work like any account's), the account
+  list is reloaded, and the entry is added: id `familie` (`familie-2` … if taken), `user` = the account, `family:
+  true`, `prefix: ""`, and – from `settings.familySetup` if the update to one person per account left one – `icon`,
+  `color`, `likes`, `dislikes` and `clean` (default `true`). `playlists`: ids out of `familySetup.playlists` that move
+  to the family (other ids are ignored), each with its “What everyone likes” members from `familySetup.together` that
+  are still people other than the family (at least two). `settings.familySetup` is removed, and a list in
+  `settings.deezer.users` gets the account. The server log says “Family set up: Navidrome account …”. Only this answer
+  carries the password – shown once, for shared devices in Symfonium; nobody signs in to Tuttiphon with it.
 - `POST /api/notify/test` is the only endpoint in this section that is also open to users – but only with
-  `person` set to one of their own people (`_own_person()`, otherwise `403`) and only to that person's topic (`topic`
+  `person` set to their own person (otherwise `403`) and only to that person's topic (`topic`
   or the stored one): the administrator's topic or one another person uses → `403`, no topic → `400 "No topic
   entered."` (no fallback to the administrator's); without `person` only for admins. If notifications are off, it
   responds `400 "Notifications are turned off."`
@@ -529,7 +555,7 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
   `themes` = `[{id, label, strength}]`, the offered themes the AI hears in the song (from their threshold, strongest
   first).
 - `/api/song/more` (“More like this”): pool of a radio starting from the song's band (Last.fm's similar bands and –
-  with sound vectors – bands that sound alike), with one's own person (`_default_person()`: dislikes, kid-safe mode),
+  with sound vectors – bands that sound alike), with one's own person (`_default_person()` – the account's person, administrators without one the family's, otherwise the first person's: dislikes, kid-safe mode),
   without a minimum rating; ordered by `classify.rank_like()`: with sound vectors mainly by sound similarity to the
   song (songs without a vector after those that sound alike), plus arousal, mood and tempo, some randomness; at most
   3 songs by the band itself and 2 per other band, then shuffled. No playlist is created; “Keep as radio mix” in the
@@ -539,7 +565,7 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
   (response `206` with `Content-Range`, seeking works); with `f=mp3` Navidrome transcodes to MP3 at 192 kbit/s (no seeking).
   Navidrome doesn't count this as a play – statistics, recap and taste stay untouched.
 - Song IDs must match `^[A-Za-z0-9_-]{1,64}$` and be in the song list, otherwise `400 "This song no longer
-  exists."`. **Kid-safe mode:** if one of the account's own people has it on, all three respond with `403` for songs with
+  exists."`. **Kid-safe mode:** if the account's person has it on, all three respond with `403` for songs with
   explicit lyrics or songs tagged “explicit” (`web._child_blocked()`); administrators are exempt.
 
 ## Images & covers
@@ -593,13 +619,14 @@ protection): body `{"event": "start" | "play" | "report", "user", "id", "time"?,
 ahead: `{"ok": false}`), otherwise the time of arrival; `position` and `duration` (the song's length) in seconds
 (0–86,400), `state` one of `starting`, `playing`, `paused`, `stopped`, `expired`. `{"ok": true}` – the same play once
 more (Navidrome retrying) is kept once; `{"ok": false}` and nothing kept for an account without a person in Tuttiphon
-or with the role “none” and for a `start` further than 15 s into the song (the same play going on); an unknown event,
+or blocked by an administrator (`accounts.<account>.role: "none"`, `listen.allowed()` – the family's account, which can
+never sign in, is kept like any other) and for a `start` further than 15 s into the song (the same play going on); an unknown event,
 an empty, unprintable or longer than 100 characters user, an empty song: `400`; another
 `POST /api/sonic/<what>`: `404`. What happens with it: [Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy).
 
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
-| `GET /api/plugin` | admin | – | `{"key": bool, "keyAt", "lastCall", "calls", "lastFor", "lastForAt", "lastGuess", "vectors", "live": {"lastEvent", "events", "accounts"}, "file": bool, "version"}` – `lastCall`/`calls` and `live` since Tuttiphon started (memory only; times with time zone), `lastFor`: the name of the person the last answer with similar songs was for (`null`: the family), `lastForAt`: when (other requests – covers, biographies – are for nobody), `lastGuess`: that person was a guess from the plays, `file`: the plugin file is part of this installation |
+| `GET /api/plugin` | admin | – | `{"key": bool, "keyAt", "lastCall", "calls", "lastFor", "lastForAt", "lastGuess", "vectors", "live": {"lastEvent", "events", "accounts"}, "file": bool, "version"}` – `lastCall`/`calls` and `live` since Tuttiphon started (memory only; times with time zone), `lastFor`: the name of the person the last answer with similar songs was for – the family's name when it was unclear who listens, `null` when it was unclear and there is no family (an answer for everyone), `lastForAt`: when (other requests – covers, biographies – are for nobody), `lastGuess`: that person was a guess from the plays, `file`: the plugin file is part of this installation |
 | `POST /api/plugin/key` | admin | `{}` | `{"key": "tp_…"}` – a new key, shown once (only its SHA-256 is stored in `state/plugin_key.json`); the old one stops working |
 | `POST /api/plugin/key/remove` | admin | `{}` | `{"ok": true}` |
 | `GET /plugin/tuttiphon.ndp` | admin | – | the plugin as a download (`application/octet-stream` – with `application/zip` browsers save it as `tuttiphon.ndp.zip`; it is a zip inside all the same, as every `.ndp`); `404` if this installation has none |

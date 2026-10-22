@@ -1,4 +1,4 @@
-<!-- Playlist overview: grid per person, shared, paused, handmade (takeover) and trash. -->
+<!-- Playlist overview: grid per person (yours, the family's, the others'), paused, handmade (takeover) and trash. -->
 <script module>
   // Filter and search are kept when coming back
   const remember = { filter: 'alle', query: '' }   // i18n-ignore: filter id
@@ -13,7 +13,8 @@
   import Mosaic from '../components/Mosaic.svelte'
   import PersonAvatar from '../components/PersonAvatar.svelte'
   import PlaylistCard from '../components/PlaylistCard.svelte'
-  import { S, isAdmin, ownPersons, canEdit, defaultPerson, plStatus, loadPlaylists } from '../lib/state.svelte.js'
+  import { S, isAdmin, myPerson, familyPerson, creatablePersons, canEdit, plStatus, loadPlaylists } from '../lib/state.svelte.js'
+  import { ownerOrder } from '../lib/playlist.js'
   import { openTakeover } from '../lib/takeover.js'
   import { purgeAll } from './playlist/actions.js'
   import { plural } from '../lib/format.js'
@@ -24,32 +25,33 @@
   let query = $state(remember.query)
   $effect(() => { remember.filter = filter; remember.query = query })
 
-  const mineP = $derived(ownPersons())
-  // Users: other people who share playlists with them (the server only sends what is shared)
-  const others = $derived(admin ? [] : S.config.personen.filter((p) => !mineP.includes(p) && S.config.playlists.some((x) => x.person === p.id)))
+  // Yours, the family's, the other people's (administrators – users only get their own and the family's)
+  const people = $derived(ownerOrder(admin ? S.config.personen : [myPerson(), familyPerson()].filter(Boolean)))
+  const me = $derived(myPerson())
+  /** You may create playlists for this person (otherwise an empty group is left out) */
+  const creatable = (person) => creatablePersons().some((x) => x.id === person.id)
   $effect(() => {
-    if (filter !== 'alle' && filter !== 'geteilt' && !mineP.some((p) => p.id === filter)) filter = 'alle'   // person deleted in the meantime (i18n-ignore: filter id)
-    if (filter === 'geteilt' && !others.length) filter = 'alle'   // i18n-ignore: filter id
+    if (filter !== 'alle' && !people.some((p) => p.id === filter)) filter = 'alle'   // person deleted in the meantime (i18n-ignore: filter id)
   })
 
   const q = $derived(query.toLowerCase())
   const nameOf = (p) => (plStatus(p.id)?.name || p.name || p.id).toLowerCase()
-  const personOf = (p) => p.person || defaultPerson()
   const pls = $derived(S.config.playlists.filter((p) =>
-    (filter === 'alle' || filter === 'geteilt' || personOf(p) === filter) && (!q || nameOf(p).includes(q))))   // i18n-ignore: filter id
+    (filter === 'alle' || p.person === filter) && (!q || nameOf(p).includes(q))))   // i18n-ignore: filter id
   const isActive = (p) => (p.status || 'aktiv') === 'aktiv'
 
-  const ownGroups = $derived(filter === 'geteilt' ? [] : mineP
+  const groups = $derived(people
     .filter((person) => filter === 'alle' || filter === person.id)   // i18n-ignore: filter id
-    .map((person) => ({ person, list: pls.filter((p) => personOf(p) === person.id && isActive(p)) }))
-    .filter((g) => g.list.length || !q))
-  const sharedGroups = $derived(filter === 'alle' || filter === 'geteilt'   // i18n-ignore: filter id
-    ? others.map((person) => ({ person, list: pls.filter((p) => p.person === person.id && isActive(p)) })).filter((g) => g.list.length)
-    : [])
+    .map((person) => ({ person, list: pls.filter((p) => p.person === person.id && isActive(p)) }))
+    .filter((g) => g.list.length || (!q && creatable(g.person))))
+  /** The line under a group's name: how many – and who sees them */
+  const groupSub = (person, n) => `${plural(n, 'playlist', 'playlists')} · ${person.family
+    ? (admin || canEdit({ person: person.id }) ? t('visible to everyone') : t('to listen to in Symfonium, can be copied and adjusted'))
+    : person.id === me?.id ? t('only for you') : t('private for {user}', { user: person.user })}`
   const paused = $derived(pls.filter((p) => p.status === 'pausiert' && canEdit(p)))
   const hand = $derived(filter === 'alle' ? (S.pl?.handmade || []).filter((x) => !q || x.name.toLowerCase().includes(q)) : [])   // i18n-ignore: filter id
   const trash = $derived(pls.filter((p) => p.status === 'papierkorb' && canEdit(p)))
-  const nothing = $derived(!ownGroups.length && !sharedGroups.length && !paused.length && !hand.length && !trash.length)
+  const nothing = $derived(!groups.length && !paused.length && !hand.length && !trash.length)
 
   if (!S.pl) loadPlaylists().catch(() => {})
 </script>
@@ -64,24 +66,23 @@
 <div class="page">
   <PageHead title={admin ? t('Playlists') : t('My playlists')} sub={admin
     ? t('Everything Tuttiphon looks after for you. Navidrome reshuffles smart playlists on every request – paused and deleted ones are kept here.')
-    : t('Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium. Further down: what others share with you.')}>
+    : familyPerson()
+      ? t('Your playlists and the family’s – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.')
+      : t('Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.')}>
     {#snippet actions()}
       <div class="btns"><a class="btn primary" href="#/neu"><Icon name="plus" size={18} />{t('New playlist')}</a></div><!-- i18n-ignore: route -->
     {/snippet}
   </PageHead>
 
   <div class="btns justify-between mb-1.5">
-    {#if mineP.length > 1 || others.length}
+    {#if people.length > 1}
       <div class="seg">
         <button class:on={filter === 'alle'} onclick={() => (filter = 'alle')}>{t('All')}</button><!-- i18n-ignore: filter id -->
-        {#if mineP.length > 1}
-          {#each mineP as p (p.id)}
-            <button class:on={filter === p.id} onclick={() => (filter = p.id)}><Glyph value={p.icon} size={15} />{p.name}</button>
-          {/each}
-        {/if}
-        {#if others.length}
-          <button class:on={filter === 'geteilt'} onclick={() => (filter = 'geteilt')}><Icon name="users" size={15} />{t('Shared')}</button>
-        {/if}
+        {#each people as p (p.id)}
+          <button class:on={filter === p.id} onclick={() => (filter = p.id)}>
+            <Glyph value={p.icon} size={15} />{admin ? p.name : p.family ? t('Family') : t('Yours')}
+          </button>
+        {/each}
       </div>
     {:else}
       <span></span>
@@ -93,12 +94,11 @@
     </div>
   </div>
 
-  {#each ownGroups as { person, list } (person.id)}
+  {#each groups as { person, list } (person.id)}
     <section class="section">
       <div class="section-head">
-        {@render personHead(person, person.name,
-          `${plural(list.length, 'playlist', 'playlists')} · ${person.public ? t('visible to everyone') : admin ? t('private for {user}', { user: person.user }) : t('only for you')}`)}
-        <a href="#/person/{person.id}">{admin ? t('Preferences →') : t('Taste →')}</a>
+        {@render personHead(person, person.name, groupSub(person, list.length))}
+        {#if admin || person.id === me?.id}<a href="#/person/{person.id}">{admin ? t('Preferences →') : t('Taste →')}</a>{/if}
       </div>
       {#if list.length}
         <div class="g-pl">{#each list as p (p.id)}<PlaylistCard {p} />{/each}</div>
@@ -111,17 +111,6 @@
           </div>
         </div>
       {/if}
-    </section>
-  {/each}
-
-  <!-- Users: shared by others – view only -->
-  {#each sharedGroups as { person, list } (person.id)}
-    <section class="section">
-      <div class="section-head">
-        {@render personHead(person, t('{name} shares', { name: person.name }),
-          `${plural(list.length, 'playlist', 'playlists')} · ${t('to listen to in Symfonium, can be copied and adjusted')}`)}
-      </div>
-      <div class="g-pl">{#each list as p (p.id)}<PlaylistCard {p} />{/each}</div>
     </section>
   {/each}
 

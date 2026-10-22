@@ -120,8 +120,8 @@ export default {
     'Oude & handgemaakte playlists',
   'The easiest way is the assistant under <a class="link" href="#/neu">New playlist</a>. It asks step by step – “For whom?” only when there are several people:':
     'De makkelijkste weg is de assistent onder <a class="link" href="#/neu">Nieuwe playlist</a>. Die vraagt stap voor stap – “Voor wie?” alleen als er meerdere personen zijn:',
-  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to; the stars of that account count.':
-    '<b>Voor wie?</b> – de persoon bepaalt in welk Navidrome-account de playlist terechtkomt; de sterren van dat account tellen mee.',
+  '<b>For whom?</b> – a person’s playlist is only theirs, and the stars of their account count; a family playlist is for everyone.':
+    '<b>Voor wie?</b> – de playlist van een persoon is alleen van die persoon, en de sterren van diens account tellen; een gezinsplaylist is voor iedereen.',
   '<b>Music world</b> – who’s playing: e.g. “Kids’ rock”, “Medieval” or several together. “All” takes the whole library.':
     '<b>Muziekwereld</b> – wie er speelt: bijv. “Kinderrock”, “Middeleeuws” of meerdere samen. “Alle” neemt de hele bibliotheek.',
   '<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.':
@@ -278,8 +278,8 @@ export default {
     '<b>Nieuw van je favoriete bands</b> en <b>Jouw oktober</b> – wat er nieuw is van de favoriete bands, de meest gespeelde nummers van de maand.',
   '<b>Good night</b>, <b>Good morning</b> and <b>Car ride</b> – a fixed length instead of a number of songs; good morning only for accounts that often listen in the morning.':
     '<b>Welterusten</b>, <b>Goedemorgen</b> en <b>Autorit</b> – een vaste lengte in plaats van een aantal nummers; goedemorgen alleen voor accounts die vaak ’s ochtends luisteren.',
-  '<b>What everyone likes</b> – the taste of every account counts equally; what someone dislikes stays out.':
-    '<b>Wat iedereen leuk vindt</b> – de smaak van elk account telt even zwaar; wat iemand liever niet hoort, blijft eruit.',
+  '<b>What everyone likes</b> – a family playlist in which the taste of every person counts equally; what someone dislikes stays out.':
+    '<b>Wat iedereen leuk vindt</b> – een gezinsplaylist waarin de smaak van iedere persoon even zwaar telt; wat iemand liever niet hoort, blijft eruit.',
   'Mixes renew themselves at the time of the daily refresh (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>) – daily, on Mondays or on the 1st.':
     'Mixen vernieuwen zich op het tijdstip van de dagelijkse verversing (<a class="link" href="#/einstellungen/ablaeufe">Instellingen → Automatisering</a>) – dagelijks, op maandag of op de 1e.',
   '<b>Mixes learn:</b> what was skipped comes up less often, songs someone rates 1 star never – with the Navidrome plugin for every account, otherwise for accounts whose password Tuttiphon knows. Switch: “Mixes that learn” under <a class="link" href="#/einstellungen/playlists">Settings → Playlists</a>.':
@@ -310,8 +310,8 @@ export default {
     '{new} maakt een eigen wereld; {rebuild} stelt een gewijzigde wereld opnieuw samen uit zijn scene.',
   'Under <b>“Might fit too”</b>, tap bands to add them; <b>×</b> takes one out.':
     'Tik onder <b>“Past misschien ook”</b> op bands om ze toe te voegen; <b>×</b> haalt er een uit.',
-  'Each person has a Navidrome account; several may share one, such as “Family”. <b>Preferences</b> steer their suggestions and mixes, <b>Dislikes</b> never appear in their playlists.':
-    'Elke persoon heeft een Navidrome-account; meerdere mogen er een delen, zoals “Gezin”. <b>Voorkeuren</b> sturen de suggesties en mixen, <b>“Liever niet”</b> verschijnt nooit in de playlists.',
+  'Each person has a Navidrome account of their own, and their playlists are only theirs. <b>Preferences</b> steer their suggestions and mixes, <b>Dislikes</b> never appear in their playlists.':
+    'Elke persoon heeft een eigen Navidrome-account, en diens playlists zijn van niemand anders. <b>Voorkeuren</b> sturen de suggesties en mixen, wat onder <b>Liever niet</b> staat, komt nooit in diens playlists.',
   'Store the account’s password under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a> – or the person signs in and chooses “Turn on statistics & stars”.':
     'Sla het wachtwoord van het account op onder <a class="link" href="#/einstellungen/navidrome">Instellingen → Navidrome</a> – of de persoon logt in en kiest “Statistieken & sterren inschakelen”.',
   '<b>From listening:</b> the person’s page shows what Tuttiphon has recognized from plays, favorites and stars; {all} turns it into preferences.':
@@ -382,8 +382,8 @@ export default {
     '<b>Ontbrekende covers:</b> voor albums zonder afbeelding haalt Tuttiphon er een op (Cover Art Archive of Deezer) en slaat die op als cover.jpg naast de muziek. Bestaande afbeeldingen blijven onaangeroerd.',
   'With the Tuttiphon plugin (Navidrome 0.64 or later), Instant Mix, song radio and the smart queue in Symfonium follow the sound of your own files – and Navidrome passes every play on.':
     'Met de Tuttiphon-plugin (Navidrome 0.64 of nieuwer) volgen Instant Mix, nummerradio en de slimme wachtrij in Symfonium de klank van je eigen bestanden – en geeft Navidrome elke afspeelbeurt door.',
-  'Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family. Kid-safe always stays as for the family. The card shows for whom it last answered.':
-    'Navidrome zegt niet wie er vraagt; Tuttiphon ziet het aan de afspeelbeurten en antwoordt voor de persoon die luistert – anders voor het gezin. Kindveilig blijft altijd zoals voor het gezin. De kaart toont voor wie het laatst is geantwoord.',
+  'Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family, or for everyone if there is none. Songs with explicit lyrics stay out as soon as a person has kid-safe mode or is a child profile. The card shows for whom it last answered.':
+    'Navidrome zegt niet wie er vraagt; Tuttiphon ziet het aan de afspeelbeurten en antwoordt voor de persoon die luistert – anders voor het gezin, of voor iedereen als er geen gezin is. Nummers met grove teksten blijven eruit zodra een persoon de kindveilige modus heeft of een kinderprofiel is. De kaart toont voor wie het laatst is geantwoord.',
   'Turn on notifications under <a class="link" href="#/einstellungen/benachrichtigungen">Settings → Notifications</a> and tap “Turn on for this device” on the phone – this needs the https address, on the iPhone the home screen. Each person turns on their devices in their profile.':
     'Schakel meldingen in onder <a class="link" href="#/einstellungen/benachrichtigungen">Instellingen → Meldingen</a> en tik op de telefoon op “Inschakelen op dit apparaat” – daarvoor is het https-adres nodig, op de iPhone het beginscherm. Iedereen schakelt de eigen apparaten in het eigen profiel in.',
   'Alternatively via the <b>ntfy</b> app:':
@@ -402,14 +402,14 @@ export default {
     'De <b>taal van de server</b> geldt voor logboeken, het ntfy-topic van de beheerders en de namen die Tuttiphon aan playlists en muziekwerelden geeft. Meldingen op de telefoon en in de browser volgen de taal van het apparaat.',
   'Every day Tuttiphon backs up everything that cannot be restored on its own – settings, playlists, credentials, Deezer, sound analysis and the listening history – as a ZIP file. Under <a class="link" href="#/einstellungen/sicherung">Settings → Backup</a> you back up right away, download backups and set how many are kept.':
     'Elke dag maakt Tuttiphon een back-up van alles wat niet vanzelf kan worden hersteld – instellingen, playlists, inloggegevens, Deezer, klankanalyse en de luistergeschiedenis – als ZIP-bestand. Onder <a class="link" href="#/einstellungen/sicherung">Instellingen → Back-up</a> maak je meteen een back-up, download je back-ups en stel je in hoeveel er worden bewaard.',
-  '<b>User</b> – own home page, playlists and profile; sees others’ playlists only if they are shared with everyone.':
-    '<b>Gebruiker</b> – eigen startpagina, playlists en profiel; ziet playlists van anderen alleen als die met iedereen worden gedeeld.',
-  'You change the roles under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a>; new users are guided through their profile by a short assistant.':
-    'De rollen wijzig je onder <a class="link" href="#/einstellungen/benutzer">Instellingen → Gebruikers & rechten</a>; nieuwe gebruikers worden door een korte assistent door hun profiel geleid.',
+  '<b>User</b> – own home page, playlists and profile; listens to the family playlists and changes them unless only administrators may.':
+    '<b>Gebruiker</b> – eigen startpagina, playlists en profiel; luistert naar de gezinsplaylists en wijzigt ze, tenzij alleen beheerders dat mogen.',
+  'Under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a> you set the roles and who may change the family playlists; new users are guided through their profile by a short assistant.':
+    'Onder <a class="link" href="#/einstellungen/benutzer">Instellingen → Gebruikers & rechten</a> stel je de rollen in en wie de gezinsplaylists mag wijzigen; nieuwe gebruikers worden door een korte assistent door hun profiel geleid.',
   'The local administrator signs in under “Local administrator” on the sign-in page – also when Navidrome is not reachable.':
     'De lokale beheerder logt op de inlogpagina in onder “Lokale beheerder” – ook als Navidrome niet bereikbaar is.',
-  'Symfonium syncs only now and then – wait or refresh the media source there. Private playlists are only visible to their own account.':
-    'Symfonium synchroniseert maar af en toe – wacht of vernieuw daar de mediabron. Privéplaylists zijn alleen zichtbaar voor hun eigen account.',
+  'Symfonium syncs only now and then – wait or refresh the media source there. A person’s playlists only show up in their own account, family playlists in every account.':
+    'Symfonium synchroniseert maar af en toe – wacht of vernieuw daar de mediabron. De playlists van een persoon verschijnen alleen in diens eigen account, gezinsplaylists in elk account.',
   'The deeper it listens, the more accurate: “Deep” listens to the whole song, “Fast” only briefly. Tempo and energy are reliable; the mood is an estimate – the AI sound analysis in the Docker image makes it much better.':
     'Hoe dieper het luistert, hoe nauwkeuriger: “Diep” luistert naar het hele nummer, “Snel” maar kort. Tempo en energie zijn betrouwbaar; de stemming is een schatting – de AI-klankanalyse in het Docker-image maakt die veel beter.',
   'Mixes learn: what someone skips comes up less often for a while, songs they rate 1 star themselves not at all. Switch: Settings → Playlists → “Mixes that learn”.':
@@ -436,4 +436,30 @@ export default {
     '<b>Volgende aflevering</b> – voor accounts die naar hoorspelen luisteren: de volgende aflevering van elke serie, elke dag nieuw.',
   'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
     'Overslaan stuurt de slimme wachtrij meteen bij: na twee keer achter elkaar wisselt die naar een andere klank. Om de paar nummers zit er een tussen dat het account nog nooit heeft gespeeld – hoe vaak, wordt per persoon in het profiel ingesteld (“Nieuwe nummers in de wachtrij”).',
+  'The family':
+    'Het gezin',
+  'If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in Symfonium.':
+    'Als je wilt, maakt Tuttiphon een Navidrome-account voor het gezin aan. De playlists van het gezin zijn voor iedereen – gedeelde apparaten zoals de auto gebruiken dat account in Symfonium.',
+  '<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.':
+    '<b>Het gezin</b> (optioneel): “Het gezin instellen” maakt er een eigen Navidrome-account voor aan. De playlists van het gezin zijn voor iedereen – gedeelde apparaten zoals de auto of de tablet in de keuken gebruiken dat account in Symfonium.',
+  'With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in four short steps:':
+    'Met <a class="link" href="#/neu">Nieuwe playlist</a> stel je er zelf een samen – in vier korte stappen:',
+  '<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and Symfonium.':
+    '<b>Voor wie?</b> – alleen voor jou, of voor het hele gezin: gezinsplaylists ziet iedereen in Navidrome en Symfonium.',
+  '<b>Shared devices</b> such as the car or a kitchen tablet can use the family account in Symfonium – the administrator sets it up.':
+    '<b>Gedeelde apparaten</b> zoals de auto of een tablet in de keuken kunnen in Symfonium het gezinsaccount gebruiken – de beheerder stelt dat in.',
+  'Can two people share one Navidrome account?':
+    'Kunnen twee personen één Navidrome-account delen?',
+  'No – one account, one person. Create an account of their own for everyone in Navidrome under “Users”, then add them under People. Shared devices such as the car use the family account.':
+    'Nee – één account, één persoon. Maak in Navidrome onder “Users” voor iedereen een eigen account aan en voeg ze daarna toe onder Personen. Gedeelde apparaten zoals de auto gebruiken het gezinsaccount.',
+  'I need the password of the family account again.':
+    'Ik heb het wachtwoord van het gezinsaccount opnieuw nodig.',
+  'Tuttiphon shows it only once. Set a new one in Navidrome under Settings → Users and enter it under Settings → Navidrome as well – Tuttiphon needs it for the family playlists.':
+    'Tuttiphon toont het maar één keer. Stel in Navidrome onder Settings → Users een nieuw wachtwoord in en voer het ook in onder Instellingen → Navidrome – Tuttiphon heeft het nodig voor de gezinsplaylists.',
+  'Family playlist':
+    'Gezinsplaylist',
+  'Family account':
+    'Gezinsaccount',
+  'Navidrome account of the family – for shared devices such as the car or the kitchen tablet in Symfonium.':
+    'Navidrome-account van het gezin – voor gedeelde apparaten in Symfonium, zoals de auto of de tablet in de keuken.',
 }

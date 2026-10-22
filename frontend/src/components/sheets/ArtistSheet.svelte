@@ -10,7 +10,8 @@
   import Cover from '../Cover.svelte'
   import Field from '../Field.svelte'
   import TrackList from '../TrackList.svelte'
-  import { S, findWelt, isAdmin, ownPersons, snapshot, changed, MOODS } from '../../lib/state.svelte.js'
+  import { S, findWelt, isAdmin, myPerson, snapshot, changed, MOODS } from '../../lib/state.svelte.js'
+  import { ownerOrder } from '../../lib/playlist.js'
   import { closeSheet, toast } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
   import { openArtist, startRadio } from '../../lib/artist.js'
@@ -34,7 +35,8 @@
 
   const TG = 'inline-flex align-[-3px] mr-1.5'   // icon before a name (music world, vibe)
   const IN = (ws) => ws.state === 'manuell' || ws.state === 'automatisch'
-  const persons = $derived(ownPersons())
+  // likes and dislikes: administrators for everyone, users for themselves
+  const persons = $derived(admin ? ownerOrder(S.config.personen) : [myPerson()].filter(Boolean))
   const tags = $derived(a ? (a.tags || []).filter((tag) => !a.genres.some(([g]) => g.toLowerCase() === tag)).slice(0, 5) : [])
   // Tooltip per state of a band in a music world (the keys are stored states)
   const STATE_TIP = $derived({ manuell: t('included'), automatisch: t('automatically included'), herausgenommen: t('taken out') })
@@ -188,19 +190,21 @@
     {/if}
 
     <!-- people (users: only their own) -->
-    <Field label={admin ? t('People') : persons.length === 1 ? t('Do you like the band?') : t('Your profiles')}>
-      <div class="grid gap-2">
-        {#each persons as p (p.id)}
-          <div class="member-row">
-            <span class="hi"><Glyph value={p.icon || 'user'} size={18} /></span>
-            <b class="flex-1">{p.name}</b>
-            <button class="toggle" class:on={likes(p)} onclick={() => setLike(p, 'like')}><Icon name="heart" size={15} />{t('Favorite')}</button>
-            <button class="toggle no" class:on={hates(p)} onclick={() => setLike(p, 'hate')}><Icon name="ban" size={15} />{t('never')}</button>
-          </div>
-        {/each}
-      </div>
-      {#if !admin}<div class="hint">{t('“Favorite”: shows up more often in your mixes. “never”: never gets into your playlists.')}</div>{/if}
-    </Field>
+    {#if persons.length}
+      <Field label={admin ? t('People') : t('Do you like the band?')}>
+        <div class="grid gap-2">
+          {#each persons as p (p.id)}
+            <div class="member-row">
+              <span class="hi"><Glyph value={p.icon || 'user'} size={18} /></span>
+              <b class="flex-1">{p.name}</b>
+              <button class="toggle" class:on={likes(p)} onclick={() => setLike(p, 'like')}><Icon name="heart" size={15} />{t('Favorite')}</button>
+              <button class="toggle no" class:on={hates(p)} onclick={() => setLike(p, 'hate')}><Icon name="ban" size={15} />{t('never')}</button>
+            </div>
+          {/each}
+        </div>
+        {#if !admin}<div class="hint">{t('“Favorite”: shows up more often in your mixes. “never”: never gets into your playlists.')}</div>{/if}
+      </Field>
+    {/if}
 
     {#if a.sound}
       <Field label={t('Sound')}>

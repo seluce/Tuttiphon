@@ -298,23 +298,22 @@ class TestUses(SoundTasteTest):
         harfe, kita = self.ids(self.lib, "Harfe", unplayed=False), self.ids(self.lib, "Kita", unplayed=False)
         self.assertGreater(min(m[i] for i in harfe), max(j[i] for i in harfe) + 0.5)
         self.assertGreater(min(j[i] for i in kita), max(m[i] for i in kita) + 0.5)
-        # mixes: each person's taste from their own account (a person sharing the account gets the same)
+        # mixes: each person's taste from their own account
         cfg = copy.deepcopy(self.cfg)
-        cfg["personen"].append({"id": "mia", "name": "Mia", "user": "Mia", "public": False, "prefix": ""})
-        cfg["personen"].append({"id": "jonas2", "name": "Jonas zu zweit", "user": "jonas", "public": False, "prefix": ""})
+        cfg["personen"].append({"id": "mia", "name": "Mia", "user": "Mia", "prefix": ""})
         seen = []
         real = taste.matcher
 
         def spy(prof, plib, sound=1.0):
             seen.append((prof or {}).get("user"))
             return real(prof, plib, sound)
-        for pid in ("mia", "jonas", "jonas2"):
+        for pid in ("mia", "jonas"):
             p = {"id": f"m-{pid}", "type": "mix", "person": pid, "welt": "*", "stil": "*", "minRating": 0,
                  "mix": {"size": 10, "perArtist": 2, "perAlbum": 0, "flavor": "geschmack"}}
             with mock.patch.object(taste, "matcher", side_effect=spy), \
                  mock.patch.object(rules, "apply_sound", side_effect=lambda cfg, lib, pl, ids: ids):
                 mixer.pick(cfg, self.lib, p, {"all": []}, today=TODAY)
-        self.assertEqual([u.lower() for u in seen], ["mia", "jonas", "jonas"])
+        self.assertEqual([u.lower() for u in seen], ["mia", "jonas"])
 
     def test_your_sound_mix_prefers_the_sound(self):
         write_vectors(vectors_for(self.lib))

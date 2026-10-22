@@ -188,8 +188,8 @@ export default {
     'Cliquez sur le nom du groupe – dans la fenêtre, sous « Dans quels univers musicaux ? », cochez ou décochez les univers. Ou retirez le groupe de l’univers musical avec ×.',
   'What do users see of each other?':
     'Que voient les utilisateurs les uns des autres ?',
-  'Only playlists of profiles that are “visible to everyone” – and only to view, listen to and copy them. Statistics, profile and private playlists stay with each person. Administrators see everything.':
-    'Seulement les playlists des profils « visibles par tous » – et uniquement pour les voir, les écouter et les copier. Les statistiques, le profil et les playlists privées restent propres à chacun. Les administrateurs voient tout.',
+  'Only the family playlists – they can change them too, unless only administrators may. Statistics, profile and playlists of each person stay with them. Administrators see everything.':
+    'Seulement les playlists de la famille – ils peuvent aussi les modifier, sauf si seuls les administrateurs le peuvent. Statistiques, profil et playlists restent propres à chaque personne. Les administrateurs voient tout.',
   'Kid-safe mode removes a harmless song.':
     'Le mode enfants retire un titre inoffensif.',
   'Kid-safe mode leaves out songs with explicit lyrics and songs tagged as explicit in the file; songs found by their lyrics can be allowed under Settings → Lyrics. They go back in the next time the playlists are written.':
@@ -204,8 +204,8 @@ export default {
     'Quelqu’un a oublié son mot de passe Navidrome.',
   'I don’t see my new playlist in Symfonium.':
     'Je ne vois pas ma nouvelle playlist dans Symfonium.',
-  'Symfonium only syncs with Navidrome now and then. Wait a bit or refresh the media source in Symfonium. Also: be signed in to Symfonium with your own account – only that account sees private playlists.':
-    'Symfonium ne se synchronise avec Navidrome que de temps en temps. Patientez un peu ou actualisez la source média dans Symfonium. Et aussi : soyez connecté à Symfonium avec votre propre compte – seul ce compte voit les playlists privées.',
+  'Symfonium only syncs with Navidrome now and then. Wait a bit or refresh the media source in Symfonium. Also: be signed in to Symfonium with your own account – only it sees your playlists.':
+    'Symfonium ne se synchronise avec Navidrome que de temps en temps. Patientez un peu ou actualisez la source média dans Symfonium. Et aussi : soyez connecté à Symfonium avec votre propre compte – lui seul voit vos playlists.',
   'What’s the difference between a playlist and a mix?':
     'Quelle est la différence entre une playlist et un mix ?',
   'Navidrome reshuffles a smart playlist every time you open it. A mix stays the same for a day, a week or a month and then renews itself – ideal for downloading.':
@@ -216,12 +216,12 @@ export default {
     'Un titre revient moins souvent, voire plus du tout, dans mon mix.',
   'Can I change the family playlists?':
     'Puis-je modifier les playlists de la famille ?',
-  'Not directly – they belong to someone else. But with “Copy for me” you get your own version that you can adjust as you like.':
-    'Pas directement – elles appartiennent à quelqu’un d’autre. Mais avec « Copier pour moi », vous obtenez votre propre version, que vous pouvez ajuster à votre guise.',
+  'Yes, unless only administrators may – then “Copy for me” gives you your own version that you can adjust as you like.':
+    'Oui, sauf si seuls les administrateurs le peuvent – « Copier pour moi » vous donne alors votre propre version, que vous pouvez ajuster à votre guise.',
   'Can others see my playlists?':
     'D’autres peuvent-ils voir mes playlists ?',
-  'Only if you chose “The whole family” in your profile. Even then they can’t change them. Apart from you, only the administrator sees your statistics and your profile.':
-    'Seulement si vous avez choisi « Toute la famille » dans votre profil. Même dans ce cas, ils ne peuvent pas les modifier. À part vous, seul l’administrateur voit vos statistiques et votre profil.',
+  'No – your playlists are only yours; the family playlists are for everyone. Apart from you, only the administrator sees your statistics and your profile.':
+    'Non – vos playlists n’appartiennent qu’à vous ; les playlists de la famille sont pour tout le monde. À part vous, seul l’administrateur voit vos statistiques et votre profil.',
   'My statistics are empty.':
     'Mes statistiques sont vides.',
   'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
@@ -286,10 +286,8 @@ export default {
     'Garder ce mix',
   'In the “…” menu of a mix: save the current selection as a fixed playlist that never changes. For a smart playlist it is called “Save as fixed playlist”.':
     'Dans le menu « … » d’un mix : enregistrer la sélection actuelle comme playlist fixe qui ne change jamais. Pour une playlist intelligente, cela s’appelle « Enregistrer comme playlist fixe ».',
-  'Shared':
-    'Partagée',
-  'Playlist of a profile that is “visible to everyone” – others can listen to it and copy it.':
-    'Playlist d’un profil « visible par tous » – les autres peuvent l’écouter et la copier.',
+  'Playlist for everyone – every account sees it in Navidrome and Symfonium.':
+    'Playlist pour tout le monde – chaque compte la voit dans Navidrome et Symfonium.',
   'Free lyrics database; provides synced and plain lyrics.':
     'Base de paroles gratuite ; fournit des paroles synchronisées et simples.',
   'Modern, very efficient audio format – at 160 kbit/s hardly distinguishable from the original.':
@@ -332,8 +330,8 @@ export default {
     '<b>Vos mix</b> – des playlists qui se renouvellent chaque jour, chaque semaine ou chaque mois.',
   '<b>Discovered for you</b> – ideas that match what you listen to. <Ui icon="plus" primary>Create</Ui> adds one, <Ui icon="x">✕</Ui> hides it.':
     '<b>Découvert pour vous</b> – des idées qui correspondent à ce que vous écoutez. <Ui icon="plus" primary>Créer</Ui> en ajoute une, <Ui icon="x">✕</Ui> la masque.',
-  '<b>Your week</b>, <b>your playlists</b>, what the family shares and the latest albums.':
-    '<b>Votre semaine</b>, <b>vos playlists</b>, ce que partage la famille et les derniers albums.',
+  '<b>Your week</b>, <b>your playlists</b>, the family playlists and the latest albums.':
+    '<b>Votre semaine</b>, <b>vos playlists</b>, les playlists de la famille et les derniers albums.',
   'On your phone, <Ui icon="more">More</Ui> at the bottom leads to all other pages.':
     'Sur le téléphone, <Ui icon="more">Plus</Ui> en bas mène à toutes les autres pages.',
   'Under <a class="link" href="#/profil">My profile</a> you see what Tuttiphon knows about your taste. Your mixes and suggestions build on it.':
@@ -346,8 +344,6 @@ export default {
     '<b>Je n’aime pas :</b> des groupes ou des genres qui n’entrent <b>jamais</b> dans vos playlists.',
   '<b>Not part of your taste:</b> music that plays on your account for someone else, such as children’s music.':
     '<b>Ne fait pas partie de vos goûts :</b> de la musique qui passe sur votre compte pour quelqu’un d’autre, comme de la musique pour enfants.',
-  '<b>Who can see your playlists:</b> “Only me” or “The whole family” – only you can change them. The <b>prefix</b>, such as “Mia · ”, goes in front of their names.':
-    '<b>Qui peut voir vos playlists :</b> « Moi seul » ou « Toute la famille » – vous seul pouvez les modifier. Le <b>préfixe</b>, comme « Mia · », se place devant leurs noms.',
   '<b>Kid-safe mode:</b> songs with explicit lyrics stay out of all your playlists.':
     '<b>Mode enfants :</b> les titres aux paroles explicites restent en dehors de toutes vos playlists.',
   '<b>To your phone:</b> “Turn on for this device” – then news from your favorite bands, what is new for you on Mondays and your monthly recap come as notifications.':
@@ -372,8 +368,8 @@ export default {
     '<b>Album de la semaine</b> – chaque lundi, un album entier que vous ne connaissez pas encore.',
   '<b>Good night</b> and <b>Good morning</b> – calming down in the evening, waking up gently in the morning.':
     '<b>Bonne nuit</b> et <b>Bon réveil</b> – se poser le soir, se réveiller en douceur le matin.',
-  '<b>Car ride</b> and <b>What everyone likes</b> – music the whole family enjoys.':
-    '<b>En voiture</b> et <b>Ce que tout le monde aime</b> – de la musique qui plaît à toute la famille.',
+  '<b>Car ride</b> and <b>What everyone likes</b> – for the family: music everyone enjoys.':
+    '<b>En voiture</b> et <b>Ce que tout le monde aime</b> – pour la famille : de la musique qui plaît à tout le monde.',
   'At the very bottom, “You might also like” shows bands that are not in the library yet – if you like one, let the administrator know.':
     'Tout en bas, « Vous aimerez peut-être aussi » montre des groupes qui ne sont pas encore dans la bibliothèque – si l’un d’eux vous plaît, prévenez l’administrateur.',
   '<b>“calm kids’ songs”</b> or <b>“medieval party”</b> – if something matches, <b>Create as mix</b> appears at the top.':
@@ -390,8 +386,8 @@ export default {
     '<Ui icon="trash">Mettre à la corbeille</Ui> – peut être restaurée pendant 30 jours.',
   '<b>Seasonal playlists</b> such as Christmas are only in Symfonium during their season and come back by themselves.':
     'Les <b>playlists de saison</b> comme Noël ne sont dans Symfonium que pendant leur saison et reviennent d’elles-mêmes.',
-  '<b>Shared playlists</b> of others you can listen to; <Ui icon="copy">Copy for me</Ui> gives you your own version.':
-    'Vous pouvez écouter les <b>playlists partagées</b> des autres ; <Ui icon="copy">Copier pour moi</Ui> vous donne votre propre version.',
+  '<b>Your playlists</b> are only yours, <b>family playlists</b> are for everyone. If you may not change one, <Ui icon="copy">Copy for me</Ui> gives you your own version.':
+    '<b>Vos playlists</b> n’appartiennent qu’à vous, les <b>playlists de la famille</b> sont pour tout le monde. Si vous ne pouvez pas en modifier une, <Ui icon="copy">Copier pour moi</Ui> vous donne votre propre version.',
   'Everything you create here appears in Symfonium after the next sync – or right away if you refresh the media source there.':
     'Tout ce que vous créez ici apparaît dans Symfonium après la prochaine synchronisation – ou tout de suite si vous y actualisez la source média.',
   '<b>Listening counts:</b> what you play in Symfonium shapes your statistics, taste and mixes.':

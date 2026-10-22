@@ -252,10 +252,8 @@ export default {
     'Pour que Tuttiphon affiche vos statistiques et attribue des étoiles Deezer dans votre compte, il a besoin une fois de votre mot de passe Navidrome – le même que dans Symfonium. Il reste sur votre NAS.',
   'your Navidrome password':
     'votre mot de passe Navidrome',
-  'Your profiles':
-    'Vos profils',
-  'Playlists visible to everyone':
-    'Playlists visibles par tous',
+  'Your profile':
+    'Votre profil',
   'Playlists only for you':
     'Playlists rien que pour vous',
   'Create profile':
@@ -654,8 +652,8 @@ export default {
     'Dans Navidrome, sous <b>Settings → Plugins</b>, activez « Tuttiphon », saisissez l’adresse et la clé et autorisez-le pour <b>tous les utilisateurs</b> (pour les écoutes). Idéalement l’adresse du réseau domestique, par ex. <code>http://&lt;NAS&gt;:8765</code> – pas une adresse https via un reverse proxy, qui peut refuser Navidrome. Ce navigateur joint Tuttiphon à l’adresse <code>{address}</code>.',
   'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
     'Dans Symfonium, activez <b>« Use similar tracks for Radio Mix »</b> pour le serveur Navidrome (« Manage media providers » → le serveur) et choisissez <b>« Sonic Analysis »</b> pour la file d’attente intelligente dans le lecteur.',
-  'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
-    'Navidrome ne dit pas qui demande. Si le titre est joué sur exactement un compte – ou si un seul compte écoute –, la réponse vaut pour cette personne : sans ce qu’elle n’aime pas, sans ce qu’elle vient d’écouter ou a noté 1 étoile, ce qu’elle passe souvent vient plus tard, et après deux titres d’un groupe, d’autres groupes passent d’abord. Sinon pour la famille. La musique pour enfants seulement après des chansons pour enfants, et sans titres aux paroles explicites dès qu’un profil a le mode enfants ou est un profil enfant.',
+  'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family – without a family for everyone. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a person has kid-safe mode or is a child profile.':
+    'Navidrome ne dit pas qui demande. Si le titre passe sur exactement un compte – ou si un seul compte est en train d’écouter – la réponse vaut pour cette personne : sans ce qu’elle n’aime pas, sans ce qu’elle vient d’écouter ou a noté 1 étoile ; ce qu’elle passe souvent vient plus tard, et après deux titres d’un groupe, d’autres groupes passent d’abord. Sinon, elle vaut pour la famille – sans famille, pour tout le monde. La musique pour enfants seulement en réponse à des titres pour enfants, et sans titres aux paroles explicites dès qu’une personne a le mode enfants activé ou a un profil enfant.',
   'Create a new key?':
     'Créer une nouvelle clé ?',
   'The old key stops working – enter the new one in Navidrome afterwards.':
@@ -676,8 +674,8 @@ export default {
     'Toujours rien ? Placez le nouveau fichier du plugin dans Navidrome, redémarrez-le et autorisez le plugin pour tous les utilisateurs.',
   '{when} · for {name}':
     '{when} · pour {name}',
-  '{when} · for the family':
-    '{when} · pour la famille',
+  '{when} · for everyone':
+    '{when} · pour tout le monde',
   '{when} · probably for {name}':
     '{when} · probablement pour {name}',
   'Last answer with similar songs':

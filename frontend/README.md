@@ -30,9 +30,19 @@ frontend/
 - Instead of the old events: everything is reactive. Reload a page's own data after a run:
   `$effect(() => { S.done; untrack(load) })`. `S.saved` counts saves.
 - Helpers: `findWelt/findStil/findPerson/findPl`, `plStatus(id)`, `artistId(name)`, `weltIds(p)`, `soundOf(p)`,
-  `mixWording(p)`, `MOODS`, `passKey(user)`, `isAdmin()`, `ownPersons()`, `canEdit(p)`, `defaultPerson()`, `myPerson()`,
-  `save()`, `undo()`, `reloadConfig()`, `mergeServerFields()`, `loadLibrary/loadStatus/loadPlaylists/loadHistory()`,
-  `runTask(steps, extra)`, `applyNow()`, `pendingCount()`.
+  `mixWording(p)`, `MOODS`, `passKey(user)`, `isAdmin()`, `save()`, `undo()`, `reloadConfig()`, `mergeServerFields()`,
+  `loadLibrary/loadStatus/loadPlaylists/loadHistory()`, `runTask(steps, extra)`, `applyNow()`, `pendingCount()`.
+- **People** – one person per Navidrome account, the family is an optional person with an account of its own
+  (`family: true`); there is no default person and no visibility per person:
+  - `myPerson()` – the signed-in account's person, or `null` (local administrator, an account without one yet).
+  - `familyPerson()` – the family entry, or `null`. `isFamily(p)` – is this person (object or id) the family?
+  - `canEdit(playlist)` – administrators always; users their own person's playlists and the family's unless
+    `settings.familyEdit` is `"admins"` (the server checks the same: `auth.editable_persons()`).
+  - `creatablePersons()` – whom you may create playlists for: administrators everyone; users their own person and the
+    family if allowed (never `null` entries). Offer a “For whom?” choice only when it has more than one.
+  - `defaultOwner()` – owner of a new playlist when none is chosen: `myPerson()`, for administrators otherwise the
+    family, otherwise the first person; `null` for a user without a person (send them to `#/willkommen`).
+  - `ownerOrder(list)` (`lib/playlist.js`) – sorts people as the pages show them: you, the family, the others.
 
 ## Overlays – `lib/overlay.svelte.js`
 
@@ -215,7 +225,7 @@ export const STEPS = translated(() => [{ title: t('…') }])   // at module leve
   | Musik verstehen (the analysis step, also in the history) | Understand music |
   | Passwort hinterlegt / Passwort fehlt | password stored / password missing |
   | Alle ansehen → (link to the whole list) | See all → |
-  | Familie | family |
+  | Familie (the family entry with its own account), Familien-Playlist | family, family playlist |
   | Administrator:in / Benutzer:in | administrator / user |
 
 **Help texts** (`pages/help/`): a topic opens with one sentence, then at most about seven points of one or two short

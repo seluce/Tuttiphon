@@ -270,6 +270,13 @@ class NativeApi:
     def users(self):
         return self._request("GET", "/api/user")
 
+    def create_user(self, user_name, name, password):
+        """A new Navidrome account (not an administrator; it gets every library). -> its id. An account name that
+        exists already: NavidromeError (HTTP 400, "ra.validation.unique")."""
+        got = self._request("POST", "/api/user", {"userName": user_name, "name": name, "password": password,
+                                                  "isAdmin": False})
+        return (got or {}).get("id")
+
     def playlists(self):
         return self._request("GET", "/api/playlist?_start=0&_end=5000&_sort=name&_order=ASC")
 

@@ -1,8 +1,10 @@
 <!--
   A person's profile: header, taste from listening, preferences (with new songs in the smart queue, p.newEvery),
-  "dislikes", kid-safe mode (with the administrator's
-  switch "Child profile", p.child), notifications,
-  profile (prefix, account/visibility), appearance (name, icon, color – folded) and their playlists. p: person from S.config (changed directly) · self: a user looking at their own profile.
+  "dislikes", kid-safe mode (with the administrator's switch "Child profile", p.child), notifications, profile (prefix,
+  account), appearance (name, icon, color – folded) and their playlists. The family (p.family): no child profile, nothing
+  left out of the taste, no notifications; its account stays as Tuttiphon created it. Deleting a person deletes their
+  playlists too (undo via the toast).
+  p: person from S.config (changed directly) · self: a user looking at their own profile.
 -->
 <script>
   import PushDevice from '../../components/PushDevice.svelte'
@@ -25,12 +27,12 @@
   import TasteExclude from './TasteExclude.svelte'
   import StilToggles from './StilToggles.svelte'
   import ColorPick from './ColorPick.svelte'
-  import { S, findPerson, defaultPerson, changed, snapshot, isAdmin } from '../../lib/state.svelte.js'
+  import { S, changed, snapshot, isAdmin, myPerson } from '../../lib/state.svelte.js'
   import { confirmDialog, toast } from '../../lib/overlay.svelte.js'
   import { go } from '../../lib/router.svelte.js'
   import { passwordModal } from '../../lib/account.js'
   import { genreSuggestions } from '../../lib/richtungen.js'
-  import { users, pwOk } from './shared.js'
+  import { users, pwOk, takenAccounts } from './shared.js'
   import Switch from '../../components/Switch.svelte'
   import { api } from '../../lib/api.js'
   import { t, tn } from '../../lib/i18n.svelte.js'
@@ -47,8 +49,15 @@
   let us = $state.raw([])
   untrack(() => { if (!self) users().then((list) => (us = list)) })
 
-  const userOptions = $derived([...new Set([...us.map((u) => u.name), p.user].filter(Boolean))].map((u) => [u, u]))
-  const mine = $derived(S.config.playlists.filter((x) => (x.person || defaultPerson()) === p.id && x.status !== 'papierkorb'))
+  // accounts without a person – and the current one
+  const userOptions = $derived.by(() => {
+    const taken = takenAccounts(p)
+    return [...new Set([...us.map((u) => u.name).filter((u) => !taken.has(u.toLowerCase())), p.user].filter(Boolean))].map((u) => [u, u])
+  })
+  const mine = $derived(S.config.playlists.filter((x) => x.person === p.id && x.status !== 'papierkorb'))
+  const fam = $derived(!!p.family)
+  /** your own person (also as administrator): notifications on this device */
+  const own = $derived(self || myPerson()?.id === p.id)
 
   // kid-safe mode: anyone may turn it on, only the administrator may turn it off (otherwise the server keeps it on)
   const cleanLocked = untrack(() => !isAdmin() && !!p.clean)
@@ -74,12 +83,15 @@
 
   async function deletePerson() {
     const n = S.config.playlists.filter((x) => x.person === p.id).length
-    if (!await confirmDialog(t('Delete {name}?', { name: p.name }),
-      n ? tn(n, '{n} playlist goes to “{name}”.', '{n} playlists go to “{name}”.', { name: findPerson(defaultPerson()).name }) : t('This person has no playlists.'),
-      t('Delete'), true)) return
+    const text = fam
+      ? (n ? tn(n, 'Its {n} playlist is deleted too. The Navidrome account “{account}” stays – you can remove it in Navidrome.',
+        'Its {n} playlists are deleted too. The Navidrome account “{account}” stays – you can remove it in Navidrome.', { account: p.user })
+        : t('The Navidrome account “{account}” stays – you can remove it in Navidrome.', { account: p.user }))
+      : n ? tn(n, 'Their {n} playlist is deleted too.', 'Their {n} playlists are deleted too.') : t('This person has no playlists.')
+    if (!await confirmDialog(t('Delete {name}?', { name: p.name }), text, t('Delete'), true)) return
     snapshot()
+    S.config.playlists = S.config.playlists.filter((x) => x.person !== p.id)   // their playlists go too
     S.config.playlists.forEach((x) => {
-      if (x.person === p.id) x.person = defaultPerson()
       if (Array.isArray(x.together) && x.together.includes(p.id)) {   // family mix: without this person
         x.together = x.together.filter((id) => id !== p.id)
         if (x.together.length < 2) delete x.together
@@ -112,12 +124,12 @@
     <div class="hero-row items-center">
       <PersonAvatar {p} size={120} />
       <div class="hero-text">
-        <div class="eyebrow">{self ? t('My profile') : t('Person')}</div>
+        <div class="eyebrow">{self ? t('My profile') : fam ? t('Family') : t('Person')}</div>
         <h1>{p.name}<HelpLink /></h1>
         {#if self}<p class="muted max-w-[560px]">{t('What you enter here decides your suggestions and what ends up in your playlists. Changes apply right away.')}</p>{/if}
         <div class="hero-meta">
           <span>Navidrome: {p.user}</span>
-          <span>{p.public ? t('Playlists visible to everyone') : self ? t('Playlists only for you') : t('Playlists private')}</span>
+          <span data-guide="sichtbar">{fam ? t('Playlists for everyone') : self ? t('Playlists only for you') : t('Playlists private')}</span>
           {#if p.child}<span class="pill acc"><Icon name="baby" size={12} />{t('Child profile')}</span>{/if}
           {#if self}
             {#if S.me?.passwordStored}
@@ -141,7 +153,7 @@
 
   {#if p.user}
     <div class="section"><TasteCard person={p.id} likes={p.likes} {self} name={p.name} onchange={ch} /></div>
-    {#if p.id !== S.config.settings.defaultPerson && !p.child}<div class="section"><TasteExclude {p} {self} onchange={ch} /></div>{/if}
+    {#if !fam && !p.child}<div class="section"><TasteExclude {p} {self} onchange={ch} /></div>{/if}
   {/if}
 
   <div class="card section grid gap-4" data-guide="likes">
@@ -179,21 +191,21 @@
       <Switch checked={!!p.clean} disabled={cleanLocked || !!p.child} onchange={(v) => { p.clean = v; ch() }}
         label={t('Leave out songs with explicit lyrics')} />
       <p class="muted small">{cleanText}</p>
-      {#if !self && isAdmin() && p.id !== defaultPerson()}
+      {#if !self && isAdmin() && !fam}
         <!-- child profile: only the administrator sets it; children's music belongs to "all", kid-safe mode stays on -->
         <Switch checked={!!p.child} onchange={(v) => { p.child = v; if (v) p.clean = true; ch() }} label={t('Child profile')} />
         <p class="muted small">{t('For {name}, children’s music is part of the whole library: discoveries, album of the week and own sound include it. Kid-safe mode stays on.', { name: p.name })}</p>
       {/if}
     </div>
-    {#if S.config.settings.notify?.enabled}
+    {#if S.config.settings.notify?.enabled && !fam}
       <div class="card grid gap-3 content-start min-w-0" data-guide="push">
         <h2 class="ih"><span class="hi"><Icon name="bell" size={18} /></span>{t('To your phone')}</h2>
-        <p class="muted small">{self
+        <p class="muted small">{own
           ? t('You get news from your favorite bands, what is new for you each Monday and your monthly recap as a notification – on every device where you turn it on.')
           : t('{name} gets news from their favorite bands, what is new for them each Monday and their monthly recap as a notification – on the devices they turn on in their profile.', { name: p.name })}</p>
-        {#if self}<PushDevice />{/if}
+        {#if own}<PushDevice />{/if}
         <details class="small" open={!!p.push}>
-          <summary class="muted cursor-pointer">{self ? t('Or via the ntfy app') : t('Via the ntfy app')}</summary>
+          <summary class="muted cursor-pointer">{own ? t('Or via the ntfy app') : t('Via the ntfy app')}</summary>
           <div class="grid gap-2 mt-2">
             <p class="muted">{t('Subscribe to the topic in the ntfy app, server: {server}.', { server: S.config.settings.notify.server || 'https://ntfy.sh' })}</p>
             <div class="flex gap-2 items-center">
@@ -214,31 +226,23 @@
       <label class="f">{t('Prefix for playlist names')}
         <input class="input" value={p.prefix || ''} placeholder={t('e.g. Mia · ')} onchange={(e) => { p.prefix = e.currentTarget.value; ch() }} />
       </label>
-      {#if self}<div class="hint -mt-2">{t('Goes in front of every playlist name – so you spot your playlists in Symfonium at a glance.')}</div>{/if}
       {#if self}
-        <div data-guide="sichtbar">
-          <Field label={t('Who may see your playlists?')}>
-            <Seg options={[['0', t('Only me')], ['1', t('The whole family')]]} value={p.public ? '1' : '0'} onchange={(v) => { p.public = v === '1'; ch() }} />
-            <div class="hint">{t('With “family”, everyone sees them in Navidrome and Symfonium – only you can change them.')}</div>
-          </Field>
-        </div>
+        <div class="hint -mt-2">{t('Goes in front of every playlist name – so you spot your playlists in Symfonium at a glance.')}</div>
       {:else}
-        <div class="frow" data-guide="sichtbar">
+        {#if fam}
+          <div class="field">
+            <span class="lbl">{t('Navidrome account')}</span>
+            <b>{p.user}</b>
+            <div class="hint">{t('The family’s playlists are in this account and for everyone. Shared devices play them with it in Symfonium – nobody signs in to Tuttiphon with it.')}</div>
+          </div>
+        {:else}
           <label class="f">{t('Navidrome user')}
             <Select options={userOptions} value={p.user} onchange={(v) => { p.user = v; ch() }} />
           </label>
-          <label class="f">{t('Visibility')}
-            <Select options={[['1', t('visible to everyone')], ['0', t('private')]]} value={p.public ? '1' : '0'} onchange={(v) => { p.public = v === '1'; ch() }} />
-          </label>
-        </div>
-        {#if p.id === defaultPerson()}
-          <div class="hint">{t('Default: new playlists are for this person at first.')}</div>
-        {:else}
-          <div class="btns">
-            <button class="btn sm" onclick={() => { S.config.settings.defaultPerson = p.id; ch() }}>{t('Make default')}</button>
-            <button class="btn sm danger" onclick={deletePerson}><Icon name="trash" size={15} />{t('Delete person')}</button>
-          </div>
         {/if}
+        <div class="btns">
+          <button class="btn sm danger" onclick={deletePerson}><Icon name="trash" size={15} />{fam ? t('Delete family') : t('Delete person')}</button>
+        </div>
       {/if}
     </div>
 

@@ -297,7 +297,7 @@ it. Then also set `TUTTIPHON_TRUSTED_PROXIES` in `environment` (or in `/config/.
 proxy connects to Tuttiphon, or its network, comma-separated, e.g. `172.16.0.0/12` for the usual Docker networks.
 
 - Only then does the sign-in lockout count each person's own address (from `X-Forwarded-For`). Without it, every
-  request seems to come from the proxy: failed attempts of strangers then also block sign-in for the family.
+  request seems to come from the proxy: failed attempts of strangers then also block sign-in for everyone at home.
 - Sign-ins via https (`X-Forwarded-Proto: https`) get a session cookie with `Secure` – the browser never sends it
   unencrypted.
 - The proxy must append the client address to `X-Forwarded-For` and set `X-Forwarded-Proto`. Name it as narrowly as
@@ -414,7 +414,12 @@ refuse to save settings that contain such keys.
 **Configuration:** If `config.json` is older than the current version (`CONFIG_VERSION`), `load_config()` migrates it
 by itself on the first load. Before that, it uses `write_atomic()` to save a copy as
 `backup/config_v<old>_<YYYYMMDD_HHMMSS>.json` ([Data model](02-data-model.md)). It adds missing settings
-from `app/default_config.json`.
+from `app/default_config.json`. The migration to one person per Navidrome account (v13,
+[Data model](02-data-model.md#version-and-migration)) changes nothing in Navidrome by itself: a shared person
+(“Familie” on a parent's account) and profiles that shared an account are merged into the account's person, and “To
+review” then offers “Set up the family” – Tuttiphon creates a Navidrome account for the family, shows its password
+once (for shared devices in Symfonium) and moves the playlists chosen there – and names every merged profile that
+needs an account of its own.
 
 **Browser:** The server delivers `index.html` and `login.html` with `Cache-Control: no-cache`, and files under
 `/assets/` (content hash in the name) as `immutable` for one year. The service worker (`sw.js`) loads from the server
@@ -433,13 +438,14 @@ there.
 | `autoAssigned` | administrators' devices, the administrator's topic | bands were automatically assigned to a music world |
 | `favorites` | devices of the person's account, their topic (`person.push`) | an album by a favorite band was added in the last 3 days (after the scan, once per album) |
 | `review` | devices of the person's account, their topic | in the first three days of the month, if the person has a recap playlist “Your month” |
-| `weekly` | devices of the person's account, their topic | “New for you this week” on Monday (still on Tuesday if no run came on Monday), if the person has an active “Discovered for you” or “Album of the week” that renews weekly and was renewed this week: how many never played songs and which album – to the topic once per person and week; the devices of an account once per week with what is new for all its people (own people first); tapping opens the first of them |
+| `weekly` | devices of the person's account, their topic | “New for you this week” on Monday (still on Tuesday if no run came on Monday), if the person has an active “Discovered for you” or “Album of the week” that renews weekly and was renewed this week: how many never played songs and which album – to the topic once per person and week, to the devices of the account once per week; tapping opens the first of them |
 
-Each event is sent only once (`state/notified.json`). If two people share the same Navidrome account (such as
-“Familie” and the administrator), each device still gets the message only once: `favorites` once per album and
-account (`favpush|…`), `review` once per month and account (`reviewpush|…`, the first person's recap), `weekly` once
-per week and account (`weeklypush|…`, with what is new for all its people); every person's own ntfy topic gets its
-own message. A playlist without `person` counts for the default person.
+Each event is sent only once (`state/notified.json`): per person to its ntfy topic (`fav|<person>|<album>`,
+`review|<person>|<month>`, `weekly|<person>|<week>`) and per account to its devices (`favpush|…`, `reviewpush|…`,
+`weeklypush|…`). One person per Navidrome account, so the devices of an account get exactly their person's news.
+The family is a person like the others (`notify.for_persons()`): its favorite bands, its recap and its weekly news –
+from the plays on its account. Nobody signs in with the family's account, so it has no devices of its own; its
+messages go only to an ntfy topic entered for it.
 
 ### Via the app (web push)
 
@@ -508,7 +514,7 @@ sound analysis, so the Docker image – without it, the plugin answers with the 
    similar tracks for Radio Mix” – Instant Mix, song radio and the smart queue then come from Tuttiphon.
 
 Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix – with the person
-the answer was for, or “for the family” – and “Plays from Navidrome” after a song (with the accounts). The answers
+the answer was for (when it was unclear: the family, without a family “for everyone”) – and “Plays from Navidrome” after a song (with the accounts). The answers
 follow the one listening only with the plays: the plugin needs all users allowed
 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Problems: in
 Navidrome's log lines with `plugin=tuttiphon` (more with `ND_PLUGINS_LOGLEVEL=debug`) – “Tuttiphon not reachable”

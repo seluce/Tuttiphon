@@ -1,7 +1,7 @@
 <!-- Bands similar to your favorites that are not in the library yet (Last.fm). -->
 <script>
   import Icon from '../../components/Icon.svelte'
-  import { isAdmin, defaultPerson } from '../../lib/state.svelte.js'
+  import { isAdmin, defaultOwner } from '../../lib/state.svelte.js'
   import { api } from '../../lib/api.js'
   import { t } from '../../lib/i18n.svelte.js'
 
@@ -9,7 +9,8 @@
   const FIRST = 6   // this many first, the rest on request
   let d = $state.raw(null)
   let all = $state(false)
-  api(`/api/missing?person=${encodeURIComponent(defaultPerson())}`).then((r) => (d = r)).catch(() => {})
+  const owner = defaultOwner()?.id   // your own person (administrators without one: the family's)
+  api(`/api/missing${owner ? `?person=${encodeURIComponent(owner)}` : ''}`).then((r) => (d = r)).catch(() => {})
 </script>
 
 {#if d && !d.lastfm}

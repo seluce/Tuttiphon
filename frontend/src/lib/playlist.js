@@ -1,5 +1,5 @@
-// Playlist helpers: name, symbols, description, state.
-import { S, findWelt, findStil, findPerson, defaultPerson, weltIds } from './state.svelte.js'
+// Playlist helpers: name, symbols, description, state, owners.
+import { S, findWelt, findStil, findPerson, myPerson, isFamily, weltIds } from './state.svelte.js'
 import { t, translated } from './i18n.svelte.js'
 
 /** Symbols of a playlist (music worlds + vibe) – as a list for <Mosaic marks>. */
@@ -26,13 +26,38 @@ export function plName(p) {
   if (p.name) return p.name
   if (p.rules) return p.originalName || t('Playlist')
   const words = S.status?.names || NAMES_EN
-  const person = findPerson(p.person || defaultPerson())
+  const person = findPerson(p.person)
   const w = weltIds(p).map((id) => findWelt(id)?.name).filter(Boolean).join(' + ')
   const s = p.stil && p.stil !== '*' ? findStil(p.stil)?.name : null
   const base = p.type === 'mix' ? `${MIX_LABEL[p.mix?.every] || MIX_LABEL.day} · ${[w, s].filter(Boolean).join(' · ') || words.everything}`
     : !s ? (p.hits ? words.hits : words.all).replace('{world}', w) : !w ? s + (p.hits ? ' (Hits)' : '')
       : S.config.settings.namePattern.replace('{welt}', w).replace('{stil}', s + (p.hits ? ' (Hits)' : ''))
   return (person?.prefix || '') + base
+}
+
+/** People in the order the pages show them: yours, the family, then the others (as in the configuration). */
+export function ownerOrder(list) {
+  const me = myPerson()
+  const rank = (x) => (x.id === me?.id ? 0 : x.family ? 1 : 2)
+  return [...list].sort((a, b) => rank(a) - rank(b))
+}
+
+/**
+ * “What everyone likes” exists only for the family, with the other people as members (at least two). Otherwise it
+ * goes – and an “All × Everything” left without it becomes a mix by the own taste, as the server does. Changes x.
+ */
+export function fixTogether(x) {
+  if (!x.together) return x
+  if (isFamily(x.person)) {
+    x.together = x.together.filter((id) => findPerson(id) && !isFamily(id))
+    if (x.together.length >= 2) return x
+  }
+  delete x.together
+  if (!weltIds(x).length && (x.stil || '*') === '*' && !x.radio && !x.fav && !x.review) {
+    x.type = 'mix'
+    x.mix = { ...x.mix, flavor: 'geschmack' }
+  }
+  return x
 }
 
 export function plDescribe(p) {

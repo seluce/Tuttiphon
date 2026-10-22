@@ -1,6 +1,5 @@
 {
  "You can have at most {n} playlists – please delete some you no longer listen to (also from the trash).": "Je kunt hoogstens {n} playlists hebben – verwijder er een paar waar je niet meer naar luistert (ook uit de prullenbak).",
- "You can have at most {n} profiles.": "Je kunt hoogstens {n} profielen hebben.",
  "This topic belongs to someone else – please choose your own.": "Dit topic is van iemand anders – kies je eigen topic.",
  "Something went wrong – the details are in the server log.": "Er is iets misgegaan – de details staan in het serverlogboek.",
  "⚠ The configuration {file} is damaged ({error}) – Tuttiphon keeps working with the last good state and writes it back with the next save. Copy of the damaged file: {copy}": "⚠ De configuratie {file} is beschadigd ({error}) – Tuttiphon werkt verder met de laatste goede stand en schrijft die bij de volgende keer opslaan terug. Kopie van het beschadigde bestand: {copy}",
@@ -14,7 +13,6 @@
  "config: music world '{id}': {key} must be a number between {lo} and {hi}": "config: muziekwereld '{id}': {key} moet een getal tussen {lo} en {hi} zijn",
  "Settings: {key} invalid": "Instellingen: {key} ongeldig",
  "Settings: {key} must be yes/no": "Instellingen: {key} moet ja/nee zijn",
- "Settings: the default person does not exist": "Instellingen: de standaardpersoon bestaat niet",
  "Settings: the name pattern may only contain {welt} and {stil}": "Instellingen: het naampatroon mag alleen {welt} en {stil} bevatten",
  "Max. songs per playlist": "Max. nummers per playlist",
  "Minimum length": "Minimale lengte",

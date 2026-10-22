@@ -1,6 +1,6 @@
 """The weekly "New for you this week" notification: on Monday per person with "Discovered for you" or "Album of the
-week", from the selections written for this week, once per week – the devices of an account shared by several people
-once, with what is new for each of them; configuration v12 turns the event on."""
+week", from the selections written for this week, once per week – the devices of the person's account once;
+configuration v12 turns the event on."""
 from tests.python import env  # noqa: F401  (before app.*)
 
 import copy
@@ -63,21 +63,6 @@ class WeeklyTest(unittest.TestCase):
         self.cfg["playlists"][0]["mix"]["every"] = "day"   # a daily "Discovered": not "this week"
         self.run_on(MONDAY)
         self.assertNotIn("Entdeckt", self.devices[0][1])
-
-    @env.german
-    def test_shared_account_gets_one_message(self):
-        family = self.cfg["personen"][0]
-        family["user"] = "Jonas"   # the shared person on the same account
-        self.cfg["playlists"].append({"id": "fam", "welt": "*", "stil": "*", "type": "mix", "unheard": True,   # no "person":
-                                      "name": "Entdeckt für uns", "mix": {"every": "week"}})              # the default one
-        self.state["fam"] = {"day": MONDAY.isoformat(), "ids": ["d1", "d2"]}
-        self.run_on(MONDAY, "familie", topic="familie-topic")
-        self.run_on(MONDAY, "jonas", topic="jonas-topic")
-        self.assertEqual(len(self.devices), 1)   # the phone: once …
-        text = self.devices[0][1]
-        self.assertIn("Entdeckt für Jonas", text)   # … with what is new for both, the own person first
-        self.assertTrue(text.index("Entdeckt für Jonas") < text.index("Entdeckt für uns"))
-        self.assertEqual([t[0] for t in self.topics], ["familie-topic", "jonas-topic"])   # own topics: each
 
     def test_migration_turns_the_event_on(self):
         old = copy.deepcopy(base_config())

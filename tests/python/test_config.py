@@ -86,6 +86,8 @@ class TestNormalizePlaylists(unittest.TestCase):
             {"id": "e", "welt": "kinder", "stil": "tanzen"},
             {"id": "f", "welt": "kinder", "stil": "*", "sound": {"moods": ["froh"]}, "mix": {"size": 12}},
         ]
+        for p in cfg["playlists"]:
+            p.setdefault("person", "familie")
         out = {p["id"]: p for p in config.normalize_playlists(cfg)["playlists"]}
         self.assertEqual((out["a"]["type"], out["a"]["mix"]), ("mix", {"size": 40, "perArtist": 3, "every": "week"}))
         self.assertEqual(out["b"]["type"], "mix")
@@ -106,6 +108,8 @@ class TestValidateConfig(unittest.TestCase):
                                  {"id": "p4", "welt": "*", "stil": "*", "type": "mix", "radio": {"seed": ["Band A"]},
                                   "mix": {"size": 30, "every": "month", "perAlbum": 0}},
                                  {"id": "p5", "rules": [{"is": {"loved": True}}], "welt": "weg", "stil": "weg"}]
+        for p in self.cfg["playlists"]:   # every playlist belongs to a person
+            p.setdefault("person", "familie")
 
     def assertInvalid(self, change, message=None):
         cfg = copy.deepcopy(self.cfg)

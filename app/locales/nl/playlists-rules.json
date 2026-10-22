@@ -215,5 +215,13 @@
  "new every month": "elke maand nieuw",
  "Next episode – the next episode of every audio play series being listened to, new every day": "Volgende aflevering – de volgende aflevering van elke hoorspelserie die nu wordt beluisterd, elke dag nieuw",
  "Next episode: for every series this account listened to in the last 3 months, the next episode – the rest of the one begun, otherwise the next one never heard, by episode number": "Volgende aflevering: voor elke serie die dit account de afgelopen 3 maanden heeft beluisterd, de volgende aflevering – de rest van de begonnen aflevering, anders de volgende die nog nooit is gehoord, op afleveringsnummer",
- "New every day – the series heard last come first": "Elke dag nieuw – de laatst beluisterde series eerst"
+ "New every day – the series heard last come first": "Elke dag nieuw – de laatst beluisterde series eerst",
+ "Set up the family": "Het gezin instellen",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it.": "Het gezin krijgt nu een eigen Navidrome-account in plaats van er een te delen. Tuttiphon maakt het aan.",
+ "{name} needs an account of their own": "{name} heeft een eigen account nodig",
+ "{name} used the Navidrome account of {into} and is now part of {into} – every person has an account of their own. Create one for {name} in Navidrome, then add {name} under People.": "{name} gebruikte het Navidrome-account van {into} en hoort nu bij {into} – elke persoon heeft een eigen account. Maak er in Navidrome een aan voor {name} en voeg {name} daarna toe onder Personen.",
+ "Set up": "Instellen",
+ "People": "Personen",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose whether its playlist moves there.": "Het gezin krijgt nu een eigen Navidrome-account in plaats van er een te delen. Tuttiphon maakt het aan – en jij kiest of de gezinsplaylist daarheen verhuist.",
+ "The family now gets a Navidrome account of its own instead of sharing one. Tuttiphon creates it – and you choose which of its {n} playlists move there.": "Het gezin krijgt nu een eigen Navidrome-account in plaats van er een te delen. Tuttiphon maakt het aan – en jij kiest welke van de {n} gezinsplaylists daarheen verhuizen."
 }

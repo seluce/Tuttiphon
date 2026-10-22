@@ -620,9 +620,10 @@ Instant Mix, “similar songs”, the smart queue, song and artist radio in Navi
 OpenSubsonic extension `sonicSimilarity` follow the sound of the own files.
 
 **What may come** (`_pool()`, cached per song list, configuration, worlds and person): Navidrome does not say who asks,
-so “All” as for the shared person – minimum rating 0, without the separate worlds, without its dislikes, without live
-recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon as any profile is a child profile or
-has kid-safe mode on (`_view()`; without a shared person a stand-in without dislikes). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
+so “All” as for the family – minimum rating 0, without the separate worlds, without its dislikes, without live
+recordings and the like (`excludeTitles`, `minDuration`), kid-safe as soon as any person is a child profile or has
+kid-safe mode on – the family's own kid-safe mode only for the family's answers, it is the default for its playlists
+(`_view()`; without a family a stand-in without dislikes: an answer for everyone). If the song (or band, album) asked for is in a separate world, that world comes along – children's songs
 lead to children's songs, a rock song never to an audio play.
 
 **For the one listening** (`_who()`): the live plays (`app/listen.py`) tell who is playing what. `listen.listener()`
@@ -635,12 +636,13 @@ looks at the day files of all accounts and gives the account and whether it is s
   if none did – the one account whose last event is at most 10 minutes old and still on (`LISTENER_ACTIVE`).
   Accounts whose plays are not kept (no person, blocked) count as playing too (`listen._active`, memory only), so
   their question is never taken for someone else's;
-- **unclear** – the family's answer: two accounts on the same song, two playing at once and neither the song, or
-  two Navidrome accounts whose names give the same folder name.
+- **unclear** – the family's answer (without a family the neutral one): two accounts on the same song, two playing at
+  once and neither the song, or two Navidrome accounts whose names give the same folder name.
 
-The account must belong to exactly one person who is allowed (`listen.allowed()`). If the shared person uses the
-account too (“Family” on a parent's account), the answer is for the account's own person, with the dislikes of both
-and without a child profile's music. Then, for similar songs, artist and album radio:
+The account must belong to a person who is allowed (`listen.allowed()`) – one person per account (`_listener()`). The
+family's account (a shared device such as the car or the kitchen tablet) is no exception: its plays get the family's
+answer as the one listening, with the family's dislikes and kid-safe mode. Then, for similar songs, artist and album
+radio:
 
 - what may come is that person's “All” and dislikes (`_pool(…, who)`; a sure child profile: its children's music too);
 - left out: what the account started, played or reported in the last 3 hours (`listen.heard()`, `HEARD_SECONDS`) and,
@@ -671,11 +673,13 @@ and without a child profile's music. Then, for similar songs, artist and album r
   (`_monotone()`) so the order holds even where a player sorts by them;
 - a guess is careful – it may be someone else asking: no 1-stars left out, no variety, no steering, no songs never
   played, never a child profile's music;
-- kid-safe stays as for the family – never loosened;
+- kid-safe stays as soon as any person other than the family has kid-safe mode or is a child profile – never loosened
+  for the one listening;
 - not remembered (the family's answers are).
 
 The settings card shows for whom the last answer with similar songs was, when, and whether it was a guess
-(`status()`: `lastFor`, `lastForAt`, `lastGuess`).
+(`status()`: `lastFor`, `lastForAt`, `lastGuess`) – `lastFor` is the person's name, the family's name when it was
+unclear, and `null` when it was unclear and there is no family (“for everyone”).
 
 | Question | How |
 |---|---|
@@ -920,22 +924,23 @@ song list and state of the sound analysis/AI. With sound vectors it also carries
 
 | Where | What |
 |---|---|
-| Suggestions (`suggest.suggestions`) | worlds with ≥ 8% of what was played count as favorite worlds (even without likes set by hand, badge “Played often”); radios of the most played bands; “Your sound” (mix `flavor: geschmack` over the whole library, for the shared person “Our sound”); “Not heard in a while” for the person; scenes from the catalog whose bands are played often move up (“Played often: …”); with a sound taste, what sounds like what the person plays moves up ([below](#sound-taste-appsoundtastepy)) |
+| Suggestions (`suggest.suggestions`) | worlds with ≥ 8% of what was played count as favorite worlds (even without likes set by hand, badge “Played often”); radios of the most played bands; “Your sound” (mix `flavor: geschmack` over the whole library, for the family “Our sound”); “Not heard in a while” for the person; scenes from the catalog whose bands are played often move up (“Played often: …”); with a sound taste, what sounds like what the person plays moves up ([below](#sound-taste-appsoundtastepy)) |
 | Mixes (`mixer.pick`, with `settings.mixLearn`) | `taste.matcher()` rates every song 0–1 (60% distance to the averaged sound, 40% style similarity of the band; with a sound taste blended with its score, [below](#sound-taste-appsoundtastepy)); the weight is multiplied by `0.6 + 0.8 · similarity`, for “Your sound” cubed |
 | Interface | `GET /api/taste?person=` or `?me=1` (`taste.summary()`: up to 12 bands, worlds from 5%, moods, up to 6 styles, `sound`: a sound taste is active): card “From your listening” in the profile (`TasteCard`, adopts worlds from 8% and the five most played bands into the likes) and preselection in the welcome assistant (same thresholds, only as long as nothing has been chosen there) |
 | Music world page | `GET /api/welt` → `forMe`: up to 8 most played bands of the signed-in account from this world and their share of what was played (“Your favorites here”) |
 | Favorite bands (`rules.favorite_artists()`) | bands chosen by hand plus most played bands (share ≥ 1%), without dislikes, at most 30: “New from your favorite bands”, badge “Favorite band” on new albums on the home page, notification about new albums |
-| Family mix (`together`) | the taste of several accounts counts equally ([04](04-playlists.md#playlists-from-listening)) |
+| Family mix (`together`) | the taste of the family's account and of every member's account counts equally ([04](04-playlists.md#playlists-from-listening)) |
 
 ### Taste per person
 
-A profile belongs to an account – but a parent's account also plays the children's music, and then discoveries, album
-of the week, “Your sound” and the favorite bands of the parent fill up with children's songs. `person.tasteExclude`
+A profile belongs to an account, and every account has one person (the family's account the family). But a parent's
+account also plays the children's music, and then discoveries, album of the week, “Your sound” and the favorite bands
+of the parent fill up with children's songs. `person.tasteExclude`
 (the card “Not part of your taste” in the profile) names music worlds that do not count for **this person**:
 
 | Where | How |
 |---|---|
-| `taste.for_person(cfg, base, person)` | `profile()` with `exclude = taste.excluded(person)` (sorted ids); cached per exclusion too. The other people on the same account – e.g. the shared family – keep the full profile |
+| `taste.for_person(cfg, base, person)` | `profile()` with `exclude = taste.excluded(person)` (sorted ids); cached per exclusion too. `taste.profile()` without exclusion – the account's whole listening – stays for the family suggestions (see below) |
 | `song_scores(…, exclude)` | the songs of these worlds (`excluded_ids()`: the world's block via `rules.welt_block()` in the account's song list, cached per song list, exclusion and configuration) count neither as liked nor as disliked – so the sound taste (`soundtaste.of(…, variant=exclude)`) does not learn from them either |
 | Users of the profile | suggestions, mixes (each person of a family mix with its own exclusion), album of the week, “Good morning”, favorite bands (`rules.favorite_artists()`), the card “From your listening” (`/api/taste?person=`), “To review” for users |
 | Listening clock | `morning_of(…, exclude)`: plays of these songs do not make a morning, nor do they shape its sound ([below](#listening-clock-applistenclockpy)) |
@@ -943,7 +948,7 @@ of the week, “Your sound” and the favorite bands of the parent fill up with 
 The playlists of the music world itself stay as they are – the exclusion is only about the taste. In the profile, the
 toggles show the separate worlds (`separate`, e.g. children's music, audio plays) and the ones already excluded; any
 other world can be added from a list. **Hint** (`suggest.taste_hints()`): if a separate world makes up at least 20 %
-(`TASTE_HINT_SHARE`) of what an account plays and one of its own people (not the default person) does not exclude it
+(`TASTE_HINT_SHARE`) of what an account plays and its person (not the family, not a child profile) does not exclude it
 yet, “To review” says so once per person and world (`taste-world|<person>|<world>`, “Set it” opens the profile).
 
 **A child's own account.** For a child, children's music *is* the own taste. A child profile (`person.child`, set only
@@ -960,13 +965,13 @@ children's music the administrator's hint also offers “Child profile”.
 **Family playlists keep it.** The exclusion is about one person's taste only. For the family suggestions (“What
 everyone likes”, car ride) the worlds come from everything an account plays (`suggest.played_worlds()`: the profile
 without exclusion), so the children's music on a parent's account stays in the family's music. In a family mix each
-account counts once – with the playlist's own person first (its exclusion), not another profile of the same account.
+account counts once – the family's own account first, then every member's person with its exclusion.
 `mixer.settings_key()` contains the exclusion (only when set), so a mix is picked anew right away when it changes.
 
 ### Sound taste (`app/soundtaste.py`)
 
 With the AI's sound vectors ([Sound similarity](#sound-similarity-appsimilarpy)) the taste also learns what the songs
-an account plays sound like. Not as one average: a family account plays children's songs and adult music, and the mean
+an account plays sound like. Not as one average: a parent's account plays children's songs and adult music, and the mean
 of both sounds like neither. Instead a few **prototypes** – the typical sounds of what is played:
 
 | Step | How |
@@ -979,8 +984,8 @@ of both sounds like neither. Instead a few **prototypes** – the typical sounds
 
 Computed once per account (whatever the spelling), day and state of `state/sound_vectors.json`, kept in memory
 (`soundtaste._memo`, no file); the scores of all songs only when a mix or the suggestions need them – by song id, and
-per song list as a list by index. People who share one Navidrome account share its sound taste; a mix only ever uses
-the account of its person (a family mix each member's own, as before).
+per song list as a list by index. One person per account, so the sound taste of an account is its person's; a mix
+only ever uses the account of its person (a family mix the family's and each member's own, as before).
 
 | Where | How |
 |---|---|
@@ -1010,7 +1015,7 @@ Only for accounts with a stored password (the song list of the account is needed
 person keeps out of their taste (`tasteExclude`, [above](#taste-per-person)) do not count (`morning(…, skip)`): a parent
 whose mornings are the children's music has no morning habit of their own. Cached per account, day, song list, state
 of `moments.json` and exclusion (`morning_of()`), the sound per account, day and sound vectors – in memory. On the
-reference data (two family accounts, 25,000 songs) the habit shows from the plays of the past weeks right away.
+reference data (two personal accounts, 25,000 songs) the habit shows from the plays of the past weeks right away.
 
 ## Lyrics search and kid-safe mode
 
@@ -1120,12 +1125,13 @@ Navidrome first) or by administrators under Settings → Navidrome – see
 Without a password there are no personal statistics for the account (error message “No password is stored for “…” –
 personal statistics need one.”) and no recap. The Deezer stars need the same passwords ([05-maintenance.md](05-maintenance.md#accounts-for-the-stars)),
 as do mixes that select by their person's plays and stars (`mixer.person_lib()`, without a password the
-default library). If the library cache was already loaded with exactly this account (the default person's account,
-if its password is stored), `songs_for()` uses it directly. Otherwise it keeps the song list per account in memory for
+shared list). The family's account gets its password when it is set up (`POST /api/family`), so its statistics, recap
+and mixes work like any account's. The library cache itself is neutral (admin account, average ratings – nobody's view,
+[04](04-playlists.md#library-cache-applibrarypy)), so `songs_for()` loads every account's own list and keeps it in memory for
 10 minutes; after that the scheduler releases it (`stats.purge()`, every minute). It lies as an overlay on the
-default list (`stats.overlay()`) – only songs with different stars, favorites or plays get their own
-entry. If the account sees the same songs in the same order as the default list (the normal case), the list also
-shares the default list's account-independent caches (`rules.Library.share_with()`): the evaluated rules of music
+shared list (`stats.overlay()`) – only songs with different stars, favorites or plays get their own
+entry. If the account sees the same songs in the same order as the shared list (the normal case), the list also
+shares the shared list's account-independent caches (`rules.Library.share_with()`): the evaluated rules of music
 worlds, vibes and exclusions, the value index, the sound features and the sound index are computed once, not once per
 account – only rules on stars, favorites and plays (and “in the last n days”) are evaluated per account. Per account
 that is about 10–20 MB (measured with 25,000 songs, 30 % of them with other values) and under a second to set up.
@@ -1144,7 +1150,7 @@ that is about 10–20 MB (measured with 25,000 songs, 30 % of them with other va
 | `forgotten` | “Forgotten favorites”: favorites or played songs with ≥ 4 stars, not played for over 90 days (or never); favorites first, count and 12 examples |
 | `neverPlayed` | songs without a play |
 
-Users only get the statistics and recap of their own people (`_own_person()`).
+Users only get the statistics and recap of their own person and of the family (`_own_person()`).
 
 ## Recap
 

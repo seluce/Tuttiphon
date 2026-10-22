@@ -3,7 +3,7 @@
   import Icon from '../components/Icon.svelte'
   import Collage from '../components/Collage.svelte'
   import PageHead from '../components/PageHead.svelte'
-  import { S, isAdmin, ownPersons, canEdit, weltIds } from '../lib/state.svelte.js'
+  import { S, isAdmin, myPerson, canEdit, weltIds } from '../lib/state.svelte.js'
   import { addWelt } from '../lib/welten.js'
   import { plural } from '../lib/format.js'
   import { t, tn } from '../lib/i18n.svelte.js'
@@ -11,11 +11,11 @@
 
   const admin = isAdmin()
   const info = $derived(S.library?.weltInfo || {})
-  /** Does one of your own people like this world? */
-  const likedBy = (wid) => ownPersons().find((p) => (p.likes?.welten || []).includes(wid))
+  /** Do you like this world? */
+  const likedBy = (wid) => (myPerson()?.likes?.welten || []).includes(wid)
   loadMyTaste()
-  /** your own favorite worlds first, then what you listen to yourself */
-  const sorted = $derived(byRelevance(S.config.welten, new Set(ownPersons().flatMap((p) => p.likes?.welten || []))))
+  /** favorite worlds first (administrators: everyone's, users: their own), then what you listen to yourself */
+  const sorted = $derived(byRelevance(S.config.welten, new Set((admin ? S.config.personen : [myPerson()].filter(Boolean)).flatMap((p) => p.likes?.welten || []))))
   const usedBy = (w) => S.config.playlists.filter((p) => weltIds(p).includes(w.id) && (p.status || 'aktiv') === 'aktiv' && (admin || canEdit(p))).length
 </script>
 

@@ -21,6 +21,11 @@ export async function users() {
   return userList
 }
 users.error = ''
+/** Ask Navidrome again next time (e.g. after Tuttiphon created the family's account). */
+export const forgetUsers = () => { userList = null }
+
+/** Navidrome accounts that already belong to a person (lower case) – except `but` (the person being edited). */
+export const takenAccounts = (but = null) => new Set(S.config.personen.filter((x) => x !== but).map((x) => (x.user || '').toLowerCase()))
 
 /** Is a (matching) password stored for this Navidrome account? */
 export const pwOk = (user) => (S.status?.env?.users || []).find((u) => u.name.toLowerCase() === (user || '').toLowerCase())?.ok
@@ -30,4 +35,14 @@ export function toggleIn(arr, id) {
   const i = arr.indexOf(id)
   if (i >= 0) arr.splice(i, 1)
   else arr.push(id)
+}
+
+/** A person to add that the update to one person per account merged into someone else (settings.mergedPersons):
+ *  People → "Add person" hands it to the assistant, which takes it once. */
+let draft = null
+export const setDraft = (x) => { draft = x }
+export function takeDraft() {
+  const x = draft
+  draft = null
+  return x
 }

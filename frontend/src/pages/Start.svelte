@@ -20,7 +20,7 @@
   import DeezerCard from './start/DeezerCard.svelte'
   import LibraryCard from './start/LibraryCard.svelte'
   import LiveLog from './start/LiveLog.svelte'
-  import { S, loadHistory } from '../lib/state.svelte.js'
+  import { S, defaultOwner, loadHistory } from '../lib/state.svelte.js'
   import { api } from '../lib/api.js'
   import { accept } from '../lib/discover.js'
   import { START_SECTIONS } from '../lib/settings-info.js'
@@ -38,9 +38,12 @@
   const ideas = $derived((cache.sg || []).filter((x) => x.playlist?.type === 'mix' && !S.config.dismissed.includes(x.key)).slice(0, 3))
 
   /* --- Loading: when opened and after every run */
-  let woche = $state(null)   // { d } or { error }
-  const loadWoche = () => api(`/api/rueckblick?kind=woche&person=${encodeURIComponent(S.config.settings.defaultPerson)}`)
-    .then((d) => (woche = { d })).catch((e) => (woche = { error: e.message }))
+  let woche = $state(null)   // { d } or { error } – your own person's week (without one: the family's)
+  function loadWoche() {
+    const owner = defaultOwner()?.id
+    api(`/api/rueckblick?kind=woche${owner ? `&person=${encodeURIComponent(owner)}` : ''}`)
+      .then((d) => (woche = { d })).catch((e) => (woche = { error: e.message }))
+  }
   $effect(() => {
     S.done
     untrack(() => {
@@ -140,7 +143,7 @@
         {:else}<div class="skel h-[230px]"></div>{/if}
       </Section>
     {:else if id === 'playlists'}
-      <Section title={t('Family playlists')} icon="playlists" action={allSee}>
+      <Section title={t('All playlists')} icon="playlists" action={allSee}>
         {#if active.length}
           <Carousel>{#each active as p (p.id)}<PlaylistCard {p} />{/each}</Carousel>
         {:else}

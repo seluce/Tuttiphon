@@ -252,10 +252,8 @@ export default {
     'Para o Tuttiphon mostrar as suas estatísticas e atribuir estrelas do Deezer na sua conta, precisa uma vez da sua palavra-passe do Navidrome – a mesma do Symfonium. Fica no seu NAS.',
   'your Navidrome password':
     'a sua palavra-passe do Navidrome',
-  'Your profiles':
-    'Os seus perfis',
-  'Playlists visible to everyone':
-    'Playlists visíveis para todos',
+  'Your profile':
+    'O seu perfil',
   'Playlists only for you':
     'Playlists só para si',
   'Create profile':
@@ -654,8 +652,8 @@ export default {
     'No Navidrome, em <b>Settings → Plugins</b>, ative «Tuttiphon», introduza o endereço e a chave e dê-lhe acesso a <b>todos os utilizadores</b> (para as reproduções). De preferência o endereço na rede doméstica, p. ex. <code>http://&lt;NAS&gt;:8765</code> – não um endereço https através de um proxy inverso, que pode recusar o Navidrome. Este navegador acede ao Tuttiphon em <code>{address}</code>.',
   'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
     'No Symfonium, ative <b>«Use similar tracks for Radio Mix»</b> para o servidor Navidrome («Manage media providers» → o servidor) e escolha <b>«Sonic Analysis»</b> para a fila inteligente no leitor.',
-  'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
-    'O Navidrome não diz quem pergunta. Se a música estiver a tocar em exatamente uma conta – ou se só uma conta estiver a tocar – a resposta é para essa pessoa: sem aquilo de que ela não gosta, sem o que acabou de ouvir ou classificou com 1 estrela; o que salta muitas vezes vem mais tarde e, após duas músicas de uma banda, vêm primeiro outras bandas. Caso contrário, é para a família. Música infantil só para canções infantis, e sem músicas com letras explícitas assim que um perfil tiver o modo seguro para crianças ou for um perfil infantil.',
+  'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family – without a family for everyone. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a person has kid-safe mode or is a child profile.':
+    'O Navidrome não diz quem pergunta. Se a música estiver a tocar em exatamente uma conta – ou se só uma conta estiver a tocar –, a resposta é para essa pessoa: sem aquilo de que não gosta, sem o que acabou de ouvir ou classificou com 1 estrela; o que salta muitas vezes vem mais tarde, e depois de duas músicas de uma banda vêm primeiro outras bandas. Caso contrário, é para a família – sem família, para todos. Música infantil só para canções infantis, e sem músicas com letras explícitas assim que uma pessoa tiver o modo seguro para crianças ou for um perfil infantil.',
   'Create a new key?':
     'Criar uma nova chave?',
   'The old key stops working – enter the new one in Navidrome afterwards.':
@@ -676,8 +674,8 @@ export default {
     'Ainda nada? Coloque o novo ficheiro do plugin no Navidrome, reinicie-o e dê ao plugin acesso a todos os utilizadores.',
   '{when} · for {name}':
     '{when} · para {name}',
-  '{when} · for the family':
-    '{when} · para a família',
+  '{when} · for everyone':
+    '{when} · para todos',
   '{when} · probably for {name}':
     '{when} · provavelmente para {name}',
   'Last answer with similar songs':

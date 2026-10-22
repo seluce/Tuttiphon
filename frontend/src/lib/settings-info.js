@@ -9,7 +9,7 @@ export const START_SECTIONS = translated(() => ({
   todo: [t('To review'), t('Notes: missing passwords, new bands, old playlists …'), 'check-circle'],
   woche: [t('Played this week'), t('Most played bands of the last 7 days'), 'trending'],
   neu: [t('New in your library'), t('Recently added albums'), 'disc'],
-  playlists: [t('All of your playlists'), t('All active playlists as a carousel'), 'playlists'],
+  playlists: [t('All playlists'), t('All active playlists as a carousel'), 'playlists'],
   karten: [t('Deezer & library'), t('State of the ratings, file formats'), 'star'],
   verlauf: [t('History'), t('The latest runs'), 'clock'],
 }))

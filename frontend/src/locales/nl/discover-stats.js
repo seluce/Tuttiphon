@@ -188,8 +188,6 @@ export default {
     'Nog geen afspeelbeurten geteld',
   'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.':
     'Navidrome heeft nog geen afspeelbeurten voor “{user}” opgeslagen. In Symfonium moet “Scrobbling” of “Report plays to the server” aan staan.',
-  '{names} use the same Navidrome account “{account}” – so their numbers are the same.':
-    '{names} gebruiken hetzelfde Navidrome-account “{account}” – daarom zijn hun cijfers gelijk.',
   'Plays':
     'Afspeelbeurten',
   'from {n} different song':
@@ -338,8 +336,8 @@ export default {
     'Personen',
   'Do you like the band?':
     'Vind je de band leuk?',
-  'Your profiles':
-    'Jouw profielen',
+  'Your profile':
+    'Je profiel',
   'Favorite':
     'Favoriet',
   '“Favorite”: shows up more often in your mixes. “never”: never gets into your playlists.':

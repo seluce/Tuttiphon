@@ -143,8 +143,9 @@ def main():
         key = sonic.new_key()
         cfg = config.load_config()
         cfg["settings"].update(autoApply=False, minDuration=0)
-        cfg["personen"].append({**copy.deepcopy(cfg["personen"][0]), "id": "check", "name": "Check", "user": nd_user,
-                                "public": False})   # plays are kept only for accounts with a person
+        cfg["personen"].append({"id": "check", "name": "Check", "user": nd_user, "prefix": "",   # plays are kept only
+                                "likes": {"welten": [], "stile": [], "artists": []},           # for accounts with a person
+                                "dislikes": {"artists": [], "genres": []}})
         config.save_config(cfg)
         (work / "tp" / ".env").write_text(f"NAV_URL=http://127.0.0.1:{ND_PORT}\nNAV_ADMIN_USER={nd_user}\n"
                                           f"NAV_ADMIN_PASS={nd_pass}\n")

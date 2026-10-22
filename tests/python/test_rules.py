@@ -316,7 +316,7 @@ class TestBuildNsp(unittest.TestCase):
             "sort": "random", "limit": 100})
 
     def test_all_playlist_negates_separate_worlds_as_documented(self):
-        nsp = self.nsp(welt="*", stil="80er", hits=True, sort="beliebt")
+        nsp = self.nsp(welt="*", stil="80er", hits=True, sort="beliebt", person="familie")
         self.assertEqual(nsp["name"], "80er (Hits)")
         self.assertEqual(nsp["comment"], "Tuttiphon: Alle × 80er")
         self.assertEqual(nsp["sort"], "-rating")
@@ -391,9 +391,10 @@ class TestBuildNsp(unittest.TestCase):
         self.assertIn({"notContains": {"genre": "Metal"}}, all_)
         self.assertNotIn({"isNot": {"artist": "Band X"}}, all_)   # no-go of another person
 
-    def test_default_person_when_playlist_has_none(self):
-        all_ = self.nsp(welt="metal", stil="*")["all"]
-        self.assertIn({"isNot": {"artist": "Band X"}}, all_)   # no-go of the default person "familie"
+    def test_without_a_person_nobody_s_dislikes(self):
+        all_ = self.nsp(welt="metal", stil="*")["all"]   # a neutral view (counts of a music world)
+        self.assertNotIn({"isNot": {"artist": "Band X"}}, all_)
+        self.assertIn({"isNot": {"artist": "Band X"}}, self.nsp(welt="metal", stil="*", person="familie")["all"])
 
     def test_exclude_titles_from_settings_and_all_chosen_worlds(self):
         self.cfg["welten"][2]["excludeTitles"] = ["Dudelsack-Solo"]
@@ -434,12 +435,10 @@ class TestBuildNsp(unittest.TestCase):
         self.cfg["welten"][1]["minDuration"] = 0
         self.assertEqual(duration(welt="metal", stil="*"), [])
 
-    def test_public_defaults(self):
+    def test_only_the_family_s_playlists_are_for_everyone(self):
         self.assertTrue(self.nsp(welt="metal", stil="*", person="familie")["public"])
         self.assertFalse(self.nsp(welt="metal", stil="*", person="jonas")["public"])
-        self.assertFalse(self.nsp(welt="metal", stil="*", person="niklas")["public"])   # "public" missing -> private
-        self.assertTrue(self.nsp(welt="metal", stil="*", person="gibtsnicht")["public"])   # settings.public
-        self.cfg["settings"]["public"] = False
+        self.assertFalse(self.nsp(welt="metal", stil="*", person="niklas")["public"])
         self.assertFalse(self.nsp(welt="metal", stil="*", person="gibtsnicht")["public"])
 
     def test_filters_sort_limit_and_not_played(self):
@@ -476,7 +475,7 @@ class TestSummary(unittest.TestCase):
         self.cfg = base_config()
 
     def test_all_playlist_summary(self):
-        lines = rules.summary(self.cfg, {"id": "t", "welt": "*", "stil": "80er", "minRating": 3},
+        lines = rules.summary(self.cfg, {"id": "t", "welt": "*", "stil": "80er", "minRating": 3, "person": "familie"},
                               BuildContext(None, OCT))
         self.assertEqual(lines, [
             "Die ganze Bibliothek – ohne Kinder",

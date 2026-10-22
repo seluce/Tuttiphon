@@ -220,7 +220,7 @@ class ListenerTest(unittest.TestCase):
 
     def test_unclear_is_for_the_family(self):
         self.assertIn("Blech", self.ask()[1])
-        self.assertIsNone(sonic.status()["lastFor"])
+        self.assertEqual(sonic.status()["lastFor"], "Familie")   # nobody playing: the family's answer
         self.play("niklas", "Stahl-0")         # the only one playing anything: his – also for another song
         self.assertNotIn("Blech", self.ask()[1])
         self.play("oma", "Harfe-0")            # two playing, neither Eisen-0: unclear
@@ -228,7 +228,10 @@ class ListenerTest(unittest.TestCase):
         self.play("niklas", "Eisen-0")
         self.play("oma", "Eisen-0")            # both on the same song: unclear
         self.assertIn("Blech", self.ask()[1])
-        self.assertIsNone(sonic.status()["lastFor"])
+        self.assertEqual(sonic.status()["lastFor"], "Familie")
+        self.cfg["personen"] = [p for p in self.cfg["personen"] if not p.get("family")]
+        self.ask()
+        self.assertIsNone(sonic.status()["lastFor"])   # without a family: for everyone
 
     def test_skipped_further_down_and_one_star_out(self):
         from app import feedback
@@ -262,19 +265,14 @@ class ListenerTest(unittest.TestCase):
             self.assertEqual(sonic._rated_one(self.lib, "oma"), frozenset())   # loading
             self.assertEqual(sonic._rated_one(self.lib, "Oma"), {theirs.songs[3]["id"]})
 
-    def test_the_own_person_of_a_shared_account(self):
-        """The shared person on a parent's account: the parent's own person listens – with the family's dislikes."""
-        self.cfg["personen"][0]["user"] = "niklas"   # the shared person "Familie" uses Niklas' account too
+    def test_the_family_s_account_on_a_shared_device(self):
+        """The family's own account playing (a tablet in the car): the family's answer – its dislikes, for sure."""
         self.cfg["personen"][0]["dislikes"] = {"artists": ["Stahl"], "genres": []}
-        self.play("niklas", "Eisen-0")
+        self.play("familie", "Eisen-0")
         bands = self.ask()[1]
-        self.assertFalse({"Blech", "Stahl"} & set(bands))   # his and the family's dislikes
-        self.assertEqual(sonic.status()["lastFor"], "Niklas")
-        self.cfg["personen"][2]["user"] = "oma"   # now only the shared person is left on the account: it listens
-        self.clean()
-        self.play("niklas", "Eisen-0")
-        self.ask()
-        self.assertEqual(sonic.status()["lastFor"], "Familie")
+        self.assertNotIn("Stahl", bands)                 # the family's dislike
+        self.assertIn("Blech", bands)                    # not Niklas' – it is not his account
+        self.assertEqual((sonic.status()["lastFor"], sonic.status()["lastGuess"]), ("Familie", False))
 
     def test_a_guess_never_brings_a_child_s_music(self):
         """root (no person, plays not kept) asks about a metal song while a child listens: not the child's answer."""
@@ -286,7 +284,7 @@ class ListenerTest(unittest.TestCase):
         self.assertFalse(listen.record("root", "report", "Eisen-0", position=5, state="playing", player="web",
                                        cfg=self.cfg, now=time.time()))   # not kept, but playing
         bands = self.ask("Eisen-0")[1]
-        self.assertIsNone(sonic.status()["lastFor"])   # two playing: unclear
+        self.assertEqual(sonic.status()["lastFor"], "Familie")   # two playing: unclear – the family's answer
         self.assertFalse({"Kita", "Sandkasten"} & set(bands))
         listen._active.pop("root")
         bands = self.ask("Eisen-0")[1]                  # only Jonas playing: a guess for him …

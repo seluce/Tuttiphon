@@ -1,6 +1,7 @@
 <!--
   Statistics: what is really being played? "Overall" from Navidrome's play counters, "This week", "30 days"
-  and "Year" as a recap from the counters saved every day. Top right: the person (if there are several).
+  and "Year" as a recap from the counters saved every day. Top right: the person (if there are several) – administrators
+  everyone, users their own and the family's.
 -->
 <script module>
   // The chosen person stays when switching between the periods
@@ -16,7 +17,8 @@
   import { showChosen } from '../components/Seg.svelte'
   import Overall from './stats/Overall.svelte'
   import Rueckblick from './stats/Rueckblick.svelte'
-  import { S, isAdmin, ownPersons, defaultPerson, findPerson } from '../lib/state.svelte.js'
+  import { S, isAdmin, myPerson, familyPerson, defaultOwner, findPerson } from '../lib/state.svelte.js'
+  import { ownerOrder } from '../lib/playlist.js'
   import { api } from '../lib/api.js'
   import { passwordModal } from '../lib/account.js'
   import { t } from '../lib/i18n.svelte.js'
@@ -30,9 +32,10 @@
   const kind = $derived(KINDS.some(([k]) => k === wanted) ? wanted : 'gesamt')
   const admin = isAdmin()
 
-  if (!current || !ownPersons().some((p) => p.id === current)) current = defaultPerson()   // person may have been deleted or belong to someone else
+  const choices = () => ownerOrder(admin ? S.config.personen : [myPerson(), familyPerson()].filter(Boolean))
+  const persons = $derived(choices())
+  if (!current || !choices().some((p) => p.id === current)) current = defaultOwner()?.id   // person may have been deleted or belong to someone else
   let personId = $state(current)
-  const persons = $derived(ownPersons())
   const person = $derived(findPerson(personId))
   const pwOk = (p) => (S.status?.env?.users || []).find((u) => u.name.toLowerCase() === (p.user || '').toLowerCase())?.ok
 
@@ -42,8 +45,8 @@
     const mine = ++seq   // only show the answer for the most recently chosen person
     result = null
     try {
-      const d = await api(kind === 'gesamt' ? `/api/stats?person=${encodeURIComponent(personId)}`
-        : `/api/rueckblick?kind=${kind}&person=${encodeURIComponent(personId)}`)
+      const who = encodeURIComponent(personId || '')
+      const d = await api(kind === 'gesamt' ? `/api/stats?person=${who}` : `/api/rueckblick?kind=${kind}&person=${who}`)
       if (mine === seq) result = { d }
     } catch (e) {
       if (mine === seq) result = { error: e.message }
@@ -70,7 +73,7 @@
           {#each persons as p (p.id)}
             <button class:on={personId === p.id} onclick={() => choose(p.id)}>
               <Glyph value={p.icon} size={16} />{p.name}
-              {#if !pwOk(p)}<span class="inline-flex opacity-70" title={t('Password missing')}><Icon name="lock" size={13} /></span>{/if}
+              {#if admin && !pwOk(p)}<span class="inline-flex opacity-70" title={t('Password missing')}><Icon name="lock" size={13} /></span>{/if}
             </button>
           {/each}
         </div>
@@ -90,7 +93,7 @@
     <Empty icon="lock" title={person?.name ? t('No statistics for {name}', { name: person.name }) : t('No statistics for this person')} text={result.error}>
       {#if !/kein Passwort|no password/i.test(result.error)}
         <!-- e.g. Navidrome currently unreachable: no password button (the regex matches the server's error text) -->
-      {:else if !admin}
+      {:else if !admin && personId === myPerson()?.id}
         <a class="btn primary" href="#/einstellungen/konto"><Icon name="key" size={16} />{t('Turn on statistics')}</a>
       {:else if person?.user}
         <button class="btn primary" onclick={enterPassword}>{t('Enter password')}</button>

@@ -6,7 +6,7 @@
   import Glyph from '../components/Glyph.svelte'
   import Mosaic from '../components/Mosaic.svelte'
   import PersonAvatar from '../components/PersonAvatar.svelte'
-  import { S, ownPersons, plStatus, isAdmin } from '../lib/state.svelte.js'
+  import { S, myPerson, plStatus, isAdmin } from '../lib/state.svelte.js'
   import { plName, plEmoji } from '../lib/playlist.js'
   import { go } from '../lib/router.svelte.js'
   import { openArtist } from '../lib/artist.js'
@@ -47,7 +47,7 @@
   /** Combined search ("calm children's songs", "calm piano music"), an instrument or a theme: open the assistant's
    *  last step with the preview – nothing is created yet */
   function openCombo(c) {
-    if (!isAdmin() && !(S.me?.own || []).length) { go('#/willkommen'); return }   // an own profile first
+    if (!isAdmin() && !myPerson()) { go('#/willkommen'); return }   // an own profile first
     const pl = c.playlist
     // how often the mix renews itself: as the search row says (“new every week”)
     const args = new URLSearchParams({ type: 'mix', step: '3', name: c.title, every: pl.mix?.every || 'week' })
@@ -72,7 +72,7 @@
     if (pls.length) out.push({ title: t('Playlists'), items: pls.map((p) => ({ kind: 'pl', p, pick: () => go(`#/playlist/${encodeURIComponent(p.id)}`) })) })
     const wel = S.config.welten.filter((w) => w.name.toLowerCase().includes(s)).slice(0, 4)
     if (wel.length) out.push({ title: t('Music worlds'), items: wel.map((w) => ({ kind: 'welt', w, pick: () => go(`#/welt/${w.id}`) })) })
-    const per = ownPersons().filter((p) => p.name.toLowerCase().includes(s)).slice(0, 3)
+    const per = (isAdmin() ? S.config.personen : [myPerson()].filter(Boolean)).filter((p) => p.name.toLowerCase().includes(s)).slice(0, 3)
     if (per.length) out.push({ title: t('People'), items: per.map((p) => ({ kind: 'person', p, pick: () => go(`#/person/${p.id}`) })) })
     if (extra.moods.length) out.push({ title: t('Mood'), items: extra.moods.map((m) => ({ kind: 'mood', m,
       pick: () => go(m.stil ? `#/neu?stil=${encodeURIComponent(m.stil)}&type=mix&step=1` : '#/neu') })) })   // i18n-ignore: route
