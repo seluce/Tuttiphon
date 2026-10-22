@@ -5,7 +5,7 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 1.7.0
 
 - **Translations checked:** corrections in all six new languages (e.g. Spanish “por sí solo” where it means “by
   itself”, Italian always “tu”, the colour theme with its own word), counts in the singular where there is one song
