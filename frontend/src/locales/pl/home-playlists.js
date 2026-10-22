@@ -491,4 +491,19 @@ export default {
     'Album tygodnia · nowy w każdy poniedziałek',
   'This week’s album':
     'Album tygodnia',
+  'Today’s episodes':
+    'Dzisiejsze odcinki',
+  'The next episode of every series, the one heard last first – tomorrow morning it moves on to what was heard today.':
+    'Kolejny odcinek każdej serii, zaczynając od ostatnio słuchanej – jutro rano lista pójdzie dalej, zgodnie z tym, czego słuchano dzisiaj.',
+  'the next episode of {n} series, new every day':
+    'następny odcinek {n} serii, codziennie nowy',
+  'the next episode of each of {n} series, new every day': { few: 'następny odcinek każdej z {n} serii, codziennie nowy', many: 'następny odcinek każdej z {n} serii, codziennie nowy' },
+  'Next episode · new every day':
+    'Następny odcinek · codziennie nowy',
+  'one series':
+    'jedna seria',
+  '{n} series': { few: '{n} serie', many: '{n} serii' },
+  '{n} track':
+    '{n} utwór',
+  '{n} tracks': { few: '{n} utwory', many: '{n} utworów' },
 }

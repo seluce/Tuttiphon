@@ -410,4 +410,8 @@ export default {
     'Daarvoor heeft Tuttiphon één keer je Navidrome-wachtwoord nodig – laat bij het inloggen “Statistieken & sterren inschakelen” aangevinkt, of schakel het in onder <a class="link" href="#/einstellungen/konto">Instellingen → Mijn account</a>.',
   '<b>Changed your password in Navidrome?</b> Under <a class="link" href="#/einstellungen/konto">My account</a>, turn statistics off and on again with the new one.':
     '<b>Je wachtwoord in Navidrome gewijzigd?</b> Schakel onder <a class="link" href="#/einstellungen/konto">Mijn account</a> de statistieken uit en weer in met het nieuwe wachtwoord.',
+  '<b>Next episode</b> – for every audio play series you listen to, the episode that comes next.':
+    '<b>Volgende aflevering</b> – voor elke hoorspelserie waar je naar luistert, de aflevering die nu aan de beurt is.',
+  '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
+    '<b>De wachtrij leert mee:</b> sla je twee keer over, dan wisselt die meteen naar een andere klank. Om de paar nummers zit er een tussen dat je nog nooit hebt gespeeld – hoe vaak, stel je in <a class="link" href="#/profil">je profiel</a> in.',
 }

@@ -653,7 +653,24 @@ and without a child profile's music. Then, for similar songs, artist and album r
   (`listen.sequence()`, the song asked about at the end): after `RUN_MAX` = 2 songs of one band in a row its songs
   count only a fifth (`RUN_FACTOR`), so other bands come first; a band heard n times in the last hour counts
   `HOUR_FACTOR`^(n − 1) (0.85);
-- a guess is careful – it may be someone else asking: no 1-stars left out, no variety, never a child profile's music;
+- when sure, for similar songs the queue **learns in the moment** (`_steer()`): `listen.moment()` reads the account's
+  last 15 minutes (`STEER_SECONDS`) song after song – skipped as in the mixes' live skips, from the reports of the
+  player that reported last, otherwise from the starts (a new song's start counts even before its player's first
+  report) – and how many were skipped in a row right before the song playing now. The sound asked for moves away from
+  the mean sound of the (last three) skipped songs: by 0.2 if the skips were earlier in the window, 0.35 after one
+  right before, 0.7 after two or more in a row (`STEER_AWAY`), and after two in a row also 0.5 toward the songs listened
+  to on (`STEER_BACK`); the skipped bands count 0.7 / 0.5 / 0.25 (`SKIPPED_BAND`);
+- when sure, **songs never played come in** (`_mix_new()`, similar songs, artist and album radio): every n-th song of
+  the answer is one the account has never played – the person's `newEvery` (0 never, 5 now and then – the default –,
+  3 often; Profile → “New songs in the queue”). “Played” is what Tuttiphon counted (`rueckblick.played_ever()`:
+  `baseline.json` and `first.json`) plus the live plays of the last two days; without anything counted the answer stays
+  as it is. The count goes on from the last never played song of an earlier answer that the account played since
+  (`_given`, memory only, `_since_new()` over `listen.sequence()`), so the smart queue – which takes the first song of
+  each answer – gets one every n songs and an Instant Mix one at every n-th place. The song brought is the most similar
+  never played one (another recording than those in the answer); the similarities are made to fall along the answer
+  (`_monotone()`) so the order holds even where a player sorts by them;
+- a guess is careful – it may be someone else asking: no 1-stars left out, no variety, no steering, no songs never
+  played, never a child profile's music;
 - kid-safe stays as for the family – never loosened;
 - not remembered (the family's answers are).
 

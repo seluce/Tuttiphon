@@ -117,6 +117,24 @@ class ListenTest(unittest.TestCase):
         self.assertEqual(listen.skips(USER, DAY, DAY), {"a": [DAY.isoformat()]})
         self.assertEqual(listen.plays(USER, DAY, DAY), {"b": 1, "c": 1})
 
+    def test_the_moment_for_the_smart_queue(self):
+        """The last minutes, song after song: what was skipped, what was listened to on, skips in a row right before the
+        song playing now – which is not judged yet."""
+        self.rep("z", 0, 0)
+        self.rep("a", 200, 0)                        # z played on
+        self.rep("b", 210, 0)                        # a after 10 s
+        self.rep("c", 300, 0)                        # b played on
+        self.rep("d", 305, 0)                        # c after 5 s
+        self.rep("e", 312, 0)                        # d after 7 s – e is playing now
+        got = listen.moment(USER, now=at(315))
+        self.assertEqual(got, {"skipped": ["a", "c", "d"], "kept": ["z", "b"], "streak": 2})
+        self.ev("start", "f", 320, position=0)        # f started, its player's report not here yet: e was skipped too
+        self.assertEqual(listen.moment(USER, now=at(321))["streak"], 3)
+        self.assertEqual(listen.moment(USER, now=at(321 + 1800))["skipped"], [])   # half an hour later: forgotten
+        self.rep("f", 330, 20)
+        self.rep("g", 600, 0)                        # f played on: the run of skips is over
+        self.assertEqual(listen.moment(USER, now=at(601))["streak"], 0)
+
     def test_listening_clock_gets_every_play_once(self):
         self.ev("start", "a", 0, position=0)
         listen.record(USER, "play", "a", t=at(0), now=at(200))     # the same play

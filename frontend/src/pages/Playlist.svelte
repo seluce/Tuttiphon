@@ -98,14 +98,14 @@
       <div class="g-2 section">
         <div class="card">
           <div class="card-head">
-            <h2>{p.album ? t('This week’s album') : mix ? every.title : t('Sample')}</h2>
+            <h2>{p.album ? t('This week’s album') : p.episodes ? t('Today’s episodes') : mix ? every.title : t('Sample')}</h2>
             <div class="btns">
               {#if tracks.length}
                 <button class="btn sm primary" onclick={() => (playing ? toggle() : playList(tracks, 0, d.name))}>
                   <Icon name={playing ? 'pause' : 'play'} size={15} />{playing ? t('Pause') : t('Play')}
                 </button>
               {/if}
-              {#if mix && status === 'aktiv' && own}
+              {#if mix && !p.episodes && status === 'aktiv' && own}
                 <button class="btn sm ghost" onclick={() => reroll(p)}><Icon name="dice" size={16} />{t('reshuffle')}</button>
               {:else if !mix}
                 <button class="btn sm ghost" onclick={shuffle}><Icon name="shuffle" size={16} />{t('shuffle again')}</button>
@@ -115,6 +115,8 @@
           <p class="muted small -mt-1.5 mb-2.5">
             {p.album
               ? t('One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in Symfonium.')
+              : p.episodes
+              ? t('The next episode of every series, the one heard last first – tomorrow morning it moves on to what was heard today.')
               : mix
               ? every.about(fmt(d.count))
               : t('This is how a mix could look – Navidrome reshuffles on every request.')}

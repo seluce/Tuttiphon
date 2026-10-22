@@ -280,4 +280,12 @@ export default {
   'Music that plays on {name}’s account for someone else – e.g. children’s music. It stays in the family playlists, but {name}’s discoveries, album of the week, own sound and good morning follow {name}’s own music.': 'Musik, die auf dem Konto von {name} für jemand anderen läuft – z. B. Kindermusik. Sie bleibt in den Familien-Playlists, aber Entdeckungen, Album der Woche, eigener Sound und Guten Morgen von {name} richten sich nach der eigenen Musik.',
   'Leave out another music world': 'Weitere Musikwelt herausnehmen',
   'Choose …': 'Auswählen …',
+  'New songs in the queue': 'Neue Songs in der Warteschlange',
+  'Never': 'Nie',
+  'Now and then': 'Ab und zu',
+  'Often': 'Oft',
+  'In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.':
+    'In der intelligenten Warteschlange und im Instant Mix von Symfonium kommt alle paar Songs einer, den du noch nie gehört hast – der, der am meisten nach dem klingt, was gerade läuft.',
+  'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
+    'In der intelligenten Warteschlange und im Instant Mix von Symfonium kommt alle paar Songs einer, den {name} noch nie gehört hat – der, der am meisten nach dem klingt, was gerade läuft.',
 }

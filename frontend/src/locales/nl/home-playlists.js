@@ -510,4 +510,22 @@ export default {
     'Album van de week · elke maandag nieuw',
   'This week’s album':
     'Album van deze week',
+  'Today’s episodes':
+    'Afleveringen van vandaag',
+  'The next episode of every series, the one heard last first – tomorrow morning it moves on to what was heard today.':
+    'De volgende aflevering van elke serie, de laatst beluisterde eerst – morgenochtend gaat het verder met wat vandaag is beluisterd.',
+  'the next episode of {n} series, new every day':
+    'de volgende aflevering van {n} serie, elke dag nieuw',
+  'the next episode of each of {n} series, new every day':
+    'de volgende aflevering van {n} series, elke dag nieuw',
+  'Next episode · new every day':
+    'Volgende aflevering · elke dag nieuw',
+  'one series':
+    'één serie',
+  '{n} series':
+    '{n} series',
+  '{n} track':
+    '{n} track',
+  '{n} tracks':
+    '{n} tracks',
 }

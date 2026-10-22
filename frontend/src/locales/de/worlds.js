@@ -299,4 +299,8 @@ export default {
   'Only songs this account has never played – what sounds like its taste comes much more often. New every week by default, at most one song per album.': 'Nur Songs, die dieses Konto noch nie gespielt hat – was nach seinem Geschmack klingt, kommt deutlich öfter. Standardmäßig jede Woche neu, höchstens ein Song pro Album.',
   'Album of the week: one whole album this account has never played, picked by its taste – favorite bands first – in album order. New every Monday; during the week it stays the same.': 'Album der Woche: ein ganzes Album, das dieses Konto noch nie gespielt hat, nach seinem Geschmack ausgewählt – Lieblingsbands zuerst – in Albumreihenfolge. Jeden Montag neu; während der Woche bleibt es gleich.',
   'This week: {n} songs, one whole album out of {pool} never played': 'Diese Woche: {n} Songs, ein ganzes Album aus {pool} noch nie gehörten',
+  'Today: the next episode of {n} series': 'Heute: die nächste Folge von {n} Serie',
+  'Today: the next episode of each of {n} series': 'Heute: die nächste Folge von {n} Serien',
+  'Next episode: for every audio play series this account listened to in the last 3 months, the episode that comes next – the rest of the one begun, otherwise the next one never heard. New every day; the series heard last come first.':
+    'Nächste Folge: für jede Hörspielserie, die dieses Konto in den letzten 3 Monaten gehört hat, die Folge, die als Nächstes kommt – der Rest der angefangenen, sonst die nächste noch nie gehörte. Jeden Tag neu; die zuletzt gehörten Serien zuerst.',
 }

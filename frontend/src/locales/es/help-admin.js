@@ -432,4 +432,8 @@ export default {
     'Escríbelo en el campo de búsqueda de arriba, como «manos arriba» – en «En la letra» encontrarás la canción.',
   'For a quick listen, yes: tap a song. It doesn’t count toward your statistics – for real listening there’s Symfonium.':
     'Para escuchar un momento, sí: toca una canción. No cuenta para tus estadísticas – para escuchar de verdad está Symfonium.',
+  '<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.':
+    '<b>Siguiente episodio</b> – para cuentas que escuchan audiodramas: el siguiente episodio de cada serie, nuevo cada día.',
+  'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
+    'Saltar canciones reorienta la cola inteligente al instante: tras dos saltos seguidos, cambia a otro sonido. Cada pocas canciones entra una que la cuenta nunca ha escuchado – la frecuencia se ajusta por persona en el perfil («Canciones nuevas en la cola»).',
 }

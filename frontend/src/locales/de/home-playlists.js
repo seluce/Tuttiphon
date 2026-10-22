@@ -283,4 +283,14 @@ export default {
   'from {n} albums never played': 'aus {n} noch nie gehörten Alben',
   'Album of the week · new every Monday': 'Album der Woche · jeden Montag neu',
   'This week’s album': 'Das Album dieser Woche',
+  'Today’s episodes': 'Die Folgen von heute',
+  'The next episode of every series, the one heard last first – tomorrow morning it moves on to what was heard today.':
+    'Die nächste Folge jeder Serie, die zuletzt gehörte zuerst – morgen früh geht es weiter mit dem, was heute gehört wurde.',
+  'the next episode of {n} series, new every day': 'die nächste Folge von {n} Serie, jeden Tag neu',
+  'the next episode of each of {n} series, new every day': 'die nächste Folge von {n} Serien, jeden Tag neu',
+  'Next episode · new every day': 'Nächste Folge · jeden Tag neu',
+  'one series': 'eine Serie',
+  '{n} series': '{n} Serien',
+  '{n} track': '{n} Titel',
+  '{n} tracks': '{n} Titel',
 }

@@ -134,5 +134,6 @@
  "config: {where}: unknown theme": "config: {where}: nieznany temat",
  "config: playlist '{id}': time of day invalid": "config: playlista '{id}': nieprawidłowa pora dnia",
  "config: playlist '{id}': “never played” only exists as a mix": "config: playlista '{id}': „nigdy nieodtwarzane” istnieje tylko jako mix",
- "config: playlist '{id}': “album of the week” only exists as a mix": "config: playlista '{id}': „album tygodnia” istnieje tylko jako mix"
+ "config: playlist '{id}': “album of the week” only exists as a mix": "config: playlista '{id}': „album tygodnia” istnieje tylko jako mix",
+ "config: playlist '{id}': “next episode” only exists as a mix": "config: playlista '{id}': „następny odcinek” istnieje tylko jako mix"
 }

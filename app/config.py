@@ -616,7 +616,8 @@ def _validate_config(cfg):
             raise ValueError(_("config: playlist '{id}': radio needs at least one starting band", id=p.get('id')))
         taste_mix = p.get("type") == "mix" and isinstance(p.get("mix"), dict) and p["mix"].get("flavor") == "geschmack"
         special = p.get("fav") or p.get("review") or p.get("together") or p.get("daytime") or p.get("unheard") \
-            or p.get("album")   # favorite bands, recap, family mix, the morning, never played, album of the week
+            or p.get("album") or p.get("episodes")   # favorite bands, recap, family mix, the morning, never played,
+        #                                              album of the week, next episode
         # an instrument narrows the whole library enough (“ruhige Klaviermusik”, combined search)
         special = special or (isinstance(p.get("sound"), dict) and (p["sound"].get("instruments") or p["sound"].get("themes")))
         if not wl and p.get("stil") == "*" and not radio and not taste_mix and not special:   # “Your sound” picks from everything
@@ -645,6 +646,8 @@ def _validate_config(cfg):
             raise ValueError(_("config: playlist '{id}': “never played” only exists as a mix", id=p.get('id')))
         if p.get("album") is not None and not (p["album"] is True and p.get("type") == "mix"):
             raise ValueError(_("config: playlist '{id}': “album of the week” only exists as a mix", id=p.get('id')))
+        if p.get("episodes") is not None and not (p["episodes"] is True and p.get("type") == "mix"):
+            raise ValueError(_("config: playlist '{id}': “next episode” only exists as a mix", id=p.get('id')))
     for p in cfg["playlists"]:
         # minDuration: seconds (null = from the music world or the settings); every number ends up in int() when
         # writing – a text or an endless number there would stop the playlists of the whole family
@@ -729,6 +732,9 @@ def _validate_types(cfg):
         if p.get("push") not in (None, "") and not (isinstance(p["push"], str) and re.fullmatch(r"[A-Za-z0-9_-]{1,64}", p["push"])):
             raise ValueError(_("config: person '{id}': the topic for notifications may only contain letters, digits, - and _",
                                id=p['id']))
+        new = p.get("newEvery")   # never played songs in the smart queue: every n-th song (sonic.NEW_CHOICES), 0 = none
+        if new is not None and (isinstance(new, bool) or new not in (0, 3, 5)):
+            raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key="newEvery"))
         te = p.get("tasteExclude")   # music worlds that do not count for the person's taste (ids; unknown ones are ignored)
         if te is not None and (not strs(te) or len(te) > 50 or any(long(x, 100) for x in te)):
             raise ValueError(_("config: person '{id}': {key} invalid", id=p['id'], key="tasteExclude"))

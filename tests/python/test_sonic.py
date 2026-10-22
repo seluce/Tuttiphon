@@ -6,7 +6,7 @@ import json
 import unittest
 from unittest import mock
 
-from app import classify, sonic, web
+from app import classify, rueckblick, sonic, web
 from app.rules import Library
 from tests.python.factory import base_config, song
 from tests.python.test_audit_server import request
@@ -191,6 +191,8 @@ class ListenerTest(unittest.TestCase):
         listen._active.clear()
         sonic._memo.clear()
         sonic._stars.clear()
+        sonic._given.clear()
+        rueckblick._ever.clear()
 
     def play(self, user, sid, ago=0):
         from app import listen
@@ -303,6 +305,54 @@ class ListenerTest(unittest.TestCase):
         self.assertNotIn("Eisen", bands[:2])                 # now other bands first
         self.assertIn("Eisen", bands)                        # … but still there, further down
         self.assertEqual(sonic.status()["lastFor"], "Niklas")
+
+    def test_skips_turn_the_queue_elsewhere(self):
+        """Two metal songs skipped right before Eisen-0, a folk song listened to on: the next songs sound like folk."""
+        self.play("niklas", "Eisen-0")
+        self.assertTrue(set(self.ask()[1][:3]) <= {"Eisen", "Stahl"})   # without skips: metal like the song
+        self.clean()
+        self.play("niklas", "Harfe-1", ago=300)
+        self.play("niklas", "Stahl-1", ago=30)   # after 4:30 minutes of the harp: on to Stahl-1 …
+        self.play("niklas", "Stahl-2", ago=20)   # … left after 10 s …
+        self.play("niklas", "Eisen-0")           # … and Stahl-2 after 20 s
+        from app import listen
+        self.assertEqual(listen.moment("niklas")["streak"], 2)
+        ids, bands = self.ask()
+        self.assertTrue(set(bands[:3]) <= {"Harfe", "Dudel", "Flöte"}, bands)   # somewhere else at once
+        self.assertTrue(all(k >= len(bands) // 2 for k, b in enumerate(bands) if b == "Stahl"), bands)   # skipped band: far down
+        self.assertEqual(sonic.status()["lastFor"], "Niklas")
+
+    def test_never_played_songs_come_in(self):
+        """Every 5th song one the account has never played (the person's "newEvery") – the smart queue, which takes
+        the first song of each answer, gets one every 5 songs."""
+        new = {"Stahl-3", "Stahl-4", "Stahl-5", "Harfe-3", "Harfe-4", "Harfe-5", "Dudel-5", "Flöte-5"}
+        folder = rueckblick._dir("niklas")
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "first.json").write_text(json.dumps({s["id"]: "2026-10-01" for s in self.lib.songs
+                                                       if s["id"] not in new}))
+        self.play("niklas", "Eisen-0")           # the first song: the 4th of the answer is a new one
+        ids = self.ask(count=12)[0]
+        self.assertTrue(ids[3] in new and ids[8] in new, ids)   # (a new one may be among the nearest anyway)
+        scores = [x["similarity"] for x in sonic.answer(self.cfg, self.lib, "similar", {"id": "Eisen-0", "count": "12"})["songs"]]
+        self.assertEqual(scores, sorted(scores, reverse=True))   # the order holds where a player sorts by them
+        brought = ids[3]
+        self.clean()
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "first.json").write_text(json.dumps({s["id"]: "2026-10-01" for s in self.lib.songs if s["id"] not in new}))
+        sonic._given["niklas"] = {brought: 0}
+        self.play("niklas", "Eisen-1", ago=60)
+        self.play("niklas", brought)             # the new song plays now: the next new one only as 5th
+        ids = self.ask(brought, count=12)[0]
+        self.assertIn(ids[4], new)
+        self.cfg["personen"][2]["newEvery"] = 3  # often: every 3rd
+        sonic._given["niklas"] = {brought: 0}
+        self.assertIn(self.ask(brought, count=12)[0][2], new)
+        self.cfg["personen"][2]["newEvery"] = 0  # never: as without anything known
+        sonic._given.clear()
+        ids = self.ask(brought, count=12)[0]
+        rueckblick._ever.clear()
+        (folder / "first.json").unlink()
+        self.assertEqual(ids, self.ask(brought, count=12)[0])
 
     def test_kid_safe_stays(self):
         self.lib.songs[1]["explicitStatus"] = "explicit"   # Eisen-1, the nearest of Eisen-0

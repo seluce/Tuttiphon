@@ -169,5 +169,8 @@
  "{name}: {n} songs you have never heard": {
   "few": "{name}: {n} piosenki, których jeszcze nie znasz",
   "many": "{name}: {n} piosenek, których jeszcze nie znasz"
- }
+ },
+ "Next episode": "Następny odcinek",
+ "Next episode for {name}": "Następny odcinek · {name}",
+ "For every audio play series this account listens to, the episode that comes next – new every day, the series heard last first.": "Dla każdej serii słuchowisk, której słucha to konto, kolejny odcinek – codziennie nowy, najpierw ostatnio słuchane serie."
 }

@@ -410,4 +410,8 @@ export default {
     'Per questo Tuttiphon ha bisogno una volta della tua password di Navidrome – all\'accesso lascia spuntato «Attiva statistiche e stelle», oppure attivalo in <a class="link" href="#/einstellungen/konto">Impostazioni → Il mio account</a>.',
   '<b>Changed your password in Navidrome?</b> Under <a class="link" href="#/einstellungen/konto">My account</a>, turn statistics off and on again with the new one.':
     '<b>Hai cambiato la password in Navidrome?</b> In <a class="link" href="#/einstellungen/konto">Il mio account</a> disattiva le statistiche e riattivale con quella nuova.',
+  '<b>Next episode</b> – for every audio play series you listen to, the episode that comes next.':
+    '<b>Prossimo episodio</b> – per ogni serie di radiodrammi che ascolti, l\'episodio successivo.',
+  '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
+    '<b>La coda impara con te:</b> salta due brani e passa subito a un altro suono. Ogni pochi brani ne arriva uno che non hai mai ascoltato – quanto spesso, lo imposti nel <a class="link" href="#/profil">tuo profilo</a>.',
 }

@@ -325,6 +325,8 @@ def describe(cfg, playlist):
         text = _s("Never played yet, picked by taste: {text}", text=text)
     if playlist.get("album"):
         return _s("Album of the week – one whole album never played yet, picked by taste, new every week")
+    if playlist.get("episodes"):
+        return _s("Next episode – the next episode of every audio play series being listened to, new every day")
     if playlist.get("review"):
         if playlist["review"].get("period") == "year":
             return _s("Recap – the most played songs of the year")
@@ -1031,6 +1033,10 @@ def summary(cfg, playlist, ctx=None):
         return [_("Album of the week: one whole album this account has never played – at least 6 songs, one band, no "
                   "compilation – picked by its taste, favorite bands first, in album order"),
                 _("New every week – during the week it stays the same, even once it has been played")]
+    if playlist.get("episodes"):
+        return [_("Next episode: for every series this account listened to in the last 3 months, the next episode – "
+                  "the rest of the one begun, otherwise the next one never heard, by episode number"),
+                _("New every day – the series heard last come first")]
     if playlist.get("review"):
         from .mixer import mix_day, options
         start, end, _title = review_period(playlist["review"].get("period", "month"), mix_day())

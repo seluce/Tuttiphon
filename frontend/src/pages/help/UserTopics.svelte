@@ -83,6 +83,7 @@
     <li>{@html t('<b>Your October</b> – your most played songs of the last month.')}</li>
     <li>{@html t('<b>Discovered for you</b> – every Monday 30 songs you have never played, picked to fit your taste.')}</li>
     <li>{@html t('<b>Album of the week</b> – every Monday a whole album you don’t know yet.')}</li>
+    <li>{@html t('<b>Next episode</b> – for every audio play series you listen to, the episode that comes next.')}</li>
     <li>{@html t('<b>Good night</b> and <b>Good morning</b> – calming down in the evening, waking up gently in the morning.')}</li>
     <li>{@html t('<b>Car ride</b> and <b>What everyone likes</b> – music the whole family enjoys.')}</li>
   </Bullets>
@@ -154,6 +155,7 @@
     <li>{@html t('<b>1 star:</b> rate a song you no longer want to hear with 1 star in Symfonium – then it no longer goes into your mixes.')}</li>
     {#if S.status?.plugin}
       <li>{@html t('<b>Radio and smart queue by sound:</b> in Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers) and choose “Sonic Analysis” for the smart queue in the player. The next songs then come from Tuttiphon – picked for you and with variety between bands.')}</li>
+      <li>{@html t('<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.')}</li>
     {/if}
   </Bullets>
 {/snippet}

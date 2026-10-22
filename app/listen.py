@@ -22,7 +22,8 @@ What comes of it:
   plays go into the recap from here (the day files rueckblick.snapshot writes); with the first snapshot that stops, so
   nothing counts twice. A play that arrives twice (Navidrome retrying it) is kept once;
 * who is listening right now (listener(), heard()) – Navidrome does not say who asks the plugin for similar songs;
-  sonic.py answers for the person playing the song asked about.
+  sonic.py answers for the person playing the song asked about;
+* what was skipped in the last minutes (moment()) – the smart queue turns away from it at once.
 """
 import datetime as dt
 import json
@@ -43,6 +44,7 @@ IDLE_SECONDS = 1800  # the first song after this long a pause on a player never 
 LISTENER_SONG = 900       # the song asked about played on exactly one account this recently: that account listens
 LISTENER_ACTIVE = 600     # otherwise: the one account playing anything right now (its last event this recent)
 HEARD_SECONDS = 3 * 3600  # what the listener heard this recently does not come again at once (sonic.py)
+STEER_SECONDS = 900       # skips this recent steer the smart queue (moment(), sonic._steer())
 KINDS = ("start", "play", "report")
 STATES = ("starting", "playing", "paused", "stopped", "expired")
 _lock = threading.Lock()
@@ -320,6 +322,39 @@ def heard(user, seconds=HEARD_SECONDS, now=None):
     """Song ids this account started, played or reported in the last `seconds`."""
     now_t = now or time.time()
     return {r["id"] for r in _recent(_folder(user), now_t - seconds, now_t)}
+
+
+def moment(user, seconds=STEER_SECONDS, now=None):
+    """What this account did in the last `seconds`, song after song – for the smart queue (sonic._steer()):
+    {"skipped": song ids skipped, "kept": song ids it stayed with, "streak": skips in a row right before the song
+    playing now}, oldest first. The song playing now (the last one) is not judged yet. Skips as in summary(): from the
+    reports of the player that reported last, otherwise from the account's starts."""
+    now_t = now or time.time()
+    rows = _recent(_folder(user), now_t - 2 * seconds, now_t)
+    played = defaultdict(list)
+    for r in rows:
+        if r["k"] == "play":
+            played[r["id"]].append(r["t"])
+
+    def heard(sid, a, b):
+        return any(a - SAME_PLAY <= t <= b + 5 for t in played.get(sid, ()))
+
+    starts = [r for r in rows if r["k"] == "start" and (r.get("pos") or 0) <= START_SECONDS]
+    reports = [r for r in rows if r["k"] == "report" and r.get("pl")]
+    seq = [r for r in reports if r["pl"] == reports[-1]["pl"]] if reports else starts
+    if reports and starts and starts[-1]["t"] > seq[-1]["t"] and starts[-1]["id"] != seq[-1]["id"]:
+        seq = seq + [starts[-1]]   # the new song started before its player's first report about it arrived
+    segs = _segments(seq)
+    skipped = set(_skipped(segs, heard))
+    out = {"skipped": [], "kept": [], "streak": 0}
+    judged = [seg for seg in segs[:-1] if seg["t0"] >= now_t - seconds]
+    for seg in judged:
+        out["skipped" if (seg["id"], seg["t0"]) in skipped else "kept"].append(seg["id"])
+    for seg in reversed(judged):
+        if (seg["id"], seg["t0"]) not in skipped:
+            break
+        out["streak"] += 1
+    return out
 
 
 def has_live(user, start, end):

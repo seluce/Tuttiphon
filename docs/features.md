@@ -30,7 +30,8 @@ A playlist is **music world × vibe × person** – for example *The 90s × Good
 - Mixes **learn from listening** – what is skipped comes up less often, a 1-star rating removes a song for that person,
   and the sound of what someone plays shapes their personal mixes.
 - **Discover** suggests ready-made playlists per person and season: new songs from favorite bands, a good-night mix
-  with a fixed length, "what everyone likes", a monthly recap.
+  with a fixed length, "what everyone likes", a monthly recap – and for audio plays **Next episode**: the episode that
+  comes next in every series someone listens to.
 
 ## FLAC to Opus or AAC
 
@@ -84,7 +85,8 @@ Every song is listened to – locally, at night, gently on a few cores:
   related artists in Navidrome, Symfonium, Feishin and other apps follow the sound of your own files, also for bands
   that Last.fm hardly knows; sound paths from one song to another for apps that support OpenSubsonic's
   `sonicSimilarity`. It also passes every play on as it happens – exact listening times and real skips for the
-  mixes, and the recap even for accounts without a stored password.
+  mixes, and the recap even for accounts without a stored password. The smart queue **learns in the moment** (skip
+  twice and it turns to another sound) and **mixes in songs never played** – every few songs, set per person.
 - **Taste per person**: what someone plays, favors and rates – including how it sounds – shapes their suggestions.
 - Last.fm (optional, free key) adds similar bands and tags.
 

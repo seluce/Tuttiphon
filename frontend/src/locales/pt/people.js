@@ -518,4 +518,16 @@ export default {
     'Excluir outro mundo musical',
   'Choose …':
     'Escolher …',
+  'New songs in the queue':
+    'Músicas novas na fila',
+  'Never':
+    'Nunca',
+  'Now and then':
+    'De vez em quando',
+  'Often':
+    'Muitas vezes',
+  'In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.':
+    'Na fila inteligente e no Instant Mix do Symfonium, de poucas em poucas músicas entra uma que nunca ouviu – a que mais soa ao que está a tocar.',
+  'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
+    'Na fila inteligente e no Instant Mix do Symfonium, de poucas em poucas músicas entra uma que {name} nunca ouviu – a que mais soa ao que está a tocar.',
 }

@@ -432,4 +432,8 @@ export default {
     'Wpisz go w pole wyszukiwania na górze, np. „ręce w górę” – piosenkę znajdziesz w „W tekstach”.',
   'For a quick listen, yes: tap a song. It doesn’t count toward your statistics – for real listening there’s Symfonium.':
     'Do szybkiego odsłuchu tak: dotknij piosenki. Nie liczy się do twoich statystyk – do prawdziwego słuchania jest Symfonium.',
+  '<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.':
+    '<b>Następny odcinek</b> – dla kont, które słuchają słuchowisk: kolejny odcinek każdej serii, codziennie nowy.',
+  'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
+    'Pomijanie od razu wpływa na inteligentną kolejkę: po dwóch pominięciach z rzędu przechodzi ona do innego brzmienia. Co kilka piosenek pojawia się taka, której konto jeszcze nigdy nie odtwarzało – jak często, ustawia się dla każdej osoby w profilu („Nowe piosenki w kolejce”).',
 }

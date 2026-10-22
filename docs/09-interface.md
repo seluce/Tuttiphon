@@ -330,7 +330,9 @@ number of suggestions when collapsed; the device remembers this (`localStorage` 
 Within a person's area the **core set** (`core: true`, [04](04-playlists.md#suggestions)) comes first; the other
 ideas wait behind “n more ideas” (until the page is left). An album of the week reads “one whole album a week, from
 n never played” on its card and, on the playlist page, “One whole album, in album order – next Monday there is a new
-one …”; the editor shows a note instead of the mix settings.
+one …”; the editor shows a note instead of the mix settings. “Next episode” (`episodes`) the same way: its card reads
+“the next episode of n series, new every day”, the playlist page “Today’s episodes” (series and tracks in the header,
+no “Reshuffle”), the editor a note.
 
 **Hidden suggestions.** ✕ (“Not interested”, at the top right of every card – on a new music world on its picture)
 hides a suggestion for half a year. Below the suggestions it says
@@ -442,7 +444,9 @@ favorite worlds stay attached. Bands that became free are checked for a new worl
    playlist” and “Suggestions”.
 2. **From your listening** (`TasteCard`, only with a Navidrome account – see below).
 3. **What you like to hear** (in the administrator's view of a person: “Preferences”): favorite music worlds as compact toggles like the vibes
-   (`LikedWelten` with `compact`), favorite vibes (`StilToggles`), favorite bands (`ArtistChips`).
+   (`LikedWelten` with `compact`), favorite vibes (`StilToggles`), favorite bands (`ArtistChips`); with a Navidrome
+   account and while the plugin is in use (`status.plugin`) also “New songs in the queue” (`Seg`: Never / Now and
+   then / Often = `newEvery` 0 / 5 / 3, missing counts as 5).
 4. **Dislikes**: bands and “Genre contains”.
 5. **Kid-safe mode** and **To your phone** side by side (see below).
 6. **Profile** (prefix for playlist names, who may see the playlists; administrators: Navidrome user, visibility,

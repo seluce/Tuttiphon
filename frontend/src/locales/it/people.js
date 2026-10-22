@@ -518,4 +518,16 @@ export default {
     'Escludi un altro mondo musicale',
   'Choose …':
     'Scegli …',
+  'New songs in the queue':
+    'Brani nuovi nella coda',
+  'Never':
+    'Mai',
+  'Now and then':
+    'Ogni tanto',
+  'Often':
+    'Spesso',
+  'In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.':
+    'Nella coda intelligente e nell\'Instant Mix di Symfonium, ogni pochi brani ne arriva uno che non hai mai ascoltato – quello che somiglia di più a ciò che è in riproduzione.',
+  'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
+    'Nella coda intelligente e nell\'Instant Mix di Symfonium, ogni pochi brani ne arriva uno che {name} non ha mai ascoltato – quello che somiglia di più a ciò che è in riproduzione.',
 }

@@ -18,7 +18,9 @@ import datetime as dt
 import hashlib
 import json
 import math
+import re
 import threading
+import time
 from collections import Counter
 
 from .config import MARKER, STATE_DIR, read_text, write_atomic
@@ -141,7 +143,7 @@ def settings_key(cfg, playlist):
     # Radio bands, own sound filter and minimum length count too – only appended when set, so the fingerprint of
     # existing mixes without these fields does not change (otherwise all would be picked anew mid-period)
     extra = {k: playlist[k] for k in ("radio", "sound", "minDuration", "notPlayedDays", "together", "review", "daytime",
-                                      "unheard", "album")
+                                      "unheard", "album", "episodes")
              if playlist.get(k) is not None}
     if extra:
         parts.append(extra)
@@ -427,6 +429,98 @@ def album_order(cfg, base, plib, playlist, nsp, today=None):
     return order, len(cands)
 
 
+EPISODE_DAYS = 90      # "Next episode": the series an account listened to this recently …
+EPISODE_SERIES = 12    # … at most this many, the most recently heard first
+_EPISODE = (re.compile(r"\b(?:folge|episode|fall|teil|band|vol(?:ume)?|part|nr|no)\.?\s*(\d{1,4})\b", re.I),
+            re.compile(r"#\s*(\d{1,4})\b"),
+            re.compile(r"^\s*(\d{1,4})(?!\d)"),
+            re.compile(r"(?:^|\s)[-–]\s*(\d{1,4})\s*(?:[-–:/.]|$)"))
+
+
+def episode_number(album):
+    """The number of an episode in its album name – “Folge 12: …”, “012/Der Super-Papagei”, “Episode 3”, “Vol. 4”,
+    “Die drei ??? - 125 - …” – or None."""
+    for rx in _EPISODE:
+        m = rx.search(album or "")
+        if m:
+            return int(m.group(1))
+    return None
+
+
+def _listened(user, plib, today):
+    """When this account last began each song in the last EPISODE_DAYS days (Unix seconds) and which songs it ever
+    played to the end – from the live plays, the recap's counts and, where the song list is the account's own (a stored
+    password), Navidrome's counters. -> ({song id: time}, {song ids played})"""
+    from . import listen, rueckblick
+    last, done = {}, set(rueckblick.played_ever(user))
+    since = time.time() - EPISODE_DAYS * 86400
+    for r in listen.events(user, today - dt.timedelta(days=EPISODE_DAYS), today):
+        if r["k"] in ("start", "play"):
+            last[r["id"]] = max(last.get(r["id"], 0), r["t"])
+            if r["k"] == "play":
+                done.add(r["id"])
+    if (getattr(plib, "user", None) or "").lower() == user.lower():
+        for s in plib.songs:
+            if s.get("playCount"):
+                done.add(s["id"])
+                t = _played_utc(s.get("played"))
+                sec = t.replace(tzinfo=dt.timezone.utc).timestamp() if t else 0
+                if sec >= since:
+                    last[s["id"]] = max(last.get(s["id"], 0), sec)
+    return last, done
+
+
+def episode_order(cfg, base, plib, playlist, nsp, today=None):
+    """"Next episode" -> (song indices in plib, number of series): for every series (album artist) of the playlist's
+    worlds the account listened to in the last EPISODE_DAYS days – the most recently heard first, at most
+    EPISODE_SERIES – its next episode: the rest of the episode heard last while it is not finished, otherwise the first
+    one after it (by episode number, without one by year and name) that was never begun – after the last one the first
+    never begun. The tracks in album order. It stays the same for the day (remembered like a mix)."""
+    from . import rules
+    today = today or mix_day()
+    saved = _load_state().get(playlist.get("id"))
+    if saved and saved.get("day") == period_start(options(playlist).get("every", "day"), today).isoformat() \
+            and saved.get("key") == settings_key(cfg, playlist):
+        index = plib.index_of()
+        order = [index[s] for s in saved.get("ids", []) if s in index]
+        if order:
+            return order, saved.get("albums", 1)
+    user = (rules.person_of(cfg, playlist) or {}).get("user")
+    if not user:
+        return [], 0
+    songs = plib.songs
+    albums = {}
+    for i in plib.match(nsp):
+        if songs[i].get("albumId"):
+            albums.setdefault(songs[i]["albumId"], []).append(i)
+    last, done = _listened(user, plib, today)
+    series = {}
+    for idx in albums.values():
+        idx.sort(key=lambda i: (songs[i].get("discNumber") or 1, songs[i].get("track") or 0, songs[i].get("title") or ""))
+        first = songs[idx[0]]
+        name = first.get("displayAlbumArtist") or plib._main_artist(first) or ""
+        heard = max(last.get(songs[i]["id"], 0) for i in idx)
+        number = episode_number(first.get("album"))
+        series.setdefault(name, []).append(((number is None, number or 0, first.get("year") or 0,
+                                             (first.get("album") or "").lower()), idx, heard))
+    picks = []
+    for eps in series.values():
+        latest = max(e[2] for e in eps)
+        if not latest:
+            continue   # not listened to lately
+        eps.sort(key=lambda e: e[0])
+        cur = next(k for k, e in enumerate(eps) if e[2] == latest)
+        rest = [i for i in eps[cur][1] if songs[i]["id"] not in done]
+        if rest:   # begun and not finished: on with it
+            picks.append((latest, rest))
+            continue
+        untouched = [e for e in eps[cur + 1:] + eps[:cur] if not e[2] and not any(songs[i]["id"] in done for i in e[1])]
+        if untouched:
+            picks.append((latest, untouched[0][1]))
+    picks.sort(key=lambda x: -x[0])
+    return [i for _t, idx in picks[:EPISODE_SERIES] for i in idx], len(picks)
+
+
 def unheard(lib, ids):
     """The songs among ids that the account of this song list has never played (playCount 0)."""
     songs = lib.songs
@@ -499,8 +593,11 @@ def pick(cfg, base, playlist, nsp, today=None, keep=False):
         return order, len(order)
     plib = person_lib(cfg, playlist, base)
     from . import feedback, rules
-    if playlist.get("album"):   # album of the week: one whole album instead of a selection
-        order, n = album_order(cfg, base, plib, playlist, nsp, today)
+    if playlist.get("album") or playlist.get("episodes"):   # whole albums instead of a selection
+        if playlist.get("album"):   # album of the week
+            order, n = album_order(cfg, base, plib, playlist, nsp, today)
+        else:   # the next episode of every series being listened to
+            order, n = episode_order(cfg, base, plib, playlist, nsp, today)
         if keep and order:
             remember(cfg, playlist, plib, order, period_start(options(playlist).get("every", "week"), today))
         if plib is not base:

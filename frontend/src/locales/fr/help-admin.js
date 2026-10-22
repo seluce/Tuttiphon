@@ -432,4 +432,8 @@ export default {
     'Tapez-la dans le champ de recherche en haut, par ex. « les mains en l’air » – sous « Dans les paroles », vous trouvez le titre.',
   'For a quick listen, yes: tap a song. It doesn’t count toward your statistics – for real listening there’s Symfonium.':
     'Pour une écoute rapide, oui : appuyez sur un titre. Cela ne compte pas dans vos statistiques – pour écouter vraiment, il y a Symfonium.',
+  '<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.':
+    '<b>Prochain épisode</b> – pour les comptes qui écoutent des fictions audio : le prochain épisode de chaque série, renouvelé chaque jour.',
+  'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
+    'Passer des titres réoriente aussitôt la file intelligente : après deux d’affilée, elle bascule vers un autre son. Tous les quelques titres s’intercale un titre que le compte n’a jamais écouté – la fréquence se règle par personne dans le profil (« Nouveaux titres dans la file d’attente »).',
 }

@@ -32,7 +32,7 @@
   import { api } from '../../lib/api.js'
   import { fmt, plural, clone, uid, today, debounce } from '../../lib/format.js'
   import { SORTS, AUSWAHL, stilOptions, openEditor } from '../../lib/editor.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { t, tn } from '../../lib/i18n.svelte.js'
 
   let { p0, isNew = false, onSaved = null } = $props()
 
@@ -75,7 +75,7 @@
   // Favorite bands, recap, family mix and the morning from the listening clock choose on their own – “All × Everything”
   // is right there; so is a mix whose own sound filter requires instruments or themes (e.g. “calm piano music”)
   const special = $derived(p.fav ? 'fav' : p.review ? 'review' : p.together ? 'together' : null)
-  const isInvalid = () => !p.rules && !p.fav && !p.review && !p.together && !p.radio && !p.daytime && !p.unheard && !p.album && !narrowsLibrary(p.sound)
+  const isInvalid = () => !p.rules && !p.fav && !p.review && !p.together && !p.radio && !p.daytime && !p.unheard && !p.album && !p.episodes && !narrowsLibrary(p.sound)
     && !(p.type === 'mix' && p.mix?.flavor === 'geschmack') && weltIds(p).length === 0 && (p.stil || '*') === '*'
   const invalid = $derived(isInvalid())
   const togetherOptions = $derived(S.config.personen.filter((x) => isAdmin() || ownPersons().includes(x) || x.public))
@@ -225,13 +225,15 @@
       <div class="muted small">
         {p.album
           ? t('This week: {n} songs, one whole album out of {pool} never played', { n: fmt(res.count), pool: fmt(res.pool) })
+          : p.episodes
+          ? tn(res.pool, 'Today: the next episode of {n} series', 'Today: the next episode of each of {n} series')
           : res.mix
           ? t('{when}: {n} of {pool} matching songs · {bands} bands · {renew}', { when: mixWording(p)[0], n: fmt(res.count), pool: fmt(res.pool), bands: fmt(res.artistCount), renew: mixWording(p)[1] })
           : res.limit && res.count > res.limit
             ? t('{n} matching songs by {artists} bands · Navidrome shuffles {limit} of them on every load', { n: fmt(res.count), artists: fmt(res.artistCount), limit: res.limit })
             : t('{n} matching songs by {artists} bands', { n: fmt(res.count), artists: fmt(res.artistCount) })}
       </div>
-      {#if !p.album && (res.mix ? res.pool : res.count) < 15}
+      {#if !p.album && !p.episodes && (res.mix ? res.pool : res.count) < 15}
         <div class="warn-t small">{t('Rather few – maybe a lower selection or more music worlds?')}</div>
       {/if}
       <div class="flex gap-2.5 items-center min-w-0">
@@ -287,6 +289,8 @@
     </label>
   {:else if p.album}
     <div class="note">{t('Album of the week: one whole album this account has never played, picked by its taste – favorite bands first – in album order. New every Monday; during the week it stays the same.')}</div>
+  {:else if p.episodes}
+    <div class="note">{t('Next episode: for every audio play series this account listened to in the last 3 months, the episode that comes next – the rest of the one begun, otherwise the next one never heard. New every day; the series heard last come first.')}</div>
   {:else if raw}
     <div class="note">
       {t('This playlist still has its own rules, taken over unchanged. You can change name, person, count and order – or switch it to the builder, then everything can be set.')}

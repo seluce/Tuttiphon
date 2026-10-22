@@ -1,5 +1,6 @@
 <!--
-  A person's profile: header, taste from listening, preferences, "dislikes", kid-safe mode (with the administrator's
+  A person's profile: header, taste from listening, preferences (with new songs in the smart queue, p.newEvery),
+  "dislikes", kid-safe mode (with the administrator's
   switch "Child profile", p.child), notifications,
   profile (prefix, account/visibility), appearance (name, icon, color – folded) and their playlists. p: person from S.config (changed directly) · self: a user looking at their own profile.
 -->
@@ -151,6 +152,16 @@
     <Field label={self ? t('Favorite bands – show up more often in your mixes') : t('Favorite bands – go into the personal mix')}>
       <ArtistChips items={p.likes.artists} onchange={ch} />
     </Field>
+    {#if p.user && S.status?.plugin}
+      <!-- never played songs in the smart queue and Instant Mix (the plugin's answers, p.newEvery: 0, 5 or 3) -->
+      <Field label={t('New songs in the queue')}>
+        <Seg class="justify-self-start" options={[['0', t('Never')], ['5', t('Now and then')], ['3', t('Often')]]} value={String(p.newEvery ?? 5)}
+          onchange={(v) => { p.newEvery = Number(v); ch() }} />
+        <div class="hint">{self
+          ? t('In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.')
+          : t('In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.', { name: p.name })}</div>
+      </Field>
+    {/if}
   </div>
 
   <div class="card section grid gap-4" data-guide="dislikes">

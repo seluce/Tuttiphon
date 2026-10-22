@@ -534,4 +534,10 @@ export default {
     'Album van de week: één heel album dat dit account nooit heeft gespeeld, gekozen op zijn smaak – favoriete bands eerst – in albumvolgorde. Elke maandag nieuw; tijdens de week blijft het gelijk.',
   'This week: {n} songs, one whole album out of {pool} never played':
     'Deze week: {n} nummers, één heel album uit {pool} nooit gespeelde',
+  'Today: the next episode of {n} series':
+    'Vandaag: de volgende aflevering van {n} serie',
+  'Today: the next episode of each of {n} series':
+    'Vandaag: de volgende aflevering van {n} series',
+  'Next episode: for every audio play series this account listened to in the last 3 months, the episode that comes next – the rest of the one begun, otherwise the next one never heard. New every day; the series heard last come first.':
+    'Volgende aflevering: voor elke hoorspelserie die dit account de afgelopen 3 maanden heeft beluisterd, de aflevering die nu aan de beurt is – de rest van de begonnen aflevering, anders de volgende die nog nooit is gehoord. Elke dag nieuw; de laatst beluisterde series eerst.',
 }

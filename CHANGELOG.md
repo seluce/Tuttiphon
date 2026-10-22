@@ -5,6 +5,17 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **Next episode:** a new playlist for audio plays – for every series someone listens to (“Die drei ???”, “TKKG” …)
+  the episode that comes next: the rest of the one begun, otherwise the next one never heard, by episode number. New
+  every day, the series heard last first. Offered under Discover as soon as an account listens to audio plays – also
+  for children without a stored password, from the plays the plugin passes on.
+- **The smart queue learns in the moment:** skip two songs in a row and Symfonium's smart queue turns to another sound
+  at once – away from what was skipped, toward what you listened to on; the skipped bands come later.
+- **New songs in the queue:** every few songs the smart queue and Instant Mix bring one you have never played – the one
+  that sounds most like what is playing. How often (never, now and then, often) is set per person in the profile.
+
 ## 1.7.0
 
 - **Translations checked:** corrections in all six new languages (e.g. Spanish “por sí solo” where it means “by

@@ -534,4 +534,10 @@ export default {
     'Álbum de la semana: un álbum entero que esta cuenta nunca ha escuchado, elegido según su gusto – primero las bandas favoritas – en el orden del álbum. Nuevo cada lunes; durante la semana no cambia.',
   'This week: {n} songs, one whole album out of {pool} never played':
     'Esta semana: {n} canciones, un álbum entero de {pool} nunca escuchados',
+  'Today: the next episode of {n} series':
+    'Hoy: el siguiente episodio de {n} serie',
+  'Today: the next episode of each of {n} series':
+    'Hoy: el siguiente episodio de cada una de las {n} series',
+  'Next episode: for every audio play series this account listened to in the last 3 months, the episode that comes next – the rest of the one begun, otherwise the next one never heard. New every day; the series heard last come first.':
+    'Siguiente episodio: para cada serie de audiodramas que esta cuenta ha escuchado en los últimos 3 meses, el episodio que viene a continuación – lo que queda del ya empezado o, si no, el siguiente nunca escuchado. Nuevo cada día; primero las series escuchadas más recientemente.',
 }

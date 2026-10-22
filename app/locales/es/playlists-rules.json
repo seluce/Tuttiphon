@@ -212,5 +212,8 @@
  "new every Monday": "nuevo cada lunes",
  "new every day": "nuevo cada día",
  "{n} minutes every morning": "{n} minutos cada mañana",
- "new every month": "nuevo cada mes"
+ "new every month": "nuevo cada mes",
+ "Next episode – the next episode of every audio play series being listened to, new every day": "Siguiente episodio – el siguiente episodio de cada serie de audiodramas que se está escuchando, nuevo cada día",
+ "Next episode: for every series this account listened to in the last 3 months, the next episode – the rest of the one begun, otherwise the next one never heard, by episode number": "Siguiente episodio: para cada serie que esta cuenta ha escuchado en los últimos 3 meses, el siguiente episodio – lo que queda del ya empezado o, si no, el siguiente nunca escuchado, por número de episodio",
+ "New every day – the series heard last come first": "Nuevo cada día – primero las series escuchadas más recientemente"
 }

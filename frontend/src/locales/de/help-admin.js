@@ -310,4 +310,8 @@ export default {
     'Tipp sie oben ins Suchfeld, etwa „hoch die Hände“ – unter „Im Liedtext“ findest du den Song.',
   'For a quick listen, yes: tap a song. It doesn’t count toward your statistics – for real listening there’s Symfonium.':
     'Zum kurzen Reinhören ja: Song antippen. Das zählt nicht für deine Statistik – zum richtigen Hören gibt es Symfonium.',
+  '<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.':
+    '<b>Nächste Folge</b> – für Konten, die Hörspiele hören: die nächste Folge jeder Serie, jeden Tag neu.',
+  'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
+    'Überspringen lenkt die intelligente Warteschlange sofort um: nach zweimal hintereinander wechselt sie zu einem anderen Klang. Alle paar Songs kommt einer, den das Konto noch nie gehört hat – wie oft, wird pro Person im Profil eingestellt („Neue Songs in der Warteschlange“).',
 }

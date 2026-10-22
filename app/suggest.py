@@ -22,7 +22,7 @@ def key_of(p):
     special = ("|fav" if p.get("fav") else "") + (f"|review:{p['review'].get('period', 'month')}" if p.get("review") else "") \
         + ("|together" if p.get("together") else "") + ("|sound" if p.get("sound") else "") \
         + (f"|daytime:{p['daytime']}" if p.get("daytime") else "") + ("|unheard" if p.get("unheard") else "") \
-        + ("|album" if p.get("album") else "")
+        + ("|album" if p.get("album") else "") + ("|episodes" if p.get("episodes") else "")
     return f"{p.get('person')}|{w}|{p.get('stil', ALL)}|{'hits' if p.get('hits') else ''}" + ("|mix" if p.get("type") == "mix" else "") + radio + special
 
 
@@ -132,7 +132,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             if prof and prof.get("enough"):
                 profiles[person["id"]] = prof
 
-    def add(p, score, title=None, why=None, group=None, because=None, only=None, core=False, count=None):
+    def add(p, score, title=None, why=None, group=None, because=None, only=None, core=False, count=None, small=False):
         if rules.sound_of(cfg, p) and p.get("type") != "mix":   # sound vibes only exist as mixes
             p = {**p, "type": "mix", "mix": p.get("mix") or {"size": 50, "perArtist": 3, "every": "week"}}
         k = key_of(p)
@@ -148,11 +148,11 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
         if only is not None:   # e.g. only what the person's account has never played
             ids = frozenset(i for i in ids if lib.songs[i]["id"] in only)
         n = len(ids)
-        if n < (MIN_UNHEARD if p.get("unheard") else MIN_SONGS):
-            return
+        if not n or not small and n < (MIN_UNHEARD if p.get("unheard") else MIN_SONGS):
+            return   # small: a few whole episodes are enough
         top = lib.top_artists(ids, 6)
         distinct = len(top)
-        if distinct < 2 or (top and top[0][1] / n > 0.8 and distinct < 4):
+        if not small and (distinct < 2 or (top and top[0][1] / n > 0.8 and distinct < 4)):
             return   # basically just one artist
         existing.add(k)
         if person.get("public"):
@@ -262,6 +262,27 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                   "album order."), group=pid, because=_("From listening"), core=True, count=len(cands),
             only={s["id"] for s in lib.songs if s.get("albumId") in best})
 
+    def next_episode(person):
+        """"Next episode": the next episode of every audio play series the account listened to lately
+        (mixer.episode_order) – also without a stored password, from the live plays."""
+        spoken = [w["id"] for w in cfg["welten"] if w.get("scene") == rules.SPOKEN_SCENE]
+        if not spoken:
+            return
+        pid = person["id"]
+        own = pid == default
+        p = {"person": pid, "welt": spoken, "stil": ALL, "type": "mix", "episodes": True, "mix": {"every": "day"},
+             "name": _s("Next episode") if own else _s("Next episode for {name}", name=person["name"])}
+        if key_of(p) in existing:
+            return
+        plib = mixer.person_lib(cfg, p, lib)
+        order, n = mixer.episode_order(cfg, lib, plib, p, rules.build_nsp(cfg, p, ctx), today)
+        if not order:
+            return
+        add(p, 2.6, title=_("Next episode") if own else _("Next episode for {name}", name=person["name"]),
+            why=_("For every audio play series this account listens to, the episode that comes next – new every day, the "
+                  "series heard last first."), group=pid, because=_("From listening"), core=True, count=n,
+            only={plib.songs[i]["id"] for i in order}, small=True)
+
     def morning_mix(person):
         """"Good morning" from the listening clock (listenclock.py): only if the account really listens in the
         morning – with its usual length, the worlds of its mornings and their sound (mixer.morning_sound)."""
@@ -338,15 +359,19 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
             group=owner["id"], because=_("From listening"), core=True)
 
     # daily routines from the listening clock: one person per account – its own profile before the shared one
-    routine = {}
+    routine, listener = {}, {}
     for x in sorted(persons, key=lambda x: x["id"] == default):
         if x.get("user") and x["id"] in profiles:
             routine.setdefault(x["user"].lower(), x["id"])
+        if x.get("user"):   # the next episodes: also without a taste profile (no stored password – the live plays)
+            listener.setdefault(x["user"].lower(), x["id"])
 
     for person in persons:
         pid = person["id"]
         if only_person and pid != only_person:
             continue
+        if listener.get((person.get("user") or "").lower()) == pid:
+            next_episode(person)   # also for a profile without favorites yet (a child listening to audio plays)
         likes = person.get("likes", {})
         prof = profiles.get(pid)
         liked_w = [w for w in likes.get("welten", []) if w in welten]
@@ -593,7 +618,7 @@ def unused_playlists(cfg, lib, only_persons=None, today=None):
 
 # What a playlist selects and orders – everything else (name, file, cover, visibility …) does not count when comparing
 CONTENT_FIELDS = ("welt", "stil", "type", "hits", "radio", "fav", "review", "together", "daytime", "unheard",
-                  "album", "minRating", "minDuration", "notPlayedDays", "addArtists", "excludeArtists", "sound", "mix",
+                  "album", "episodes", "minRating", "minDuration", "notPlayedDays", "addArtists", "excludeArtists", "sound", "mix",
                   "sort", "sortRaw", "limit", "rulesExtra", "rulesOp", "yearRound")
 
 

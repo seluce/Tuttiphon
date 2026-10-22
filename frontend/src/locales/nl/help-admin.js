@@ -432,4 +432,8 @@ export default {
     'Typ het in het zoekveld bovenaan, zoals “handen in de lucht” – onder “In de songtekst” vind je het nummer.',
   'For a quick listen, yes: tap a song. It doesn’t count toward your statistics – for real listening there’s Symfonium.':
     'Om even te luisteren, ja: tik op een nummer. Het telt niet mee voor je statistieken – om echt te luisteren is er Symfonium.',
+  '<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.':
+    '<b>Volgende aflevering</b> – voor accounts die naar hoorspelen luisteren: de volgende aflevering van elke serie, elke dag nieuw.',
+  'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
+    'Overslaan stuurt de slimme wachtrij meteen bij: na twee keer achter elkaar wisselt die naar een andere klank. Om de paar nummers zit er een tussen dat het account nog nooit heeft gespeeld – hoe vaak, wordt per persoon in het profiel ingesteld (“Nieuwe nummers in de wachtrij”).',
 }

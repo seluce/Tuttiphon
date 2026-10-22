@@ -113,5 +113,6 @@
  "config: {where}: unknown theme": "config: {where}: tema sconosciuto",
  "config: playlist '{id}': time of day invalid": "config: playlist '{id}': momento della giornata non valido",
  "config: playlist '{id}': “never played” only exists as a mix": "config: playlist '{id}': «Mai ascoltati» esiste solo come mix",
- "config: playlist '{id}': “album of the week” only exists as a mix": "config: playlist '{id}': «Album della settimana» esiste solo come mix"
+ "config: playlist '{id}': “album of the week” only exists as a mix": "config: playlist '{id}': «Album della settimana» esiste solo come mix",
+ "config: playlist '{id}': “next episode” only exists as a mix": "config: playlist '{id}': «Prossimo episodio» esiste solo come mix"
 }

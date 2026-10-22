@@ -518,4 +518,16 @@ export default {
     'Nog een muziekwereld weglaten',
   'Choose …':
     'Kies …',
+  'New songs in the queue':
+    'Nieuwe nummers in de wachtrij',
+  'Never':
+    'Nooit',
+  'Now and then':
+    'Af en toe',
+  'Often':
+    'Vaak',
+  'In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.':
+    'In de slimme wachtrij en de Instant Mix van Symfonium zit er om de paar nummers een tussen dat je nog nooit hebt gespeeld – het nummer dat het meest klinkt als wat er nu speelt.',
+  'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
+    'In de slimme wachtrij en de Instant Mix van Symfonium zit er om de paar nummers een tussen dat {name} nog nooit heeft gespeeld – het nummer dat het meest klinkt als wat er nu speelt.',
 }

@@ -1,4 +1,4 @@
-// Same keys as ../de/people.js (tools/translate.py)
+// Same keys as ../de/people.js
 export default {
   'Color {n}':
     'Kolor {n}',
@@ -512,4 +512,16 @@ export default {
     'Pomiń kolejny świat muzyczny',
   'Choose …':
     'Wybierz …',
+  'New songs in the queue':
+    'Nowe piosenki w kolejce',
+  'Never':
+    'Nigdy',
+  'Now and then':
+    'Od czasu do czasu',
+  'Often':
+    'Często',
+  'In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.':
+    'W inteligentnej kolejce i Instant Mix w Symfonium co kilka piosenek pojawia się taka, której jeszcze nigdy nie odtwarzano na twoim koncie – ta, która brzmieniem najbardziej przypomina to, co właśnie gra.',
+  'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
+    'W inteligentnej kolejce i Instant Mix w Symfonium co kilka piosenek pojawia się taka, której osoba {name} jeszcze nigdy nie odtwarzała – ta, która brzmieniem najbardziej przypomina to, co właśnie gra.',
 }

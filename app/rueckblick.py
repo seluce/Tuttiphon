@@ -103,6 +103,38 @@ def last_snapshot(user):
     return base and {"since": base.get("since"), "at": base.get("at")}
 
 
+_ever = {}   # folder -> (signature of baseline.json and first.json, song ids)
+
+
+def played_ever(user):
+    """Song IDs this account has ever played as far as Tuttiphon counted: the counters of the last state
+    (baseline.json) and the first plays (first.json – also those that came live). Kept until the two files change.
+    Empty if nothing was ever counted for the account."""
+    folder = _dir(user)
+    sig = []
+    for name in ("baseline.json", "first.json"):
+        try:
+            st = (folder / name).stat()
+            sig.append((st.st_size, st.st_mtime_ns))
+        except OSError:
+            sig.append(None)
+    sig = tuple(sig)
+    with _lock:
+        hit = _ever.get(str(folder))
+    if hit and hit[0] == sig:
+        return hit[1]
+    base = _load(folder / "baseline.json", {})
+    counts = (base.get("counts") if isinstance(base, dict) else None) or {}
+    first = _load(folder / "first.json", {}) or {}
+    ids = frozenset([sid for sid, n in counts.items() if n] if isinstance(counts, dict) else []) \
+        | frozenset(first if isinstance(first, dict) else ())
+    with _lock:
+        if len(_ever) > 200:
+            _ever.clear()
+        _ever[str(folder)] = (sig, ids)
+    return ids
+
+
 _between = OrderedDict()   # (folder, state, start, end) -> result; taste, mixes and recap often ask the same
 
 

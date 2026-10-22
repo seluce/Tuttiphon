@@ -148,5 +148,8 @@
  "New for you this week": "Deze week nieuw voor jou",
  "{name}: {artist} – {album}": "{name}: {artist} – {album}",
  "{name}: {n} song you have never heard": "{name}: {n} nummer dat je nog nooit hebt gehoord",
- "{name}: {n} songs you have never heard": "{name}: {n} nummers die je nog nooit hebt gehoord"
+ "{name}: {n} songs you have never heard": "{name}: {n} nummers die je nog nooit hebt gehoord",
+ "Next episode": "Volgende aflevering",
+ "Next episode for {name}": "Volgende aflevering voor {name}",
+ "For every audio play series this account listens to, the episode that comes next – new every day, the series heard last first.": "Voor elke hoorspelserie waar dit account naar luistert, de aflevering die nu aan de beurt is – elke dag nieuw, de laatst beluisterde series eerst."
 }

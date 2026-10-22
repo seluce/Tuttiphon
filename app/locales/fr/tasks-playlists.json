@@ -148,5 +148,8 @@
  "New for you this week": "Nouveau pour vous cette semaine",
  "{name}: {artist} – {album}": "{name} : {artist} – {album}",
  "{name}: {n} song you have never heard": "{name} : {n} titre que vous n’avez jamais entendu",
- "{name}: {n} songs you have never heard": "{name} : {n} titres que vous n’avez jamais entendus"
+ "{name}: {n} songs you have never heard": "{name} : {n} titres que vous n’avez jamais entendus",
+ "Next episode": "Prochain épisode",
+ "Next episode for {name}": "Prochain épisode pour {name}",
+ "For every audio play series this account listens to, the episode that comes next – new every day, the series heard last first.": "Pour chaque série de fictions audio qu’écoute ce compte, l’épisode qui vient ensuite – renouvelé chaque jour, les dernières séries écoutées d’abord."
 }

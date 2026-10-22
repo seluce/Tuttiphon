@@ -236,6 +236,7 @@ def render(cfg, lib, playlist, style):
 FORMAT_COLORS = {
     "unheard": ((49, 46, 129), (139, 92, 246)),     # indigo → violet: discovered
     "album": ((17, 17, 27), (64, 56, 84)),          # dark – the album itself is the picture
+    "episodes": ((30, 58, 138), (217, 119, 6)),     # night blue → amber: a story before bed
     "morning": ((251, 146, 60), (219, 39, 119)),    # sunrise
     "sound": ((13, 148, 136), (67, 56, 202)),       # teal → indigo
     "fav": ((219, 39, 119), (234, 88, 12)),         # magenta → orange
@@ -249,6 +250,8 @@ def format_kind(playlist):
     """Which format a playlist is (a key of FORMAT_COLORS) – None for an ordinary playlist."""
     if playlist.get("album"):
         return "album"
+    if playlist.get("episodes"):
+        return "episodes"
     if playlist.get("unheard"):
         return "unheard"
     if playlist.get("daytime") == "morning":
@@ -361,6 +364,7 @@ def format_title(cfg, playlist, name):
     """The big name on a format cover – the format, not the person (that goes below)."""
     kind = format_kind(playlist)
     titles = {"unheard": _s("Discovered"), "album": _s("Album of the week"), "morning": _s("Good morning"),
+              "episodes": _s("Next episode"),
               "fav": _s("New from favorite bands"), "together": _s("What everyone likes")}
     if kind in titles:
         return titles[kind]

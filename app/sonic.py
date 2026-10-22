@@ -13,7 +13,9 @@ without explicit songs as soon as a profile is kid-safe. But Tuttiphon knows fro
 playing what: if the song asked about (or a song of the band or album) is playing on exactly one account – or only
 one account is playing at all – the answer is for that person (_listener()): their "All" and dislikes, without what
 they heard in the last hours or rated 1 star by hand, songs they skip further down. Kid-safe stays as for the
-family – never loosened on a guess.
+family – never loosened on a guess. The smart queue learns in the moment: what was skipped in the last minutes steers
+the next answer away from its sound (_steer()). And every few songs one the account has never played comes in
+(_mix_new(), the person's "newEvery").
 
 The plugin signs in with its own key (Settings → Navidrome, card "Navidrome plugin"): only its SHA-256 is stored
 (state/plugin_key.json),
@@ -44,12 +46,20 @@ RADIO_BONUS = 0.1      # a band Last.fm counts as similar moves up this much (ar
 RUN_MAX = 2            # the smart queue: after this many songs of one band in a row, other bands come first …
 RUN_FACTOR = 0.2       # … (that band's scores times this)
 HOUR_FACTOR = 0.85     # a band heard several times in the last hour: times this for every further song of it
+# the smart queue after skips (listen.moment()) – per level: skips earlier in the last minutes / one right before the
+# song playing now / two or more in a row:
+STEER_AWAY = (0.2, 0.35, 0.7)      # away from the sound of the skipped songs by this much …
+STEER_BACK = 0.5                   # … after two in a row also toward what was listened to on
+SKIPPED_BAND = (0.7, 0.5, 0.25)    # songs of the skipped bands: scores times this
+NEW_EVERY = 5          # default of a person's "newEvery": every 5th song one the account has never played (0: never)
+NEW_CHOICES = (0, 3, 5)
 _lock = threading.Lock()
 _memo = {}
 _seen = {"at": None, "calls": 0, "for": None, "forAt": None, "guess": False}   # the plugin's last call (settings page)
 _stars = {}   # account (lower case) -> (time, song ids rated 1 star by hand) – loaded in the background (_rated_one())
 STARS_AGE = 3600
-_FAMILY = (None, frozenset(), {})   # (person id, indices to leave out, {index: factor}): an answer for the family
+_FAMILY = (None, frozenset(), {}, None)   # (view, indices to leave out, {index: factor}, me): an answer for the family
+_given = {}   # account (lower case) -> {song id: time} the answers brought as never played (_mix_new())
 _last = threading.local()
 
 
@@ -302,8 +312,9 @@ def _variety(lib, user, seed):
 
 
 def _who(cfg, lib, ids, personal, seed=None):
-    """For whom the answer is: (view, indices to leave out, {index: factor}) – view for _pool()/_view(): (person id,
-    ids of people whose dislikes count too, plain). For the person listening to one of these song ids:
+    """For whom the answer is: (view, indices to leave out, {index: factor}, me) – view for _pool()/_view(): (person
+    id, ids of people whose dislikes count too, plain); me: {"person", "user", "sure"} of the one listening, None for
+    the family. For the person listening to one of these song ids:
     * sure (the song is playing on their account right now): their "All" and dislikes; what they heard in the last
       hours (listen.heard()) or rated 1 star by hand stays out, what they skip comes further down
       (feedback.factors(), with "Mixes that learn" on), and for the songs like `seed` (the smart queue) variety
@@ -328,7 +339,8 @@ def _who(cfg, lib, ids, personal, seed=None):
     if seed is not None and sure:
         for j, f in _variety(lib, user, seed).items():
             factor[j] = factor.get(j, 1.0) * f
-    return (person["id"], tuple(p["id"] for p in shared), not sure or bool(shared)), leave, factor
+    return (person["id"], tuple(p["id"] for p in shared), not sure or bool(shared)), leave, factor, \
+        {"person": person, "user": user, "sure": sure}
 
 
 def _favour(scored, factor):
@@ -336,6 +348,105 @@ def _favour(scored, factor):
     if not factor:
         return scored
     return sorted(((i, sc * factor.get(i, 1.0)) for i, sc in scored), key=lambda x: -x[1])
+
+
+def _steer(lib, idx, user, vec):
+    """The smart queue after skips (listen.moment()): away from the sound of what was skipped in the last minutes – after
+    two skips in a row clearly, and toward the songs listened to on – and the skipped bands further down.
+    -> (unit vector, {index: factor})"""
+    from . import listen
+    m = listen.moment(user)
+    if not m["skipped"]:
+        return vec, {}
+    level = min(m["streak"], 2)
+    index = lib.index_of()
+
+    def sound(ids):
+        return [v for v in (_sound(lib, idx, index[s]) for s in ids[-3:] if s in index) if v is not None]
+    away = similar.mean_unit(sound(m["skipped"]))
+    if vec is not None and away is not None:
+        mix = [x - STEER_AWAY[level] * a for x, a in zip(vec, away)]
+        back = similar.mean_unit(sound(m["kept"])) if level == 2 else None
+        if back is not None:
+            mix = [x + STEER_BACK * b for x, b in zip(mix, back)]
+        vec = similar.unit(mix) or vec
+    members = _bands(lib)
+    factor = {}
+    for band in {lib._main_artist(lib.songs[index[s]]) for s in m["skipped"] if s in index}:
+        for j in members.get(band, ()):
+            factor[j] = SKIPPED_BAND[level]
+    return vec, factor
+
+
+def _played(user):
+    """Song ids this account has played – counted by Tuttiphon (rueckblick.played_ever()) or live in the last two days.
+    Empty if nothing is known about the account (then nothing counts as never played)."""
+    from . import listen, rueckblick
+    ever = rueckblick.played_ever(user)
+    return ever | listen.heard(user, 2 * 86400) if ever else frozenset()
+
+
+def _since_new(user):
+    """Songs the account played since the last one an answer brought as never played (the song playing now included)."""
+    from . import listen
+    seq = listen.sequence(user)
+    with _lock:
+        given = dict(_given.get(user.lower(), {}))
+    for k, sid in enumerate(reversed(seq)):
+        if sid in given:
+            return k
+    return len(seq)
+
+
+def _monotone(out):
+    """Similarities that never rise along the answer – the order holds even where a player sorts by them."""
+    res, top = [], None
+    for i, sc in out:
+        if top is not None and sc >= top:
+            sc = max(0.0, round(top - 0.0001, 4))
+        res.append((i, sc))
+        top = sc
+    return res
+
+
+def _mix_new(lib, out, ranked, me, seeds=()):
+    """Every n-th song of the answer one the account has never played (the person's "newEvery", NEW_EVERY by default;
+    only for the one listening for sure) – the most similar of them, counted on from the last one brought, so the
+    smart queue (which takes the first song of each answer) gets one every n songs. out: the answer, ranked: all
+    candidates best first. Without anything known about the account the answer stays as it is."""
+    if not me or not me["sure"] or not out:
+        return out
+    every = me["person"].get("newEvery", NEW_EVERY)
+    played = _played(me["user"]) if every else frozenset()
+    if not played:
+        return out
+    songs = lib.songs
+    taken = {i for i, _sc in out} | set(seeds)
+    seen = _Seen()
+    for i in taken:
+        seen.add(songs[i])
+    fresh = (x for x in ranked if x[0] not in taken and songs[x[0]]["id"] not in played)
+    out, given, changed = list(out), [], False
+    for pos in range(every - 1 - _since_new(me["user"]) % every, len(out), every):
+        if songs[out[pos][0]]["id"] not in played:
+            given.append(songs[out[pos][0]]["id"])
+            continue
+        pick = next((x for x in fresh if seen.add(songs[x[0]])), None)
+        if pick is None:
+            break
+        out.insert(pos, (pick[0], max(0.0, min(1.0, round(pick[1], 4)))))
+        out.pop()
+        given.append(songs[pick[0]]["id"])
+        changed = True
+    given += [songs[i]["id"] for i, _sc in out if songs[i]["id"] not in played and songs[i]["id"] not in given]
+    if given:   # every never played song of the answer: whichever the player takes, the count starts again after it
+        now = time.time()
+        with _lock:
+            box = _given.setdefault(me["user"].lower(), {})
+            box.update((sid, now) for sid in given)
+            for sid in list(box)[:-500]:
+                del box[sid]
+    return _monotone(out) if changed else out
 
 
 def _closest(lib, vec, allowed, exclude=frozenset()):
@@ -457,7 +568,7 @@ def similar_songs(cfg, lib, song_id, count=50, personal=False):
     i = lib.index_of().get(song_id)
     if i is None:
         return []
-    pid, leave, factor = _who(cfg, lib, {song_id}, personal, seed=i)
+    pid, leave, factor, me = _who(cfg, lib, {song_id}, personal, seed=i)
     allowed = _pool(cfg, lib, _worlds_of(cfg, lib, [i]), pid)
     key = (ml.lib_key(lib), _cfg_key(cfg), similar.stamp(), song_id, count)
     if pid is None:
@@ -465,12 +576,19 @@ def similar_songs(cfg, lib, song_id, count=50, personal=False):
         if hit is not None:
             return hit
     idx = similar.index(lib)
-    scored = _favour(_closest(lib, _sound(lib, idx, i), allowed, exclude={i} | leave), factor)
+    vec = _sound(lib, idx, i)
+    if me and me["sure"]:   # the smart queue: skipped just now – somewhere else
+        vec, away = _steer(lib, idx, me["user"], vec)
+        factor = {**factor, **{j: factor.get(j, 1.0) * f for j, f in away.items()}}
+    scored = _favour(_closest(lib, vec, allowed, exclude={i} | leave), factor)
     out = _diverse(lib, scored, count, seeds=[i])
     if len(out) < count:   # no sound at all, or too few near ones: the radio fills up – below the real ones
         have = {j for j, _sc in out} | {i} | leave
         low = out[-1][1] if out else 0.5
-        out = _diverse(lib, out + _favour(_radio(lib, i, allowed, have, count, below=low), factor), count, seeds=[i])
+        radio = _favour(_radio(lib, i, allowed, have, count, below=low), factor)
+        out = _diverse(lib, out + radio, count, seeds=[i])
+        scored = scored + radio
+    out = _mix_new(lib, out, scored, me, seeds=[i])
     return out if pid else _remember("similar", key, out, keep=256)
 
 
@@ -506,7 +624,7 @@ def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50, exclude=fro
     own, artist = _artist_songs(lib, name, artist_id)
     if not own:
         return []
-    pid, leave, factor = who or _who(cfg, lib, {lib.songs[i]["id"] for i in own}, personal)
+    pid, leave, factor, me = who or _who(cfg, lib, {lib.songs[i]["id"] for i in own}, personal)
     exclude = set(exclude) | leave
     allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own), pid)
     bands = set(classify.radio_artists([artist], lib, limit=25))
@@ -515,12 +633,12 @@ def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50, exclude=fro
     if centre is not None:
         scored = _favour(_closest(lib, centre, allowed, exclude), factor)
         ranked = sorted(scored, key=lambda x: -(x[1] + (RADIO_BONUS if lib._main_artist(lib.songs[x[0]]) in bands else 0)))
-        return _diverse(lib, ranked, count, own=artist)
+        return _mix_new(lib, _diverse(lib, ranked, count, own=artist), ranked, me)
     rnd = random.Random(f"{artist}|{dt.date.today()}")
     cands = [i for i in allowed if i not in exclude and lib._main_artist(lib.songs[i]) in bands]
     rnd.shuffle(cands)
     scored = _favour([(i, max(0.01, 0.5 - 0.49 * k / count)) for k, i in enumerate(cands)], factor)
-    return _diverse(lib, scored, count, own=artist)
+    return _mix_new(lib, _diverse(lib, scored, count, own=artist), scored, me)
 
 
 def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50, personal=False):
@@ -535,14 +653,15 @@ def songs_like_album(cfg, lib, album_id=None, name=None, artist=None, count=50, 
     if not own:
         return []
     who = _who(cfg, lib, {songs[i]["id"] for i in own}, personal)
-    pid, leave, factor = who
+    pid, leave, factor, me = who
     allowed = _pool(cfg, lib, _worlds_of(cfg, lib, own), pid)
     idx = similar.index(lib)
     vec = similar.mean_unit([v for v in (idx.centered(i) for i in own) if v is not None]) if idx is not None else None
     if vec is None and idx is not None:
         vec = idx.centroid(lib._main_artist(songs[own[0]]))
     if vec is not None:
-        return _diverse(lib, _favour(_closest(lib, vec, allowed, exclude=set(own) | leave), factor), count, seeds=own)
+        scored = _favour(_closest(lib, vec, allowed, exclude=set(own) | leave), factor)
+        return _mix_new(lib, _diverse(lib, scored, count, seeds=own), scored, me, seeds=own)
     return songs_like_artist(cfg, lib, name=lib._main_artist(songs[own[0]]), count=count, exclude=set(own), who=who)
 
 

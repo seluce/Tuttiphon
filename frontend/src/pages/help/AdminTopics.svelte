@@ -84,6 +84,7 @@
   <p>{@html t('<b>Mixes from listening</b> – under <a class="link" href="#/entdecken">Discover</a>, for every person:')}</p>
   <Bullets>
     <li>{@html t('<b>Discovered for you</b> and <b>Album of the week</b> – every Monday songs or a whole album the account has never played, by its taste.')}</li>
+    <li>{@html t('<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.')}</li>
     <li>{@html t('<b>New from your favorite bands</b> and <b>Your October</b> – what is new from the favorite bands, the most played songs of the month.')}</li>
     <li>{@html t('<b>Good night</b>, <b>Good morning</b> and <b>Car ride</b> – a fixed length instead of a number of songs; good morning only for accounts that often listen in the morning.')}</li>
     <li>{@html t('<b>What everyone likes</b> – the taste of every account counts equally; what someone dislikes stays out.')}</li>
@@ -244,6 +245,7 @@
     <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.')}</span></li>
   </Steps>
   <p>{t('Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family. Kid-safe always stays as for the family. The card shows for whom it last answered.')}</p>
+  <p>{t('Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).')}</p>
 {/snippet}
 
 {#snippet benachrichtigungen()}

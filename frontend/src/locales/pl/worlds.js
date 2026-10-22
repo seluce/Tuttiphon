@@ -524,4 +524,9 @@ export default {
     'Album tygodnia: jeden cały album, którego to konto nigdy nie odtwarzało, wybrany według jego gustu – najpierw ulubione zespoły – w kolejności z albumu. Nowy w każdy poniedziałek; w ciągu tygodnia pozostaje taki sam.',
   'This week: {n} songs, one whole album out of {pool} never played':
     'W tym tygodniu jeden cały album (piosenki: {n}) spośród {pool} nigdy nieodtwarzanych',
+  'Today: the next episode of {n} series':
+    'Dziś: następny odcinek {n} serii',
+  'Today: the next episode of each of {n} series': { few: 'Dziś: następny odcinek każdej z {n} serii', many: 'Dziś: następny odcinek każdej z {n} serii' },
+  'Next episode: for every audio play series this account listened to in the last 3 months, the episode that comes next – the rest of the one begun, otherwise the next one never heard. New every day; the series heard last come first.':
+    'Następny odcinek: dla każdej serii słuchowisk, której to konto słuchało w ostatnich 3 miesiącach, kolejny odcinek – reszta rozpoczętego, a w przeciwnym razie następny jeszcze nigdy niesłuchany. Codziennie nowy; najpierw ostatnio słuchane serie.',
 }
