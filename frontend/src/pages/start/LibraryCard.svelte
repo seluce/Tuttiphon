@@ -3,7 +3,7 @@
   import Icon from '../../components/Icon.svelte'
   import { S } from '../../lib/state.svelte.js'
   import { fmt, plural } from '../../lib/format.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { t, tn } from '../../lib/i18n.svelte.js'
 
   const L = $derived(S.library)
   const total = $derived(L?.songs || 1)
@@ -26,7 +26,7 @@
     </div>
     {#if L.mp3Albums.length}
       <details class="small mt-3.5">
-        <summary class="muted cursor-pointer">{t('{n} albums still in MP3 – list', { n: L.mp3Albums.length })}</summary>
+        <summary class="muted cursor-pointer">{tn(L.mp3Albums.length, '{n} album still in MP3 – list', '{n} albums still in MP3 – list')}</summary>
         <ul class="max-h-[200px] overflow-auto pl-[18px] list-disc">
           {#each L.mp3Albums as a, i (i)}<li>{a}</li>{/each}
         </ul>

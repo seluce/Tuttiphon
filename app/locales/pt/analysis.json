@@ -49,7 +49,7 @@
  "Loudness: {done} songs measured, {open} pending.": "Volume: {done} músicas medidas, {open} pendentes.",
  "  {measured} measured, {errors} not measurable.": "  {measured} medidas, {errors} não mensuráveis.",
  "  {measured} measured.": "  {measured} medidas.",
- "Loudness: ReplayGain values added to {n} songs – Navidrome reads them at the next scan.": "Volume: valores ReplayGain adicionados a {n} músicas – o Navidrome lê-os na verificação seguinte.",
+ "Loudness: ReplayGain values added to {n} songs – Navidrome reads them at the next scan.": "Volume: valores ReplayGain adicionados a {n} músicas – o Navidrome incorpora-os na leitura seguinte.",
  "  ⚠ {path}: {error} – file unchanged.": "  ⚠ {path}: {error} – ficheiro sem alterações.",
  "Duplicate in the same album": "Duplicado no mesmo álbum",
  "The same title appears twice in the album – often the old FLAC file next to the converted Opus file.": "O mesmo título aparece duas vezes no álbum – muitas vezes o ficheiro FLAC antigo ao lado do ficheiro Opus convertido.",

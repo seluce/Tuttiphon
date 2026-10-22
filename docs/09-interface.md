@@ -223,8 +223,9 @@ and (administrator) the history, and increments `S.done`.
 `shell/TaskBar.svelte` shows a small indicator at the top of the header while something is running, and a floating bar
 at the bottom (notice bar). Users only see apply runs (all steps are `playlists` or `scan`, `isApplyRun()`),
 no analysis or maintenance runs. The bar of a running task can be put away – with ✕ or swiped aside (it follows the
-finger; 90 px to the side or 40 px down) – until that run ends; the indicator in the header stays. The bar shows the
-first thing that applies:
+finger; 90 px to the side or 40 px down) – until that run ends (`startedAt` of `GET /api/task`: a later run brings it
+back, even if the interface never saw a moment without a run); the indicator in the header stays and takes the
+keyboard focus. The bar shows the first thing that applies:
 
 | State | Bar |
 |---|---|
@@ -379,7 +380,8 @@ window. The component for this is `components/TrackList.svelte` (`tracks`, `from
 bottom next to the sidebar (title, previous, pause/resume, next, position for seeking, close), on the phone as a card
 above the navigation (without “Previous song” and times, the position as a thin line). Tapping the title or cover
 opens the song window. It sets `--player` to its height (`--player-h`: 72 px, 64 px on the phone) so that the apply bar,
-toasts, the end of the page and the assistant's footer stay above it. `lib/player.svelte.js` plays `/api/stream` with a
+toasts, the end of the page and the assistant's footer stay above it. On the phone they all also stay above the
+navigation: `shell/Nav.svelte` measures its bar (labels on two lines, the safe area included) and sets `--nav-h`. `lib/player.svelte.js` plays `/api/stream` with a
 single `Audio` element – as the original file, in browsers without Opus (`canPlayType`) as MP3 – and reports title,
 band and cover to the Media Session (lock screen and headphone buttons on the phone).
 
@@ -641,13 +643,15 @@ what the plugin does (Navidrome 0.64 or later); songs with a sound vector (`GET 
 while there are none); the key – “Create key” / “New key” (asks first: the old one stops working) and “Remove” (asks
 first, reminds to turn the plugin off in Navidrome) –; a new key appears once in a field with “Copy”; “Plays from
 Navidrome” (the last play received and the accounts, `live` from `GET /api/plugin`; while there is none a hint what to
-check); “Last request from Navidrome” (relative time and for whom – a person or “for the family”, `lastFor`; count
-since the start); both reloaded every 30 seconds while the
+check); “Last request from Navidrome” (relative time, count since the start); “Last answer with similar songs” (when and for
+whom – a person, “probably” a person when it was a guess, or “for the family”: `lastForAt`, `lastFor`, `lastGuess`); both reloaded every 30 seconds while the
 card is open. The setup steps: “Download the plugin” (only if the installation has the file, otherwise the GitHub
 release; not to unpack, keep the name), the agents lines for `navidrome.toml` and for docker-compose as read-only
 fields with “Copy” (Tuttiphon in front of Navidrome's defaults; the label above the field on the phone), the address as
-this browser reaches Tuttiphon, the Symfonium setting; below a note for whom the answers are (the one listening, otherwise the family). “Copy”
-uses the browser's clipboard with https or on localhost, otherwise a hidden text field.
+this browser reaches Tuttiphon, the Symfonium settings (“Use similar tracks for Radio Mix” and “Sonic Analysis” for
+the smart queue); below a note for whom the answers are (the one listening, otherwise the family). “Copy” uses the
+browser's clipboard with https or on localhost, otherwise a hidden text field (not read-only and 16 px, so Safari on
+the iPhone selects it); its label names what it copies.
 
 ### Settings → Playlists and Intelligence
 

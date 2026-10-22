@@ -35,6 +35,18 @@
     ['#/hilfe', 'help', t('Help'), /^\/hilfe/],
   ])
   const items = $derived(isAdmin() ? ADMIN_NAV : USER_NAV)
+
+  /** --nav-h: the height of the bar at the bottom (labels on two lines, the safe area included) – the mini player, the
+   *  task bar and the assistant's buttons sit above it */
+  function height(node) {
+    const set = () => { if (node.offsetHeight) document.documentElement.style.setProperty('--nav-h', `${node.offsetHeight}px`) }
+    const watch = new ResizeObserver(set)
+    watch.observe(node)
+    return () => {
+      watch.disconnect()
+      document.documentElement.style.removeProperty('--nav-h')
+    }
+  }
   const pending = $derived(pendingCount())
   const moreOn = $derived(/^\/(person|profil|richtungen|einstellungen|verlauf|statistik|hilfe)/.test(route.path))
 
@@ -68,7 +80,7 @@
 {/snippet}
 
 {#if bottom}
-  <nav class="bottomnav" aria-label={t('Navigation')} data-tour="bottomnav">
+  <nav class="bottomnav" aria-label={t('Navigation')} data-tour="bottomnav" {@attach height}>
     {#each items.filter(Boolean).slice(0, 4) as item (item[0])}{@render link(item)}{/each}
     <button type="button" data-tour="more" class:on={moreOn} aria-haspopup="dialog" onclick={moreMenu}><Icon name="more" /><span class="lbl">{t('More')}</span></button>
   </nav>

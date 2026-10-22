@@ -37,7 +37,7 @@
 <Card title={t('Notifications on your phone')} icon="bell" guide="notify">
   <p class="muted small">{t('Tuttiphon notifies you directly through the app, on every device where you turn it on. Each person turns on their devices in their profile. Optionally it also works via ntfy.')}</p>
   <Row label={t('Notifications')} hint={t('Turns everything on or off.')}>
-    <Toggle obj={nt} key="enabled" def={false} />
+    <Toggle label={t('Notifications')} obj={nt} key="enabled" def={false} />
   </Row>
   <Row label={t('This device')} hint={t('Gets the notifications for administrators and those of your people.')} full>
     <PushDevice />
@@ -66,6 +66,6 @@
 
 <Card title={t('What to notify about?')} icon="sparkles">
   {#each EVENTS as [key, label, hint] (key)}
-    <Row {label} {hint}><Toggle obj={nt.events} {key} /></Row>
+    <Row {label} {hint}><Toggle label={t('Own topic in the profile')} obj={nt.events} {key} /></Row>
   {/each}
 </Card>

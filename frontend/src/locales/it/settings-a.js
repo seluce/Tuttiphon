@@ -129,11 +129,13 @@ export default {
   'The AI may use at most this many cores – the rest stays free for Navidrome.':
     'L\'IA può occupare al massimo questo numero di core – il resto resta libero per Navidrome.',
   'Free with your own key: similar bands for radio, suggestions and “You might still be missing”, plus genre and mood tags for classifying new bands. Everything is cached for 30 days.':
-    'Gratis con una tua chiave: band simili per radio, suggerimenti e «Forse vi manca ancora», più tag di genere e di mood per classificare le nuove band. Tutto viene messo in cache per 30 giorni.',
+    'Gratis con una tua chiave: band simili per radio, suggerimenti e «Forse ti manca ancora», più tag di genere e di mood per classificare le nuove band. Tutto viene messo in cache per 30 giorni.',
   'Key entered':
     'Chiave inserita',
   'No key yet':
     'Ancora nessuna chiave',
+  '{n} band loaded':
+    '{n} band caricata',
   '{n} bands loaded':
     '{n} band caricate',
   ' · last run {when}':
@@ -145,7 +147,7 @@ export default {
   '•••••• entered':
     '•••••• inserita',
   'You can get a key for free at last.fm/api/account/create. It is only stored on your NAS.':
-    'Puoi ottenere una chiave gratis su last.fm/api/account/create. Viene salvata solo sul vostro NAS.',
+    'Puoi ottenere una chiave gratis su last.fm/api/account/create. Viene salvata solo sul tuo NAS.',
   'Time limit per run':
     'Limite di tempo per esecuzione',
   'Tuttiphon loads Last.fm data for at most this long. The first pass takes a few minutes.':
@@ -153,7 +155,7 @@ export default {
   'Music worlds':
     'Mondi musicali',
   'From genres, Last.fm tags, AI music style, language and decade, Tuttiphon recognizes which music worlds your library offers – such as 80s hits, Eurodance, German rap or Schlager & party – and classifies every band. New bands go into their world on their own.':
-    'Da generi, tag di Last.fm, stile musicale dell\'IA, lingua e decennio, Tuttiphon riconosce quali mondi musicali offre la vostra libreria – come hit anni \'80, Eurodance, rap tedesco o Schlager e party – e classifica ogni band. Le nuove band entrano da sole nel loro mondo.',
+    'Da generi, tag di Last.fm, stile musicale dell\'IA, lingua e decennio, Tuttiphon riconosce quali mondi musicali offre la tua libreria – come hit anni \'80, Eurodance, rap tedesco o Schlager e party – e classifica ogni band. Le nuove band entrano da sole nel loro mondo.',
   'Create music worlds automatically':
     'Crea mondi musicali in automatico',
   'From 4 bands and 60 songs, or from just 2 bands if someone listens to them a lot. Deleted worlds don’t come back.':
@@ -180,6 +182,8 @@ export default {
     'Automatico da',
   'Only very confident matches are classified directly; the rest stays a suggestion.':
     'Solo le corrispondenze molto sicure vengono classificate direttamente; il resto resta un suggerimento.',
+  '{n} song · {why}':
+    '{n} brano · {why}',
   '{n} songs · {why}':
     '{n} brani · {why}',
   'add':
@@ -245,7 +249,7 @@ export default {
   'Tuttiphon knows your plays, stars and favorites – for your statistics, your stars and more accurate suggestions.':
     'Tuttiphon conosce i tuoi ascolti, le tue stelle e i tuoi preferiti – per le tue statistiche, le tue stelle e suggerimenti più precisi.',
   'For Tuttiphon to show your statistics and set Deezer stars in your account, it needs your Navidrome password once – the same as in Symfonium. It stays on your NAS.':
-    'Perché Tuttiphon possa mostrare le tue statistiche e assegnare stelle Deezer nel tuo account, ha bisogno una volta della tua password di Navidrome – la stessa di Symfonium. Resta sul vostro NAS.',
+    'Perché Tuttiphon possa mostrare le tue statistiche e assegnare stelle Deezer nel tuo account, ha bisogno una volta della tua password di Navidrome – la stessa di Symfonium. Resta sul NAS di casa.',
   'your Navidrome password':
     'la tua password di Navidrome',
   'Your profiles':
@@ -404,6 +408,8 @@ export default {
     'consentito',
   'allow':
     'consenti',
+  'Show {n} more band':
+    'Mostra {n} altra band',
   'Show {n} more bands':
     'Mostra altre {n} band',
   'The levels must go up: ★ < ★★ < …':
@@ -461,7 +467,7 @@ export default {
   'Overwrite stars given by hand':
     'Sovrascrivi le stelle date a mano',
   'Normally your own stars stay untouched.':
-    'Normalmente le vostre stelle restano intatte.',
+    'Normalmente le stelle date a mano restano intatte.',
   'In the full run':
     'Nell\'esecuzione completa',
   '“Update everything” rates …':
@@ -511,7 +517,7 @@ export default {
   'Test connection':
     'Prova la connessione',
   'Tuttiphon needs the admin account in the background for scans, playlists and their owners. Credentials are only stored on your NAS.':
-    'Tuttiphon ha bisogno dell\'account amministratore in background per scansioni, playlist e i loro proprietari. Le credenziali vengono salvate solo sul vostro NAS.',
+    'Tuttiphon ha bisogno dell\'account amministratore in background per scansioni, playlist e i loro proprietari. Le credenziali vengono salvate solo sul tuo NAS.',
   'Password stored':
     'Password salvata',
   'The stored password no longer works – probably it was changed in Navidrome.':
@@ -523,7 +529,7 @@ export default {
   'Enter':
     'Inserisci',
   'The list comes from the Navidrome accounts of your <a class="link" href="#/personen">people</a>. Anyone who signs in and leaves the “Turn on statistics & stars” box checked enters it themselves. Roles: <a class="link" href="#/einstellungen/benutzer">Users & permissions</a>.':
-    'L\'elenco deriva dagli account Navidrome delle vostre <a class="link" href="#/personen">persone</a>. Chi accede e lascia spuntata la casella «Attiva statistiche e stelle» la inserisce da sé. Ruoli: <a class="link" href="#/einstellungen/benutzer">Utenti e permessi</a>.',
+    'L\'elenco deriva dagli account Navidrome delle tue <a class="link" href="#/personen">persone</a>. Chi accede e lascia spuntata la casella «Attiva statistiche e stelle» la inserisce da sé. Ruoli: <a class="link" href="#/einstellungen/benutzer">Utenti e permessi</a>.',
   'Scan':
     'Scansione',
   'Type of scan':
@@ -646,8 +652,8 @@ export default {
     'Se c\'è già un elenco, mettici davanti «tuttiphon,» – senza elenco questi sono i valori predefiniti di Navidrome. La riga in docker-compose ha la precedenza su navidrome.toml. Poi riavvia Navidrome; quando Tuttiphon non ha una risposta, Navidrome chiede ai successivi.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'In Navidrome, in <b>Settings → Plugins</b>, attiva «Tuttiphon», inserisci l\'indirizzo e la chiave e abilitalo per <b>tutti gli utenti</b> (per gli ascolti). Meglio l\'indirizzo nella rete di casa, ad es. <code>http://&lt;NAS&gt;:8765</code> – non un indirizzo https tramite un reverse proxy, che potrebbe respingere Navidrome. Questo browser raggiunge Tuttiphon all\'indirizzo <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'In Symfonium attiva <b>«Use similar tracks for Radio Mix»</b> per il server Navidrome («Settings → Media providers» → il server).',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'In Symfonium attiva <b>«Use similar tracks for Radio Mix»</b> per il server Navidrome («Manage media providers» → il server) e nel player scegli <b>«Sonic Analysis»</b> per la coda intelligente.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
     'Navidrome non dice chi sta chiedendo. Se il brano è in riproduzione su un solo account – o se suona un solo account – la risposta vale per quella persona: senza ciò che non le piace, senza ciò che ha appena ascoltato o valutato con 1 stella; ciò che salta spesso arriva più tardi, e dopo due brani di una band vengono prima altre band. Altrimenti vale per la famiglia. Musica per bambini solo per le canzoni per bambini, e senza brani con testi espliciti appena un profilo ha la modalità bambini o è un profilo bambino.',
   'Create a new key?':
@@ -672,4 +678,10 @@ export default {
     '{when} · per {name}',
   '{when} · for the family':
     '{when} · per la famiglia',
+  '{when} · probably for {name}':
+    '{when} · probabilmente per {name}',
+  'Last answer with similar songs':
+    'Ultima risposta con brani simili',
+  'Copy {what}':
+    'Copia {what}',
 }

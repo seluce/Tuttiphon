@@ -13,11 +13,11 @@ export default {
   'Follow the progress below':
     'Acompanhe o progresso abaixo',
   'scan navidrome apply write deezer lyrics opus aac analysis automatic folder':
-    'verificar navidrome aplicar escrever deezer letras opus aac análise automático pasta',
+    'leitura scan navidrome aplicar escrever deezer letras opus aac análise automático pasta',
   'One click for everything':
     'Um clique para tudo',
   'Convert music, fetch lyrics and missing covers, understand the sound, write playlists, scan Navidrome and set stars – one after another. “Apply playlists only” writes just the playlists.':
-    'Converter música, obter letras e capas em falta, compreender o som, escrever playlists, verificar o Navidrome e atribuir estrelas – um passo após o outro. «Só aplicar playlists» escreve apenas as playlists.',
+    'Converter música, obter letras e capas em falta, compreender o som, escrever playlists, iniciar a leitura do Navidrome e atribuir estrelas – um passo após o outro. «Só aplicar playlists» escreve apenas as playlists.',
   'Which steps are included':
     'Que passos estão incluídos',
   'Here you decide what “Update everything” does.':
@@ -46,12 +46,12 @@ export default {
     'Que música, que estado de espírito e, por fim, os retoques finais. No topo vê onde está.',
   'For whom?':
     'Para quem?',
-  'The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.':
-    'A pessoa define para que conta do Navidrome vai a playlist e as estrelas de quem contam. Depois escolhe o mundo musical.',
+  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
+    'A pessoa define para que conta do Navidrome vai a playlist – contam as estrelas dessa conta. Depois escolhe o mundo musical.',
   'Choose music':
     'Escolher música',
   'Tap one or more music worlds. “All” takes the whole library.':
-    'Toque num ou mais mundos musicais. «Tudo» usa a biblioteca inteira.',
+    'Toque num ou mais mundos musicais. «Todos» usa a biblioteca inteira.',
   'On to the mood':
     'Seguir para o estado de espírito',
   'Then you choose the mood, such as Party or Calm. In the last step you see right away which songs would be in it, and create the playlist.':
@@ -120,8 +120,8 @@ export default {
     'Cada um inicia sessão com a sua própria conta do Navidrome. Aqui escolhe, para cada conta, administrador, utilizador ou sem acesso.',
   'People':
     'Pessoas',
-  'One person per account: suggestions and mixes are made for them with their favorites and dislikes.':
-    'Uma pessoa por conta: as sugestões e os mixes são feitos para ela, com os seus favoritos e o que não gosta.',
+  'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
+    'Uma pessoa por conta: as sugestões e os mixes são feitos para ela, com os seus favoritos e sem aquilo de que não gosta.',
   'Make suggestions better':
     'Melhorar as sugestões',
   'Open my profile':
@@ -129,7 +129,7 @@ export default {
   'Add what was recognized with “+”':
     'Adicione o que foi reconhecido com «+»',
   'Add favorites and dislikes':
-    'Adicione favoritos e o que não gosta',
+    'Adicione favoritos e aquilo de que não gosta',
   'profile preferences favorites favorite bands favorite worlds recommendations taste listening':
     'perfil preferências favoritos bandas favoritas mundos favoritos recomendações gosto ouvir',
   'From listening':
@@ -279,11 +279,11 @@ export default {
   'Home':
     'Início',
   'Your mixes of the day, what there is to review – and “Update everything”: convert music, fetch lyrics and covers, analyze the sound, write playlists, scan Navidrome, set stars. One click.':
-    'Os seus mixes do dia, o que há para rever – e «Atualizar tudo»: converter música, obter letras e capas, analisar o som, escrever playlists, verificar o Navidrome, atribuir estrelas. Um clique.',
+    'Os seus mixes do dia, o que há para rever – e «Atualizar tudo»: converter música, obter letras e capas, analisar o som, escrever playlists, iniciar a leitura do Navidrome, atribuir estrelas. Um clique.',
   'New playlist':
     'Nova playlist',
   'The assistant asks: For whom? Which music world? Which vibe? – and shows right away what comes out. Either as a smart playlist or as a mix that puts itself together anew daily, weekly or monthly. On the phone under “More”.':
-    'O assistente pergunta: Para quem? Que mundo musical? Que ambiente? – e mostra logo o resultado. Como playlist inteligente ou como mix que se monta de novo todos os dias, semanas ou meses. No telemóvel em «Mais».',
+    'O assistente pergunta: Para quem? Que mundo musical? Que ambiente? – e mostra logo o resultado. Como playlist inteligente ou como mix que se monta de novo diária, semanal ou mensalmente. No telemóvel em «Mais».',
   'Playlists':
     'Playlists',
   'All playlists Tuttiphon looks after for you. Tapping opens preview, “Who’s in it?”, cover and editing.':
@@ -335,7 +335,7 @@ export default {
   'My profile':
     'O meu perfil',
   'What Tuttiphon has recognized from your listening, your favorites and dislikes. Your suggestions come from that.':
-    'O que o Tuttiphon reconheceu pelo que ouve, os seus favoritos e o que não gosta. É daí que vêm as suas sugestões.',
+    'O que o Tuttiphon reconheceu pelo que ouve, os seus favoritos e aquilo de que não gosta. É daí que vêm as suas sugestões.',
   'Find bands, songs, playlists and moods – “calm children’s songs” turns right into a mix. On the PC also with the / key.':
     'Encontre bandas, músicas, playlists e estados de espírito – «canções infantis calmas» torna-se logo um mix. No computador também com a tecla /.',
   'Tour':
@@ -369,7 +369,7 @@ export default {
   'Recently added albums':
     'Álbuns adicionados recentemente',
   'All of your playlists':
-    'Todas as vossas playlists',
+    'Todas as playlists',
   'All active playlists as a carousel':
     'Todas as playlists ativas em carrossel',
   'Deezer & library':
@@ -401,7 +401,7 @@ export default {
   'Smart playlists & mixes into the playlist folder':
     'Playlists inteligentes e mixes na pasta de playlists',
   'Navidrome scan & sync':
-    'Verificação e sincronização do Navidrome',
+    'Leitura e sincronização do Navidrome',
   'Navidrome reads everything in, names & owners are synced':
     'O Navidrome lê tudo, nomes e proprietários são sincronizados',
   'Deezer rating':
@@ -413,7 +413,7 @@ export default {
   'Lyrics':
     'Letras',
   'Scan':
-    'Verificação',
+    'Leitura',
   '{n} converted':
     '{n} convertidas',
   '{n} lyrics found':
@@ -536,6 +536,8 @@ export default {
     'Nas letras',
   'Bands, songs, mood, lyric line …':
     'Bandas, músicas, estado de espírito, verso …',
+  'Mix · {n} matching song, new every week':
+    'Mix · {n} música compatível, novo todas as semanas',
   'Mix · {n} matching songs, new every week':
     'Mix · {n} músicas compatíveis, novo todas as semanas',
   '{songs} · create as mix':

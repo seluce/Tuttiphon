@@ -3,7 +3,7 @@ export default {
   'General':
     'Geral',
   'Theme, install as app':
-    'Tema, instalar como app',
+    'Esquema de cores, instalar como app',
   'My account':
     'A minha conta',
   'Sign-in, password, tour':
@@ -17,7 +17,7 @@ export default {
   'What the home page shows':
     'O que a página inicial mostra',
   'Server, accounts, scan, plugin':
-    'Servidor, contas, verificação, plugin',
+    'Servidor, contas, leitura, plugin',
   'Music, playlists, archive':
     'Música, playlists, arquivo',
   'Playlists':
@@ -67,7 +67,7 @@ export default {
   'Appearance':
     'Aspeto',
   'Theme':
-    'Tema',
+    'Esquema de cores',
   '“System” follows the setting of your phone or computer.':
     '«Sistema» segue a definição do seu telemóvel ou computador.',
   'System':
@@ -233,7 +233,7 @@ export default {
   'Apply automatically':
     'Aplicar automaticamente',
   'A few seconds after a change, Tuttiphon writes the playlists and has Navidrome scan briefly. Off = via the “Apply” button.':
-    'Alguns segundos após uma alteração, o Tuttiphon escreve as playlists e manda o Navidrome fazer uma verificação breve. Desativado = através do botão «Aplicar».',
+    'Alguns segundos após uma alteração, o Tuttiphon escreve as playlists e manda o Navidrome fazer uma leitura breve. Desativado = através do botão «Aplicar».',
   'Keep it tidy':
     'Manter tudo arrumado',
   'Seasonal playlists only in season':
@@ -261,7 +261,7 @@ export default {
   'Shorter tracks such as intros or skits stay out. In seconds.':
     'Faixas mais curtas, como intros ou sketches, ficam de fora. Em segundos.',
   'Minimum rating for “All”':
-    'Classificação mínima para «Tudo»',
+    'Classificação mínima para «Todos»',
   'For playlists across the whole library.':
     'Para playlists de toda a biblioteca.',
   'any':
@@ -287,7 +287,7 @@ export default {
   'Folder watch':
     'Vigilância de pastas',
   'If you like, Tuttiphon regularly checks whether new music has landed in the music folder, e.g. from Lidarr, and processes it right away: convert, search lyrics, scan Navidrome, rate on Deezer.':
-    'Se quiser, o Tuttiphon verifica regularmente se chegou música nova à pasta de música, p. ex. do Lidarr, e processa-a de imediato: converter, procurar letras, verificar o Navidrome, classificar no Deezer.',
+    'Se quiser, o Tuttiphon verifica regularmente se chegou música nova à pasta de música, p. ex. do Lidarr, e processa-a de imediato: converter, procurar letras, iniciar a leitura do Navidrome, classificar no Deezer.',
   'Turn on folder watch':
     'Ativar a vigilância de pastas',
   'Last on {when} – new files: {n}.':
@@ -389,7 +389,7 @@ export default {
   'none so far':
     'nenhuma até agora',
   'Remove the extra copies from the music folder yourself – tapping a copy opens it to listen in. Navidrome notices the change at its next scan.':
-    'Remova por si as cópias a mais da pasta de música – tocar numa cópia abre-a para a ouvir. O Navidrome deteta a alteração na verificação seguinte.',
+    'Remova por si as cópias a mais da pasta de música – tocar numa cópia abre-a para a ouvir. O Navidrome deteta a alteração na leitura seguinte.',
   '“Same recording twice” appears here once the audio fingerprints have been compared – they are made during “Understand music” and at night.':
     '«A mesma gravação duas vezes» aparece aqui quando as impressões digitais de áudio tiverem sido comparadas – são criadas durante «Compreender a música» e à noite.',
   'Missing covers':
@@ -438,6 +438,8 @@ export default {
     'Quanto mais de uma música o Tuttiphon ouve, mais fiável é o reconhecimento do andamento e do estado de espírito – sobretudo em músicas que começam baixinho e acabam alto. Em contrapartida, a primeira passagem demora mais.',
   '“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.':
     '«Andamento coincide»: com que frequência o andamento coincide com o nível «Profundo». Os tempos são aproximados; no NAS demora bastante mais, consoante o processador. Corre em segundo plano com limite de tempo por execução e pode ser parado a qualquer momento.',
+  '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.':
+    '{n} música foi ouvida até agora com menos atenção e é medida de novo aos poucos, primeiro as novas.',
   '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.':
     '{n} músicas foram ouvidas até agora com menos atenção e são medidas de novo aos poucos, primeiro as novas.',
   'testing …':
@@ -472,6 +474,8 @@ export default {
     'Desativado neste dispositivo',
   'Turn off':
     'Desativar',
+  '{n} device is registered.':
+    'Há {n} dispositivo registado.',
   '{n} devices are registered.':
     'Há {n} dispositivos registados.',
   'Turned on for this device':

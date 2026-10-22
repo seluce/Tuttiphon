@@ -1,7 +1,7 @@
-// Same keys as ../de/home-playlists.js (tools/translate.py)
+// Same keys as ../de/home-playlists.js
 export default {
   'Hidden':
-    'Ukryto',
+    'Ukryte',
   'See all →':
     'Zobacz wszystko →',
   'Your recap →':
@@ -77,7 +77,7 @@ export default {
   'Mix':
     'Mix',
   'for {name}':
-    'dla: {name}',
+    '{name}',
   'Create':
     'Utwórz',
   'Not interested':
@@ -161,7 +161,7 @@ export default {
   'Rate new songs':
     'Oceń nowe piosenki',
   'Retry songs not found':
-    'Ponów nieznalezione piosenki',
+    'Szukaj ponownie nieznalezionych piosenek',
   'Continue full check · {done}/{total}':
     'Kontynuuj pełne sprawdzenie · {done}/{total}',
   'Check everything again':
@@ -191,8 +191,9 @@ export default {
     'pokaż jeszcze {n}',
   'Library':
     'Biblioteka',
-  '{n} albums still in MP3 – list':
-    'Albumy wciąż w MP3: {n} – lista',
+  '{n} album still in MP3 – list':
+    '{n} album nadal w MP3 – lista',
+  '{n} albums still in MP3 – list': { few: '{n} albumy nadal w MP3 – lista', many: '{n} albumów nadal w MP3 – lista' },
   '{loved} favorites · {played} songs with plays':
     'ulubione: {loved} · piosenki z odtworzeniami: {played}',
   'Plays':
@@ -280,7 +281,7 @@ export default {
   'Play':
     'Odtwórz',
   'reshuffle':
-    'losuj ponownie',
+    'przetasuj',
   'shuffle again':
     'wymieszaj ponownie',
   'This is how a mix could look – Navidrome reshuffles on every request.':
@@ -311,16 +312,18 @@ export default {
     'z powrotem w Symfonium od {date}',
   'from {n} matching':
     'z {n} pasujących',
-  '{n} matching songs':
-    'pasujące piosenki: {n}',
+  '{n} matching song':
+    '{n} pasująca piosenka',
+  '{n} matching songs': { few: '{n} pasujące piosenki', many: '{n} pasujących piosenek' },
   'up to {n} per request':
     'do {n} na zapytanie',
   'in Navidrome: {owner}':
     'w Navidrome: {owner}',
   'Rather few songs – maybe loosen the selection or add more music worlds.':
     'Raczej mało piosenek – może poluzuj wybór albo dodaj więcej światów muzycznych.',
-  'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.':
-    'Mix jest krótszy niż zamierzono, bo limit piosenek na zespół wynosi {n} – więcej zespołów z innych światów muzycznych go wydłuży.',
+  'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.':
+    'Mix jest krótszy niż ustawiona długość, bo dozwolona jest najwyżej {n} piosenka na zespół – więcej zespołów z innych światów muzycznych go wydłuży.',
+  'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.': { few: 'Mix jest krótszy niż ustawiona długość, bo dozwolone są najwyżej {n} piosenki na zespół – więcej zespołów z innych światów muzycznych go wydłuży.', many: 'Mix jest krótszy niż ustawiona długość, bo dozwolonych jest najwyżej {n} piosenek na zespół – więcej zespołów z innych światów muzycznych go wydłuży.' },
   'This playlist belongs to {name} and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.':
     'Ta playlista należy do osoby {name} i jest udostępniona wszystkim. Możesz jej słuchać w Symfonium – albo utworzyć własną wersję przez „Kopia dla mnie” i ją dostosować.',
   'This playlist belongs to someone else and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.':
@@ -349,24 +352,27 @@ export default {
     'Daily Mix · nowy codziennie',
   'Today in the mix':
     'Dziś w mixie',
-  '{n} songs today':
-    'piosenki na dziś: {n}',
+  '{n} song today':
+    '{n} piosenka dzisiaj',
+  '{n} songs today': { few: '{n} piosenki dzisiaj', many: '{n} piosenek dzisiaj' },
   'These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
     'Dokładnie te piosenki ({n}) są dziś w Navidrome – jutro rano będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
   'Weekly Mix · new every week':
     'Weekly Mix · nowy co tydzień',
   'This week in the mix':
     'W tym tygodniu w mixie',
-  '{n} songs this week':
-    'piosenki w tym tygodniu: {n}',
+  '{n} song this week':
+    '{n} piosenka w tym tygodniu',
+  '{n} songs this week': { few: '{n} piosenki w tym tygodniu', many: '{n} piosenek w tym tygodniu' },
   'These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
     'Dokładnie te piosenki ({n}) są w tym tygodniu w Navidrome – w następny poniedziałek będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
   'Monthly Mix · new every month':
     'Monthly Mix · nowy co miesiąc',
   'This month in the mix':
     'W tym miesiącu w mixie',
-  '{n} songs this month':
-    'piosenki w tym miesiącu: {n}',
+  '{n} song this month':
+    '{n} piosenka w tym miesiącu',
+  '{n} songs this month': { few: '{n} piosenki w tym miesiącu', many: '{n} piosenek w tym miesiącu' },
   'These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
     'Dokładnie te piosenki ({n}) są w tym miesiącu w Navidrome – pierwszego dnia miesiąca będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
   'Paused – kept here, disappears from Navidrome shortly':
@@ -399,8 +405,9 @@ export default {
     'Wybór piosenek ({n}) zostanie zapisany w Navidrome jako stała playlista „{name}”. Potem już się nie zmieni – przydatne, gdy podoba ci się mix.',
   'A selection of {n} songs is saved as the fixed playlist “{name}” in Navidrome. It won’t change after that.':
     'Wybór piosenek ({n}) zostanie zapisany w Navidrome jako stała playlista „{name}”. Potem już się nie zmieni.',
-  '“{name}” saved with {n} songs ✓':
-    'Zapisano „{name}”, piosenki: {n} ✓',
+  '“{name}” saved with {n} song ✓':
+    'Zapisano „{name}” z {n} piosenką ✓',
+  '“{name}” saved with {n} songs ✓': { few: 'Zapisano „{name}” z {n} piosenkami ✓', many: 'Zapisano „{name}” z {n} piosenkami ✓' },
   'Reshuffled – coming to Navidrome shortly':
     'Przetasowano – wkrótce trafi do Navidrome',
   'Reshuffled – bring it to Navidrome with “Apply”':
@@ -452,7 +459,7 @@ export default {
   'Is it listened to?':
     'Czy jest słuchana?',
   'Counts the songs of each finished edition that were played in its period – also from the album or elsewhere. An edition counts as listened to from 3 songs.':
-    'Liczy piosenki każdego zakończonego wydania, które zostały odtworzone w jego okresie – także z albumu lub skądinąd. Wydanie uznaje się za wysłuchane od 3 piosenek.',
+    'Liczy piosenki każdego zakończonego wydania, które zostały odtworzone w jego okresie – także z albumu lub z innego miejsca. Wydanie uznaje się za wysłuchane od 3 piosenek.',
   'Only single songs played from the last edition ({pct} % of the songs).':
     'Z ostatniego wydania odtworzono tylko pojedyncze piosenki ({pct}% piosenek).',
   'Only single songs played from the last {n} editions ({pct} % of the songs).': { few: 'Z ostatnich {n} wydań odtworzono tylko pojedyncze piosenki ({pct}% piosenek).', many: 'Z ostatnich {n} wydań odtworzono tylko pojedyncze piosenki ({pct}% piosenek).' },
@@ -477,8 +484,9 @@ export default {
     'Jeden cały album, w kolejności z albumu – w następny poniedziałek będzie nowy. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
   'one whole album a week, from {n} never played':
     'co tydzień cały album, spośród {n} nigdy nieodtwarzanych',
-  'from {n} albums never played':
-    'z {n} nigdy nieodtwarzanych albumów',
+  'from {n} album never played':
+    'z {n} nigdy nieodtwarzanego albumu',
+  'from {n} albums never played': { few: 'z {n} nigdy nieodtwarzanych albumów', many: 'z {n} nigdy nieodtwarzanych albumów' },
   'Album of the week · new every Monday':
     'Album tygodnia · nowy w każdy poniedziałek',
   'This week’s album':

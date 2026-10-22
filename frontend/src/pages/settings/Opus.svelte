@@ -130,10 +130,10 @@
 <Card title={t('Even out loudness')} icon="waves">
   <p class="muted small">{t('At night Tuttiphon measures how loud each song is and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in Symfonium and all songs play equally loud, even in a mix from a children\'s song to metal.')}</p>
   <Row label={t('Leveling on')} hint={t('Writes once into every music file. Each file is copied and checked first, only then replaced. Values that already came from elsewhere stay.')}>
-    <Toggle obj={ld} key="enabled" def={false} />
+    <Toggle label={t('Leveling on')} obj={ld} key="enabled" def={false} />
   </Row>
   <Row label={t('Album values too')} hint={t('For albums you listen to in one go: quiet and loud songs of an album keep their balance.')}>
-    <Toggle obj={ld} key="album" def={true} />
+    <Toggle label={t('Album values too')} obj={ld} key="album" def={true} />
   </Row>
   {#if lo && !lo.available}
     <div class="note">{t('Not possible here: {why}. The Docker container on the NAS includes everything.', { why: lo.why })}</div>

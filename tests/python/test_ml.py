@@ -828,6 +828,10 @@ class TestKeyTempoInstruments(MlTest):
                             ("violon", "violin"), ("violoncelle", "cello"), ("tromba", "trumpet"),
                             ("trombone", "trombone"), ("batterie", "drums"), ("fisarmonica", "accordion")):
             self.assertEqual(ml.instrument_word(word)[0], first, word)   # the other languages of the interface
+        for word in ("epica", "noel", "swiat", "contra"):   # a band, a name, Polish "world", "against"
+            self.assertIsNone(ml.instrument_word(word) or ml.theme_word(word), word)
+        self.assertEqual(ml.instrument_word("trąbka"), ["trumpet"])
+        self.assertEqual((ml.theme_word("weihn"), ml.instrument_word("klavi")), (["christmas"], ["piano"]))   # type-ahead stays
         for word, theme in (("noël", "christmas"), ("navidad", "christmas"), ("kerstmis", "christmas"),
                             ("kolędy", "christmas"), ("épique", "epic"), ("sombre", "dark"), ("zomer", "summer")):
             self.assertEqual(ml.theme_word(word), [theme], word)

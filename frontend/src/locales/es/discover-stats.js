@@ -41,9 +41,9 @@ export default {
   'Show {n} hidden again':
     'Volver a mostrar {n} ocultas',
   '{n} hidden suggestion comes back by itself after six months.':
-    '{n} sugerencia oculta vuelve sola a los seis meses.',
+    '{n} sugerencia oculta vuelve automáticamente a los seis meses.',
   '{n} hidden suggestions come back by themselves after six months.':
-    '{n} sugerencias ocultas vuelven solas a los seis meses.',
+    '{n} sugerencias ocultas vuelven automáticamente a los seis meses.',
   'Show again now':
     'Volver a mostrar ahora',
   'You might still be missing':
@@ -70,6 +70,8 @@ export default {
     'para {name}',
   'hits only':
     'solo los éxitos',
+  '{n} song, changes on the first of the month':
+    '{n} canción, cambia el día 1 de cada mes',
   '{n} songs, changes on the first of the month':
     '{n} canciones, cambia el día 1 de cada mes',
   '{n} minutes':
@@ -190,10 +192,14 @@ export default {
     '{names} usan la misma cuenta de Navidrome «{account}» – por eso sus cifras son iguales.',
   'Plays':
     'Reproducciones',
+  'from {n} different song':
+    'de {n} canción distinta',
   'from {n} different songs':
     'de {n} canciones distintas',
   'Listening time':
     'Tiempo de escucha',
+  '≈ {n} day non-stop':
+    '≈ {n} día seguido',
   '≈ {n} days non-stop':
     '≈ {n} días seguidos',
   'Bands played':
@@ -234,6 +240,8 @@ export default {
     'Crear como playlist',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Nota: Navidrome solo guarda cuántas veces sonó cada canción y cuándo fue la última – no guarda un historial a lo largo del tiempo.',
+  '“{name}” saved with {n} song – coming to Symfonium shortly':
+    '«{name}» guardada con {n} canción – llega enseguida a Symfonium',
   '“{name}” saved with {n} songs – coming to Symfonium shortly':
     '«{name}» guardada con {n} canciones – llega enseguida a Symfonium',
   'Nothing counted yet':
@@ -250,6 +258,8 @@ export default {
     '{n} banda',
   '{n} bands':
     '{n} bandas',
+  '{n} different song':
+    '{n} canción distinta',
   '{n} different songs':
     '{n} canciones distintas',
   '{n} newly discovered':
@@ -270,6 +280,8 @@ export default {
     'Día a día',
   'Newly discovered':
     'Recién descubierto',
+  '{n} new song':
+    '{n} canción nueva',
   '{n} new songs':
     '{n} canciones nuevas',
   'For the Navidrome account “{user}”. Tuttiphon records its play counts every day – most recently {when}.':
@@ -342,6 +354,8 @@ export default {
     'Estado de ánimo',
   'Sounds like:':
     'Suena como:',
+  'from the sound analysis of {n} song':
+    'según el análisis de sonido de {n} canción',
   'from the sound analysis of {n} songs':
     'según el análisis de sonido de {n} canciones',
   'In your playlists':
@@ -391,7 +405,7 @@ export default {
   'The playlist is not in Navidrome yet. As soon as it is applied, you can choose a cover here.':
     'La playlist aún no está en Navidrome. En cuanto se aplique, podrás elegir aquí una portada.',
   'The image appears in Navidrome and – after the next sync – in Symfonium. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
-    'La imagen aparece en Navidrome y – tras la próxima sincronización – en Symfonium. Tuttiphon renueva solo las portadas diseñadas cuando cambia la playlist – en los mixes, con cada nueva selección.',
+    'La imagen aparece en Navidrome y – tras la próxima sincronización – en Symfonium. Tuttiphon renueva automáticamente las portadas diseñadas cuando cambia la playlist – en los mixes, con cada nueva selección.',
   'not possible here':
     'no es posible aquí',
   'active':
@@ -439,7 +453,7 @@ export default {
   '{key} · {camelot} · uncertain':
     '{key} · {camelot} · incierto',
   'Key and its code on the Camelot wheel – neighboring codes blend well in a mix':
-    'Tonalidad y su código en la rueda de Camelot – los códigos vecinos combinan bien en una mezcla',
+    'Tonalidad y su código en la rueda de Camelot – los códigos vecinos combinan bien en un mix',
   'Instruments:':
     'Instrumentos:',
   'Themes:':

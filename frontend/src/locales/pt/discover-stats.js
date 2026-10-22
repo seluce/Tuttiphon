@@ -7,7 +7,7 @@ export default {
   'For you':
     'Para si',
   'Ready-made playlists from your library – matching your preferences and the season. One click creates them, ✕ hides a suggestion for six months.':
-    'Playlists prontas a partir da biblioteca – de acordo com as vossas preferências e a época do ano. Um clique cria-as, ✕ oculta uma sugestão durante seis meses.',
+    'Playlists prontas a partir da biblioteca – de acordo com as preferências de cada pessoa e a época do ano. Um clique cria-as, ✕ oculta uma sugestão durante seis meses.',
   'Ready-made playlists from your library – matching your taste and the season. “Create” adds them, ✕ hides a suggestion for six months.':
     'Playlists prontas a partir da sua biblioteca – de acordo com o seu gosto e a época do ano. «Criar» adiciona-as, ✕ oculta uma sugestão durante seis meses.',
   'Suggestions could not be computed':
@@ -25,7 +25,7 @@ export default {
   'For {name}':
     'Para {name}',
   'Scenes whose typical bands are already on your shelf':
-    'Cenas cujas bandas típicas já estão na vossa estante',
+    'Cenas cujas bandas típicas já estão na sua estante',
   'Preferences →':
     'Preferências →',
   'Change taste →':
@@ -70,6 +70,8 @@ export default {
     'para {name}',
   'hits only':
     'só os êxitos',
+  '{n} song, changes on the first of the month':
+    '{n} música, muda no primeiro dia do mês',
   '{n} songs, changes on the first of the month':
     '{n} músicas, muda no primeiro dia do mês',
   '{n} minutes':
@@ -107,7 +109,7 @@ export default {
   'According to Last.fm – tap to listen in. If you like something, the administrator can add it to the library.':
     'Segundo o Last.fm – toque para ouvir um pouco. Se gostar de algo, o administrador pode adicioná-lo à biblioteca.',
   'All':
-    'Tudo',
+    'Todos',
   'Error':
     'Erro',
   'Computing all combinations …':
@@ -190,10 +192,14 @@ export default {
     '{names} usam a mesma conta do Navidrome «{account}» – por isso os números são iguais.',
   'Plays':
     'Reproduções',
+  'from {n} different song':
+    'de {n} música diferente',
   'from {n} different songs':
     'de {n} músicas diferentes',
   'Listening time':
     'Tempo de audição',
+  '≈ {n} day non-stop':
+    '≈ {n} dia sem parar',
   '≈ {n} days non-stop':
     '≈ {n} dias sem parar',
   'Bands played':
@@ -234,6 +240,8 @@ export default {
     'Criar como playlist',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Nota: o Navidrome só guarda quantas vezes e quando cada música tocou pela última vez – não mantém histórico ao longo do tempo.',
+  '“{name}” saved with {n} song – coming to Symfonium shortly':
+    '«{name}» guardada com {n} música – chega ao Symfonium em breve',
   '“{name}” saved with {n} songs – coming to Symfonium shortly':
     '«{name}» guardada com {n} músicas – chega ao Symfonium em breve',
   'Nothing counted yet':
@@ -250,6 +258,8 @@ export default {
     '{n} banda',
   '{n} bands':
     '{n} bandas',
+  '{n} different song':
+    '{n} música diferente',
   '{n} different songs':
     '{n} músicas diferentes',
   '{n} newly discovered':
@@ -270,6 +280,8 @@ export default {
     'Dia a dia',
   'Newly discovered':
     'Recém-descobertas',
+  '{n} new song':
+    '{n} música nova',
   '{n} new songs':
     '{n} músicas novas',
   'For the Navidrome account “{user}”. Tuttiphon records its play counts every day – most recently {when}.':
@@ -327,7 +339,7 @@ export default {
   'Do you like the band?':
     'Gosta da banda?',
   'Your profiles':
-    'Os vossos perfis',
+    'Os seus perfis',
   'Favorite':
     'Favorita',
   '“Favorite”: shows up more often in your mixes. “never”: never gets into your playlists.':
@@ -342,6 +354,8 @@ export default {
     'Estado de espírito',
   'Sounds like:':
     'Soa como:',
+  'from the sound analysis of {n} song':
+    'a partir da análise de som de {n} música',
   'from the sound analysis of {n} songs':
     'a partir da análise de som de {n} músicas',
   'In your playlists':

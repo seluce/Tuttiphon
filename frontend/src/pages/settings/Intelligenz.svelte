@@ -171,7 +171,7 @@
     <Row label={t('Turn on sound analysis')}><Toggle obj={an} key="enabled" /></Row>
     <Row label={t('Add AI')} hint={t('Stage 2. Without AI, only the measurement runs.')}><Toggle obj={an} key="ml" /></Row>
     <Row label={t('Night analysis')} hint={t('At night Tuttiphon works through everything still open with no time limit – first the measurement, then the AI. Ends at the latest at the end of the time window and before the daily refresh. New music arriving during this time is processed afterwards. The nightly Deezer refresh and the weekly cover search also run in this window.')}>
-      <Toggle obj={an.night} key="enabled" />
+      <Toggle label={t('Night analysis')} obj={an.night} key="enabled" />
     </Row>
     {#if an.night.enabled ?? true}
       <Row label={t('Time window')}>
@@ -224,7 +224,7 @@
       {/if}
     {/if}
     <Row label={t('Make audio fingerprints')} hint={t('Independent of the AI sound analysis. About 3 KB per song – not part of the backup, they renew themselves.')}>
-      <Toggle obj={an} key="fingerprints" />
+      <Toggle label={t('Make audio fingerprints')} obj={an} key="fingerprints" />
     </Row>
   </Card>
 
@@ -234,7 +234,7 @@
       <Icon name={l.key ? 'check' : 'key'} size={18} class={l.key ? 'ok-t' : 'warn-t'} />
       <div class="flex-1 min-w-0">
         <b>{l.key ? t('Key entered') : t('No key yet')}</b>
-        <div class="tiny muted">{t('{n} bands loaded', { n: fmt(l.artists || 0) }) + (l.lastRun ? t(' · last run {when}', { when: serverDate(l.lastRun) }) : '')}</div>
+        <div class="tiny muted">{tn(l.artists || 0, '{n} band loaded', '{n} bands loaded') + (l.lastRun ? t(' · last run {when}', { when: serverDate(l.lastRun) }) : '')}</div>
       </div>
     </div>
     {#if locked}
@@ -260,7 +260,7 @@
   <Card title={t('Music worlds')} icon="globe">
     <p class="muted small">{t('From genres, Last.fm tags, AI music style, language and decade, Tuttiphon recognizes which music worlds your library offers – such as 80s hits, Eurodance, German rap or Schlager & party – and classifies every band. New bands go into their world on their own.')}</p>
     <Row label={t('Create music worlds automatically')} hint={t('From 4 bands and 60 songs, or from just 2 bands if someone listens to them a lot. Deleted worlds don’t come back.')}>
-      <Toggle obj={wl} key="auto" />
+      <Toggle label={t('Create music worlds automatically')} obj={wl} key="auto" />
     </Row>
   </Card>
 
@@ -271,7 +271,7 @@
     </Row>
     {#if (an.classify || 'suggest') === 'suggest'}
       <Row label={t('Classify new bands right away')} hint={t('Bands that are new in the library, e.g. from Lidarr, go straight into their music world with a confident match of 75% or more. “To review” then shows what was classified, with “Undo”.')}>
-        <Toggle obj={an} key="autoNew" />
+        <Toggle label={t('Classify new bands right away')} obj={an} key="autoNew" />
       </Row>
     {/if}
     {#if (an.classify || 'suggest') === 'auto'}
@@ -287,7 +287,7 @@
             <span class={['pill', x.score >= 0.7 ? 'ok' : x.score >= 0.5 && 'acc']}>{Math.round(x.score * 100)} %</span>
             <div class="flex-1 min-w-0">
               <b class="ell block">{x.artist} → {x.weltName}</b>
-              <div class="tiny muted ell">{t('{n} songs · {why}', { n: fmt(x.songs), why: x.why })}</div>
+              <div class="tiny muted ell">{tn(x.songs, '{n} song · {why}', '{n} songs · {why}', { why: x.why })}</div>
             </div>
             <button class="btn sm" onclick={() => addTo(x)}>{t('add')}</button>
           </div>

@@ -239,7 +239,7 @@ run.
 | `liedtext.py` | lyrics index (SQLite FTS5): search for lyric lines, language per song, kid-safe mode |
 | `notify.py` | notifications to the phone: which events go to whom, once per event; sent via the app (`webpush.py`) and ntfy |
 | `webpush.py` | notifications via the app itself (web push): devices per account, encryption (RFC 8291) and sender keys (VAPID) |
-| `i18n.py` | languages of the server texts: English in the code, German from `app/locales/de/*.json`; `_()` in the request's language, `_s()` in the server's (`settings.language`) for run logs, notifications and names; every translated text also carries its English form for the server log, which is always English (`Text`, `english()`, `join()`, `said()`) |
+| `i18n.py` | languages of the server texts (`LANGS`: en, de, fr, nl, es, it, pt, pl): English in the code, the others from `app/locales/<lang>/*.json`; `_()` in the request's language, `_s()` in the server's (`settings.language`) for run logs, notifications and names, `speaking(lang)` for a while in another one (notifications per device language); counts with the plural rules of each language (`_n()`/`_sn()`, `category()`); every translated text also carries its English form for the server log, which is always English (`Text`, `english()`, `join()`, `said()`) |
 | `pflege.py` | library check: duplicates, missing covers, gaps, suspicious files |
 | `fingerprint.py` | audio fingerprints (Chromaprint `fpcalc`) and their comparison: the same recording stored twice |
 | `covers.py` | designs playlist covers (with Pillow) and uploads them to Navidrome |

@@ -15,7 +15,7 @@
   import { api } from '../../lib/api.js'
   import { openArtist, startRadio } from '../../lib/artist.js'
   import { fmt, plural } from '../../lib/format.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { t, tn } from '../../lib/i18n.svelte.js'
 
   let { name } = $props()
   const admin = isAdmin()
@@ -217,7 +217,7 @@
           {#if a.sound.styles?.length}
             <div class="small"><span class="muted">{t('Sounds like:')}</span> {a.sound.styles.join(' · ')}</div>
           {/if}
-          <div class="hint">{t('from the sound analysis of {n} songs', { n: fmt(a.sound.songs) })}</div>
+          <div class="hint">{tn(a.sound.songs, 'from the sound analysis of {n} song', 'from the sound analysis of {n} songs')}</div>
         </div>
       </Field>
     {/if}

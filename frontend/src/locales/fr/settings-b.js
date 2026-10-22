@@ -3,7 +3,7 @@ export default {
   'General':
     'Général',
   'Theme, install as app':
-    'Thème, installer comme app',
+    'Mode d’affichage, installer comme app',
   'My account':
     'Mon compte',
   'Sign-in, password, tour':
@@ -67,7 +67,7 @@ export default {
   'Appearance':
     'Apparence',
   'Theme':
-    'Thème',
+    'Mode d’affichage',
   '“System” follows the setting of your phone or computer.':
     '« Système » suit le réglage de votre téléphone ou de votre ordinateur.',
   'System':
@@ -438,6 +438,8 @@ export default {
     'Plus Tuttiphon entend d’un titre, plus il reconnaît le tempo et l’humeur de façon fiable – surtout pour les titres qui commencent doucement et finissent fort. En contrepartie, le premier passage prend plus de temps.',
   '“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.':
     '« Tempo concordant » : à quelle fréquence le tempo concorde avec le niveau « Intégral ». Les durées sont des ordres de grandeur ; sur le NAS, cela prend nettement plus de temps selon le processeur. Tourne en arrière-plan avec une limite de temps par exécution et peut être arrêté à tout moment.',
+  '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.':
+    '{n} titre a jusqu’ici été écouté moins attentivement et est remesuré petit à petit, les nouveaux titres d’abord.',
   '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.':
     '{n} titres ont jusqu’ici été écoutés moins attentivement et sont remesurés petit à petit, les nouveaux titres d’abord.',
   'testing …':
@@ -472,6 +474,8 @@ export default {
     'Désactivé pour cet appareil',
   'Turn off':
     'Désactiver',
+  '{n} device is registered.':
+    '{n} appareil est enregistré.',
   '{n} devices are registered.':
     '{n} appareils sont enregistrés.',
   'Turned on for this device':

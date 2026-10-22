@@ -87,7 +87,7 @@
 
 <Card title={t('Cleanup')} icon="eraser">
   <Row label={t('Delete duplicate lyrics')} hint={t('If there is an .lrc next to a .txt, the .txt goes – otherwise Symfonium sometimes shows the wrong lyrics.')}>
-    <Toggle obj={ly} key="cleanup" />
+    <Toggle label={t('Delete duplicate lyrics')} obj={ly} key="cleanup" />
   </Row>
 </Card>
 

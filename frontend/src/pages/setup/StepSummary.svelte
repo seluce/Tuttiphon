@@ -71,6 +71,6 @@
   <Row label={t('Start the first run now')} hint={nav?.ok
     ? t('Runs “Update everything” once after “Finish”: {steps}. With a large library the first run takes a while – you can follow it on the home page and stop it at any time.', { steps })
     : t('Only possible with a working connection to Navidrome.')}>
-    <Switch bind:checked={start} disabled={!nav?.ok} />
+    <Switch label={t('Start the first run now')} hidelabel bind:checked={start} disabled={!nav?.ok} />
   </Row>
 </Card>

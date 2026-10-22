@@ -17,13 +17,16 @@
   const n = $derived(pendingCount())
   const auto = $derived(S.config?.settings.autoApply !== false)
 
-  let away = $state(false)   // the running task's bar was put away – until the run ends
-  $effect(() => { if (!task?.running) away = false })
+  // the bar of a run put away: that run (its start time) – a later run brings it back, even unseen in between
+  let awayRun = $state(null)
+  const run = $derived(task?.startedAt ?? task?.name)
+  const away = $derived(!!task?.running && awayRun != null && awayRun === run)
 
   // swiping the bar aside: it follows the finger; far enough (or fast to the bottom) and it is gone
   let drag = $state(null)   // { x, y, dx, dy }
+  $effect(() => { if (!task?.running) drag = null })   // the run ended mid-swipe: the next bar starts in place
   function down(e) {
-    if (e.target.closest('button')) return
+    if (!e.isPrimary || e.button > 0 || e.target.closest('button')) return
     drag = { x: e.clientX, y: e.clientY, dx: 0, dy: 0 }
     e.currentTarget.setPointerCapture?.(e.pointerId)
   }
@@ -31,8 +34,13 @@
     if (drag) drag = { ...drag, dx: e.clientX - drag.x, dy: Math.max(0, e.clientY - drag.y) }
   }
   function up() {
-    if (drag && (Math.abs(drag.dx) > 90 || drag.dy > 40)) away = true
+    if (drag && (Math.abs(drag.dx) > 90 || drag.dy > 40)) awayRun = run
     drag = null
+  }
+  /** ✕: away – the keyboard focus goes to the indicator in the header, which stays */
+  function putAway() {
+    awayRun = run
+    document.querySelector('[data-task-chip]')?.focus()
   }
 
   /** "Progress": to the live log on the home page (when already there: just scroll to it) */
@@ -53,6 +61,7 @@
 {#if chip}
   {#if task?.running}
     <button type="button" class="inline-flex items-center gap-2 ml-auto px-3.5 py-[7px] rounded-full text-[.84rem] font-[650] bg-surface border border-accent/50 whitespace-nowrap text-text cursor-pointer"
+      data-task-chip aria-label={task.name || t('running …')} title={task.name || t('running …')}
       onclick={() => (isAdmin() ? showProgress() : go('#/'))}><Icon name="refresh" size={16} class="animate-spin" /><span class="max-mobile:hidden">{task.name || t('running …')}</span></button>
   {/if}
 {:else if task?.running}
@@ -62,7 +71,7 @@
       onpointerdown={down} onpointermove={move} onpointerup={up} onpointercancel={() => (drag = null)}>
       <Icon name="refresh" size={18} class="animate-spin shrink-0" /><span>{task.name} …</span>
       {#if isAdmin()}<button class="btn sm" onclick={showProgress}>{t('Progress')}</button>{/if}
-      <button type="button" class="btn icon sm ghost shrink-0" aria-label={t('Close')} title={t('Close')} onclick={() => (away = true)}><Icon name="x" size={16} /></button>
+      <button type="button" class="btn icon sm ghost shrink-0" aria-label={t('Close')} title={t('Close')} onclick={putAway}><Icon name="x" size={16} /></button>
     </div>
   {/if}
 {:else if S.auto?.waiting && n}
@@ -83,12 +92,12 @@
   @keyframes up { from { transform: translate(calc(-50% - var(--sidebar) / 2), 20px); opacity: 0; } }
   @media (max-width: 900px) {
     /* phone: full width instead of a narrow pill, text at most two lines */
-    .applybar { left: 12px; right: 12px; transform: none; max-width: none; bottom: calc(78px + env(safe-area-inset-bottom, 0px) + var(--player));
+    .applybar { left: 12px; right: 12px; transform: none; max-width: none; bottom: calc(var(--nav-h) + 20px + var(--player));
       border-radius: 16px; padding: 10px 10px 10px 14px; font-size: .86rem; line-height: 1.3; }
     .applybar > span { flex: 1; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     @keyframes up { from { transform: translateY(20px); opacity: 0; } }
   }
-  .swipe { touch-action: none; transform: translate(calc(-50% - var(--sidebar) / 2 + var(--dx)), var(--dy)); }
+  .swipe { touch-action: none; user-select: none; -webkit-user-select: none; transform: translate(calc(-50% - var(--sidebar) / 2 + var(--dx)), var(--dy)); }
   .swipe.dragging { transition: none; cursor: grabbing; }
   .swipe:not(.dragging) { transition: transform .2s var(--ease), opacity .2s; }
   @media (max-width: 900px) { .swipe { transform: translate(var(--dx), var(--dy)); } }

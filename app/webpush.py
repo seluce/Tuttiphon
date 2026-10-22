@@ -11,6 +11,8 @@
 * Needs the package cryptography (in the Docker image) and an https address of Tuttiphon (browser rule).
 """
 import base64
+import contextlib
+import fcntl
 import json
 import os
 import struct
@@ -28,7 +30,21 @@ SUBS_FILE = STATE_DIR / "push.json"
 MAX_DEVICES = 10
 PUSH_HOSTS = ("fcm.googleapis.com", "android.googleapis.com", "push.services.mozilla.com", "push.apple.com",
               "notify.windows.com")
-_lock = threading.Lock()
+_thread_lock = threading.Lock()
+
+
+@contextlib.contextmanager
+def _locked():
+    """Load, change and save state/push.json one at a time – also across processes (a run from the command line
+    removes an expired device while the server adds one)."""
+    with _thread_lock:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(STATE_DIR / "push.lock", "a") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(f, fcntl.LOCK_UN)
 
 
 def available():
@@ -53,7 +69,7 @@ def _keys():
     """-> (private key, public one as base64url). Created and remembered the first time."""
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric import ec
-    with _lock:
+    with _locked():
         try:
             priv = serialization.load_pem_private_key(json.loads(read_text(KEYS_FILE))["private"].encode(), None)
         except FileNotFoundError:
@@ -118,7 +134,7 @@ def add(account, sub, admin=False, origin="", lang=None):
     from .i18n import LANGS
     entry = {**check(sub), "admin": bool(admin), "origin": origin if origin.startswith("https://") else "",
              "added": int(time.time()), **({"lang": lang} if lang in LANGS else {})}
-    with _lock:
+    with _locked():
         data = _load()
         for acc in list(data):   # same device under another account? remove it there
             data[acc] = [x for x in data[acc] if x.get("endpoint") != entry["endpoint"]]
@@ -130,7 +146,7 @@ def add(account, sub, admin=False, origin="", lang=None):
 
 
 def remove(endpoint, account=None):
-    with _lock:
+    with _locked():
         data = _load()
         for acc in list(data):
             if account is None or acc == account.lower():
@@ -147,7 +163,7 @@ def set_lang(endpoint, account, lang):
     from .i18n import LANGS
     if lang not in LANGS:
         return
-    with _lock:
+    with _locked():
         data = _load()
         for x in data.get((account or "").lower(), []):
             if x.get("endpoint") == endpoint and x.get("lang") != lang:
@@ -231,14 +247,18 @@ def send_to(title, body, path="", accounts=(), admins=False, tag=None, make=None
         for sub in subs:
             if acc in accounts or (admins and sub.get("admin")):
                 targets[sub["endpoint"]] = sub
-    ok, texts = False, {}
+    texts = {}   # every language first – a failing one must not leave half of the devices served (and the rest again)
+    for lang in {sub.get("lang") for sub in targets.values()} if make else ():
+        try:
+            with speaking(lang):
+                texts[lang] = make()
+        except Exception:   # noqa: BLE001 – a broken translation: English for that language
+            with speaking("en"):
+                texts[lang] = make()
+    ok = False
     for sub in targets.values():
         if make:
-            lang = sub.get("lang")
-            if lang not in texts:
-                with speaking(lang):
-                    texts[lang] = make()
-            title, body = texts[lang]
+            title, body = texts[sub.get("lang")]
         res = send(sub, title, body, path, tag)
         if res == "gone":
             remove(sub["endpoint"])

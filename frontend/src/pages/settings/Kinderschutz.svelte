@@ -14,7 +14,7 @@
   import { toast } from '../../lib/overlay.svelte.js'
   import { openArtist } from '../../lib/artist.js'
   import { fmt, plural } from '../../lib/format.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { t, tn } from '../../lib/i18n.svelte.js'
 
   /** The allowed songs – always fresh from S.config, because “Undo” replaces S.config as a whole */
   function allowList() {
@@ -160,7 +160,7 @@
             </div>
           {/each}
           {#if groups.length > limit}
-            <button class="btn sm ghost justify-self-start" onclick={() => (limit += 30)}>{t('Show {n} more bands', { n: fmt(Math.min(30, groups.length - limit)) })}</button>
+            <button class="btn sm ghost justify-self-start" onclick={() => (limit += 30)}>{tn(Math.min(30, groups.length - limit), 'Show {n} more band', 'Show {n} more bands')}</button>
           {/if}
         </div>
       {/if}

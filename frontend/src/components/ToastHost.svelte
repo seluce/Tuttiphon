@@ -54,5 +54,5 @@
   .close { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; }
   .close:hover { background: rgba(255, 255, 255, .15); }
   .toast :global(.btn) { background: transparent; color: inherit; border-color: currentColor; }
-  @media (max-width: 900px) { .toast { bottom: calc(140px + var(--player) + env(safe-area-inset-bottom, 0px)); } }
+  @media (max-width: 900px) { .toast { bottom: calc(var(--nav-h) + 82px + var(--player)); } }
 </style>

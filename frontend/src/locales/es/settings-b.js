@@ -211,7 +211,7 @@ export default {
   'Where is what?':
     '¿Dónde está cada cosa?',
   'Normally everything fits on its own. In the Docker container you set the folders as volumes in docker-compose.yaml – then they are shown here for viewing only.':
-    'Normalmente todo encaja solo. En el contenedor Docker, las carpetas se definen como volúmenes en docker-compose.yaml – entonces aquí solo se muestran.',
+    'Normalmente todo encaja por sí solo. En el contenedor Docker, las carpetas se definen como volúmenes en docker-compose.yaml – entonces aquí solo se muestran.',
   'reachable':
     'accesible',
   'read-only':
@@ -239,7 +239,7 @@ export default {
   'Seasonal playlists only in season':
     'Playlists de temporada solo en su temporada',
   'Christmas, Halloween, summer … are not in Symfonium outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
-    'Navidad, Halloween, verano … no están en Symfonium fuera de su temporada y vuelven solas a tiempo. Algunas playlists se pueden mostrar todo el año desde la ventana de edición.',
+    'Navidad, Halloween, verano … no están en Symfonium fuera de su temporada y vuelven automáticamente a tiempo. Algunas playlists se pueden mostrar todo el año desde la ventana de edición.',
   'Mixes that learn':
     'Mixes que aprenden',
   'Learn from listening':
@@ -327,7 +327,7 @@ export default {
   'Backed up ✓ – {size} KB':
     'Copia hecha ✓ – {size} KB',
   'Once a day, at the time of the daily refresh, Tuttiphon backs up everything that cannot be restored on its own: settings, people, music worlds and playlists, credentials, Deezer status, sound analysis, listening history for the recap and the saved original playlists. Not images and logs.':
-    'Una vez al día, a la hora de la actualización diaria, Tuttiphon hace una copia de seguridad de todo lo que no se puede recuperar solo: ajustes, personas, mundos musicales y playlists, datos de acceso, estado de Deezer, análisis de sonido, historial de escucha para el resumen y las playlists originales guardadas. No incluye imágenes ni registros.',
+    'Una vez al día, a la hora de la actualización diaria, Tuttiphon hace una copia de seguridad de todo lo que no se puede recuperar por sí solo: ajustes, personas, mundos musicales y playlists, datos de acceso, estado de Deezer, análisis de sonido, historial de escucha para el resumen y las playlists originales guardadas. No incluye imágenes ni registros.',
   'Back up daily':
     'Copia de seguridad diaria',
   'Keep':
@@ -438,6 +438,8 @@ export default {
     'Cuanto más escucha Tuttiphon de una canción, con más fiabilidad reconoce el tempo y el estado de ánimo – sobre todo en canciones que empiezan suaves y terminan fuertes. A cambio, la primera pasada tarda más.',
   '“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.':
     '«Aciertos de tempo»: con qué frecuencia el tempo coincide con el nivel «Profundo». Los tiempos son orientativos; en el NAS tarda bastante más según el procesador. Funciona en segundo plano con límite de tiempo por ejecución y se puede detener en cualquier momento.',
+  '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.':
+    '{n} canción se escuchó hasta ahora con menos detalle y se vuelve a medir poco a poco, primero las nuevas.',
   '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.':
     '{n} canciones se escucharon hasta ahora con menos detalle y se vuelven a medir poco a poco, primero las nuevas.',
   'testing …':
@@ -472,6 +474,8 @@ export default {
     'Desactivado en este dispositivo',
   'Turn off':
     'Desactivar',
+  '{n} device is registered.':
+    'Hay {n} dispositivo registrado.',
   '{n} devices are registered.':
     'Hay {n} dispositivos registrados.',
   'Turned on for this device':

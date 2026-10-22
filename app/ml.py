@@ -99,13 +99,17 @@ INSTRUMENT_WORDS = {
     "drummachine": ["drummachine"], "trommel": ["drums", "percussion"], "perkussion": ["percussion"],
     "percussion": ["percussion"], "bongo": ["bongo"], "glocke": ["bell"], "glockensp": ["bell"], "bells": ["bell"],
     "keyboard": ["keyboard"],
-    # French, Dutch, Spanish, Italian, Portuguese and Polish search words
+}
+# the same in French, Dutch, Spanish, Italian, Portuguese and Polish – a typed word must cover most of such a key
+# before it counts as its start (_word: „świat“ is no „świąteczny“)
+_INSTRUMENT_MORE = {
     "chitarr": _GUITARS, "gitaar": _GUITARS, "gitara": _GUITARS, "violon": ["violin"], "violín": ["violin"],
     "viool": ["violin"], "skrzyp": ["violin"], "violoncel": ["cello"], "violonch": ["cello"], "wiolonczel": ["cello"],
-    "contreb": ["doublebass"], "contrab": ["doublebass"], "cordes": _STRINGS, "cuerdas": _STRINGS, "cordas": _STRINGS,
+    "contrebass": ["doublebass"], "contrabajo": ["doublebass"], "contrabbass": ["doublebass"],
+    "contrabaix": ["doublebass"], "cordes": _STRINGS, "cuerdas": _STRINGS, "cordas": _STRINGS,
     "strijk": _STRINGS, "smyczk": _STRINGS, "flûte": ["flute"], "flauta": ["flute"], "flauto": ["flute"],
     "fluit": ["flute"], "flet": ["flute"], "klarinet": ["clarinet"], "klarnet": ["clarinet"], "tromba": ["trumpet"],
-    "trąbk": ["trumpet"], "trabk": ["trumpet"], "cuivres": _BRASS, "ottoni": _BRASS, "accordéon": ["accordion"],
+    "trąbka": ["trumpet"], "trabka": ["trumpet"], "trąbki": ["trumpet"], "trabki": ["trumpet"], "cuivres": _BRASS, "ottoni": _BRASS, "accordéon": ["accordion"],
     "accordeon": ["accordion"], "acordeón": ["accordion"], "acordeon": ["accordion"], "acordeão": ["accordion"],
     "fisarmonic": ["accordion"], "akordeon": ["accordion"], "armónic": ["harmonica"], "armonic": ["harmonica"],
     "harmonijk": ["harmonica"], "harpe": ["harp"], "arpa": ["harp"], "harpa": ["harp"], "harfa": ["harp"],
@@ -116,6 +120,7 @@ INSTRUMENT_WORDS = {
     "sintet": ["synthesizer", "pad"], "orkest": ["orchestra"], "orquest": ["orchestra"], "orkiestr": ["orchestra"],
     "cloche": ["bell"], "campan": ["bell"], "dzwonk": ["bell"], "dzwony": ["bell"],
 }
+INSTRUMENT_WORDS.update(_INSTRUMENT_MORE)
 # short search words only count with these endings ("harp" fits "harps", not the band "Harpyie"; "organ" not "organic")
 _ENDINGS = ("", "musik", "music", "klang", "klänge", "solo", "sound", "sounds", "ist", "isten", "er")
 # two-word search terms that become one word before the input is split
@@ -156,13 +161,14 @@ THEME_WORDS = {
     "love": ["love"], "romanti": ["romantic"], "ballade": ["ballad"], "ballad": ["ballad"], "sommer": ["summer"],
     "summer": ["summer"], "weltraum": ["space"], "weltall": ["space"], "space": ["space"], "kosmisch": ["space"],
     "cosmic": ["space"],
-    # French, Dutch, Spanish, Italian, Portuguese and Polish search words
-    "noël": ["christmas"], "noel": ["christmas"], "navidad": ["christmas"], "navideñ": ["christmas"],
+}
+_THEME_MORE = {   # the same in French, Dutch, Spanish, Italian, Portuguese and Polish
+    "noël": ["christmas"], "navidad": ["christmas"], "navideñ": ["christmas"],
     "natale": ["christmas"], "natal": ["christmas"], "natalin": ["christmas"], "kerstmis": ["christmas"],
     "kerstlied": ["christmas"], "kerstmuziek": ["christmas"], "świątecz": ["christmas"], "swiatecz": ["christmas"],
     "kolędy": ["christmas"], "koledy": ["christmas"], "cinéma": ["film"], "cine": ["film"], "películ": ["film"],
     "pelicul": ["film"], "épique": ["epic"], "epique": ["epic"], "épico": ["epic"], "épica": ["epic"],
-    "epico": ["epic"], "epica": ["epic"], "epicki": ["epic"], "sombre": ["dark"], "oscuro": ["dark"],
+    "epico": ["epic"], "epicki": ["epic"], "sombre": ["dark"], "oscuro": ["dark"],
     "oscura": ["dark"], "escuro": ["dark"], "escura": ["dark"], "duister": ["dark"], "mroczn": ["dark"],
     "amour": ["love"], "amor": ["love"], "amore": ["love"], "liefde": ["love"], "miłość": ["love"],
     "milosc": ["love"], "miłosn": ["love"], "románti": ["romantic"], "romantycz": ["romantic"],
@@ -171,6 +177,8 @@ THEME_WORDS = {
     "espacio": ["space"], "spazio": ["space"], "espaço": ["space"], "ruimte": ["space"], "kosmos": ["space"],
     "cosmiq": ["space"], "cósmic": ["space"], "cosmico": ["space"], "cosmica": ["space"],
 }
+THEME_WORDS.update(_THEME_MORE)
+_STRICT = set(_INSTRUMENT_MORE) | set(_THEME_MORE)
 THEME_PHRASES = {"x-mas": "xmas", "love song": "lovesong", "film music": "filmmusic", "outer space": "space",
                  "musique de film": "film", "bande originale": "film", "banda sonora": "film",
                  "colonna sonora": "film", "trilha sonora": "film"}
@@ -430,8 +438,8 @@ def theme_word(word):
 
 def _word(word, table):
     """Search word -> ids of the longest matching key of table (a word start; short keys only with fitting endings) –
-    otherwise of the shortest key that a typed word from 5 letters begins ("violon" is the violin, not the
-    "violoncelle")."""
+    otherwise of the shortest key that a typed word of 5 letters or more begins – a key of the other languages only if
+    the word covers three quarters of it ("violon" is the violin, not the "violoncelle"; "swiat" is no "świąteczny")."""
     best, begun = None, None
     for k, ids in table.items():
         if word.startswith(k):
@@ -441,7 +449,8 @@ def _word(word, table):
                 continue
             if best is None or len(k) > len(best[0]):
                 best = (k, ids)
-        elif len(word) >= 5 and k.startswith(word) and (begun is None or len(k) < len(begun[0])):
+        elif len(word) >= 5 and k.startswith(word) and (k not in _STRICT or len(word) * 4 >= len(k) * 3) \
+                and (begun is None or len(k) < len(begun[0])):   # „weihn“ – but not „swiat“ of „świątecz…“
             begun = (k, ids)
     hit = best or begun
     return hit[1] if hit else None

@@ -89,7 +89,7 @@ export default {
   'Make audio fingerprints':
     'Crear huellas de audio',
   'Independent of the AI sound analysis. About 3 KB per song – not part of the backup, they renew themselves.':
-    'Independiente del análisis de sonido con IA. Unos 3 KB por canción – no forman parte de la copia de seguridad, se renuevan solas.',
+    'Independiente del análisis de sonido con IA. Unos 3 KB por canción – no forman parte de la copia de seguridad, se renuevan por sí solas.',
   '{label}: {n} songs':
     '{label}: {n} canciones',
   'Tempo: mostly between {low} and {high} BPM, median {median}.':
@@ -134,6 +134,8 @@ export default {
     'Clave introducida',
   'No key yet':
     'Aún no hay clave',
+  '{n} band loaded':
+    '{n} banda cargada',
   '{n} bands loaded':
     '{n} bandas cargadas',
   ' · last run {when}':
@@ -153,7 +155,7 @@ export default {
   'Music worlds':
     'Mundos musicales',
   'From genres, Last.fm tags, AI music style, language and decade, Tuttiphon recognizes which music worlds your library offers – such as 80s hits, Eurodance, German rap or Schlager & party – and classifies every band. New bands go into their world on their own.':
-    'A partir de géneros, etiquetas de Last.fm, estilo musical según la IA, idioma y década, Tuttiphon reconoce qué mundos musicales ofrece tu biblioteca – como éxitos de los 80, Eurodance, rap alemán o Schlager y fiesta – y clasifica cada banda. Las bandas nuevas entran solas en su mundo.',
+    'A partir de géneros, etiquetas de Last.fm, estilo musical según la IA, idioma y década, Tuttiphon reconoce qué mundos musicales ofrece tu biblioteca – como éxitos de los 80, Eurodance, rap alemán o Schlager y fiesta – y clasifica cada banda. Las bandas nuevas entran automáticamente en su mundo.',
   'Create music worlds automatically':
     'Crear mundos musicales automáticamente',
   'From 4 bands and 60 songs, or from just 2 bands if someone listens to them a lot. Deleted worlds don’t come back.':
@@ -180,6 +182,8 @@ export default {
     'Automático desde',
   'Only very confident matches are classified directly; the rest stays a suggestion.':
     'Solo las coincidencias muy seguras se clasifican directamente; el resto queda como sugerencia.',
+  '{n} song · {why}':
+    '{n} canción · {why}',
   '{n} songs · {why}':
     '{n} canciones · {why}',
   'add':
@@ -269,7 +273,7 @@ export default {
   'Hidden items':
     'Elementos ocultos',
   '{suggestions} suggestions · {tips} tips are hidden. Suggestions come back on their own after half a year.':
-    '{suggestions} sugerencias · {tips} consejos ocultos. Las sugerencias vuelven solas al cabo de medio año.',
+    '{suggestions} sugerencias · {tips} consejos ocultos. Las sugerencias vuelven automáticamente al cabo de medio año.',
   'show again':
     'volver a mostrar',
   'Open, free lyrics database – fast, synced lyrics and plain text.':
@@ -361,7 +365,7 @@ export default {
   'Being read in right now …':
     'Leyendo ahora mismo …',
   'New ones are added on their own with every scan.':
-    'Las nuevas se añaden solas con cada escaneo.',
+    'Las nuevas se añaden automáticamente con cada escaneo.',
   'Read in now':
     'Leer ahora',
   'Kid-safe mode on for':
@@ -404,6 +408,8 @@ export default {
     'permitida',
   'allow':
     'permitir',
+  'Show {n} more band':
+    'Mostrar {n} banda más',
   'Show {n} more bands':
     'Mostrar {n} bandas más',
   'The levels must go up: ★ < ★★ < …':
@@ -646,8 +652,8 @@ export default {
     'Si ya hay una lista, pon «tuttiphon,» delante – si no la hay, estos son los valores predeterminados de Navidrome. La línea de docker-compose tiene prioridad sobre navidrome.toml. Después reinicia Navidrome; donde Tuttiphon no tenga respuesta, Navidrome pregunta a los siguientes.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'En Navidrome, en <b>Settings → Plugins</b>, activa «Tuttiphon», introduce la dirección y la clave y habilítalo para <b>todos los usuarios</b> (por las reproducciones). Lo ideal es la dirección de la red doméstica, p. ej. <code>http://&lt;NAS&gt;:8765</code> – no una dirección https a través de un proxy inverso, que podría rechazar a Navidrome. Este navegador accede a Tuttiphon en <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'En Symfonium, activa <b>«Use similar tracks for Radio Mix»</b> para el servidor de Navidrome (Settings → Media providers → el servidor).',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'En Symfonium, activa <b>«Use similar tracks for Radio Mix»</b> para el servidor de Navidrome (Manage media providers → el servidor) y elige <b>«Sonic Analysis»</b> para la cola inteligente en el reproductor.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
     'Navidrome no dice quién pregunta. Si la canción suena en exactamente una cuenta – o solo una cuenta está reproduciendo –, la respuesta es para esa persona: sin lo que no le gusta, sin lo que acaba de escuchar o ha valorado con 1 estrella; lo que salta a menudo llega más tarde, y tras dos canciones de una banda van primero otras bandas. Si no, es para la familia. Música infantil solo para canciones infantiles, y sin canciones con letras explícitas en cuanto un perfil tenga protección infantil o sea un perfil infantil.',
   'Create a new key?':
@@ -672,4 +678,10 @@ export default {
     '{when} · para {name}',
   '{when} · for the family':
     '{when} · para la familia',
+  '{when} · probably for {name}':
+    '{when} · probablemente para {name}',
+  'Last answer with similar songs':
+    'Última respuesta con canciones parecidas',
+  'Copy {what}':
+    'Copiar {what}',
 }

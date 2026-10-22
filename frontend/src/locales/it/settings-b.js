@@ -3,7 +3,7 @@ export default {
   'General':
     'Generali',
   'Theme, install as app':
-    'Tema, installa come app',
+    'Modalità colore, installa come app',
   'My account':
     'Il mio account',
   'Sign-in, password, tour':
@@ -67,7 +67,7 @@ export default {
   'Appearance':
     'Aspetto',
   'Theme':
-    'Tema',
+    'Modalità colore',
   '“System” follows the setting of your phone or computer.':
     '«Sistema» segue l\'impostazione del tuo telefono o computer.',
   'System':
@@ -438,6 +438,8 @@ export default {
     'Più Tuttiphon ascolta di un brano, più riconosce in modo affidabile tempo e mood – soprattutto nei brani che iniziano piano e finiscono forte. In cambio il primo passaggio richiede più tempo.',
   '“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.':
     '«Tempo corretto»: quanto spesso il tempo coincide con il livello «Approfondita». I tempi sono indicativi; sul NAS ci vuole molto di più a seconda del processore. Gira in background con un limite di tempo per esecuzione e si può fermare in qualsiasi momento.',
+  '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.':
+    'Finora {n} brano è stato ascoltato con meno attenzione e viene rimisurato poco a poco, prima i nuovi brani.',
   '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.':
     'Finora {n} brani sono stati ascoltati con meno attenzione e vengono rimisurati poco a poco, prima i nuovi brani.',
   'testing …':
@@ -445,7 +447,7 @@ export default {
   '✓ works':
     '✓ funziona',
   'With it, Tuttiphon sets stars for this account, shows its personal statistics and takes its stars & favorites into account in the preview. It is stored only on your NAS.':
-    'Con questa, Tuttiphon assegna le stelle per questo account, mostra le sue statistiche personali e tiene conto delle sue stelle e dei suoi preferiti nell\'anteprima. Viene salvata solo sul vostro NAS.',
+    'Con questa, Tuttiphon assegna le stelle per questo account, mostra le sue statistiche personali e tiene conto delle sue stelle e dei suoi preferiti nell\'anteprima. Viene salvata solo sul tuo NAS.',
   'Password':
     'Password',
   'Test':
@@ -472,6 +474,8 @@ export default {
     'Disattivate su questo dispositivo',
   'Turn off':
     'Disattiva',
+  '{n} device is registered.':
+    '{n} dispositivo è registrato.',
   '{n} devices are registered.':
     '{n} dispositivi sono registrati.',
   'Turned on for this device':

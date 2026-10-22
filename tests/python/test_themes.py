@@ -257,6 +257,16 @@ class TestSearch(ThemeTest):
         self.assertEqual(self.combos("episch"), [])                          # one kind alone is no combination
         self.assertEqual(self.combos("epische filmmusik"), [])               # two themes are still one kind
 
+    def test_combined_search_in_other_languages(self):
+        """Accented words stay whole: „musique épique calme“, „película romántica tranquila“, „miłość spokojna“."""
+        self.auth.set_current(self.JONAS)
+        fr = self.combos("musique épique calme")
+        self.assertEqual(fr[0]["playlist"]["sound"], {"moods": ["ruhig"], "themes": ["epic"]})
+        es = self.combos("película romántica tranquila")
+        self.assertEqual(es[0]["playlist"]["sound"], {"moods": ["ruhig"], "themes": ["film"]})
+        pl = self.combos("miłość spokojna")
+        self.assertEqual(pl[0]["playlist"]["sound"], {"moods": ["ruhig"], "themes": ["love"]})
+
     def test_christmas_goes_to_the_vibe(self):
         out = self.combos("ruhige weihnachtsmusik")                          # the vibe “Weihnachten” takes the word
         self.assertEqual(out[0]["playlist"]["stil"], "weihnachten")

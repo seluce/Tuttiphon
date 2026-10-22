@@ -21,22 +21,22 @@
 
 <Card title={t('Apply')} icon="zap">
   <Row label={t('Apply automatically')} hint={t('A few seconds after a change, Tuttiphon writes the playlists and has Navidrome scan briefly. Off = via the “Apply” button.')}>
-    <Toggle obj={s} key="autoApply" />
+    <Toggle label={t('Apply automatically')} obj={s} key="autoApply" />
   </Row>
 </Card>
 
 <Card title={t('Keep it tidy')} icon="sparkles">
   <Row label={t('Seasonal playlists only in season')} hint={t('Christmas, Halloween, summer … are not in Symfonium outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.')}>
-    <Toggle obj={s} key="seasonRest" />
+    <Toggle label={t('Seasonal playlists only in season')} obj={s} key="seasonRest" />
   </Row>
 </Card>
 
 <Card title={t('Mixes that learn')} icon="brain">
   <Row label={t('Learn from listening')} hint={t('Songs that get skipped in a mix come up less often for a while. Songs someone rates with 1 star themselves – e.g. in Symfonium – no longer come into their mixes. Takes effect from the next new mix.')}>
-    <Toggle obj={s} key="mixLearn" />
+    <Toggle label={t('Learn from listening')} obj={s} key="mixLearn" />
   </Row>
   <Row label={t('Smooth transitions in mixes')} hint={t('One song leads into the next: neighboring songs fit in sound, tempo, key and energy. Needs the AI sound analysis. Takes effect from the next new mix.')}>
-    <Toggle obj={s} key="smoothTransitions" />
+    <Toggle label={t('Smooth transitions in mixes')} obj={s} key="smoothTransitions" />
   </Row>
 </Card>
 

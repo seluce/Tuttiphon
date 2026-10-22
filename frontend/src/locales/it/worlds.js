@@ -193,9 +193,9 @@ export default {
   'Music worlds':
     'Mondi musicali',
   'A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, Last.fm, AI music style, language and decade.':
-    'Un mondo musicale dice chi suona. Tuttiphon li crea dalla vostra libreria e inserisce da solo le nuove band – in base a generi, Last.fm, stile musicale dell\'IA, lingua e decennio.',
+    'Un mondo musicale dice chi suona. Tuttiphon li crea dalla tua libreria e inserisce da solo le nuove band – in base a generi, Last.fm, stile musicale dell\'IA, lingua e decennio.',
   'Your music sorted by kind. Tap a world to see which bands belong to it – with “Like” you keep a world in mind for your suggestions.':
-    'La vostra musica ordinata per tipo. Tocca un mondo per vedere quali band ne fanno parte – con «Mi piace» tieni presente un mondo per i tuoi suggerimenti.',
+    'La tua musica ordinata per tipo. Tocca un mondo per vedere quali band ne fanno parte – con «Mi piace» tieni presente un mondo per i tuoi suggerimenti.',
   'you like it':
     'ti piace',
   'you listen to it often':
@@ -219,11 +219,11 @@ export default {
   'Error':
     'Errore',
   '{n} band in your library':
-    '{n} band nella vostra libreria',
+    '{n} band in libreria',
   '{n} bands in your library':
-    '{n} band nella vostra libreria',
+    '{n} band in libreria',
   'no bands in your library yet':
-    'ancora nessuna band nella vostra libreria',
+    'ancora nessuna band in libreria',
   'Daily Mix from {name} created – coming to Symfonium shortly':
     'Daily Mix da {name} creato – arriva a breve in Symfonium',
   '{name} is no longer one of your favorite worlds':
@@ -265,9 +265,9 @@ export default {
   '— none —':
     '— nessuno —',
   '{name} · {n} in your library':
-    '{name} · {n} nella vostra libreria',
+    '{name} · {n} in libreria',
   '{name} · {n} in your library – already taken':
-    '{name} · {n} nella vostra libreria – già assegnata',
+    '{name} · {n} in libreria – già assegnata',
   '{name} taken out':
     '{name} tolta',
   '{name} added':
@@ -415,7 +415,7 @@ export default {
   'half a year':
     'sei mesi',
   'This playlist still has its own rules, taken over unchanged. You can change name, person, count and order – or switch it to the builder, then everything can be set.':
-    'Questa playlist ha ancora regole proprie, adottate senza modifiche. Puoi cambiare nome, persona, numero e ordine – oppure passarla all\'editor a blocchi, così si può impostare tutto.',
+    'Questa playlist ha ancora regole proprie, riprese invariate. Puoi cambiare nome, persona, numero e ordine – oppure passarla all\'editor a blocchi, così si può impostare tutto.',
   'What everyone likes – whose taste counts?':
     'Quello che piace a tutti – i gusti di chi contano?',
   'Songs everyone likes come up more often. Everyone’s dislikes count.':

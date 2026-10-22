@@ -41,7 +41,7 @@
 <Card title={t('Folder watch')} icon="folder-search" guide="watch">
   <p class="muted small">{t('If you like, Tuttiphon regularly checks whether new music has landed in the music folder, e.g. from Lidarr, and processes it right away: convert, search lyrics, scan Navidrome, rate on Deezer.')}</p>
   <Row label={t('Turn on folder watch')} hint={ws.lastRun ? t('Last on {when} – new files: {n}.', { when: serverDate(ws.lastRun), n: fmt(ws.found || 0) }) : ws.checked ? t('No new music found yet.') : ''}>
-    <Toggle obj={wt} key="enabled" def={false} />
+    <Toggle label={t('Turn on folder watch')} obj={wt} key="enabled" def={false} />
   </Row>
   {#if wt.enabled}
     <Row label={t('Check every')}>

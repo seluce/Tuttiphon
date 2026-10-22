@@ -17,6 +17,12 @@
   let key = $state('')   // a new key – shown only now
   let busy = $state(false)
   const address = location.origin
+  const addressHtml = address.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])   // into {@html}
+  // for whom the last similar songs were chosen – with its own time: other requests (cover, biography) are for nobody
+  const forWhom = $derived(!st?.lastForAt ? ''
+    : !st.lastFor ? t('{when} · for the family', { when: relTime(st.lastForAt) })
+      : st.lastGuess ? t('{when} · probably for {name}', { when: relTime(st.lastForAt), name: st.lastFor })
+        : t('{when} · for {name}', { when: relTime(st.lastForAt), name: st.lastFor }))
   // Navidrome's agents with Tuttiphon first – in front of Navidrome's defaults (0.64: deezer,lastfm,listenbrainz)
   const AGENTS = [['navidrome.toml', 'Agents = "tuttiphon,deezer,lastfm,listenbrainz"'],   // i18n-ignore: setting
     ['docker-compose', 'ND_AGENTS=tuttiphon,deezer,lastfm,listenbrainz']]   // i18n-ignore: setting
@@ -54,10 +60,12 @@
     try {
       if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text)
       else {
-        const area = Object.assign(document.createElement('textarea'), { value: text, readOnly: true })
-        area.style.cssText = 'position:fixed;opacity:0'
+        // not read-only and 16 px: Safari on the iPhone selects nothing in a read-only field and zooms into small ones
+        const area = Object.assign(document.createElement('textarea'), { value: text })
+        area.style.cssText = 'position:fixed;top:0;opacity:0;font-size:16px'
         document.body.append(area)
         area.select()
+        area.setSelectionRange(0, text.length)
         const ok = document.execCommand('copy')
         area.remove()
         if (!ok) throw new Error()
@@ -84,7 +92,7 @@
         <b>{t('Your key – shown only now:')}</b>
         <div class="flex gap-2 items-center">
           <input class="input flex-1 min-w-0 font-mono" readonly value={key} aria-label={t('Key')} onfocus={(e) => e.currentTarget.select()} />
-          <button class="btn sm" onclick={() => copy(key)}><Icon name="copy" size={15} />{t('Copy')}</button>
+          <button class="btn sm" onclick={() => copy(key)} aria-label={t('Copy {what}', { what: t('Key') })}><Icon name="copy" size={15} />{t('Copy')}</button>
         </div>
       </div>
     {/if}
@@ -92,8 +100,13 @@
       <span class={['pill whitespace-normal', st.live?.lastEvent && 'ok']}>{st.live?.lastEvent ? t('{when} · {accounts}', { when: relTime(st.live.lastEvent), accounts: st.live.accounts.join(', ') }) : t('none since Tuttiphon started')}</span>
     </Row>
     <Row label={t('Last request from Navidrome')} hint={st.lastCall ? t('{n} since Tuttiphon started', { n: fmt(st.calls) }) : ''}>
-      <span class={['pill whitespace-normal', st.lastCall && 'ok']}>{st.lastCall ? (st.lastFor ? t('{when} · for {name}', { when: relTime(st.lastCall), name: st.lastFor }) : t('{when} · for the family', { when: relTime(st.lastCall) })) : t('none since Tuttiphon started')}</span>
+      <span class={['pill whitespace-normal', st.lastCall && 'ok']}>{st.lastCall ? relTime(st.lastCall) : t('none since Tuttiphon started')}</span>
     </Row>
+    {#if st.lastForAt}
+      <Row label={t('Last answer with similar songs')}>
+        <span class="pill ok whitespace-normal">{forWhom}</span>
+      </Row>
+    {/if}
   {/if}
   <div class="set-row grid gap-2.5 py-3 border-t border-line">
     <b>{t('Setting it up')}</b>
@@ -111,13 +124,13 @@
           <div class="flex flex-wrap gap-x-2 gap-y-1 items-center mt-1.5">
             <span class="tiny muted w-[110px] max-mobile:w-full">{where}</span>
             <input class="input code flex-1 min-w-0" readonly value={line} aria-label={where} onfocus={(e) => e.currentTarget.select()} />
-            <button class="btn sm ghost" onclick={() => copy(line)} title={t('Copy')} aria-label={t('Copy')}><Icon name="copy" size={15} /></button>
+            <button class="btn sm ghost" onclick={() => copy(line)} title={t('Copy')} aria-label={t('Copy {what}', { what: where })}><Icon name="copy" size={15} /></button>
           </div>
         {/each}
         <span class="muted">{t('If there is a list already, put “tuttiphon,” in front of it – without one these are Navidrome’s defaults. The docker-compose line wins over navidrome.toml. Restart Navidrome afterwards; where Tuttiphon has no answer, Navidrome asks the next ones.')}</span>
       </li>
-      <li>{@html t('In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.', { address })}</li>
-      <li>{@html t('In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).')}</li>
+      <li>{@html t('In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.', { address: addressHtml })}</li>
+      <li>{@html t('In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.')}</li>
     </ol>
   </div>
   <div class="hint">{t('Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.')}</div>

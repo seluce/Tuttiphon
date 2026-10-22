@@ -134,6 +134,8 @@ export default {
     'Chave introduzida',
   'No key yet':
     'Ainda sem chave',
+  '{n} band loaded':
+    '{n} banda carregada',
   '{n} bands loaded':
     '{n} bandas carregadas',
   ' · last run {when}':
@@ -180,6 +182,8 @@ export default {
     'Automático a partir de',
   'Only very confident matches are classified directly; the rest stays a suggestion.':
     'Só as correspondências muito seguras são classificadas diretamente; o resto fica como sugestão.',
+  '{n} song · {why}':
+    '{n} música · {why}',
   '{n} songs · {why}':
     '{n} músicas · {why}',
   'add':
@@ -249,7 +253,7 @@ export default {
   'your Navidrome password':
     'a sua palavra-passe do Navidrome',
   'Your profiles':
-    'Os vossos perfis',
+    'Os seus perfis',
   'Playlists visible to everyone':
     'Playlists visíveis para todos',
   'Playlists only for you':
@@ -257,7 +261,7 @@ export default {
   'Create profile':
     'Criar perfil',
   'This is where your favorite worlds, bands and dislikes are – your suggestions come from them.':
-    'Aqui estão os seus mundos favoritos, bandas favoritas e o que não gosta – é daí que vêm as suas sugestões.',
+    'Aqui estão os seus mundos favoritos, bandas favoritas e aquilo de que não gosta – é daí que vêm as suas sugestões.',
   'Introduction':
     'Introdução',
   'Tour':
@@ -279,7 +283,7 @@ export default {
   'Find lyrics automatically':
     'Encontrar letras automaticamente',
   'Tuttiphon looks up missing lyrics on LRCLIB, and on NetEase too if you like, and puts them next to the songs: synced lyrics as .lrc, otherwise as .txt. Navidrome reads them in at the next scan, Symfonium shows them while playing.':
-    'O Tuttiphon procura as letras em falta no LRCLIB e, se quiser, também no NetEase, e coloca-as ao lado das músicas: letras sincronizadas como .lrc, caso contrário como .txt. O Navidrome lê-as na verificação seguinte, o Symfonium mostra-as durante a reprodução.',
+    'O Tuttiphon procura as letras em falta no LRCLIB e, se quiser, também no NetEase, e coloca-as ao lado das músicas: letras sincronizadas como .lrc, caso contrário como .txt. O Navidrome incorpora-as na leitura seguinte, o Symfonium mostra-as durante a reprodução.',
   'No numbers yet – they appear with the first run.':
     'Ainda sem números – aparecem com a primeira execução.',
   'synced':
@@ -343,7 +347,7 @@ export default {
   'Retry recent misses too':
     'Tentar de novo também as falhas recentes',
   '“Search all missing now” runs without a time limit and can be stopped at any time. For the lyrics to appear in Navidrome, a scan is needed afterwards. With “Update everything” this happens automatically.':
-    '«Procurar agora todas as em falta» corre sem limite de tempo e pode ser parado a qualquer momento. Para as letras aparecerem no Navidrome, é preciso uma verificação depois. Com «Atualizar tudo», isso acontece automaticamente.',
+    '«Procurar agora todas as em falta» corre sem limite de tempo e pode ser parado a qualquer momento. Para as letras aparecerem no Navidrome, é preciso uma leitura depois. Com «Atualizar tudo», isso acontece automaticamente.',
   '{band}: {songs} blocked again':
     '{band}: {songs} bloqueadas de novo',
   '{band}: {songs} allowed':
@@ -361,7 +365,7 @@ export default {
   'Being read in right now …':
     'A ser lidas neste momento …',
   'New ones are added on their own with every scan.':
-    'As novas são adicionadas sozinhas a cada verificação.',
+    'As novas são adicionadas sozinhas a cada leitura da biblioteca.',
   'Read in now':
     'Ler agora',
   'Kid-safe mode on for':
@@ -381,7 +385,7 @@ export default {
   'Search explicit songs':
     'Pesquisar músicas explícitas',
   'All':
-    'Tudo',
+    'Todos',
   'Blocked':
     'Bloqueadas',
   'Allowed':
@@ -404,6 +408,8 @@ export default {
     'permitida',
   'allow':
     'permitir',
+  'Show {n} more band':
+    'Mostrar mais {n} banda',
   'Show {n} more bands':
     'Mostrar mais {n} bandas',
   'The levels must go up: ★ < ★★ < …':
@@ -511,7 +517,7 @@ export default {
   'Test connection':
     'Testar ligação',
   'Tuttiphon needs the admin account in the background for scans, playlists and their owners. Credentials are only stored on your NAS.':
-    'O Tuttiphon precisa da conta de administrador em segundo plano para verificações, playlists e os seus proprietários. As credenciais só ficam guardadas no seu NAS.',
+    'O Tuttiphon precisa da conta de administrador em segundo plano para as leituras do Navidrome, as playlists e os seus proprietários. As credenciais só ficam guardadas no seu NAS.',
   'Password stored':
     'Palavra-passe guardada',
   'The stored password no longer works – probably it was changed in Navidrome.':
@@ -525,9 +531,9 @@ export default {
   'The list comes from the Navidrome accounts of your <a class="link" href="#/personen">people</a>. Anyone who signs in and leaves the “Turn on statistics & stars” box checked enters it themselves. Roles: <a class="link" href="#/einstellungen/benutzer">Users & permissions</a>.':
     'A lista vem das contas do Navidrome das suas <a class="link" href="#/personen">pessoas</a>. Quem iniciar sessão e deixar marcada a caixa «Ativar estatísticas e estrelas» introduz a palavra-passe por si. Funções: <a class="link" href="#/einstellungen/benutzer">Utilizadores e permissões</a>.',
   'Scan':
-    'Verificação',
+    'Leitura',
   'Type of scan':
-    'Tipo de verificação',
+    'Tipo de leitura',
   '“Quick” reads in only what changed and takes seconds. “Full” checks every file – only needed if Navidrome missed something.':
     '«Rápida» só lê o que mudou e demora segundos. «Completa» verifica cada ficheiro – só é necessária se o Navidrome tiver deixado escapar algo.',
   'Quick':
@@ -645,11 +651,11 @@ export default {
   'If there is a list already, put “tuttiphon,” in front of it – without one these are Navidrome’s defaults. The docker-compose line wins over navidrome.toml. Restart Navidrome afterwards; where Tuttiphon has no answer, Navidrome asks the next ones.':
     'Se já houver uma lista, ponha «tuttiphon,» à frente – sem lista, estas são as predefinições do Navidrome. A linha do docker-compose prevalece sobre o navidrome.toml. Depois reinicie o Navidrome; onde o Tuttiphon não tiver resposta, o Navidrome pergunta aos seguintes.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
-    'No Navidrome, em <b>Settings → Plugins</b>, ative «Tuttiphon», introduza o endereço e a chave e permita-lhe <b>all users</b> (para as reproduções). De preferência o endereço na rede doméstica, p. ex. <code>http://&lt;NAS&gt;:8765</code> – não um endereço https através de um proxy inverso, que pode recusar o Navidrome. Este navegador acede ao Tuttiphon em <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'No Symfonium, ative <b>«Use similar tracks for Radio Mix»</b> para o servidor Navidrome («Settings → Media providers» → o servidor).',
+    'No Navidrome, em <b>Settings → Plugins</b>, ative «Tuttiphon», introduza o endereço e a chave e dê-lhe acesso a <b>todos os utilizadores</b> (para as reproduções). De preferência o endereço na rede doméstica, p. ex. <code>http://&lt;NAS&gt;:8765</code> – não um endereço https através de um proxy inverso, que pode recusar o Navidrome. Este navegador acede ao Tuttiphon em <code>{address}</code>.',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'No Symfonium, ative <b>«Use similar tracks for Radio Mix»</b> para o servidor Navidrome («Manage media providers» → o servidor) e escolha <b>«Sonic Analysis»</b> para a fila inteligente no leitor.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
-    'O Navidrome não diz quem pergunta. Se a música estiver a tocar em exatamente uma conta – ou se só uma conta estiver a tocar – a resposta é para essa pessoa: sem o que ela não gosta, sem o que acabou de ouvir ou classificou com 1 estrela; o que salta muitas vezes vem mais tarde e, após duas músicas de uma banda, vêm primeiro outras bandas. Caso contrário, é para a família. Música infantil só para canções infantis, e sem músicas com letras explícitas assim que um perfil tiver o modo seguro para crianças ou for um perfil infantil.',
+    'O Navidrome não diz quem pergunta. Se a música estiver a tocar em exatamente uma conta – ou se só uma conta estiver a tocar – a resposta é para essa pessoa: sem aquilo de que ela não gosta, sem o que acabou de ouvir ou classificou com 1 estrela; o que salta muitas vezes vem mais tarde e, após duas músicas de uma banda, vêm primeiro outras bandas. Caso contrário, é para a família. Música infantil só para canções infantis, e sem músicas com letras explícitas assim que um perfil tiver o modo seguro para crianças ou for um perfil infantil.',
   'Create a new key?':
     'Criar uma nova chave?',
   'The old key stops working – enter the new one in Navidrome afterwards.':
@@ -667,9 +673,15 @@ export default {
   'none since Tuttiphon started':
     'nenhuma desde o arranque do Tuttiphon',
   'Nothing yet? Put the new plugin file into Navidrome, restart it and allow the plugin all users.':
-    'Ainda nada? Coloque o novo ficheiro do plugin no Navidrome, reinicie-o e permita o plugin a «all users».',
+    'Ainda nada? Coloque o novo ficheiro do plugin no Navidrome, reinicie-o e dê ao plugin acesso a todos os utilizadores.',
   '{when} · for {name}':
     '{when} · para {name}',
   '{when} · for the family':
     '{when} · para a família',
+  '{when} · probably for {name}':
+    '{when} · provavelmente para {name}',
+  'Last answer with similar songs':
+    'Última resposta com músicas semelhantes',
+  'Copy {what}':
+    'Copiar {what}',
 }

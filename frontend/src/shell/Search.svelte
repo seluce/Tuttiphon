@@ -17,7 +17,7 @@
   import { fmt, plural, capitalize } from '../lib/format.js'
   import { api } from '../lib/api.js'
   import { tour } from '../lib/tour.svelte.js'
-  import { t } from '../lib/i18n.svelte.js'
+  import { t, tn } from '../lib/i18n.svelte.js'
 
   // icon per theme of the AI (ml.THEMES) in the result list
   const THEME_ICONS = { christmas: 'xmas', film: 'disc', epic: 'crown', dark: 'moon', love: 'heart', romantic: 'flower',
@@ -144,7 +144,7 @@
                 <div class="ell"><div>{plName(item.p)}</div><div class="tiny muted">{st?.count != null ? plural(st.count, 'song', 'songs') : ''}</div></div>
               {:else if item.kind === 'combo'}
                 <div class="grid place-items-center shrink-0 size-[34px] rounded-full bg-accent text-white"><Icon name="dice" size={18} /></div>
-                <div class="ell"><div>{item.c.title}</div><div class="tiny muted">{t('Mix · {n} matching songs, new every week', { n: fmt(item.c.count) })}</div></div>
+                <div class="ell"><div>{item.c.title}</div><div class="tiny muted">{tn(item.c.count, 'Mix · {n} matching song, new every week', 'Mix · {n} matching songs, new every week')}</div></div>
               {:else if item.kind === 'mood'}
                 <div class="grid place-items-center shrink-0 size-[34px] rounded-full bg-surface-3 text-accent"><Icon name="waves" size={18} /></div>
                 <div class="ell"><div>{item.m.label}</div><div class="tiny muted">{item.m.stil ? t('{songs} · create as mix', { songs: plural(item.m.count, 'song', 'songs') }) : plural(item.m.count, 'song', 'songs')}</div></div>

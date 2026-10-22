@@ -174,8 +174,11 @@ class ServerTest(unittest.TestCase):
             self.assertIn("setup code", data["error"])
             self.assertEqual(self.request("POST", "/api/setup", {"code": code, "password": "kurz"})[0], 401)
             self.assertFalse(localadmin.configured())
-            before = config.load_config()["settings"].get("language")
-            self.addCleanup(lambda: config.update_config(lambda c: c["settings"].update(language=before)))
+            before = config.load_config()
+            self.addCleanup(lambda: config.update_config(lambda c: (c.update(playlists=before["playlists"]), c["settings"].update(
+                language=before["settings"].get("language"), setup=before["settings"].get("setup") or {"done": False}))))
+            # a new installation: setup not finished, no playlists (other tests may have left some)
+            config.update_config(lambda c: (c.update(playlists=[]), c["settings"].update(setup={"done": False})))
             status, data, cookie = self.request("POST", "/api/setup", {"code": code, "password": "ein-gutes-passwort"},
                                                 lang="pl")
             self.assertEqual((status, data["user"]), (200, auth.NOTFALL))
@@ -189,6 +192,19 @@ class ServerTest(unittest.TestCase):
             self.assertEqual(self.request("POST", "/api/setup", {"code": code, "password": "noch-ein-passwort"})[0], 409)
             self.assertTrue(localadmin.check("ein-gutes-passwort"))
             self.assertIn("Setup: the password of the local administrator is set.", self.log.getvalue())
+
+    def test_a_reset_keeps_the_language(self):
+        """Setting the password again after a reset (admin_password.json deleted) does not change the server language."""
+        with admin_env(""):
+            before = config.load_config()["settings"]
+            self.addCleanup(lambda: config.update_config(lambda c: c["settings"].update(
+                language=before.get("language"), setup=before.get("setup") or {"done": False})))
+            config.update_config(lambda c: c["settings"].update(language="de", setup={"done": True, "at": "2026-10-21"}))
+            self.request("GET", "/api/login")
+            code = localadmin.CODE_FILE.read_text().strip()
+            status, _data, _c = self.request("POST", "/api/setup", {"code": code, "password": "ein-gutes-passwort"}, lang="pl")
+            self.assertEqual(status, 200)
+            self.assertEqual(config.load_config()["settings"]["language"], "de")
 
     def test_guessing_the_code_is_blocked(self):
         with admin_env(""):

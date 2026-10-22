@@ -85,7 +85,7 @@ export default {
   'Settings':
     'Definições',
   'Language & theme':
-    'Idioma e tema',
+    'Idioma e esquema de cores',
   'Help':
     'Ajuda',
 }

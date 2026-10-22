@@ -65,7 +65,7 @@ export default {
   'With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in three short steps:':
     'Com <a class="link" href="#/neu">Nova playlist</a> monta uma por si – em três passos curtos:',
   '<b>Music world</b> – which music? For example “Kids’ rock”. You can pick several; “All” takes the whole library.':
-    '<b>Mundo musical</b> – que música? Por exemplo «Rock infantil». Pode escolher vários; «Tudo» usa a biblioteca inteira.',
+    '<b>Mundo musical</b> – que música? Por exemplo «Rock infantil». Pode escolher vários; «Todos» usa a biblioteca inteira.',
   '<b>Vibe</b> – which mood or occasion? Such as “Party”, “Calm” or “Christmas”. The number shows how many songs match.':
     '<b>Ambiente</b> – que estado de espírito ou ocasião? Como «Festa», «Calma» ou «Natal». O número mostra quantas músicas correspondem.',
   '<b>Finishing touches</b> – name, <b>playlist or mix</b>, only the hits or everything. Right next to it you see which songs would be in it.':
@@ -141,9 +141,9 @@ export default {
   'Only a few songs per band are allowed, 3 by default. If the music world has only 10 bands, at most 30 songs are possible. To fix it: add more music worlds or raise “At most per band”.':
     'Só são permitidas algumas músicas por banda, 3 por predefinição. Se o mundo musical tiver só 10 bandas, são possíveis no máximo 30 músicas. Solução: adicionar mais mundos musicais ou aumentar «No máximo por banda».',
   'What does “waiting for scan” mean?':
-    'O que significa «à espera da verificação»?',
+    'O que significa «à espera da leitura»?',
   'The file is written, but Navidrome hasn’t read it in yet. That happens automatically at the next scan – or right away with “Update everything”.':
-    'O ficheiro está escrito, mas o Navidrome ainda não o leu. Isso acontece automaticamente na verificação seguinte – ou de imediato com «Atualizar tudo».',
+    'O ficheiro está escrito, mas o Navidrome ainda não o leu. Isso acontece automaticamente na leitura seguinte – ou de imediato com «Atualizar tudo».',
   'I deleted or renamed a playlist in Navidrome.':
     'Eliminei ou mudei o nome de uma playlist no Navidrome.',
   'Tuttiphon is the source: the next time you apply, it creates the playlist again with the name from Tuttiphon. So please rename or delete it here.':
@@ -171,7 +171,7 @@ export default {
   'Why doesn’t Symfonium show new lyrics yet?':
     'Porque é que o Symfonium ainda não mostra as letras novas?',
   'Navidrome only reads new .lrc/.txt files at the next scan – “Update everything” does that automatically. After that, Symfonium may need a sync.':
-    'O Navidrome só lê os ficheiros .lrc/.txt novos na verificação seguinte – «Atualizar tudo» faz isso automaticamente. Depois, o Symfonium pode precisar de uma sincronização.',
+    'O Navidrome só incorpora os ficheiros .lrc/.txt novos na leitura seguinte – «Atualizar tudo» faz isso automaticamente. Depois, o Symfonium pode precisar de uma sincronização.',
   'The recap is still empty.':
     'O resumo ainda está vazio.',
   'Navidrome doesn’t keep a history. That’s why Tuttiphon records the plays every day from its first start – so the recap fills up over time.':
@@ -197,7 +197,7 @@ export default {
   'When does the search find lyrics?':
     'Quando é que a pesquisa encontra letras?',
   'The first time, Tuttiphon reads in all lyrics in the background; with around 20,000 songs this takes a few minutes. After that, only new ones are added at each scan.':
-    'Na primeira vez, o Tuttiphon lê todas as letras em segundo plano; com cerca de 20 000 músicas, isto demora alguns minutos. Depois, só as novas são adicionadas a cada verificação.',
+    'Na primeira vez, o Tuttiphon lê todas as letras em segundo plano; com cerca de 20 000 músicas, isto demora alguns minutos. Depois, só as novas são adicionadas a cada leitura da biblioteca.',
   'Is a new recap playlist added every month?':
     'É adicionada uma nova playlist de resumo todos os meses?',
   'Someone forgot their Navidrome password.':
@@ -224,8 +224,8 @@ export default {
     'Só se escolheu «Toda a família» no seu perfil. Mesmo assim, não as podem alterar. Além de si, só o administrador vê as suas estatísticas e o seu perfil.',
   'My statistics are empty.':
     'As minhas estatísticas estão vazias.',
-  'Then Tuttiphon doesn’t have your password: turn it on under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
-    'Então o Tuttiphon não tem a sua palavra-passe: ative-a em Definições → A minha conta. Ou ainda não ouviu nada desde então. O Symfonium tem de comunicar as reproduções ao servidor; normalmente isso está ativado.',
+  'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
+    'Nesse caso, falta ao Tuttiphon a sua palavra-passe: ative «Estatísticas e estrelas» em Definições → A minha conta. Ou ainda não ouviu nada desde então. O Symfonium tem de comunicar as reproduções ao servidor; normalmente isso está ativo.',
   'Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.':
     'O Tuttiphon deteta-os sozinho a partir da sua biblioteca – como êxitos dos anos 80, Eurodance ou rap alemão – e arruma sozinho as bandas novas. Os mundos que ouve aparecem logo à frente.',
   'A band is missing or in the wrong place.':
@@ -277,9 +277,9 @@ export default {
   'Apply':
     'Aplicar',
   'Write playlists to Navidrome and let Navidrome do a quick scan.':
-    'Escrever as playlists no Navidrome e deixar o Navidrome fazer uma verificação rápida.',
+    'Escrever as playlists no Navidrome e deixar o Navidrome fazer uma leitura rápida.',
   'Scan':
-    'Verificação',
+    'Leitura',
   'Navidrome reads in new files and playlists.':
     'O Navidrome lê os ficheiros e as playlists novos.',
   'Keep this mix':

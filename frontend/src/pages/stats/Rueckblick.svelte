@@ -14,7 +14,7 @@
   import Icon from '../../components/Icon.svelte'
   import { api } from '../../lib/api.js'
   import { toast } from '../../lib/overlay.svelte.js'
-  import { t, locale } from '../../lib/i18n.svelte.js'
+  import { t, tn, tword, locale } from '../../lib/i18n.svelte.js'
 
   let { d, kind } = $props()
   const tot = $derived(d.totals)
@@ -31,7 +31,7 @@
     keeping = true
     try {
       const r = await api('/api/rueckblick/keep', { body: { person: d.person, kind, year: year ? d.from.slice(0, 4) : undefined } })
-      toast(t('“{name}” saved with {n} songs – coming to Symfonium shortly', { name: r.name, n: fmt(r.count) }))
+      toast(tn(r.count, '“{name}” saved with {n} song – coming to Symfonium shortly', '“{name}” saved with {n} songs – coming to Symfonium shortly', { name: r.name }))
     } catch (e) { toast(e.message, { error: true }) } finally { keeping = false }
   }
 
@@ -62,8 +62,8 @@
     <div class="wrap-facts">
       <!-- {n} marks the bold value inside each translated text -->
       {@render fact(t('{n} of music'), `${fmt(Math.round(tot.hours))} h`)}
-      {@render fact(tot.artists === 1 ? t('{n} band') : t('{n} bands'), fmt(tot.artists))}
-      {@render fact(t('{n} different songs'), fmt(tot.songs))}
+      {@render fact(tword(tot.artists, '{n} band', '{n} bands'), fmt(tot.artists))}
+      {@render fact(tword(tot.songs, '{n} different song', '{n} different songs'), fmt(tot.songs))}
       {#if tot.newSongs}{@render fact(t('{n} newly discovered'), fmt(tot.newSongs))}{/if}
       {#if busiest}{@render fact(t('most music on {n}'), busiest)}{/if}
     </div>
@@ -115,7 +115,7 @@
           <button type="button" class="acard" onclick={() => openArtist(a.name)}>
             <Avatar name={a.name} id={a.id} size={72} />
             <div class="nm">{a.name}</div>
-            <div class="tiny muted">{t('{n} new songs', { n: fmt(a.songs) })}</div>
+            <div class="tiny muted">{tn(a.songs, '{n} new song', '{n} new songs')}</div>
           </button>
         {/each}
       </div>

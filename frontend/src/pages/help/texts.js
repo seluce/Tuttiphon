@@ -36,7 +36,7 @@ export const USER_FAQ = translated(() => [
   [t('A song comes up less often or not at all in my mix.'), t('Your mixes learn: what you skip comes up less often for a while, songs you rate with 1 star don’t come at all. Like a song after all? Give it more stars.')],
   [t('Can I change the family playlists?'), t('Not directly – they belong to someone else. But with “Copy for me” you get your own version that you can adjust as you like.')],
   [t('Can others see my playlists?'), t('Only if you chose “The whole family” in your profile. Even then they can’t change them. Apart from you, only the administrator sees your statistics and your profile.')],
-  [t('My statistics are empty.'), t('Then Tuttiphon doesn’t have your password: turn it on under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.')],
+  [t('My statistics are empty.'), t('Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.')],
   [t('Where do the music worlds come from?'), t('Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.')],
   [t('A band is missing or in the wrong place.'), t('The administrator looks after the music worlds for everyone – just let them know. For yourself, you can mark a band as “Favorite” or “never” in the band window.')],
   [t('Can I undo something?'), t('Yes: “Undo” in the message at the bottom. Deleted playlists stay in the trash for 30 days and can be restored until then.')],

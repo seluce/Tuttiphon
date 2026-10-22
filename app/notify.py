@@ -19,7 +19,7 @@ import urllib.error
 import urllib.request
 
 from .config import STATE_DIR, load_config, load_env, read_text, write_atomic
-from .i18n import _, _s, _sn, speaking
+from .i18n import _, _s, _sn, english, speaking
 
 SENT_FILE = STATE_DIR / "notified.json"
 EVENTS = ("failed", "newMusic", "autoAssigned", "favorites", "review", "weekly")
@@ -71,9 +71,14 @@ def deliver(make, tags=(), path="", cfg=None, topic=None, accounts=(), admins=Fa
 
 
 def _in(lang, make):
-    """(title, message) in lang (None: the server language)."""
-    with speaking(lang):
-        return make()
+    """(title, message) in lang (None: the server language) – in English if the translation fails (a broken entry
+    must not stop the message)."""
+    try:
+        with speaking(lang):
+            return make()
+    except Exception:   # noqa: BLE001 – e.g. a translated format the values do not fit
+        with speaking("en"):
+            return make()
 
 
 def _lang_of(person):
@@ -146,7 +151,7 @@ def after_run(entry, cfg=None):
              lambda: to_admin(lambda: (_s("Tuttiphon: {name} failed", name=name), _s("Errors in: {steps}", steps=", ".join(titled()))),
                               ("warning",), "#/verlauf"))
     done = bool(results) and all(r in ("ok", "warnung") for r in results.values())   # cancelled is not done
-    if name.startswith(NEW_MUSIC_RUNS) and done and wants(cfg, "newMusic"):
+    if (str(name).startswith(NEW_MUSIC_RUNS) or english(name).startswith(NEW_MUSIC_RUNS)) and done and wants(cfg, "newMusic"):
         to_admin(lambda: (_s("Tuttiphon: New music has arrived"), _s("{name} – done, playlists are up to date.", name=name)),
                  ("headphones",), "#/")
     welten = (entry.get("summary") or {}).get("welten") or []

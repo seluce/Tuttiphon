@@ -185,6 +185,7 @@ class TaskRunner:
         self.step = None
         self.results = {}
         self.finished_at = None
+        self.started_at = None   # identifies a run for the interface (a bar put away stays away for this run only)
         self.logfile = None
         self._opts = {}
         self._pos = 0      # index of the running step (steps can appear twice, e.g. "scan")
@@ -215,7 +216,7 @@ class TaskRunner:
         with self.lock:
             lines = [{"n": n, "t": t, "text": x} for n, t, x in self.lines if n > since]
         return {"running": self.running(), "name": self.name, "steps": self.steps, "step": self.step,
-                "results": self.results, "finishedAt": self.finished_at, "lines": lines}
+                "results": self.results, "finishedAt": self.finished_at, "startedAt": self.started_at, "lines": lines}
 
     def running(self):
         return self.thread is not None and self.thread.is_alive()
@@ -260,6 +261,7 @@ class TaskRunner:
         self.name = name
         self.results = {}
         self.finished_at = None
+        self.started_at = time.time()
         self._opts = dict(opts)
         self._pos = 0
         if background:

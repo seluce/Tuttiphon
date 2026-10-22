@@ -238,7 +238,7 @@ def api_status():
     lang = i18n.server_lang()   # how the server names playlists – the interface builds names of new ones the same way
     names = {"all": i18n.tr("{world} · All Sorts", lang), "hits": i18n.tr("{world} · The Hits", lang),
              "everything": i18n.tr("Everything", lang)}
-    out = {**_status_full(), "version": VERSION, "plugin": sonic.has_key(), "names": names}
+    out = {**_status_full(), "version": VERSION, "plugin": sonic.in_use(), "names": names}
     m = auth.current()
     if m["role"] == "admin":
         return out
@@ -872,33 +872,36 @@ MOOD_WORDS = {"ruhig": "ruhig", "sanft": "ruhig", "chill": "ruhig", "entspann": 
               # English search words
               "calm": "ruhig", "quiet": "ruhig", "gentle": "ruhig", "soft": "ruhig", "sleep": "schlaf", "asleep": "schlaf",
               "bedtime": "schlaf", "lullab": "schlaf", "cheer": "froh", "joy": "froh", "goodmood": "froh", "danc": "tanzbar",
-              "sad": "melancholisch", "thought": "melancholisch", "acoustic": "akustisch",
-              # French, Dutch, Spanish, Italian, Portuguese and Polish search words
-              "apais": "ruhig", "doux": "ruhig", "douce": "ruhig", "détente": "ruhig", "detente": "ruhig",
-              "tranquil": "ruhig", "suave": "ruhig", "relaj": "ruhig", "rilass": "ruhig", "rustig": "ruhig",
-              "kalm": "ruhig", "zacht": "ruhig", "ontspan": "ruhig", "spokojn": "ruhig", "relaks": "ruhig",
-              "łagodn": "ruhig", "lagodn": "ruhig",
-              "sommeil": "schlaf", "endorm": "schlaf", "dormi": "schlaf", "berceuse": "schlaf", "ninna": "schlaf",
-              "slaap": "schlaf", "inslap": "schlaf", "kołysan": "schlaf", "kolysan": "schlaf", "senn": "schlaf",
-              "joyeu": "froh", "heureu": "froh", "alegr": "froh", "allegr": "froh", "feliz": "froh", "felic": "froh",
-              "vrolijk": "froh", "blij": "froh", "wesoł": "froh", "wesol": "froh", "radosn": "froh",
-              "danse": "tanzbar", "dansant": "tanzbar", "dansab": "tanzbar", "dansb": "tanzbar", "dansen": "tanzbar",
-              "baila": "tanzbar", "ballabil": "tanzbar", "ballare": "tanzbar", "dança": "tanzbar", "danca": "tanzbar",
-              "taneczn": "tanzbar", "fête": "tanzbar", "fiesta": "tanzbar", "festa": "tanzbar", "feest": "tanzbar",
-              "imprez": "tanzbar",
-              "énerg": "energie", "enérg": "energie", "dynami": "energie", "dinami": "energie",
-              "triste": "melancholisch", "mélancol": "melancholisch", "melancol": "melancholisch",
-              "melancól": "melancholisch", "malinconi": "melancholisch", "verdriet": "melancholisch",
-              "droevig": "melancholisch", "smutn": "melancholisch",
-              "acoustiq": "akustisch", "acústic": "akustisch", "acustic": "akustisch", "akoesti": "akustisch",
-              "akustyczn": "akustisch", "instrumentaal": "instrumental", "instrumentaln": "instrumental"}
+              "sad": "melancholisch", "thought": "melancholisch", "acoustic": "akustisch"}
+_MOOD_MORE = {   # the same in French, Dutch, Spanish, Italian, Portuguese and Polish
+    "apais": "ruhig", "doux": "ruhig", "douce": "ruhig", "détente": "ruhig", "detente": "ruhig",
+    "tranquil": "ruhig", "suave": "ruhig", "relaj": "ruhig", "rilass": "ruhig", "rustig": "ruhig",
+    "kalm": "ruhig", "zacht": "ruhig", "ontspan": "ruhig", "spokojn": "ruhig", "relaks": "ruhig",
+    "łagodn": "ruhig", "lagodn": "ruhig",
+    "sommeil": "schlaf", "endorm": "schlaf", "dormi": "schlaf", "berceuse": "schlaf", "ninna": "schlaf",
+    "slaap": "schlaf", "inslap": "schlaf", "kołysan": "schlaf", "kolysan": "schlaf", "senn": "schlaf",
+    "joyeu": "froh", "heureu": "froh", "alegr": "froh", "allegr": "froh", "feliz": "froh", "felic": "froh",
+    "vrolijk": "froh", "blij": "froh", "wesoł": "froh", "wesol": "froh", "radosn": "froh",
+    "danse": "tanzbar", "dansant": "tanzbar", "dansab": "tanzbar", "dansb": "tanzbar", "dansen": "tanzbar",
+    "baila": "tanzbar", "ballabil": "tanzbar", "ballare": "tanzbar", "dança": "tanzbar", "danca": "tanzbar",
+    "taneczn": "tanzbar", "fête": "tanzbar", "fiesta": "tanzbar", "festa": "tanzbar", "feest": "tanzbar",
+    "imprez": "tanzbar",
+    "énerg": "energie", "enérg": "energie", "dynami": "energie", "dinami": "energie",
+    "triste": "melancholisch", "mélancol": "melancholisch", "melancol": "melancholisch",
+    "melancól": "melancholisch", "malinconi": "melancholisch", "verdriet": "melancholisch",
+    "droevig": "melancholisch", "smutn": "melancholisch",
+    "acoustiq": "akustisch", "acústic": "akustisch", "acustic": "akustisch", "akoesti": "akustisch",
+    "akustyczn": "akustisch", "instrumentaal": "instrumental", "instrumentaln": "instrumental"}
+MOOD_WORDS.update(_MOOD_MORE)
 # Words for the listening vibes (the start of a word is enough) -> id of the delivered sound vibe whose filter on the AI
 # values approachable/engaging fits: „Hintergrundmusik“, „nebenbei“, „easy listening“, „zum Zuhören“, „hinhören“
 LISTEN_WORDS = {"hintergrund": "klang-hintergrund", "nebenbei": "klang-hintergrund", "berieselung": "klang-hintergrund",
                 "background": "klang-hintergrund", "easylistening": "klang-hintergrund",
                 "zuhör": "klang-zuhoeren", "zuhoer": "klang-zuhoeren", "hinhör": "klang-zuhoeren", "hinhoer": "klang-zuhoeren",
-                "closelistening": "klang-zuhoeren", "attentivelistening": "klang-zuhoeren",
-                "achtergrond": "klang-hintergrund", "sottofondo": "klang-hintergrund"}
+                "closelistening": "klang-zuhoeren", "attentivelistening": "klang-zuhoeren"}
+_LISTEN_MORE = {"achtergrond": "klang-hintergrund", "sottofondo": "klang-hintergrund"}
+LISTEN_WORDS.update(_LISTEN_MORE)
+_STRICT_WORDS = set(_MOOD_MORE) | set(_LISTEN_MORE)   # a typed word must cover most of these before it counts as their start
 # two-word terms that become one word before the input is split (also takes the „zum“ along)
 LISTEN_PHRASES = {"zum zuhören": "zuhören", "zum zuhoeren": "zuhören", "im hintergrund": "hintergrund",
                   "background music": "background", "easy listening": "easylistening", "close listening": "closelistening",
@@ -910,7 +913,7 @@ LISTEN_PHRASES = {"zum zuhören": "zuhören", "zum zuhoeren": "zuhören", "im hi
 def _listen_word(w):
     """Search word -> id of a listening vibe or None („Hintergrundmusik“ -> klang-hintergrund); a started word counts
     from 6 letters („hinter“)."""
-    return next((v for k, v in LISTEN_WORDS.items() if w.startswith(k) or (len(w) >= 6 and k.startswith(w))), None)
+    return next((v for k, v in LISTEN_WORDS.items() if w.startswith(k) or _begun(w, k, 6)), None)
 
 
 def _listen_vibes(q, cfg):
@@ -919,13 +922,19 @@ def _listen_vibes(q, cfg):
     text = q
     for phrase, word in LISTEN_PHRASES.items():
         text = text.replace(phrase, word)
-    ids = {_listen_word(w) for w in re.split(r"[^a-zäöüß0-9]+", text) if w}   # i18n-ignore: German letters in the search input
+    ids = {_listen_word(w) for w in re.split(r"[\W_]+", text) if w}   # letters of every language: „noël“, „miłość“
     return [x for x in cfg["stile"] if x.get("sound") and x["id"] in LISTEN_WORDS.values()
             and (x["id"] in ids or (len(q) >= 4 and q in x["name"].lower()))]
 
 
+def _begun(word, key, least):
+    """A typed word of at least `least` letters as the start of a key – of a key of the other languages only if it
+    covers three quarters of it („achter“ is no „achtergrond“)."""
+    return len(word) >= least and key.startswith(word) and (key not in _STRICT_WORDS or len(word) * 4 >= len(key) * 3)
+
+
 def _words(text):
-    return [x for x in re.split(r"[^a-zäöüß0-9]+", text) if x]   # i18n-ignore: German letters in the search input
+    return [x for x in re.split(r"[\W_]+", text) if x]   # letters of every language: „noël“, „película“, „miłość“
 
 
 def _name_hits(name, pool):
@@ -992,7 +1001,7 @@ def _search_combos(q, cfg, lib):
     # every word counts only once: first mood, then music world, then vibe („ruhige“ is a mood, not „Ruhig & Chill“)
     moods, listen, rest = [], [], []
     for w in words:
-        m = next((v for k, v in MOOD_WORDS.items() if w.startswith(k) or (len(w) >= 5 and k.startswith(w))), None)
+        m = next((v for k, v in MOOD_WORDS.items() if w.startswith(k) or _begun(w, k, 5)), None)
         heard = None if m else _listen_word(w)
         if m:
             if m not in moods:
@@ -1617,12 +1626,13 @@ def api_cover_apply(body):
         img = covers.image_name(native, np["id"])
     except NavidromeError:
         img = None
+    served = covers.served_digest(native, np["id"], data)
 
     def apply(fresh):
         for x in fresh["playlists"]:
             if x["id"] == p["id"]:
                 x["cover"] = {"style": style, "sig": sig, "nid": np["id"], "at": dt.date.today().isoformat(), "rev": int(time.time()),
-                              "hash": covers.digest(data), **({"img": img} if img else {})}
+                              "hash": served, **({"img": img} if img else {})}
     update_config(apply)
     return {"ok": True}
 
@@ -1987,7 +1997,8 @@ class Handler(BaseHTTPRequestHandler):
             from .config import localize_defaults, update_config
 
             def speak(cfg):
-                if cfg["settings"].get("language") != lang:
+                fresh = not (cfg["settings"].get("setup") or {}).get("done") and not cfg.get("playlists")
+                if fresh and cfg["settings"].get("language") != lang:   # not after a reset of the password
                     cfg["settings"]["language"] = lang
                     localize_defaults(cfg, lang)
             update_config(speak)

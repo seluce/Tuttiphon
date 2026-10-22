@@ -3,7 +3,7 @@
 //   node tools/i18n-check.mjs [files…]      only these source files (default: all of frontend/src)
 //
 // Errors (exit code 1):
-//   missing     a text in t()/tn()/plural() has no German entry in frontend/src/locales/de/
+//   missing     a text in t()/tn()/plural()/tword() has no German entry in frontend/src/locales/de/
 //   conflict    the same English text has two different German entries
 //   placeholder the German entry does not have exactly the {name} placeholders of the English text – a value would be
 //               missing in German, or the German would show “{name}” literally
@@ -19,9 +19,11 @@
 //               Array.from(x, fn) and Object.fromEntries(…). Fix: $derived(…) in a component, translated(() => …)
 //               at module level, or a function called later. Allowed: $state(t('…')) / $state.raw(t('…')) with a
 //               single t()/tn()/plural() as the direct argument (a deliberate starting value someone edits).
-// The other languages (every other folder in locales/): per entry the same placeholder check, the same markup as the
-// English text (markup: tags such as <b>, <a …>, <Ui …>) and, for an entry with several forms, only plural categories
-// (one, few, many, other …); a conflict as in German. These are errors too.
+// The other languages (every other folder in locales/) – and German: the same markup as the English text (whole tags
+// with their attributes: <b>, <a class="link" href="…">, <Ui icon="…">), per entry the same placeholder check and, for
+// an entry with several forms, only plural categories
+// (one, few, many, other …); the plural of a count (third text of tn()/plural()/tword()) with every form its language
+// needs (Polish: few and many); a conflict as in German. These are errors too.
 // Warnings:
 //   dynamic     t() with a non-literal argument – the checker cannot see that text (only for data from the server)
 //   unused      a German entry nobody uses (only with all files)
@@ -69,7 +71,11 @@ for (const [k, v] of Object.entries(dict)) {
 
 // The other languages: { lang: { dict, origin } }
 const FORMS = new Set(['zero', 'one', 'two', 'few', 'many', 'other'])
-const markup = (s) => [...String(s).matchAll(/<\/?([A-Za-z][\w-]*)/g)].map((m) => m[0]).sort().join(' ')
+// whole tags with their attributes – a translation shown through {@html} may not add an href, onclick … of its own
+const markup = (s) => [...String(s).matchAll(/<\/?[A-Za-z][^>]*>/g)].map((m) => m[0].replace(/\s+/g, ' ')).sort().join(' ')
+for (const [k, v] of Object.entries(dict)) {
+  if (markup(k) !== markup(v)) errors.push(`markup    de "${k.slice(0, 80)}" (${origin[k]}): ${markup(v) || '–'} instead of ${markup(k) || '–'}`)
+}
 const langs = {}
 for (const l of readdirSync(LOCALES).filter((d) => d !== 'de' && statSync(join(LOCALES, d)).isDirectory()).sort()) {
   const d = {}, from = {}
@@ -104,6 +110,9 @@ const bare = (text) => text.replace(NAMES, '').replace(/[^\p{L}]/gu, '').length 
 const UI_ATTRS = new Set(['label', 'hint', 'title', 'placeholder', 'aria-label', 'alt', 'text', 'sub', 'desc', 'description', 'eyebrow', 'empty', 'confirm', 'cancel', 'action'])
 const UI_CALLS = new Set(['toast', 'confirmDialog', 'promptDialog', 'alert'])
 const used = new Set()
+const counted = new Set()   // the plural ("other") texts of counts: tn()/plural()/tword()
+// languages whose plural of a count has several forms – each one is needed (otherwise “5 piosenki” instead of “piosenek”)
+const NEEDS = { pl: ['few', 'many'] }
 
 function walk(node, visit, parent = null) {
   if (!node || typeof node !== 'object') return
@@ -137,7 +146,7 @@ for (const file of files) {
   walk(ast, (n) => {
     if (n.type !== 'CallExpression' || n.callee?.type !== 'Identifier') return
     const name = n.callee.name
-    const texts = name === 't' ? [n.arguments[0]] : name === 'tn' || name === 'plural' ? [n.arguments[1], n.arguments[2]] : null
+    const texts = name === 't' ? [n.arguments[0]] : ['tn', 'plural', 'tword'].includes(name) ? [n.arguments[1], n.arguments[2]] : null
     if (!texts) return
     // values handed over as an object literal: they must cover the placeholders (without one, the text is filled
     // elsewhere – e.g. {name} as an interface button in the help)
@@ -153,6 +162,7 @@ for (const file of files) {
       }
       keys.add(a)
       used.add(s)
+      if (name !== 't' && a === n.arguments[2]) counted.add(s)
       if (!(s in dict)) errors.push(`missing   ${rel}:${lineOf(a.start)} "${s}"`)
       if (given) {
         const lack = [...new Set([...placeholders(s), ...placeholders(dict[s] ?? '')])].filter((x) => !given.has(x))
@@ -215,7 +225,7 @@ for (const file of files) {
   // texts translated only once (see "static" above)
   const skipStatic = (pos) => /i18n-ignore static\b/.test(lines[lineOf(pos) - 1] || '')
   const isFn = (n) => n?.type === 'ArrowFunctionExpression' || n?.type === 'FunctionExpression'
-  const isText = (n) => n?.type === 'CallExpression' && n.callee?.type === 'Identifier' && ['t', 'tn', 'plural'].includes(n.callee.name)
+  const isText = (n) => n?.type === 'CallExpression' && n.callee?.type === 'Identifier' && ['t', 'tn', 'plural', 'tword'].includes(n.callee.name)
   // '$state', '$state.raw', 'Array.from' … – the name of a called function or method on a plain name
   const calleeName = (c) => (c.callee?.type === 'Identifier' ? c.callee.name
     : c.callee?.type === 'MemberExpression' && !c.callee.computed && c.callee.object?.type === 'Identifier'
@@ -273,6 +283,14 @@ if (!args.length) {
     const missing = [...used].filter((k) => !(k in d))
     if (missing.length) warnings.push(`missing   ${l}: ${missing.length} text(s), e.g. "${missing[0].slice(0, 80)}"`)
     for (const k of Object.keys(d)) if (!used.has(k)) warnings.push(`unused    ${l} "${k}" (${from[k]})`)
+  }
+}
+for (const [l, forms] of Object.entries(NEEDS)) {
+  const { d, from } = langs[l] || { d: {} }
+  for (const k of counted) {
+    if (!(k in d)) continue   // missing: listed above
+    const lacks = forms.filter((f) => typeof d[k] !== 'object' || !d[k]?.[f])
+    if (lacks.length) errors.push(`plural    ${l} "${k.slice(0, 80)}" (${from[k]}): a count needs the forms ${lacks.join(', ')}`)
   }
 }
 for (const w of warnings) console.log('⚠ ' + w)

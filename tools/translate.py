@@ -15,7 +15,8 @@ Areas: ui-<file> for the interface (frontend/src/locales/de/<file>.js), srv-<fil
 form: empty for a text; for the plural of a count in a language with more forms (Polish) one line per form –
 "few" (2–4, 22–24 …) and "many" (0, 5–21, 25 …).
 Checks: the same {placeholders} as the English text ({Every} may stand for {every}, {owner} for {name}), the same
-markup (<b>, <a …>, <Ui …>, <code>), the plural forms. Afterwards: npm run test:i18n.
+markup – whole tags with their attributes (<b>, <a class="link" href="…">, <Ui icon="…">, <code>) –, the plural
+forms. Afterwards: npm run test:i18n.
 A new language also needs its entry in frontend/src/lib/i18n.svelte.js (DICTS, LANGUAGES, LOCALES) and app/i18n.py
 (LANGS, category() if its plural rules differ) – the import reminds of it.
 """
@@ -30,8 +31,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FORMS = {"pl": ("few", "many")}   # the plural ("other") text of a count in these languages: one line per form
-PH = re.compile(r"\{(\w+)\}")
-TAG = re.compile(r"</?([A-Za-z][\w-]*)")
+PH = re.compile(r"\{(\w+)(?:[:!][^{}]*)?\}")   # also {start:%d/%m}
+TAG = re.compile(r"</?[A-Za-z][^>]*>")          # whole tags with their attributes
 ALT = {"Every": "every", "owner": "name"}   # forms of a value the code passes along for the translation
 LANG = re.compile(r"[a-z]{2}")
 
@@ -58,9 +59,20 @@ def _plural_keys(root):
             continue
         s = f.read_text(encoding="utf-8")
         for m in re.finditer(r"\b(tn|plural|tword)\(", s):   # the third argument, by counting brackets
-            i, depth, args, cur = m.end(), 1, [], ""
+            i, depth, args, cur, quote = m.end(), 1, [], "", None
             while i < len(s) and depth:
                 c = s[i]
+                if quote:   # inside a string: commas and brackets are text ("{n} songs, new every week")
+                    cur += c
+                    if c == "\\":
+                        cur += s[i + 1:i + 2]
+                        i += 1
+                    elif c == quote:
+                        quote = None
+                    i += 1
+                    continue
+                if c in "'\"`":
+                    quote = c
                 depth += c in "([{"
                 depth -= c in ")]}"
                 if c == "," and depth == 1:
@@ -73,7 +85,7 @@ def _plural_keys(root):
             lit = re.fullmatch(r"\s*'((?:[^'\\]|\\.)*)'\s*", args[2]) if len(args) > 2 else None
             if lit:
                 keys.add(lit.group(1).replace("\\'", "'"))
-    for f in (root / "app").glob("*.py"):
+    for f in [*(root / "app").glob("*.py"), root / "tuttiphon.py"]:
         for node in ast.walk(ast.parse(f.read_text(encoding="utf-8"))):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in ("_n", "_sn") \
                     and len(node.args) > 2 and isinstance(node.args[2], ast.Constant):
@@ -161,8 +173,9 @@ def check_text(en, text):
     out = []
     if {ALT.get(x, x) for x in PH.findall(en)} != {ALT.get(x, x) for x in PH.findall(text)}:
         out.append(f"placeholders {sorted(set(PH.findall(text)))} instead of {sorted(set(PH.findall(en)))}")
-    if sorted(TAG.findall(en)) != sorted(TAG.findall(text)) or en.count("</") != text.count("</"):
-        out.append("markup differs from the English text")
+    tags = lambda s: sorted(re.sub(r"\s+", " ", t) for t in TAG.findall(s))   # noqa: E731
+    if tags(en) != tags(text):   # an href, onclick … of its own would run in the browser ({@html})
+        out.append("markup differs from the English text (tags and their attributes)")
     return out
 
 

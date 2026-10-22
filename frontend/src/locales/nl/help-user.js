@@ -3,13 +3,13 @@ export default {
   'How Tuttiphon works':
     'Zo werkt Tuttiphon',
   '“Show me” walks you through the steps right on the page; below, everything is there to look up. The {icon} next to every page title explains that page.':
-    '“Laat zien” leidt je stap voor stap over de pagina zelf; hieronder staat alles om na te lezen. Het {icon} naast elke paginatitel legt die pagina uit.',
+    '“Laat maar zien” leidt je direct op de pagina door de stappen; hieronder staat alles om na te lezen. Het {icon} naast elke paginatitel legt die pagina uit.',
   '“Show me” walks you through the steps right on the page. The {icon} next to every page title explains that page.':
-    '“Laat zien” leidt je stap voor stap over de pagina zelf. Het {icon} naast elke paginatitel legt die pagina uit.',
+    '“Laat maar zien” leidt je direct op de pagina door de stappen. Het {icon} naast elke paginatitel legt die pagina uit.',
   'You say <b>who</b> should play and <b>what</b> kind of mood – from that, Tuttiphon builds playlists that keep themselves up to date: new albums are included automatically, stars from Deezer pick out the hits, and what you listen to in Symfonium makes the suggestions personal.':
-    'Jij zegt <b>wie</b> er moet spelen en <b>welke</b> stemming – daaruit bouwt Tuttiphon playlists die zichzelf up-to-date houden: nieuwe albums komen er automatisch bij, sterren van Deezer pikken de hits eruit, en wat jullie in Symfonium luisteren, maakt de suggesties persoonlijk.',
+    'Jij zegt <b>wie</b> er moet spelen en <b>welke</b> stemming – daaruit bouwt Tuttiphon playlists die zichzelf up-to-date houden: nieuwe albums komen er automatisch bij, sterren van Deezer pikken de hits eruit, en waar je in Symfonium naar luistert, maakt de suggesties persoonlijk.',
   'You say <b>what music</b> you like and <b>what you’re in the mood for</b> – from that, Tuttiphon builds playlists from your library that keep themselves up to date. Along the way it learns from what you listen to in Symfonium. You listen to everything in Symfonium as usual.':
-    'Jij zegt <b>welke muziek</b> je mooi vindt en <b>waar je zin in hebt</b> – daaruit bouwt Tuttiphon playlists uit je bibliotheek die zichzelf up-to-date houden. Ondertussen leert het van wat je in Symfonium beluistert. Je luistert alles gewoon in Symfonium.',
+    'Jij zegt <b>welke muziek</b> je mooi vindt en <b>waar je zin in hebt</b> – daaruit bouwt Tuttiphon playlists uit je bibliotheek die zichzelf up-to-date houden. Ondertussen leert het van wat je in Symfonium beluistert. Luisteren doe je gewoon in Symfonium.',
   'Help & guide':
     'Help & handleiding',
   'Search help':
@@ -151,9 +151,9 @@ export default {
   'Does Deezer overwrite my own stars?':
     'Overschrijft Deezer mijn eigen sterren?',
   'No. Tuttiphon recognizes stars you changed yourselves and leaves them alone – Deezer only fills gaps and updates stars it set itself.':
-    'Nee. Tuttiphon herkent sterren die jullie zelf hebben gewijzigd en laat ze met rust – Deezer vult alleen gaten op en werkt sterren bij die het zelf heeft gezet.',
+    'Nee. Tuttiphon herkent sterren die je zelf hebt gewijzigd en laat ze met rust – Deezer vult alleen gaten op en werkt sterren bij die het zelf heeft gezet.',
   'Does this also run when my PC is off?':
-    'Loopt dit ook als mijn pc uit staat?',
+    'Werkt dit ook als mijn pc uit staat?',
   'Yes, as a Docker container on the NAS – more under “Storage locations & Docker”. On the PC, Tuttiphon catches up on the daily refresh the next time it starts.':
     'Ja, als Docker-container op de NAS – meer onder “Opslaglocaties & Docker”. Op de pc haalt Tuttiphon de dagelijkse verversing in bij de volgende start.',
   'How accurate is the sound analysis?':
@@ -224,8 +224,8 @@ export default {
     'Alleen als je in je profiel “Het hele gezin” hebt gekozen. Ook dan kunnen ze ze niet wijzigen. Behalve jij ziet alleen de beheerder je statistieken en je profiel.',
   'My statistics are empty.':
     'Mijn statistieken zijn leeg.',
-  'Then Tuttiphon doesn’t have your password: turn it on under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
-    'Dan heeft Tuttiphon je wachtwoord niet: schakel het in onder Instellingen → Mijn account. Of je hebt sindsdien nergens naar geluisterd. Symfonium moet afspeelbeurten aan de server doorgeven; dat staat normaal aan.',
+  'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
+    'Dan heeft Tuttiphon je wachtwoord niet: schakel “Statistieken & sterren” in onder Instellingen → Mijn account. Of je hebt sindsdien nog nergens naar geluisterd. Symfonium moet afspeelbeurten aan de server doorgeven; dat staat normaal gesproken aan.',
   'Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.':
     'Tuttiphon herkent ze zelf uit je bibliotheek – zoals hits uit de jaren 80, Eurodance of Duitse rap – en deelt nieuwe bands zelf in. De werelden waar je naar luistert, staan helemaal vooraan.',
   'A band is missing or in the wrong place.':
@@ -237,7 +237,7 @@ export default {
   'I only know one line of the song.':
     'Ik ken maar één regel van het nummer.',
   'Can I listen to music here?':
-    'Kan ik hier muziek luisteren?',
+    'Kan ik hier naar muziek luisteren?',
   'Why is a song missing from my child’s playlists?':
     'Waarom ontbreekt er een nummer in de playlists van mijn kind?',
   'If kid-safe mode is on in the profile, songs with explicit lyrics stay out. The administrator can allow individual songs.':
@@ -379,9 +379,9 @@ export default {
   '<b>“calm kids’ songs”</b> or <b>“medieval party”</b> – if something matches, <b>Create as mix</b> appears at the top.':
     '<b>“rustige kinderliedjes”</b> of <b>“middeleeuws feest”</b> – als er iets past, verschijnt <b>Als mix maken</b> bovenaan.',
   '<b>“to fall asleep”</b>, <b>“no vocals”</b> or <b>“calm piano music”</b> – finds songs by their sound.':
-    '<b>“om in slaap te vallen”</b>, <b>“zonder zang”</b> of <b>“rustige pianomuziek”</b> – vindt nummers aan hun klank.',
+    '<b>“om in slaap te vallen”</b>, <b>“zonder zang”</b> of <b>“rustige pianomuziek”</b> – vindt nummers op klank.',
   '<b>A line of the lyrics</b>, such as “hands up in the air” – finds the song by its words.':
-    '<b>Een regel uit de songtekst</b>, zoals “handen in de lucht” – vindt het nummer aan de woorden.',
+    '<b>Een regel uit de songtekst</b>, zoals “handen in de lucht” – vindt het nummer aan de hand van de woorden.',
   '<a class="link" href="#/playlists">My playlists</a> lists all your playlists. Tap one to see its songs and bands – a tap on a song plays it.':
     '<a class="link" href="#/playlists">Mijn playlists</a> toont al je playlists. Tik er een aan om de nummers en bands te zien – een tik op een nummer speelt het af.',
   '<Ui icon="pin">Keep this mix</Ui> – the current selection as a fixed playlist that never changes.':

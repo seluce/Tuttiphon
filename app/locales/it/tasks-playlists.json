@@ -87,7 +87,7 @@
  "  ⏸ deleted in Navidrome: {name}": "  ⏸ eliminata in Navidrome: {name}",
  "Navidrome: {present} playlists present, {changed} updated, {deleted} removed.": "Navidrome: {present} playlist presenti, {changed} aggiornate, {deleted} rimosse.",
  "The playlist is empty right now – nothing to save.": "Al momento la playlist è vuota – niente da salvare.",
- "Saved mix from {month}/{day}/{year} (from “{name}”, Tuttiphon)": "Selezione salvata del {day}/{month}/{year} (da «{name}», Tuttiphon)",
+ "Saved mix from {month}/{day}/{year} (from “{name}”, Tuttiphon)": "Mix salvato del {day}/{month}/{year} (da «{name}», Tuttiphon)",
  "Navidrome address missing – Settings → Navidrome": "Manca l'indirizzo di Navidrome – Impostazioni → Navidrome",
  "Navidrome address invalid ({url}) – it starts with http:// or https://": "Indirizzo di Navidrome non valido ({url}) – deve iniziare con http:// o https://",
  "Credentials incomplete for user '{user}'": "Credenziali incomplete per l'utente '{user}'",

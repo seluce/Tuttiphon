@@ -74,7 +74,7 @@
 
   @media (max-width: 900px) {
     .mini {
-      left: 8px; right: 8px; bottom: calc(66px + env(safe-area-inset-bottom)); border: 1px solid var(--line-2);
+      left: 8px; right: 8px; bottom: calc(var(--nav-h) + 8px); border: 1px solid var(--line-2);
       border-radius: 16px; padding: 0 6px 0 8px; gap: 4px; grid-template-columns: minmax(0, 1fr) auto auto;
     }
     .who { gap: 10px; }

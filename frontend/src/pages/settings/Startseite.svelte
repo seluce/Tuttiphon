@@ -31,7 +31,7 @@
 
 <Card title={t('At the top of the header')}>
   <Row label={t('Show steps')} hint={t('Show below the big buttons, as a fold-out, what “Update everything” does.')}>
-    <Toggle obj={conf} key="showSteps" />
+    <Toggle label={t('Show steps')} obj={conf} key="showSteps" />
   </Row>
   <Row label={t('“Update everything”')} hint={t('Runs: {steps}.', { steps: stepsText })}>
     <a class="btn sm" href="#/einstellungen/ablaeufe">{t('Choose steps →')}</a>

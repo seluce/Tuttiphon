@@ -67,7 +67,7 @@ export default {
   'Your taste':
     'O seu gosto',
   'In “My profile” you set your favorite worlds, favorite bands and dislikes. The suggestions are based on them.':
-    'Em «O meu perfil» define os seus mundos favoritos, as bandas favoritas e o que não gosta. As sugestões baseiam-se nisso.',
+    'Em «O meu perfil» define os seus mundos favoritos, as bandas favoritas e aquilo de que não gosta. As sugestões baseiam-se nisso.',
   'Listen in Symfonium':
     'Ouvir no Symfonium',
   'New playlists go to Navidrome automatically. They show up in Symfonium after the next sync.':
@@ -91,7 +91,7 @@ export default {
   'No mix yet':
     'Ainda não há mixes',
   'A mix puts itself together anew regularly – daily, weekly or monthly, with at most a few songs per band and never the same band twice in a row.':
-    'Um mix monta-se de novo regularmente – todos os dias, semanas ou meses, com no máximo algumas músicas por banda e nunca a mesma banda duas vezes seguidas.',
+    'Um mix monta-se de novo regularmente – diária, semanal ou mensalmente, com no máximo algumas músicas por banda e nunca a mesma banda duas vezes seguidas.',
   'Create a mix':
     'Criar um mix',
   'To review':
@@ -121,7 +121,7 @@ export default {
   'Stopping …':
     'A parar …',
   'last scanned {when}':
-    'última verificação {when}',
+    'última leitura {when}',
   'running …':
     'em curso …',
   'Stop':
@@ -137,7 +137,7 @@ export default {
   'Dry run without changing anything':
     'Simulação sem alterar nada',
   'full Navidrome scan':
-    'verificação completa do Navidrome',
+    'leitura completa do Navidrome',
   'Check everything again?':
     'Verificar tudo de novo?',
   'All {n} songs are looked up on Deezer again; this takes about 45–60 minutes. You can stop at any time – next time it continues from there.':
@@ -194,6 +194,8 @@ export default {
     'mostrar mais {n}',
   'Library':
     'Biblioteca',
+  '{n} album still in MP3 – list':
+    '{n} álbum ainda em MP3 – lista',
   '{n} albums still in MP3 – list':
     '{n} álbuns ainda em MP3 – lista',
   '{loved} favorites · {played} songs with plays':
@@ -223,7 +225,7 @@ export default {
   'Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium. Further down: what others share with you.':
     'As suas playlists – o Tuttiphon mantém-nas atualizadas e pode ouvi-las no Symfonium. Mais abaixo: o que outros partilham consigo.',
   'All':
-    'Tudo',
+    'Todos',
   'Shared':
     'Partilhadas',
   'Search playlists …':
@@ -314,6 +316,8 @@ export default {
     'de volta ao Symfonium a partir de {date}',
   'from {n} matching':
     'de {n} compatíveis',
+  '{n} matching song':
+    '{n} música compatível',
   '{n} matching songs':
     '{n} músicas compatíveis',
   'up to {n} per request':
@@ -322,6 +326,8 @@ export default {
     'no Navidrome: {owner}',
   'Rather few songs – maybe loosen the selection or add more music worlds.':
     'Poucas músicas – talvez alargar a seleção ou adicionar mais mundos musicais.',
+  'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.':
+    'O mix é mais curto do que o pretendido porque só é permitida {n} música por banda, no máximo – mais bandas de outros mundos musicais tornam-no mais longo.',
   'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.':
     'O mix é mais curto do que o pretendido porque só são permitidas {n} músicas por banda, no máximo – mais bandas de outros mundos musicais tornam-no mais longo.',
   'This playlist belongs to {name} and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.':
@@ -352,6 +358,8 @@ export default {
     'Daily Mix · novo todos os dias',
   'Today in the mix':
     'Hoje no mix',
+  '{n} song today':
+    '{n} música hoje',
   '{n} songs today':
     '{n} músicas hoje',
   'These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -360,6 +368,8 @@ export default {
     'Weekly Mix · novo todas as semanas',
   'This week in the mix':
     'Esta semana no mix',
+  '{n} song this week':
+    '{n} música esta semana',
   '{n} songs this week':
     '{n} músicas esta semana',
   'These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -368,6 +378,8 @@ export default {
     'Monthly Mix · novo todos os meses',
   'This month in the mix':
     'Este mês no mix',
+  '{n} song this month':
+    '{n} música este mês',
   '{n} songs this month':
     '{n} músicas este mês',
   'These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -404,6 +416,8 @@ export default {
     'Uma seleção de {n} músicas é guardada no Navidrome como a playlist fixa «{name}». Depois disso, não muda – prático quando gosta de um mix.',
   'A selection of {n} songs is saved as the fixed playlist “{name}” in Navidrome. It won’t change after that.':
     'Uma seleção de {n} músicas é guardada no Navidrome como a playlist fixa «{name}». Depois disso, não muda.',
+  '“{name}” saved with {n} song ✓':
+    '«{name}» guardada com {n} música ✓',
   '“{name}” saved with {n} songs ✓':
     '«{name}» guardada com {n} músicas ✓',
   'Reshuffled – coming to Navidrome shortly':
@@ -443,7 +457,7 @@ export default {
   'changed':
     'alterada',
   'waiting for scan':
-    'à espera da verificação',
+    'à espera da leitura',
   'being removed':
     'a ser removida',
   'paused':
@@ -488,6 +502,8 @@ export default {
     'Um álbum inteiro, pela ordem do álbum – na próxima segunda-feira há outro. Até lá, a lista não muda – ideal para ouvir offline no Symfonium.',
   'one whole album a week, from {n} never played':
     'um álbum inteiro por semana, de entre {n} nunca ouvidos',
+  'from {n} album never played':
+    'de {n} álbum nunca ouvido',
   'from {n} albums never played':
     'de entre {n} álbuns nunca ouvidos',
   'Album of the week · new every Monday':

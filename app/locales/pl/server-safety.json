@@ -22,8 +22,8 @@
  "Minimum rating for “All”": "Minimalna ocena dla „Wszystkie”",
  "  ⚠ {name}: cannot be built ({error}) – left out": "  ⚠ {name}: nie można zbudować ({error}) – pominięto",
  "⚠ Playlist “{name}” cannot be built: {error}": "⚠ Nie można zbudować playlisty „{name}”: {error}",
- "⚠ Deezer: the file with the ranks was damaged – set aside as {name}.": "⚠ Deezer: plik z rangami był uszkodzony – odłożony jako {name}.",
- "The Deezer file was damaged and has been set aside as {name} – the next run starts with fresh ranks.": "Plik Deezer był uszkodzony i został odłożony jako {name} – następny przebieg zacznie od świeżych rang.",
+ "⚠ Deezer: the file with the ranks was damaged – set aside as {name}.": "⚠ Deezer: plik z rankingami był uszkodzony – odłożony jako {name}.",
+ "The Deezer file was damaged and has been set aside as {name} – the next run starts with fresh ranks.": "Plik Deezer był uszkodzony i został odłożony jako {name} – następny przebieg zacznie od świeżych rankingów.",
  "⚠ Lyrics index damaged ({error}) – set aside as {name}, it is built anew.": "⚠ Indeks tekstów uszkodzony ({error}) – odłożony jako {name}, zostanie zbudowany od nowa.",
  "⚠ Recap: {file} was damaged – set aside as {name}.": "⚠ Podsumowanie: {file} był uszkodzony – odłożony jako {name}.",
  "⚠ Mixes learn: {file} was damaged – set aside as {name}.": "⚠ Mixy się uczą: {file} był uszkodzony – odłożony jako {name}."

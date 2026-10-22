@@ -51,7 +51,7 @@ export const GUIDES = translated(() => [
         text: c.choosePerson ? t('For whom, which music, which mood and finally the finishing touches. At the top you see where you are.')
           : t('Which music, which mood and finally the finishing touches. At the top you see where you are.') },
       c.choosePerson
-        ? { sel: ['.pick'], title: t('For whom?'), text: t('The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.') }
+        ? { sel: ['.pick'], title: t('For whom?'), text: t('The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.') }
         : { sel: ['.pick'], title: t('Choose music'), text: t('Tap one or more music worlds. “All” takes the whole library.') },
       { sel: ['.wiz-foot'], title: t('On to the mood'), text: t('Then you choose the mood, such as Party or Calm. In the last step you see right away which songs would be in it, and create the playlist.') },
     ],
@@ -87,7 +87,7 @@ export const GUIDES = translated(() => [
     steps: () => [
       { go: '#/einstellungen/navidrome', sel: ['[data-guide=passwoerter]'], title: t('Accounts & passwords'), text: t('With an account’s password, Tuttiphon creates playlists there and sees what is played.') },
       { go: '#/einstellungen/benutzer', sel: ['[data-guide=rechte]'], title: t('Who may do what?'), text: t('Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account.') },
-      { go: '#/personen', sel: ['[data-guide=person-neu]'], title: t('People'), text: t('One person per account: suggestions and mixes are made for them with their favorites and dislikes.') },   // i18n-ignore: selector
+      { go: '#/personen', sel: ['[data-guide=person-neu]'], title: t('People'), text: t('One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.') },   // i18n-ignore: selector
     ],
   },
   {

@@ -1,4 +1,4 @@
-// Same keys as ../de/settings-b.js (tools/translate.py)
+// Same keys as ../de/settings-b.js
 export default {
   'General':
     'Ogólne',
@@ -438,8 +438,9 @@ export default {
     'Im więcej piosenki Tuttiphon usłyszy, tym pewniej rozpoznaje tempo i nastrój – szczególnie w piosenkach, które zaczynają się cicho, a kończą głośno. W zamian pierwszy przebieg trwa dłużej.',
   '“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.':
     '„Zgodność tempa”: jak często tempo zgadza się z poziomem „Głęboki”. Czasy są przybliżone; na NAS trwa to zależnie od procesora znacznie dłużej. Działa w tle z limitem czasu na przebieg i można to w każdej chwili zatrzymać.',
-  '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.':
-    'Piosenki słuchane dotąd mniej uważnie ({n}) są stopniowo mierzone ponownie, najpierw nowe.',
+  '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.':
+    '{n} piosenka była dotąd przesłuchana mniej dokładnie i jest stopniowo mierzona na nowo, najpierw nowe piosenki.',
+  '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.': { few: '{n} piosenki zostały dotąd przesłuchane mniej dokładnie i są stopniowo mierzone na nowo, najpierw nowe piosenki.', many: '{n} piosenek zostało dotąd przesłuchanych mniej dokładnie i jest stopniowo mierzonych na nowo, najpierw nowe piosenki.' },
   'testing …':
     'testowanie …',
   '✓ works':
@@ -472,8 +473,9 @@ export default {
     'Wyłączono na tym urządzeniu',
   'Turn off':
     'Wyłącz',
-  '{n} devices are registered.':
-    'Zarejestrowane urządzenia: {n}.',
+  '{n} device is registered.':
+    '{n} urządzenie jest zarejestrowane.',
+  '{n} devices are registered.': { few: '{n} urządzenia są zarejestrowane.', many: '{n} urządzeń jest zarejestrowanych.' },
   'Turned on for this device':
     'Włączono na tym urządzeniu',
   'Turn on for this device':

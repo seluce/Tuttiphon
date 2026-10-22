@@ -56,7 +56,7 @@
 {#snippet neu()}
   <p>{@html t('The easiest way is the assistant under <a class="link" href="#/neu">New playlist</a>. It asks step by step – “For whom?” only when there are several people:')}</p>
   <Steps>
-    <li><span>{@html t('<b>For whom?</b> – the person decides which Navidrome account the playlist goes to and whose stars count.')}</span></li>
+    <li><span>{@html t('<b>For whom?</b> – the person decides which Navidrome account the playlist goes to; the stars of that account count.')}</span></li>
     <li><span>{@html t('<b>Music world</b> – who’s playing: e.g. “Kids’ rock”, “Medieval” or several together. “All” takes the whole library.')}</span></li>
     <li><span>{@html t('<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.')}</span></li>
     <li><span>{@html t('<b>Finishing touches</b> – name, <b>smart playlist or mix</b>, hits only or everything, add or remove single bands. On the right you see right away what comes out.')}</span></li>
@@ -202,17 +202,17 @@
     <li>{@html t('<b>Same recording twice:</b> an audio fingerprint finds it, also in another format; the result is under <a class="link" href="#/einstellungen/bibliothek">Settings → Check library</a>.')}</li>
     <li>{@html t('<b>Radio and gaps:</b> “Start radio” in the band window plays the band with similar bands; Discover shows similar bands you are still missing.')}</li>
   </Bullets>
-  <p>{@html t('The analysis works through what is open at night (1–5 a.m.). The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.')}</p>
+  <p>{@html t('The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.')}</p>
 {/snippet}
 
 {#snippet watch()}
   <p>{@html t('If you like, Tuttiphon watches the music folder (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation → Folder watch</a>). New music – e.g. from Lidarr – is then processed on its own: converted, lyrics, scan, sound, Deezer stars.')}</p>
-  <p>{t('It looks every 5–60 minutes and gives freshly copied files two minutes of rest.')}</p>
+  <p>{t('It looks every 5–60 minutes and waits until freshly copied files are complete.')}</p>
 {/snippet}
 
 {#snippet docker()}
   <p>{@html t('Under <a class="link" href="#/einstellungen/speicher">Settings → Storage locations</a> you see where music, playlists and the archive are; in Docker you set them in docker-compose.yaml.')}</p>
-  <p>{@html t('The AI sound analysis needs about 850 MB of extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.')}</p>
+  <p>{@html t('The AI sound analysis needs extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.')}</p>
   <p>{@html t('Setup and updates are described in the <a class="link" href="https://github.com/seluce/tuttiphon#readme" target="_blank" rel="noopener">README on GitHub</a>.')}</p>
 {/snippet}
 
@@ -241,7 +241,7 @@
     <li><span>{@html t('Under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a>, create a key in the card “Navidrome plugin” and download the plugin.')}</span></li>
     <li><span>{@html t('Put the file – not unpacked and named exactly <b>tuttiphon.ndp</b> – into Navidrome’s plugins folder, put <code>tuttiphon</code> first in Navidrome’s list of agents (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) and restart Navidrome.')}</span></li>
     <li><span>{t('In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.')}</span></li>
-    <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Settings → Media providers).')}</span></li>
+    <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.')}</span></li>
   </Steps>
   <p>{t('Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family. Kid-safe always stays as for the family. The card shows for whom it last answered.')}</p>
 {/snippet}
@@ -268,7 +268,7 @@
 
 {#snippet allgemein()}
   <p>{@html t('Under <a class="link" href="#/einstellungen/allgemein">Settings → General</a> you choose the language and light or dark. “Automatic” and “System” follow your phone or computer. The choice applies to this device.')}</p>
-  <p>{@html t('The <b>language of the server</b> applies to notifications, logs and the names Tuttiphon gives playlists and music worlds.')}</p>
+  <p>{@html t('The <b>language of the server</b> applies to logs, the administrators’ ntfy topic and the names Tuttiphon gives playlists and music worlds. Notifications on phones and in the browser follow the language of the device.')}</p>
 {/snippet}
 
 {#snippet sicherung()}

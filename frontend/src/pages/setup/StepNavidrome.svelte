@@ -58,7 +58,7 @@
       <div class="hint">{t('Without a working connection Tuttiphon can neither read your library nor write playlists – so the next steps only make sense once it works. Can’t get it to work right now? Skip the setup and connect later under Settings → Navidrome.')}</div>
     {/if}
   {/if}
-  <Row label={t('Language of the server')} hint={t('For run logs, notifications and the names Tuttiphon gives playlists and music worlds by itself. Delivered vibes that still have their original name are renamed too.')}>
+  <Row label={t('Language of the server')} hint={t('For run logs, the administrators’ ntfy topic and the names Tuttiphon gives playlists and music worlds by itself. Delivered vibes that still have their original name are renamed too. Notifications on phones and in the browser follow the language of the device.')}>
     <Select options={LANGUAGES.map((l) => [l.key, l.name])} value={d.language} onchange={(v) => (d.language = v)} aria-label={t('Language of the server')} />
   </Row>
 </Card>

@@ -1,9 +1,10 @@
-<!-- Switch for obj[key] (if the value is missing, def applies) – saves right away. -->
+<!-- Switch for obj[key] (if the value is missing, def applies) – saves right away. label: for screen readers (the
+     row shows it). -->
 <script>
   import Switch from '../../components/Switch.svelte'
   import { changed } from '../../lib/state.svelte.js'
 
-  let { obj, key, def = true } = $props()
+  let { obj, key, def = true, label = '' } = $props()
 </script>
 
-<Switch checked={obj[key] ?? def} onchange={(v) => { obj[key] = v; changed() }} />
+<Switch checked={obj[key] ?? def} onchange={(v) => { obj[key] = v; changed() }} {label} hidelabel />

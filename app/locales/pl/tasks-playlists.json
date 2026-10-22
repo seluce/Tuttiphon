@@ -130,7 +130,10 @@
  "from the .env in the data folder": "z pliku .env w folderze danych",
  "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD is still the placeholder “{placeholder}” ({source}).": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD to wciąż symbol zastępczy „{placeholder}” ({source}).",
  "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} character ({source}).": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD ma tylko {n} znak ({source}).",
- "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} characters ({source}).": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD ma za mało znaków: {n} ({source}).",
+ "Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} characters ({source}).": {
+  "few": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD ma tylko {n} znaki ({source}).",
+  "many": "Tuttiphon ma być dostępny w sieci, ale TUTTIPHON_ADMIN_PASSWORD ma tylko {n} znaków ({source})."
+ },
  "⚠ Tuttiphon is reachable on the network, but the administrator password is too short or still the placeholder!": "⚠ Tuttiphon jest dostępny w sieci, ale hasło administratora jest za krótkie albo to wciąż symbol zastępczy!",
  "(Startup overview not possible: {error})": "(Przegląd przy starcie niemożliwy: {error})",
  "Ready – port {port}": "Gotowe – port {port}",

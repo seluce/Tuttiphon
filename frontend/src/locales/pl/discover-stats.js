@@ -1,4 +1,4 @@
-// Same keys as ../de/discover-stats.js (tools/translate.py)
+// Same keys as ../de/discover-stats.js
 export default {
   'Discover':
     'Odkrywaj',
@@ -23,7 +23,7 @@ export default {
   'New music worlds discovered':
     'Odkryto nowe światy muzyczne',
   'For {name}':
-    'Dla: {name}',
+    '{name}',
   'Scenes whose typical bands are already on your shelf':
     'Sceny, których typowe zespoły macie już na półce',
   'Preferences →':
@@ -66,11 +66,12 @@ export default {
   '{name} created – with a mix playlist':
     'Utworzono „{name}” – z playlistą mix',
   'for {name}':
-    'dla: {name}',
+    '{name}',
   'hits only':
     'tylko hity',
-  '{n} songs, changes on the first of the month':
-    'piosenki: {n}, zmienia się pierwszego dnia miesiąca',
+  '{n} song, changes on the first of the month':
+    '{n} piosenka, zmienia się pierwszego dnia miesiąca',
+  '{n} songs, changes on the first of the month': { few: '{n} piosenki, zmienia się pierwszego dnia miesiąca', many: '{n} piosenek, zmienia się pierwszego dnia miesiąca' },
   '{n} minutes':
     '{n} min',
   '{when}: {size} from {n} songs':
@@ -189,12 +190,14 @@ export default {
     '{names} używają tego samego konta Navidrome „{account}” – dlatego ich liczby są takie same.',
   'Plays':
     'Odtworzenia',
-  'from {n} different songs':
-    'z {n} różnych piosenek',
+  'from {n} different song':
+    'z {n} piosenki',
+  'from {n} different songs': { few: 'z {n} różnych piosenek', many: 'z {n} różnych piosenek' },
   'Listening time':
     'Czas słuchania',
-  '≈ {n} days non-stop':
-    '≈ {n} dni bez przerwy',
+  '≈ {n} day non-stop':
+    '≈ {n} dzień bez przerwy',
+  '≈ {n} days non-stop': { few: '≈ {n} dni bez przerwy', many: '≈ {n} dni bez przerwy' },
   'Bands played':
     'Odtwarzane zespoły',
   'Favorites':
@@ -233,8 +236,9 @@ export default {
     'Utwórz jako playlistę',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Uwaga: Navidrome zapisuje tylko, jak często i kiedy ostatnio grała każda piosenka – nie prowadzi historii w czasie.',
-  '“{name}” saved with {n} songs – coming to Symfonium shortly':
-    'Zapisano „{name}”, piosenki: {n} – wkrótce trafi do Symfonium',
+  '“{name}” saved with {n} song – coming to Symfonium shortly':
+    'Zapisano „{name}” z {n} piosenką – za chwilę pojawi się w Symfonium',
+  '“{name}” saved with {n} songs – coming to Symfonium shortly': { few: 'Zapisano „{name}” z {n} piosenkami – za chwilę pojawi się w Symfonium', many: 'Zapisano „{name}” z {n} piosenkami – za chwilę pojawi się w Symfonium' },
   'Nothing counted yet':
     'Jeszcze nic nie policzono',
   'Tuttiphon has been keeping track of plays since {date}. As soon as you listen, the most played music shows up here.':
@@ -247,10 +251,10 @@ export default {
     '{n} muzyki',
   '{n} band':
     '{n} zespół',
-  '{n} bands':
-    'zespoły: {n}',
-  '{n} different songs':
-    'różne piosenki: {n}',
+  '{n} bands': { few: '{n} zespoły', many: '{n} zespołów' },
+  '{n} different song':
+    '{n} piosenka',
+  '{n} different songs': { few: '{n} różne piosenki', many: '{n} różnych piosenek' },
   '{n} newly discovered':
     'nowo odkryte: {n}',
   'most music on {n}':
@@ -269,8 +273,9 @@ export default {
     'Dzień po dniu',
   'Newly discovered':
     'Nowo odkryte',
-  '{n} new songs':
-    'nowe piosenki: {n}',
+  '{n} new song':
+    '{n} nowa piosenka',
+  '{n} new songs': { few: '{n} nowe piosenki', many: '{n} nowych piosenek' },
   'For the Navidrome account “{user}”. Tuttiphon records its play counts every day – most recently {when}.':
     'Dla konta Navidrome „{user}”. Tuttiphon codziennie zapisuje jego liczniki odtworzeń – ostatnio {when}.',
   'included':
@@ -341,8 +346,9 @@ export default {
     'Nastrój',
   'Sounds like:':
     'Brzmi jak:',
-  'from the sound analysis of {n} songs':
-    'z analizy brzmienia {n} piosenek',
+  'from the sound analysis of {n} song':
+    'z analizy brzmienia {n} piosenki',
+  'from the sound analysis of {n} songs': { few: 'z analizy brzmienia {n} piosenek', many: 'z analizy brzmienia {n} piosenek' },
   'In your playlists':
     'W twoich playlistach',
   'In these playlists':

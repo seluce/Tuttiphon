@@ -5,7 +5,7 @@ export default {
   'Delete originals?':
     'Supprimer les originaux ?',
   'The lossless originals are deleted after converting instead of archived. This cannot be undone.':
-    'Les originaux sans perte sont supprimés après la conversion au lieu d’être archivés. Cette action est irréversible.',
+    'Les originaux sans perte seront supprimés après la conversion au lieu d’être archivés. Cette action est irréversible.',
   'Yes, delete':
     'Oui, supprimer',
   'Please enter as UID:GID, e.g. 1000:1000':

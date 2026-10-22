@@ -111,10 +111,10 @@
 
 <Card title={t('Top tracks and refreshing')} icon="trending">
   <Row label={t('Highlight top tracks per band')} hint={t('If many songs of a band share the highest star count, the most popular get one more star. This way Symfonium sorts the top tracks correctly. Takes effect on the next run.')}>
-    <Toggle obj={dz} key="topBoost" def={true} />
+    <Toggle label={t('Highlight top tracks per band')} obj={dz} key="topBoost" def={true} />
   </Row>
   <Row label={t('Refresh every night')} hint={t('Checks {n} songs on Deezer again every night in the time window of the night analysis, first those rated with the older, less accurate search. After that always the ones unchecked the longest – so the stars stay up to date.', { n: fmt(hist?.perNight || 1500) })}>
-    <Toggle obj={dz} key="refresh" def={true} />
+    <Toggle label={t('Refresh every night')} obj={dz} key="refresh" def={true} />
   </Row>
   {#if hist?.total}
     <div class="hint">{hist.top
@@ -135,7 +135,7 @@
   {/if}
   <div class="hint">{t('In Navidrome, stars are per account. Accounts without a password are skipped.')}</div>
   <Row label={t('Overwrite stars given by hand')} hint={t('Normally your own stars stay untouched.')}>
-    <Toggle obj={dz} key="overwriteManual" def={false} />
+    <Toggle label={t('Overwrite stars given by hand')} obj={dz} key="overwriteManual" def={false} />
   </Row>
 </Card>
 

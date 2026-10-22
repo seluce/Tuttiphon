@@ -5,7 +5,7 @@ export default {
   'The welcome assistant briefly asks what you like to listen to. After that, suggestions and mixes fit you.':
     'La procedura di benvenuto ti chiede brevemente cosa ti piace ascoltare. Dopo, suggerimenti e mix sono su misura per te.',
   'Bring everything up to date':
-    'Porta tutto in pari',
+    'Tieni tutto aggiornato',
   'Open the home page':
     'Apri la pagina iniziale',
   'Tap “Update everything”':
@@ -46,8 +46,8 @@ export default {
     'Quale musica, quale mood e infine gli ultimi ritocchi. In alto vedi a che punto sei.',
   'For whom?':
     'Per chi?',
-  'The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.':
-    'La persona decide in quale account Navidrome finisce la playlist e di chi contano le stelle. Poi scegli il mondo musicale.',
+  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
+    'La persona decide in quale account Navidrome finisce la playlist – contano le stelle di quell\'account. Poi scegli il mondo musicale.',
   'Choose music':
     'Scegli la musica',
   'Tap one or more music worlds. “All” takes the whole library.':
@@ -95,7 +95,7 @@ export default {
   'Music worlds form on their own':
     'I mondi musicali nascono da soli',
   'Tuttiphon recognizes from your library which worlds there are, and classifies new bands on its own. Tapping shows all bands of a world – there you remove bands or add some.':
-    'Tuttiphon riconosce dalla vostra libreria quali mondi ci sono e classifica da solo le nuove band. Toccandone uno vedi tutte le band di quel mondo – lì puoi togliere band o aggiungerne altre.',
+    'Tuttiphon riconosce dalla tua libreria quali mondi ci sono e classifica da solo le nuove band. Toccandone uno vedi tutte le band di quel mondo – lì puoi togliere band o aggiungerne altre.',
   'Your own music world':
     'Un mondo musicale tuo',
   'For your own selection: quickest from the scene catalog, then matching bands are added here on their own too.':
@@ -120,8 +120,8 @@ export default {
     'Ognuno accede con il proprio account Navidrome. Qui scegli per ogni account amministratore, utente o nessun accesso.',
   'People':
     'Persone',
-  'One person per account: suggestions and mixes are made for them with their favorites and dislikes.':
-    'Una persona per account: per lei nascono suggerimenti e mix con i suoi preferiti e senza ciò che non le piace.',
+  'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
+    'Una persona per ogni account: per lei nascono suggerimenti e mix con i suoi preferiti e senza ciò che non le piace.',
   'Make suggestions better':
     'Migliora i suggerimenti',
   'Open my profile':
@@ -167,7 +167,7 @@ export default {
   'Straight to a mix':
     'Subito come mix',
   'If a mood matches your music, “Create as mix” is right at the top. A tap shows the mix with a preview in the assistant – “Create playlist” creates it, and it renews every week.':
-    'Se un mood si adatta alla vostra musica, in cima trovi «Crea come mix». Un tocco mostra il mix con l\'anteprima nella procedura guidata – «Crea playlist» lo crea e si rinnova ogni settimana.',
+    'Se un mood si adatta alla tua musica, in cima trovi «Crea come mix». Un tocco mostra il mix con l\'anteprima nella procedura guidata – «Crea playlist» lo crea e si rinnova ogni settimana.',
   'Stop hearing something':
     'Non sentire più qualcosa',
   'Band or genre under “Dislikes”':
@@ -279,7 +279,7 @@ export default {
   'Home':
     'Home',
   'Your mixes of the day, what there is to review – and “Update everything”: convert music, fetch lyrics and covers, analyze the sound, write playlists, scan Navidrome, set stars. One click.':
-    'I vostri mix del giorno, cosa c\'è da controllare – e «Aggiorna tutto»: converte la musica, recupera testi e copertine, analizza il suono, scrive le playlist, avvia la scansione di Navidrome, assegna le stelle. Un clic.',
+    'I mix del giorno, cosa c\'è da controllare – e «Aggiorna tutto»: converte la musica, recupera testi e copertine, analizza il suono, scrive le playlist, avvia la scansione di Navidrome, assegna le stelle. Un clic.',
   'New playlist':
     'Nuova playlist',
   'The assistant asks: For whom? Which music world? Which vibe? – and shows right away what comes out. Either as a smart playlist or as a mix that puts itself together anew daily, weekly or monthly. On the phone under “More”.':
@@ -287,11 +287,11 @@ export default {
   'Playlists':
     'Playlist',
   'All playlists Tuttiphon looks after for you. Tapping opens preview, “Who’s in it?”, cover and editing.':
-    'Tutte le playlist che Tuttiphon cura per voi. Toccandone una si aprono anteprima, «Chi c\'è dentro?», copertina e modifica.',
+    'Tutte le playlist che Tuttiphon cura per la famiglia. Toccandone una si aprono anteprima, «Chi c\'è dentro?», copertina e modifica.',
   'Discover':
     'Scopri',
   'Ready-made suggestions matching your preferences and the season – one click creates them.':
-    'Suggerimenti pronti in base alle vostre preferenze e alla stagione – un clic e sono creati.',
+    'Suggerimenti pronti in base alle preferenze della famiglia e alla stagione – un clic e sono creati.',
   'Music worlds':
     'Mondi musicali',
   'Who plays what: kids’ rock, medieval, … Tuttiphon recognizes typical bands by itself.':
@@ -301,7 +301,7 @@ export default {
   'Statistics & recap':
     'Statistiche e riepilogo',
   'Most played bands, “Played this week” and your yearly recap. On the phone under “More”.':
-    'Band più ascoltate, «Ascoltati questa settimana» e il vostro riepilogo dell\'anno. Sul telefono in «Altro».',
+    'Band più ascoltate, «Ascoltati questa settimana» e il riepilogo dell\'anno. Sul telefono in «Altro».',
   'Everything can be adjusted: home page, Navidrome server, users & rights, Deezer stars, lyrics, Opus conversion and what “Update everything” does.':
     'Tutto è personalizzabile: pagina iniziale, server Navidrome, utenti e permessi, stelle Deezer, testi, conversione in Opus e cosa fa «Aggiorna tutto».',
   'Search':
@@ -327,7 +327,7 @@ export default {
   'Ready-made suggestions matching your taste and the season. “Create” adds them, ✕ hides them.':
     'Suggerimenti pronti in base ai tuoi gusti e alla stagione. «Crea» li crea per te, ✕ li nasconde.',
   'Your music sorted by kind, for example children’s songs or medieval. Here you see which bands belong to it and can make a playlist from it.':
-    'La vostra musica ordinata per tipo, ad esempio canzoni per bambini o medievale. Qui vedi quali band ne fanno parte e puoi farne una playlist.',
+    'La tua musica ordinata per tipo, ad esempio canzoni per bambini o medievale. Qui vedi quali band ne fanno parte e puoi farne una playlist.',
   'My statistics':
     'Le mie statistiche',
   'What you listen to most – with a recap of this week, the last 30 days and the year. On the phone under “More”.':
@@ -353,9 +353,9 @@ export default {
   'Show me':
     'Mostrami',
   'Today for all of you':
-    'Oggi per voi',
+    'Oggi per la famiglia',
   'Your mixes of the day, large with cover':
-    'I vostri mix del giorno, in grande con copertina',
+    'I mix del giorno, in grande con copertina',
   'To review':
     'Da controllare',
   'Notes: missing passwords, new bands, old playlists …':
@@ -365,11 +365,11 @@ export default {
   'Most played bands of the last 7 days':
     'Band più ascoltate degli ultimi 7 giorni',
   'New in your library':
-    'Novità nella vostra libreria',
+    'Novità nella tua libreria',
   'Recently added albums':
     'Album aggiunti di recente',
   'All of your playlists':
-    'Tutte le vostre playlist',
+    'Tutte le playlist di famiglia',
   'All active playlists as a carousel':
     'Tutte le playlist attive in un carosello',
   'Deezer & library':
@@ -536,6 +536,8 @@ export default {
     'Nel testo',
   'Bands, songs, mood, lyric line …':
     'Band, brani, mood, verso del testo …',
+  'Mix · {n} matching song, new every week':
+    'Mix · {n} brano adatto, nuovo ogni settimana',
   'Mix · {n} matching songs, new every week':
     'Mix · {n} brani adatti, nuovo ogni settimana',
   '{songs} · create as mix':
@@ -603,7 +605,7 @@ export default {
   'Turn on statistics & stars':
     'Attiva statistiche e stelle',
   'For this, Tuttiphon remembers your password – only on your NAS.':
-    'Per questo Tuttiphon memorizza la tua password – solo sul vostro NAS.',
+    'Per questo Tuttiphon memorizza la tua password – solo sul NAS di casa.',
   'One moment …':
     'Un momento …',
   'Sign in':

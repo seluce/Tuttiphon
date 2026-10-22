@@ -7,6 +7,23 @@ released.
 
 ## Unreleased
 
+- **Translations checked:** corrections in all six new languages (e.g. Spanish “por sí solo” where it means “by
+  itself”, Italian always “tu”, the colour theme with its own word), counts in the singular where there is one song
+  or band, and recap titles in each language's own form (“octubre de 2026”).
+- **Plugin card, more precise:** “Last answer with similar songs” says when and for whom – “probably for …” when
+  Tuttiphon only guessed from the plays. A guess never brings a child profile's music and leaves 1-star songs in. The
+  setup steps name “Sonic Analysis” for the smart queue too, and users see the help on radio by sound only once
+  Navidrome really uses the plugin.
+- **Who is listening, more reliably:** accounts without a person in Tuttiphon count as listening too, so their
+  questions are never answered for someone else.
+- **Covers set in Navidrome stay recognized** by the image Navidrome serves; if Navidrome creates such a playlist
+  anew, Tuttiphon's cover comes back.
+- **Notifications:** “new music” also arrives when the server speaks another language, and a translation that fails
+  falls back to English instead of losing the message.
+- **Small phones:** the assistant's buttons, the task bar, the mini player and messages stay above the navigation
+  even when its labels take two lines; switches and segmented controls fit at 320 px; every switch has a name for
+  screen readers. Statistics load faster (summaries kept per day).
+
 - **Six more languages:** the interface and the server now also speak French, Dutch, Spanish, Italian, Portuguese
   and Polish – chosen per device under Settings → General (now a list), otherwise the browser's language. Counts
   follow the rules of each language (Polish “2 piosenki”, “5 piosenek”). The search understands moods, instruments

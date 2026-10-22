@@ -5,7 +5,7 @@
   import Select from '../../components/Select.svelte'
   import Card from './Card.svelte'
   import Row from './Row.svelte'
-  import { S, isAdmin, changed, reloadConfig, reloadTexts } from '../../lib/state.svelte.js'
+  import { S, isAdmin, changed, reloadConfig, reloadTexts, loadStatus } from '../../lib/state.svelte.js'
   import { themeChoice, setTheme } from '../../lib/theme.js'
   import { LANGUAGES, choice as langChoice, setLanguage, t } from '../../lib/i18n.svelte.js'
   import { api } from '../../lib/api.js'
@@ -41,7 +41,10 @@
   async function setServerLanguage(v) {
     S.config.settings.language = v
     changed()
-    await reloadConfig()   // saves first
+    try {
+      await reloadConfig()   // saves first
+      await loadStatus()   // the names Tuttiphon gives by itself, in the new language
+    } catch (e) { toast(e.message, { error: true }) }
   }
 
   const standalone = isStandalone()
@@ -57,7 +60,7 @@
     <Select options={[['auto', t('Automatic')], ...LANGUAGES.map((l) => [l.key, l.name])]} value={langPick} onchange={setInterfaceLanguage} aria-label={t('Language')} />
   </Row>
   {#if isAdmin()}
-    <Row label={t('Language of the server')} hint={t('For run logs, notifications and the names Tuttiphon gives playlists and music worlds by itself. Delivered vibes that still have their original name are renamed too.')}>
+    <Row label={t('Language of the server')} hint={t('For run logs, the administrators’ ntfy topic and the names Tuttiphon gives playlists and music worlds by itself. Delivered vibes that still have their original name are renamed too. Notifications on phones and in the browser follow the language of the device.')}>
       <Select options={LANGUAGES.map((l) => [l.key, l.name])} value={S.config.settings.language || 'en'} onchange={setServerLanguage} aria-label={t('Language of the server')} />
     </Row>
   {/if}

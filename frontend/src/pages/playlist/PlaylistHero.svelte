@@ -12,7 +12,7 @@
   import { openSheet, closeSheet } from '../../lib/overlay.svelte.js'
   import { plEmoji } from '../../lib/playlist.js'
   import { fmt, plural } from '../../lib/format.js'
-  import { t, locale } from '../../lib/i18n.svelte.js'
+  import { t, tn, tword, locale } from '../../lib/i18n.svelte.js'
   import { openEditor } from '../../lib/editor.js'
   import { MIXEVERY, setStatus, purge, duplicate, snapshotMix, reroll, coverSheet } from './actions.js'
 
@@ -96,13 +96,13 @@
         <StatePill state={st.state || d.state || status} />
         {#if st.back}<span class="muted">{t('back in Symfonium from {date}', { date: new Date(st.back + 'T00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })}</span>{/if}
         {#if p.album}
-          <span>{@render bold(t('{n} songs this week'), fmt(d.count))}</span>
-          <span>{t('from {n} albums never played', { n: fmt(d.pool) })}</span>
+          <span>{@render bold(tword(d.count, '{n} song this week', '{n} songs this week'), fmt(d.count))}</span>
+          <span>{tn(d.pool, 'from {n} album never played', 'from {n} albums never played')}</span>
         {:else if mix}
-          <span>{@render bold(every.songs, fmt(d.count))}</span>
+          <span>{@render bold(every.songs(d.count), fmt(d.count))}</span>
           <span>{t('from {n} matching', { n: fmt(d.pool) })}</span>
         {:else}
-          <span>{@render bold(t('{n} matching songs'), fmt(d.count))}</span>
+          <span>{@render bold(tword(d.count, '{n} matching song', '{n} matching songs'), fmt(d.count))}</span>
         {/if}
         <span>{plural(d.artistCount, 'band', 'bands')}</span>
         {#if !mix && d.limit}<span>{t('up to {n} per request', { n: d.limit })}</span>{/if}
@@ -112,7 +112,7 @@
         <div class="warn-t small">{t('Rather few songs – maybe loosen the selection or add more music worlds.')}</div>
       {/if}
       {#if mix && !p.review && !p.album && !p.mix?.minutes && (p.mix?.perArtist ?? 3) > 0 && d.count < (p.mix?.size || 50) && d.pool >= 15 && status === 'aktiv'}
-        <div class="muted small">{t('The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.', { n: p.mix?.perArtist ?? 3 })}</div>
+        <div class="muted small">{tn(p.mix?.perArtist ?? 3, 'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.', 'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.')}</div>
       {/if}
       {#if !own}
         <div class="small flex gap-2.5 items-center px-3.5 py-3 rounded-card bg-surface-2 text-text-2">

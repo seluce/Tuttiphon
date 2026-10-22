@@ -1,4 +1,4 @@
-// Same keys as ../de/help-user.js (tools/translate.py)
+// Same keys as ../de/help-user.js
 export default {
   'How Tuttiphon works':
     'Jak działa Tuttiphon',
@@ -224,8 +224,8 @@ export default {
     'Tylko jeśli w profilu wybierzesz „Cała rodzina”. Nawet wtedy nie mogą ich zmieniać. Oprócz ciebie twoje statystyki i profil widzi tylko administrator.',
   'My statistics are empty.':
     'Moje statystyki są puste.',
-  'Then Tuttiphon doesn’t have your password: turn it on under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
-    'Wtedy Tuttiphon nie ma twojego hasła: włącz je w Ustawienia → Moje konto. Albo od tamtej pory nic u ciebie nie grało. Symfonium musi zgłaszać odtworzenia do serwera; zwykle jest to włączone.',
+  'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
+    'Wtedy Tuttiphon nie ma twojego hasła: włącz „Statystyki i gwiazdki” w Ustawienia → Moje konto. Albo od tego czasu nic jeszcze nie grało na twoim koncie. Symfonium musi zgłaszać odtworzenia do serwera; zwykle jest to włączone.',
   'Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.':
     'Tuttiphon wykrywa je sam z twojej biblioteki – np. hity lat 80., Eurodance albo niemiecki rap – i sam przydziela nowe zespoły. Światy, których słuchasz, są na samym początku.',
   'A band is missing or in the wrong place.':
@@ -297,7 +297,7 @@ export default {
   'Widespread audio format that Apple devices play everywhere – at 224 kbit/s hardly distinguishable from the original.':
     'Rozpowszechniony format audio, który urządzenia Apple odtwarzają wszędzie – przy 224 kbit/s praktycznie nie do odróżnienia od oryginału.',
   'Deezer rank':
-    'Ranga Deezer',
+    'Ranking Deezer',
   'Popularity of a song on Deezer, from 0 to about 1 million; it is turned into stars.':
     'Popularność piosenki w Deezer, od 0 do ok. 1 miliona; zamieniana jest na gwiazdki.',
   'AI sound analysis':
@@ -317,7 +317,7 @@ export default {
   'Night analysis':
     'Analiza nocna',
   'At night, Tuttiphon works through whatever the sound analysis and AI still have left, without a time limit.':
-    'Nocą Tuttiphon przerabia bez limitu czasu wszystko, co jeszcze zostało analizie brzmienia i AI.',
+    'Nocą Tuttiphon przerabia bez limitu czasu wszystko, co jeszcze czeka na analizę brzmienia i AI.',
   'Under <a class="link" href="#/einstellungen/allgemein">Settings → General</a> you choose the language and light or dark. “Automatic” and “System” follow your phone or computer. The choice applies to this device.':
     'W <a class="link" href="#/einstellungen/allgemein">Ustawienia → Ogólne</a> wybierasz język oraz jasny lub ciemny motyw. „Automatycznie” i „Systemowy” podążają za telefonem lub komputerem. Wybór dotyczy tego urządzenia.',
   'Where do I find the setup code?':

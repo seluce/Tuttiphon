@@ -41,6 +41,8 @@ export default {
   '{name} created – with a mix playlist': '{name} angelegt – samt Mix-Playlist',
   'for {name}': 'für {name}',
   'hits only': 'nur die Hits',
+  '{n} song, changes on the first of the month':
+    '{n} Song, wechselt am Monatsersten',
   '{n} songs, changes on the first of the month': '{n} Songs, wechselt am Monatsersten',
   '{n} minutes': '{n} Minuten',
   '{when}: {size} from {n} songs': '{when}: {size} aus {n} Songs',
@@ -107,8 +109,12 @@ export default {
   'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.': 'Navidrome hat für „{user}“ noch keine Wiedergaben gespeichert. In Symfonium muss „Scrobbling“ bzw. „Wiedergaben an den Server melden“ eingeschaltet sein.',
   '{names} use the same Navidrome account “{account}” – so their numbers are the same.': '{names} nutzen dasselbe Navidrome-Konto „{account}“ – die Zahlen sind deshalb gleich.',
   'Plays': 'Wiedergaben',
+  'from {n} different song':
+    'von {n} Song',
   'from {n} different songs': 'von {n} verschiedenen Songs',
   'Listening time': 'Hörzeit',
+  '≈ {n} day non-stop':
+    '≈ {n} Tag am Stück',
   '≈ {n} days non-stop': '≈ {n} Tage am Stück',
   'Bands played': 'Bands gehört',
   'Favorites': 'Favoriten',
@@ -130,6 +136,8 @@ export default {
   'Create as playlist': 'Als Playlist anlegen',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.': 'Hinweis: Navidrome speichert pro Song nur, wie oft und wann zuletzt er lief – einen Verlauf über die Zeit gibt es dort nicht.',
   // pages/stats/Rueckblick.svelte
+  '“{name}” saved with {n} song – coming to Symfonium shortly':
+    '„{name}“ mit {n} Song gespeichert – kommt gleich in Symfonium',
   '“{name}” saved with {n} songs – coming to Symfonium shortly': '„{name}“ mit {n} Songs gespeichert – kommt gleich in Symfonium',
   'Nothing counted yet': 'Noch nichts gezählt',
   'Tuttiphon has been keeping track of plays since {date}. As soon as you listen, the most played music shows up here.': 'Tuttiphon merkt sich die Wiedergaben seit {date}. Sobald ihr hört, erscheint hier, was am meisten lief.',
@@ -138,6 +146,8 @@ export default {
   '{n} of music': '{n} Musik',
   '{n} band': '{n} Band',
   '{n} bands': '{n} Bands',
+  '{n} different song':
+    '{n} verschiedener Song',
   '{n} different songs': '{n} verschiedene Songs',
   '{n} newly discovered': '{n} neu entdeckt',
   'most music on {n}': 'meiste Musik am {n}',
@@ -148,6 +158,8 @@ export default {
   'Over the year': 'Über das Jahr',
   'Day by day': 'Tag für Tag',
   'Newly discovered': 'Neu entdeckt',
+  '{n} new song':
+    '{n} neuer Song',
   '{n} new songs': '{n} neue Songs',
   'For the Navidrome account “{user}”. Tuttiphon records its play counts every day – most recently {when}.': 'Für das Navidrome-Konto „{user}“. Tuttiphon merkt sich dafür jeden Tag die Wiedergabezähler – zuletzt {when}.',
   // components/sheets/ArtistSheet.svelte
@@ -185,6 +197,8 @@ export default {
   'Danceability': 'Tanzbarkeit',
   'Mood': 'Stimmung',
   'Sounds like:': 'Klingt nach:',
+  'from the sound analysis of {n} song':
+    'aus der Klanganalyse von {n} Song',
   'from the sound analysis of {n} songs': 'aus der Klanganalyse von {n} Songs',
   'In your playlists': 'In euren Playlists',
   'In these playlists': 'In diesen Playlists',

@@ -195,7 +195,7 @@ export default {
   'A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, Last.fm, AI music style, language and decade.':
     'Um mundo musical diz quem toca. O Tuttiphon cria-os a partir da sua biblioteca e arruma sozinho as bandas novas – por géneros, Last.fm, estilo musical da IA, idioma e década.',
   'Your music sorted by kind. Tap a world to see which bands belong to it – with “Like” you keep a world in mind for your suggestions.':
-    'A vossa música organizada por tipo. Toque num mundo para ver que bandas lhe pertencem – com «Gosto» guarda um mundo para as suas sugestões.',
+    'A sua música organizada por tipo. Toque num mundo para ver que bandas lhe pertencem – com «Gosto» guarda um mundo para as suas sugestões.',
   'you like it':
     'gosta deste',
   'you listen to it often':
@@ -341,7 +341,7 @@ export default {
   'Minimum length in seconds':
     'Duração mínima em segundos',
   'Separate world – don’t mix into “All” playlists':
-    'Mundo separado – não misturar nas playlists «Tudo»',
+    'Mundo separado – não misturar nas playlists «Todos»',
   'Advanced: album series, genres, exclusions':
     'Avançado: séries de álbuns, géneros, exclusões',
   'Albums whose name contains this – e.g. compilation series like “Unter meinem Bett”':
@@ -419,13 +419,13 @@ export default {
   'What everyone likes – whose taste counts?':
     'Do que todos gostam – o gosto de quem conta?',
   'Songs everyone likes come up more often. Everyone’s dislikes count.':
-    'As músicas de que todos gostam aparecem mais vezes. Conta o que cada um não gosta.',
+    'As músicas de que todos gostam aparecem mais vezes. Conta aquilo de que cada um não gosta.',
   'Music world – who plays? You can pick several.':
     'Mundo musical – quem toca? Pode escolher vários.',
   'All':
-    'Tudo',
+    'Todos',
   '“All” = the whole library without {worlds}.':
-    '«Tudo» = a biblioteca inteira sem {worlds}.',
+    '«Todos» = a biblioteca inteira sem {worlds}.',
   'separate worlds':
     'mundos separados',
   'Vibe – what plays?':

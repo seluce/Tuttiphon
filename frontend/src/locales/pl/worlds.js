@@ -1,4 +1,4 @@
-// Same keys as ../de/worlds.js (tools/translate.py)
+// Same keys as ../de/worlds.js
 export default {
   'keyword':
     'słowo kluczowe',
@@ -282,8 +282,7 @@ export default {
     'Nowo uwzględnione:',
   'One playlist will then have a different name, also in Symfonium: {list}':
     'Jedna playlista będzie miała wtedy inną nazwę, także w Symfonium: {list}',
-  '{n} playlists will then have different names, also in Symfonium: {list}':
-    'Playlisty, które dostaną wtedy inne nazwy, także w Symfonium ({n}): {list}',
+  '{n} playlists will then have different names, also in Symfonium: {list}': { few: '{n} playlisty będą miały wtedy inne nazwy, także w Symfonium: {list}', many: '{n} playlist będzie miało wtedy inne nazwy, także w Symfonium: {list}' },
   '“{from}” → “{to}”':
     '„{from}” → „{to}”',
   'Scene: {name}':

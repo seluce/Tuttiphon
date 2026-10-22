@@ -98,7 +98,7 @@
 <Card title={t('Missing covers')} icon="image">
   <p class="muted small">{t('For albums without any picture, Tuttiphon fetches a cover – from the Cover Art Archive via the MusicBrainz ID, otherwise from Deezer – and places it as cover.jpg next to the music. Existing pictures stay, and new albums get two days so Lidarr can place its own.')}</p>
   <Row label={t('Fetch missing covers automatically')} hint={t('During “Update everything” and once a week in the time window of the night analysis. Anything not found is tried again after 30 days.')}>
-    <Toggle obj={cv} key="enabled" />
+    <Toggle label={t('Fetch missing covers automatically')} obj={cv} key="enabled" />
   </Row>
   <div class="btns"><button class="btn sm" disabled={S.running || cv.enabled === false} onclick={fetchNow}><Icon name="image" size={15} />{t('Fetch now')}</button></div>
 </Card>

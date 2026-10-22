@@ -59,7 +59,7 @@ export default {
   'Most common themes: {list}':
     'Meest voorkomende thema’s: {list}',
   'After an update the AI listens to the library once more – new songs first, the rest over the next nights. Until then the earlier results keep working.':
-    'Na een update luistert de AI de bibliotheek nog een keer door – nieuwe nummers eerst, de rest in de nachten daarna. Tot dan blijven de eerdere resultaten werken.',
+    'Na een update beluistert de AI de bibliotheek nog een keer – nieuwe nummers eerst, de rest in de nachten daarna. Tot dan blijven de eerdere resultaten werken.',
   'Same recording twice':
     'Dezelfde opname dubbel',
   'Audio fingerprints find songs stored more than once – also as another format, in another folder or on another album, for example a FLAC file next to its converted Opus file. Live versions, re-recordings and karaoke stay apart. They are made during “Understand music” and at night, new songs first.':
@@ -99,11 +99,11 @@ export default {
   'Add AI':
     'AI toevoegen',
   'Stage 2. Without AI, only the measurement runs.':
-    'Fase 2. Zonder AI loopt alleen de meting.',
+    'Fase 2. Zonder AI blijft het bij de meting.',
   'Night analysis':
     'Nachtanalyse',
   'At night Tuttiphon works through everything still open with no time limit – first the measurement, then the AI. Ends at the latest at the end of the time window and before the daily refresh. New music arriving during this time is processed afterwards. The nightly Deezer refresh and the weekly cover search also run in this window.':
-    '’s Nachts werkt Tuttiphon alles af wat nog openstaat, zonder tijdslimiet – eerst de meting, dan de AI. Stopt uiterlijk aan het einde van het tijdvenster en voor de dagelijkse verversing. Nieuwe muziek die in die tijd binnenkomt, wordt daarna verwerkt. De nachtelijke Deezer-verversing en de wekelijkse coverzoektocht lopen ook in dit tijdvenster.',
+    '’s Nachts werkt Tuttiphon alles af wat nog openstaat, zonder tijdslimiet – eerst de meting, dan de AI. Stopt uiterlijk aan het einde van het tijdvenster en voor de dagelijkse verversing. Nieuwe muziek die in die tijd binnenkomt, wordt daarna verwerkt. De nachtelijke Deezer-verversing en de wekelijkse coverzoektocht vinden ook in dit tijdvenster plaats.',
   'Time window':
     'Tijdvenster',
   'Night analysis from':
@@ -134,6 +134,8 @@ export default {
     'Sleutel ingevoerd',
   'No key yet':
     'Nog geen sleutel',
+  '{n} band loaded':
+    '{n} band geladen',
   '{n} bands loaded':
     '{n} bands geladen',
   ' · last run {when}':
@@ -180,6 +182,8 @@ export default {
     'Automatisch vanaf',
   'Only very confident matches are classified directly; the rest stays a suggestion.':
     'Alleen heel zekere treffers worden direct ingedeeld; de rest blijft een voorstel.',
+  '{n} song · {why}':
+    '{n} nummer · {why}',
   '{n} songs · {why}':
     '{n} nummers · {why}',
   'add':
@@ -249,7 +253,7 @@ export default {
   'your Navidrome password':
     'je Navidrome-wachtwoord',
   'Your profiles':
-    'Jullie profielen',
+    'Jouw profielen',
   'Playlists visible to everyone':
     'Playlists zichtbaar voor iedereen',
   'Playlists only for you':
@@ -343,7 +347,7 @@ export default {
   'Retry recent misses too':
     'Ook recente missers opnieuw proberen',
   '“Search all missing now” runs without a time limit and can be stopped at any time. For the lyrics to appear in Navidrome, a scan is needed afterwards. With “Update everything” this happens automatically.':
-    '“Nu alle ontbrekende zoeken” loopt zonder tijdslimiet en kan altijd worden gestopt. Om de songteksten in Navidrome te laten verschijnen, is daarna een scan nodig. Met “Alles bijwerken” gebeurt dat automatisch.',
+    '“Nu alle ontbrekende zoeken” draait zonder tijdslimiet en kan altijd worden gestopt. Om de songteksten in Navidrome te laten verschijnen, is daarna een scan nodig. Met “Alles bijwerken” gebeurt dat automatisch.',
   '{band}: {songs} blocked again':
     '{band}: {songs} weer geblokkeerd',
   '{band}: {songs} allowed':
@@ -353,7 +357,7 @@ export default {
   'Lyrics search & kid-safe mode':
     'Zoeken in songteksten & kindveilige modus',
   'Tuttiphon reads in all lyrics. This lets the search find songs by a line from the lyrics, and kid-safe mode detects explicit lyrics. You turn on kid-safe mode per person in their profile.':
-    'Tuttiphon leest alle songteksten in. Zo vindt de zoekfunctie nummers aan een regel uit de tekst, en herkent de kindveilige modus grove teksten. De kindveilige modus schakel je per persoon in het profiel in.',
+    'Tuttiphon leest alle songteksten in. Zo vindt de zoekfunctie nummers aan de hand van een regel uit de tekst, en herkent de kindveilige modus grove teksten. De kindveilige modus schakel je per persoon in het profiel in.',
   'The status could not be loaded.':
     'De status kon niet worden geladen.',
   'Lyrics read in':
@@ -404,6 +408,8 @@ export default {
     'toegestaan',
   'allow':
     'toestaan',
+  'Show {n} more band':
+    'Nog {n} band tonen',
   'Show {n} more bands':
     'Nog {n} bands tonen',
   'The levels must go up: ★ < ★★ < …':
@@ -646,8 +652,8 @@ export default {
     'Staat er al een lijst, zet dan “tuttiphon,” ervoor – zonder eigen lijst zijn dit de standaardwaarden van Navidrome. De regel in docker-compose wint van navidrome.toml. Start Navidrome daarna opnieuw; waar Tuttiphon geen antwoord heeft, vraagt Navidrome de volgende.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'Schakel in Navidrome onder <b>Settings → Plugins</b> “Tuttiphon” in, voer het adres en de sleutel in en geef het vrij voor <b>alle gebruikers</b> (voor de afspeelbeurten). Het liefst het adres in het thuisnetwerk, bijv. <code>http://&lt;NAS&gt;:8765</code> – geen https-adres via een reverse proxy, die Navidrome kan weigeren. Deze browser bereikt Tuttiphon op <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'Schakel in Symfonium <b>“Use similar tracks for Radio Mix”</b> in voor de Navidrome-server (Settings → Media providers → de server).',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'Schakel in Symfonium voor de Navidrome-server <b>“Use similar tracks for Radio Mix”</b> in (“Manage media providers” → de server) en kies in de speler <b>“Sonic Analysis”</b> voor de slimme wachtrij.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
     'Navidrome zegt niet wie er vraagt. Speelt het nummer op precies één account – of speelt er maar één account –, dan geldt het antwoord voor die persoon: zonder diens “Liever niet”, zonder wat die net heeft gehoord of 1 ster heeft gegeven, wat die vaak overslaat komt later, en na twee nummers van een band komen eerst andere bands. Anders voor het gezin. Kindermuziek alleen bij kinderliedjes, en zonder nummers met grove teksten zodra een profiel de kindveilige modus heeft of een kinderprofiel is.',
   'Create a new key?':
@@ -672,4 +678,10 @@ export default {
     '{when} · voor {name}',
   '{when} · for the family':
     '{when} · voor het gezin',
+  '{when} · probably for {name}':
+    '{when} · waarschijnlijk voor {name}',
+  'Last answer with similar songs':
+    'Laatste antwoord met vergelijkbare nummers',
+  'Copy {what}':
+    '{what} kopiëren',
 }

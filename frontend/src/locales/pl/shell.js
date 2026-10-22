@@ -1,4 +1,4 @@
-// Same keys as ../de/shell.js (tools/translate.py)
+// Same keys as ../de/shell.js
 export default {
   'First a profile':
     'Najpierw profil',
@@ -46,8 +46,8 @@ export default {
     'Jaka muzyka, jaki nastrój i na koniec ostatnie szlify. Na górze widzisz, gdzie jesteś.',
   'For whom?':
     'Dla kogo?',
-  'The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.':
-    'Osoba decyduje, na które konto Navidrome trafi playlista i czyje gwiazdki się liczą. Potem wybierasz świat muzyczny.',
+  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
+    'Osoba decyduje, na które konto Navidrome trafia playlista – liczą się gwiazdki tego konta. Potem wybierasz świat muzyczny.',
   'Choose music':
     'Wybierz muzykę',
   'Tap one or more music worlds. “All” takes the whole library.':
@@ -120,8 +120,8 @@ export default {
     'Każdy loguje się własnym kontem Navidrome. Tutaj wybierasz dla każdego konta: administrator, użytkownik albo brak dostępu.',
   'People':
     'Osoby',
-  'One person per account: suggestions and mixes are made for them with their favorites and dislikes.':
-    'Jedna osoba na konto: propozycje i mixy powstają dla niej na podstawie jej ulubionych i nielubianych.',
+  'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
+    'Jedna osoba na konto: dla niej powstają propozycje i mixy z jej ulubionymi i bez tego, czego nie lubi.',
   'Make suggestions better':
     'Lepsze propozycje',
   'Open my profile':
@@ -129,7 +129,7 @@ export default {
   'Add what was recognized with “+”':
     'Dodaj rozpoznane przez „+”',
   'Add favorites and dislikes':
-    'Dodaj ulubione i nielubiane',
+    'Dodaj ulubione i wpisy w „Nie lubię”',
   'profile preferences favorites favorite bands favorite worlds recommendations taste listening':
     'profil preferencje ulubione ulubione zespoły ulubione światy rekomendacje gust słuchanie',
   'From listening':
@@ -297,7 +297,7 @@ export default {
   'Who plays what: kids’ rock, medieval, … Tuttiphon recognizes typical bands by itself.':
     'Kto gra co: rock dla dzieci, średniowiecze, … Tuttiphon sam rozpoznaje typowe zespoły.',
   'Who the playlists are for: Navidrome account, favorite worlds, dislikes. On the phone under “More”.':
-    'Dla kogo są playlisty: konto Navidrome, ulubione światy, nielubiane. Na telefonie w „Więcej”.',
+    'Dla kogo są playlisty: konto Navidrome, ulubione światy, „Nie lubię”. Na telefonie w „Więcej”.',
   'Statistics & recap':
     'Statystyki i podsumowanie',
   'Most played bands, “Played this week” and your yearly recap. On the phone under “More”.':
@@ -335,7 +335,7 @@ export default {
   'My profile':
     'Mój profil',
   'What Tuttiphon has recognized from your listening, your favorites and dislikes. Your suggestions come from that.':
-    'Co Tuttiphon rozpoznał z twojego słuchania, twoje ulubione i nielubiane. Z tego biorą się twoje propozycje.',
+    'Co Tuttiphon rozpoznał z twojego słuchania, twoje ulubione i „Nie lubię”. Z tego biorą się twoje propozycje.',
   'Find bands, songs, playlists and moods – “calm children’s songs” turns right into a mix. On the PC also with the / key.':
     'Znajdź zespoły, piosenki, playlisty i nastroje – „spokojne piosenki dla dzieci” od razu staje się mixem. Na komputerze także klawiszem /.',
   'Tour':
@@ -422,8 +422,7 @@ export default {
     'Uporządkowane teksty: {n}',
   '{n} playlist written, {removed} removed':
     'Zapisano {n} playlistę, usunięto: {removed}',
-  '{n} playlists written, {removed} removed':
-    'Zapisane playlisty: {n}, usunięte: {removed}',
+  '{n} playlists written, {removed} removed': { few: 'Zapisano {n} playlisty, usunięto: {removed}', many: 'Zapisano {n} playlist, usunięto: {removed}' },
   '{n} playlist written':
     'Zapisano {n} playlistę',
   '{n} playlists written': { few: 'Zapisano {n} playlisty', many: 'Zapisano {n} playlist' },
@@ -441,8 +440,7 @@ export default {
     'Przeliczono gwiazdki, zmienione: {n}',
   'Deezer: {found} found, {n} star set':
     'Deezer: znaleziono {found}, ustawiono {n} gwiazdkę',
-  'Deezer: {found} found, {n} stars set':
-    'Deezer: znaleziono {found}, ustawione gwiazdki: {n}',
+  'Deezer: {found} found, {n} stars set': { few: 'Deezer: znaleziono {found}, ustawiono {n} gwiazdki', many: 'Deezer: znaleziono {found}, ustawiono {n} gwiazdek' },
   'no changes':
     'bez zmian',
   'Failed – tap to see the log':
@@ -532,8 +530,9 @@ export default {
     'W tekstach',
   'Bands, songs, mood, lyric line …':
     'Zespoły, piosenki, nastrój, wers tekstu …',
-  'Mix · {n} matching songs, new every week':
-    'Mix · pasujące piosenki: {n}, nowy co tydzień',
+  'Mix · {n} matching song, new every week':
+    'Mix · {n} pasująca piosenka, nowy co tydzień',
+  'Mix · {n} matching songs, new every week': { few: 'Mix · {n} pasujące piosenki, nowy co tydzień', many: 'Mix · {n} pasujących piosenek, nowy co tydzień' },
   '{songs} · create as mix':
     '{songs} · utwórz jako mix',
   'Instruments':
@@ -543,7 +542,7 @@ export default {
   '“{line}”':
     '„{line}”',
   'Nothing found – try a band, a song or a mood like “calm”.':
-    'Nic nie znaleziono – spróbuj zespołu, piosenki albo nastroju, np. „spokojne”.',
+    'Nic nie znaleziono – wpisz zespół, piosenkę albo nastrój, np. „spokojne”.',
   'Search results':
     'Wyniki wyszukiwania',
   'Navidrome unreachable':

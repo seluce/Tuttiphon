@@ -3,7 +3,7 @@ export default {
   'General':
     'Algemeen',
   'Theme, install as app':
-    'Thema, installeren als app',
+    'Kleurenschema, installeren als app',
   'My account':
     'Mijn account',
   'Sign-in, password, tour':
@@ -67,7 +67,7 @@ export default {
   'Appearance':
     'Weergave',
   'Theme':
-    'Thema',
+    'Kleurenschema',
   '“System” follows the setting of your phone or computer.':
     '“Systeem” volgt de instelling van je telefoon of computer.',
   'System':
@@ -307,9 +307,9 @@ export default {
   'Set Deezer stars':
     'Deezer-sterren zetten',
   'Runs as long as Tuttiphon is running – ideally in the Docker container. Freshly copied files get two minutes of rest before they are processed.':
-    'Loopt zolang Tuttiphon draait – het liefst in de Docker-container. Vers gekopieerde bestanden krijgen twee minuten rust voordat ze worden verwerkt.',
+    'Werkt zolang Tuttiphon draait – het liefst in de Docker-container. Vers gekopieerde bestanden krijgen twee minuten rust voordat ze worden verwerkt.',
   'These steps run one after another when you tap “Update everything” on the home page, and during the daily refresh with “Everything”.':
-    'Deze stappen lopen na elkaar als je op de startpagina op “Alles bijwerken” tikt, en bij de dagelijkse verversing met “Alles”.',
+    'Deze stappen worden na elkaar uitgevoerd als je op de startpagina op “Alles bijwerken” tikt, en bij de dagelijkse verversing met “Alles”.',
   'Daily refresh':
     'Dagelijkse verversing',
   'What happens every day':
@@ -319,7 +319,7 @@ export default {
   'Time':
     'Tijd',
   'Runs as long as Tuttiphon is running, on the PC or in the Docker container on the NAS. Anything missed is caught up at the next start.':
-    'Loopt zolang Tuttiphon draait, op de pc of in de Docker-container op de NAS. Wat is gemist, wordt bij de volgende start ingehaald.',
+    'Werkt zolang Tuttiphon draait, op de pc of in de Docker-container op de NAS. Wat is gemist, wordt bij de volgende start ingehaald.',
   'Last run: {date}.':
     'Laatste run: {date}.',
   'Has never run so far.':
@@ -437,7 +437,9 @@ export default {
   'The more of a song Tuttiphon hears, the more reliably it recognizes tempo and mood – especially with songs that start quiet and end loud. In return, the first pass takes longer.':
     'Hoe meer Tuttiphon van een nummer hoort, hoe betrouwbaarder het tempo en stemming herkent – vooral bij nummers die zacht beginnen en hard eindigen. Daar staat tegenover dat de eerste ronde langer duurt.',
   '“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.':
-    '“Tempo klopt”: hoe vaak het tempo overeenkomt met het niveau “Diep”. De tijden zijn ruwe schattingen; op de NAS duurt het afhankelijk van de processor flink langer. Loopt op de achtergrond met een tijdslimiet per run en kan altijd worden gestopt.',
+    '“Tempo klopt”: hoe vaak het tempo overeenkomt met het niveau “Diep”. De tijden zijn ruwe schattingen; op de NAS duurt het afhankelijk van de processor flink langer. Draait op de achtergrond met een tijdslimiet per run en kan altijd worden gestopt.',
+  '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.':
+    '{n} nummer is tot nu toe minder aandachtig beluisterd en wordt beetje bij beetje opnieuw gemeten, nieuwe nummers eerst.',
   '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.':
     '{n} nummers zijn tot nu toe minder aandachtig beluisterd en worden beetje bij beetje opnieuw gemeten, nieuwe nummers eerst.',
   'testing …':
@@ -472,6 +474,8 @@ export default {
     'Uitgeschakeld voor dit apparaat',
   'Turn off':
     'Uitschakelen',
+  '{n} device is registered.':
+    'Er is {n} apparaat geregistreerd.',
   '{n} devices are registered.':
     'Er zijn {n} apparaten geregistreerd.',
   'Turned on for this device':

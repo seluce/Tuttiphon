@@ -11,7 +11,7 @@
   import { toast } from '../../lib/overlay.svelte.js'
   import { go } from '../../lib/router.svelte.js'
   import { fmt, plural, relTime, uid, today } from '../../lib/format.js'
-  import { t, locale } from '../../lib/i18n.svelte.js'
+  import { t, tn, locale } from '../../lib/i18n.svelte.js'
   import { compact } from './util.js'
 
   let { d, person } = $props()
@@ -45,9 +45,9 @@
     <div class="kpi">
       <div class="l">{t('Plays')}</div>
       <div class="v text-[3rem] leading-[1.05]">{compact(tot.plays)}</div>
-      <div class="s">{t('from {n} different songs', { n: fmt(tot.songsPlayed) })}</div>
+      <div class="s">{tn(tot.songsPlayed, 'from {n} different song', 'from {n} different songs')}</div>
     </div>
-    <div class="kpi"><div class="l">{t('Listening time')}</div><div class="v">{fmt(Math.round(tot.hours))} h</div><div class="s">{t('≈ {n} days non-stop', { n: fmt(Math.round(tot.hours / 24)) })}</div></div>
+    <div class="kpi"><div class="l">{t('Listening time')}</div><div class="v">{fmt(Math.round(tot.hours))} h</div><div class="s">{tn(Math.round(tot.hours / 24), '≈ {n} day non-stop', '≈ {n} days non-stop')}</div></div>
     <div class="kpi"><div class="l">{t('Bands played')}</div><div class="v">{fmt(tot.artists)}</div></div>
     <div class="kpi"><div class="l">{t('Favorites')}</div><div class="v">{fmt(tot.loved)}</div><div class="s">{t('marked with ♥')}</div></div>
     <div class="kpi">

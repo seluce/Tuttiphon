@@ -14,7 +14,7 @@
   import { openEditor } from '../../lib/editor.js'
   import { plEmoji } from '../../lib/playlist.js'
   import { fmt, plural, uid, today, clone } from '../../lib/format.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { t, tn } from '../../lib/i18n.svelte.js'
 
   let { s, onaccepted } = $props()
 
@@ -47,7 +47,7 @@
   function details(p, mix) {
     const parts = [t('for {name}', { name: findPerson(p.person)?.name || '?' })]
     if (p.hits) parts.push(t('hits only'))
-    if (p.review) parts.push(t('{n} songs, changes on the first of the month', { n: fmt(s.count) }))
+    if (p.review) parts.push(tn(s.count, '{n} song, changes on the first of the month', '{n} songs, changes on the first of the month'))
     else if (p.album) parts.push(t('one whole album a week, from {n} never played', { n: fmt(s.count) }))
     else if (mix) {
       const v = { when: mixWording(p)[1], size: p.mix?.minutes ? t('{n} minutes', { n: p.mix.minutes }) : p.mix?.size || 50, n: fmt(s.count), max: p.mix?.perArtist || 3 }

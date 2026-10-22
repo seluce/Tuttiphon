@@ -120,8 +120,8 @@ export default {
     'Playlists anciennes & faites à la main',
   'The easiest way is the assistant under <a class="link" href="#/neu">New playlist</a>. It asks step by step – “For whom?” only when there are several people:':
     'Le plus simple est l’assistant sous <a class="link" href="#/neu">Nouvelle playlist</a>. Il demande étape par étape – « Pour qui ? » seulement s’il y a plusieurs personnes :',
-  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to and whose stars count.':
-    '<b>Pour qui ?</b> – la personne détermine dans quel compte Navidrome va la playlist et quelles étoiles comptent.',
+  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to; the stars of that account count.':
+    '<b>Pour qui ?</b> – la personne détermine dans quel compte Navidrome arrive la playlist ; ce sont les étoiles de ce compte qui comptent.',
   '<b>Music world</b> – who’s playing: e.g. “Kids’ rock”, “Medieval” or several together. “All” takes the whole library.':
     '<b>Univers musical</b> – qui joue : par ex. « Rock pour enfants », « Médiéval » ou plusieurs ensemble. « Tous » prend toute la bibliothèque.',
   '<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.':
@@ -249,7 +249,7 @@ export default {
   'As a “real” app with its own window, this only works via https, e.g. with a reverse proxy on the NAS. Via the normal http address you get a shortcut that works just as well. More under <a class="link" href="#/einstellungen/allgemein">Settings → General</a>.':
     'En « vraie » app avec sa propre fenêtre, cela ne fonctionne qu’en https, par ex. avec un reverse proxy sur le NAS. Via l’adresse http normale, vous obtenez un raccourci qui fonctionne tout aussi bien. Plus d’infos sous <a class="link" href="#/einstellungen/allgemein">Paramètres → Général</a>.',
   'Playlists that were already in the <code>00_SmartPlaylists</code> folder don’t disappear. The home page offers to <b>take them over</b>: then Tuttiphon keeps maintaining them, their rules stay unchanged, and the original file is backed up first.':
-    'Les playlists qui se trouvaient déjà dans le dossier <code>00_SmartPlaylists</code> ne disparaissent pas. La page d’accueil propose de les <b>reprendre</b> : Tuttiphon continue alors de les entretenir, leurs règles restent inchangées, et le fichier d’origine est d’abord sauvegardé.',
+    'Les playlists qui se trouvaient déjà dans le dossier <code>00_SmartPlaylists</code> ne disparaissent pas. La page d’accueil propose de les <b>prendre en charge</b> : Tuttiphon continue alors de les entretenir, leurs règles restent inchangées, et le fichier d’origine est d’abord sauvegardé.',
   'Regular playlists you create by hand in Navidrome or Symfonium are never touched by the tool.':
     'Les playlists ordinaires que vous créez à la main dans Navidrome ou Symfonium ne sont jamais touchées par l’outil.',
   'At the first start you set the password of the <b>local administrator</b> in the browser – with the setup code from the container log. It turns on sign-in; you change it later under Settings → Users & permissions.':
@@ -264,8 +264,8 @@ export default {
     'Placez le fichier – non décompressé et nommé exactement <b>tuttiphon.ndp</b> – dans le dossier des plugins de Navidrome, mettez <code>tuttiphon</code> en tête de la liste d’agents de Navidrome (navidrome.toml : <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose : <code>ND_AGENTS=…</code>) et redémarrez Navidrome.',
   'In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.':
     'Dans Navidrome, sous « Settings → Plugins », activez « Tuttiphon », saisissez l’adresse de Tuttiphon dans le réseau domestique et la clé, et autorisez-le pour tous les utilisateurs.',
-  'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Settings → Media providers).':
-    'Dans Symfonium, activez « Use similar tracks for Radio Mix » pour le serveur Navidrome (« Settings → Media providers »).',
+  'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.':
+    'Dans Symfonium, activez « Use similar tracks for Radio Mix » pour le serveur Navidrome (« Manage media providers » → le serveur) et choisissez « Sonic Analysis » pour la file d’attente intelligente dans le lecteur.',
   'The home page shows at a glance what’s going on: the big <b>“Update everything”</b> button, your mixes, <b>“To review”</b> with what needs you – such as new bands or missing passwords – and what was played and added. You arrange the sections under <a class="link" href="#/einstellungen/start">Settings → Home page</a>.':
     'La page d’accueil montre d’un coup d’œil ce qui se passe : le grand bouton <b>« Tout mettre à jour »</b>, vos mix, <b>« À vérifier »</b> avec ce qui requiert votre attention – comme de nouveaux groupes ou des mots de passe manquants – et ce qui a été écouté et ajouté. Vous organisez les sections sous <a class="link" href="#/einstellungen/start">Paramètres → Page d’accueil</a>.',
   '<b>“Update everything”</b> runs all steps in order – convert, lyrics, covers, sound analysis, playlists, scan, Deezer stars. Which steps take part you set under <a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>; the log is under <a class="link" href="#/verlauf">History</a>.':
@@ -301,9 +301,9 @@ export default {
   '<b>By sound:</b> “for falling asleep”, “without vocals” or “calm piano music”.':
     '<b>D’après le son :</b> « pour s’endormir », « sans voix » ou « piano calme ».',
   '<b>In the lyrics:</b> one line is enough, such as “hands up in the air”.':
-    '<b>Dans les paroles :</b> une ligne suffit, comme « les mains en l’air ».',
+    '<b>Dans les paroles :</b> un vers suffit, comme « les mains en l’air ».',
   'A music world groups bands, such as “Medieval” with Saltatio Mortis and In Extremo. <b>Music worlds appear on their own:</b> from genres, Last.fm, AI and language Tuttiphon recognizes what your library offers – and puts new bands into their world.':
-    'Un univers musical regroupe des groupes, comme « Médiéval » avec Saltatio Mortis et In Extremo. <b>Les univers musicaux apparaissent tout seuls :</b> à partir des genres, de Last.fm, de l’IA et de la langue, Tuttiphon reconnaît ce qu’offre votre bibliothèque – et place les nouveaux groupes dans leur univers.',
+    'Un univers musical rassemble des groupes, comme « Médiéval » avec Saltatio Mortis et In Extremo. <b>Les univers musicaux apparaissent tout seuls :</b> à partir des genres, de Last.fm, de l’IA et de la langue, Tuttiphon reconnaît ce qu’offre votre bibliothèque – et place les nouveaux groupes dans leur univers.',
   'Worlds Tuttiphon created carry the {auto} badge; rename or delete them – a deleted one won’t come back.':
     'Les univers créés par Tuttiphon portent le badge {auto} ; renommez-les ou supprimez-les – un univers supprimé ne revient pas.',
   '{new} creates a world of your own; {rebuild} puts a changed world together from its scene again.':
@@ -341,7 +341,7 @@ export default {
   '<b>Fast:</b> each run searches a few minutes at most, new songs first; the rest follows.':
     '<b>Rapide :</b> chaque exécution cherche quelques minutes au plus, les nouveaux titres d’abord ; le reste suit.',
   '<b>Lyrics search & kid-safe mode:</b> all lyrics go into a search index – so the search finds songs by a line, and kid-safe mode detects explicit lyrics.':
-    '<b>Recherche dans les paroles & mode enfants :</b> toutes les paroles vont dans un index de recherche – ainsi, la recherche trouve les titres par une ligne, et le mode enfants détecte les paroles explicites.',
+    '<b>Recherche dans les paroles & mode enfants :</b> toutes les paroles vont dans un index de recherche – ainsi, la recherche trouve les titres à partir d’un vers, et le mode enfants détecte les paroles explicites.',
   'Tuttiphon gets to know your music – locally and free of charge. Set it up under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
     'Tuttiphon apprend à connaître votre musique – en local et gratuitement. Configurez-le sous <a class="link" href="#/einstellungen/intel">Paramètres → Intelligence</a>.',
   '<b>Sound analysis:</b> measures tempo, energy and mood of every song. This gives sound vibes such as “Falling asleep” or “Danceable” – as mixes, because Navidrome doesn’t know the sound.':
@@ -358,16 +358,16 @@ export default {
     '<b>Même enregistrement en double :</b> une empreinte audio le trouve, même dans un autre format ; le résultat se trouve sous <a class="link" href="#/einstellungen/bibliothek">Paramètres → Vérifier la bibliothèque</a>.',
   '<b>Radio and gaps:</b> “Start radio” in the band window plays the band with similar bands; Discover shows similar bands you are still missing.':
     '<b>Radio et manques :</b> « Lancer la radio » dans la fenêtre du groupe joue le groupe avec des groupes similaires ; Découvrir montre les groupes similaires qui vous manquent encore.',
-  'The analysis works through what is open at night (1–5 a.m.). The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
-    'L’analyse traite la nuit ce qui reste à faire (1 h – 5 h). Le premier passage de l’IA prend plusieurs nuits sur un NAS ; ensuite, seuls les nouveaux titres s’ajoutent. Last.fm nécessite une clé gratuite. Les détails se trouvent dans le <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">manuel</a>.',
+  'The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
+    'L’analyse traite la nuit ce qui reste à faire. Sur un NAS, le premier passage de l’IA prend plusieurs nuits ; ensuite, seuls les nouveaux titres s’ajoutent. Last.fm nécessite une clé gratuite. Les détails se trouvent dans le <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">manuel</a>.',
   'If you like, Tuttiphon watches the music folder (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation → Folder watch</a>). New music – e.g. from Lidarr – is then processed on its own: converted, lyrics, scan, sound, Deezer stars.':
     'Si vous le souhaitez, Tuttiphon surveille le dossier de musique (<a class="link" href="#/einstellungen/ablaeufe">Paramètres → Automatisation → Surveillance des dossiers</a>). La nouvelle musique – par ex. venant de Lidarr – est alors traitée toute seule : conversion, paroles, scan, son, étoiles Deezer.',
-  'It looks every 5–60 minutes and gives freshly copied files two minutes of rest.':
-    'Il vérifie toutes les 5 à 60 minutes et laisse deux minutes de repos aux fichiers fraîchement copiés.',
+  'It looks every 5–60 minutes and waits until freshly copied files are complete.':
+    'Il vérifie toutes les 5 à 60 minutes et attend que les fichiers fraîchement copiés soient complets.',
   'Under <a class="link" href="#/einstellungen/speicher">Settings → Storage locations</a> you see where music, playlists and the archive are; in Docker you set them in docker-compose.yaml.':
     'Sous <a class="link" href="#/einstellungen/speicher">Paramètres → Emplacements de stockage</a>, vous voyez où se trouvent la musique, les playlists et l’archive ; dans Docker, vous les définissez dans docker-compose.yaml.',
-  'The AI sound analysis needs about 850 MB of extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
-    'L’analyse sonore par IA a besoin d’environ 850 Mo de mémoire supplémentaire pendant qu’elle tourne ; vous réglez combien de cœurs de processeur elle peut utiliser sous <a class="link" href="#/einstellungen/intel">Paramètres → Intelligence</a>.',
+  'The AI sound analysis needs extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
+    'L’analyse sonore par IA a besoin de mémoire supplémentaire pendant qu’elle tourne ; le nombre de cœurs de processeur qu’elle peut utiliser se règle sous <a class="link" href="#/einstellungen/intel">Paramètres → Intelligence</a>.',
   'Tuttiphon converts new lossless files such as FLAC to <b>Opus</b> or <b>AAC</b> – sounds the same with about a fifth of the space. Opus suits Android, AAC iPhone and Mac.':
     'Tuttiphon convertit les nouveaux fichiers sans perte comme le FLAC en <b>Opus</b> ou en <b>AAC</b> – même son pour environ un cinquième de la place. Opus convient à Android, AAC à l’iPhone et au Mac.',
   'The original only goes to the archive once the new file has been checked; nothing there is ever overwritten.':
@@ -398,8 +398,8 @@ export default {
     'L’assistant de configuration parcourt étape par étape les réglages les plus importants. Sur une nouvelle installation, il s’ouvre tout seul ; plus tard, vous le lancez sous <a class="link" href="#/einstellungen/allgemein">Paramètres → Général</a>.',
   'Only the connection is saved right away, everything else with <b>“Finish”</b>; <b>“Skip setup”</b> leaves the rest as it is.':
     'Seule la connexion est enregistrée tout de suite, tout le reste avec <b>« Terminer »</b> ; <b>« Passer la configuration »</b> laisse le reste tel quel.',
-  'The <b>language of the server</b> applies to notifications, logs and the names Tuttiphon gives playlists and music worlds.':
-    'La <b>langue du serveur</b> s’applique aux notifications, aux journaux et aux noms que Tuttiphon donne aux playlists et aux univers musicaux.',
+  'The <b>language of the server</b> applies to logs, the administrators’ ntfy topic and the names Tuttiphon gives playlists and music worlds. Notifications on phones and in the browser follow the language of the device.':
+    'La <b>langue du serveur</b> s’applique aux journaux, au sujet ntfy des administrateurs et aux noms que Tuttiphon donne aux playlists et aux univers musicaux. Les notifications sur le téléphone et dans le navigateur suivent la langue de l’appareil.',
   'Every day Tuttiphon backs up everything that cannot be restored on its own – settings, playlists, credentials, Deezer, sound analysis and the listening history – as a ZIP file. Under <a class="link" href="#/einstellungen/sicherung">Settings → Backup</a> you back up right away, download backups and set how many are kept.':
     'Chaque jour, Tuttiphon sauvegarde tout ce qui ne peut pas se reconstituer tout seul – réglages, playlists, identifiants, Deezer, analyse sonore et historique d’écoute – dans un fichier ZIP. Sous <a class="link" href="#/einstellungen/sicherung">Paramètres → Sauvegarde</a>, vous sauvegardez tout de suite, téléchargez des sauvegardes et réglez combien sont conservées.',
   '<b>User</b> – own home page, playlists and profile; sees others’ playlists only if they are shared with everyone.':

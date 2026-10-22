@@ -626,27 +626,39 @@ has kid-safe mode on (`_view()`; without a shared person a stand-in without disl
 lead to children's songs, a rock song never to an audio play.
 
 **For the one listening** (`_who()`): the live plays (`app/listen.py`) tell who is playing what. `listen.listener()`
-looks at the day files of all accounts: the account that played the song asked about – for the artist radio a song of
-the band, for an album one of the album – in the last 15 minutes (`LISTENER_SONG`), if it is exactly one; if none did,
-the one account whose last event is at most 10 minutes old and not “stopped” (`LISTENER_ACTIVE`). Two accounts on the
-same song, or two playing at once and neither the song: unclear – the family's answer. The account must belong to
-exactly one person who is allowed (`listen.allowed()`) – if the shared person uses the account too (“Family” on a
-parent's account), the account's own person. Then, for similar songs, artist and album radio:
+looks at the day files of all accounts and gives the account and whether it is sure:
 
-- what may come is that person's “All” and dislikes (`_pool(…, pid)`; a child profile: its children's music too);
-- left out: what the account started, played or reported in the last 3 hours (`listen.heard()`, `HEARD_SECONDS`) and
-  songs it rated 1 star by hand (`feedback.manual_dislikes()` – from the account's own song list, loaded in the
-  background with `stats.songs_for()` and kept an hour, `_rated_one()`; the first answer goes without);
+- **sure:** the latest event of exactly one account is the song asked about (for the artist radio a song of the band,
+  for an album one of the album) and it is still on – “playing”, “starting” or “paused”; “stopped” and “expired”
+  (the player went quiet without saying so) are over;
+- **a guess:** otherwise the one account that played one of these songs in the last 15 minutes (`LISTENER_SONG`), or –
+  if none did – the one account whose last event is at most 10 minutes old and still on (`LISTENER_ACTIVE`).
+  Accounts whose plays are not kept (no person, blocked) count as playing too (`listen._active`, memory only), so
+  their question is never taken for someone else's;
+- **unclear** – the family's answer: two accounts on the same song, two playing at once and neither the song, or
+  two Navidrome accounts whose names give the same folder name.
+
+The account must belong to exactly one person who is allowed (`listen.allowed()`). If the shared person uses the
+account too (“Family” on a parent's account), the answer is for the account's own person, with the dislikes of both
+and without a child profile's music. Then, for similar songs, artist and album radio:
+
+- what may come is that person's “All” and dislikes (`_pool(…, who)`; a sure child profile: its children's music too);
+- left out: what the account started, played or reported in the last 3 hours (`listen.heard()`, `HEARD_SECONDS`) and,
+  when sure, songs it rated 1 star by hand (`feedback.manual_dislikes()` – from the account's own song list, so only
+  for accounts with a stored password; loaded in the background with `stats.songs_for()` and kept an hour,
+  `_rated_one()`; the first answer goes without);
 - songs it skips come further down: scores times `feedback.factors()` (with “Mixes that learn” on);
-- for similar songs also variety between bands (`_variety()`): Symfonium's smart queue asks about every new song and
-  takes the most similar – mostly of the same band. From the account's songs of the last hour in order
+- when sure, for similar songs also variety between bands (`_variety()`): Symfonium's smart queue asks about every new
+  song and takes the most similar – mostly of the same band. From the account's songs of the last hour in order
   (`listen.sequence()`, the song asked about at the end): after `RUN_MAX` = 2 songs of one band in a row its songs
   count only a fifth (`RUN_FACTOR`), so other bands come first; a band heard n times in the last hour counts
   `HOUR_FACTOR`^(n − 1) (0.85);
-- kid-safe stays as for the family – never loosened on a guess;
+- a guess is careful – it may be someone else asking: no 1-stars left out, no variety, never a child profile's music;
+- kid-safe stays as for the family – never loosened;
 - not remembered (the family's answers are).
 
-The settings card shows for whom the last song answer was (`status()["lastFor"]`).
+The settings card shows for whom the last answer with similar songs was, when, and whether it was a guess
+(`status()`: `lastFor`, `lastForAt`, `lastGuess`).
 
 | Question | How |
 |---|---|

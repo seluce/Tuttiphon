@@ -47,7 +47,7 @@ export default {
   'Your week':
     'La tua settimana',
   'For your personal listening stats, Tuttiphon needs your Navidrome password once – the same one as in Symfonium. It stays on your NAS.':
-    'Per le tue statistiche di ascolto personali, Tuttiphon ha bisogno una volta della tua password di Navidrome – la stessa di Symfonium. Resta sul vostro NAS.',
+    'Per le tue statistiche di ascolto personali, Tuttiphon ha bisogno una volta della tua password di Navidrome – la stessa di Symfonium. Resta sul NAS di casa.',
   'Turn on stats':
     'Attiva le statistiche',
   'Tuttiphon has been counting since {date} – as soon as you listen, this shows what you played most.':
@@ -87,7 +87,7 @@ export default {
   'Full recap →':
     'Riepilogo completo →',
   'Today for you':
-    'Oggi per voi',
+    'Oggi per la famiglia',
   'No mix yet':
     'Ancora nessun mix',
   'A mix puts itself together anew regularly – daily, weekly or monthly, with at most a few songs per band and never the same band twice in a row.':
@@ -103,9 +103,9 @@ export default {
   'Nothing has been played this week yet – or Symfonium is not reporting any plays.':
     'Questa settimana non è stato ancora ascoltato niente – oppure Symfonium non segnala ascolti.',
   'New in your library':
-    'Novità nella vostra libreria',
+    'Novità nella tua libreria',
   'Family playlists':
-    'Le vostre playlist',
+    'Playlist di famiglia',
   'No playlists yet':
     'Ancora nessuna playlist',
   'Create the first one with the assistant or have a look at the suggestions.':
@@ -115,7 +115,7 @@ export default {
   'History':
     'Cronologia',
   'Live log':
-    'Registro dal vivo',
+    'Registro in tempo reale',
   'Customize start page':
     'Personalizza la pagina iniziale',
   'Stopping …':
@@ -194,6 +194,8 @@ export default {
     'mostra altri {n}',
   'Library':
     'Libreria',
+  '{n} album still in MP3 – list':
+    '{n} album ancora in MP3 – elenco',
   '{n} albums still in MP3 – list':
     '{n} album ancora in MP3 – elenco',
   '{loved} favorites · {played} songs with plays':
@@ -219,7 +221,7 @@ export default {
   'My playlists':
     'Le mie playlist',
   'Everything Tuttiphon looks after for you. Navidrome reshuffles smart playlists on every request – paused and deleted ones are kept here.':
-    'Tutto ciò che Tuttiphon cura per voi. Navidrome rimescola le playlist intelligenti a ogni richiesta – quelle in pausa ed eliminate restano conservate qui.',
+    'Tutto ciò che Tuttiphon cura per la famiglia. Navidrome rimescola le playlist intelligenti a ogni richiesta – quelle in pausa ed eliminate restano conservate qui.',
   'Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium. Further down: what others share with you.':
     'Le tue playlist – Tuttiphon le tiene aggiornate e puoi ascoltarle in Symfonium. Più in basso: ciò che altri condividono con te.',
   'All':
@@ -251,9 +253,9 @@ export default {
   'Handmade – not in the tool yet':
     'Fatte a mano – non ancora nello strumento',
   'Your own .nsp files. The tool leaves them alone until you take them over – then they stay the same playlist in Navidrome.':
-    'I vostri file .nsp. Lo strumento non li tocca finché non li adotti – poi restano la stessa playlist in Navidrome.',
+    'I tuoi file .nsp. Lo strumento non li tocca finché non li prendi in gestione – poi restano la stessa playlist in Navidrome.',
   'Take over …':
-    'Adotta …',
+    'Prendi in gestione …',
   'Trash · {n}':
     'Cestino · {n}',
   'After 30 days in the trash, a playlist is deleted permanently on its own.':
@@ -287,7 +289,7 @@ export default {
   'shuffle again':
     'mescola di nuovo',
   'This is how a mix could look – Navidrome reshuffles on every request.':
-    'Ecco come potrebbe essere una selezione – Navidrome rimescola a ogni richiesta.',
+    'Ecco come potrebbe essere un mix – Navidrome rimescola a ogni richiesta.',
   'Who’s in it?':
     'Chi c\'è dentro?',
   'How it is made':
@@ -299,7 +301,7 @@ export default {
   'Recap · changes on the first of the month':
     'Riepilogo · cambia il primo del mese',
   'Taken-over smart playlist':
-    'Playlist intelligente adottata',
+    'Playlist intelligente presa in gestione',
   'Smart playlist':
     'Playlist intelligente',
   'private':
@@ -314,6 +316,8 @@ export default {
     'di nuovo in Symfonium dal {date}',
   'from {n} matching':
     'da {n} adatti',
+  '{n} matching song':
+    '{n} brano adatto',
   '{n} matching songs':
     '{n} brani adatti',
   'up to {n} per request':
@@ -322,6 +326,8 @@ export default {
     'in Navidrome: {owner}',
   'Rather few songs – maybe loosen the selection or add more music worlds.':
     'Brani piuttosto pochi – forse allarga la selezione o aggiungi altri mondi musicali.',
+  'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.':
+    'Il mix è più corto del previsto perché è ammesso al massimo {n} brano per band – più band da altri mondi musicali lo allungano.',
   'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.':
     'Il mix è più corto del previsto perché sono ammessi al massimo {n} brani per band – più band da altri mondi musicali lo allungano.',
   'This playlist belongs to {name} and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.':
@@ -337,7 +343,7 @@ export default {
   'Pause playlist':
     'Metti in pausa',
   'Keep this mix':
-    'Tieni questa selezione',
+    'Tieni questo mix',
   'Save as fixed playlist':
     'Salva come playlist fissa',
   'Duplicate':
@@ -352,6 +358,8 @@ export default {
     'Daily Mix · nuovo ogni giorno',
   'Today in the mix':
     'Oggi nel mix',
+  '{n} song today':
+    '{n} brano oggi',
   '{n} songs today':
     '{n} brani oggi',
   'These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -360,6 +368,8 @@ export default {
     'Weekly Mix · nuovo ogni settimana',
   'This week in the mix':
     'Questa settimana nel mix',
+  '{n} song this week':
+    '{n} brano questa settimana',
   '{n} songs this week':
     '{n} brani questa settimana',
   'These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -368,6 +378,8 @@ export default {
     'Monthly Mix · nuovo ogni mese',
   'This month in the mix':
     'Questo mese nel mix',
+  '{n} song this month':
+    '{n} brano questo mese',
   '{n} songs this month':
     '{n} brani questo mese',
   'These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -401,9 +413,11 @@ export default {
   '{name} (copy)':
     '{name} (copia)',
   'A selection of {n} songs is saved as the fixed playlist “{name}” in Navidrome. It won’t change after that – handy when you like a mix.':
-    'Una selezione di {n} brani viene salvata in Navidrome come playlist fissa «{name}». Dopo non cambia più – comodo quando un mix vi piace.',
+    'Una selezione di {n} brani viene salvata in Navidrome come playlist fissa «{name}». Dopo non cambia più – comodo quando un mix ti piace.',
   'A selection of {n} songs is saved as the fixed playlist “{name}” in Navidrome. It won’t change after that.':
     'Una selezione di {n} brani viene salvata in Navidrome come playlist fissa «{name}». Dopo non cambia più.',
+  '“{name}” saved with {n} song ✓':
+    '«{name}» salvata con {n} brano ✓',
   '“{name}” saved with {n} songs ✓':
     '«{name}» salvata con {n} brani ✓',
   'Reshuffled – coming to Navidrome shortly':
@@ -415,7 +429,7 @@ export default {
   'Mix – {when}':
     'Mix – {when}',
   'Take over unchanged':
-    'Adotta senza modifiche',
+    'Prendi in gestione senza modifiche',
   '{n} songs · the rules stay exactly as they are. You can change name, person, count and order afterwards.':
     '{n} brani · le regole restano esattamente come sono. Nome, persona, numero e ordine puoi cambiarli dopo.',
   'Switch to the builder: {what}':
@@ -425,11 +439,11 @@ export default {
   'The playlist stays the same in Navidrome, with the same file and the same ID – Symfonium won’t notice. The original is backed up before it is overwritten for the first time.':
     'La playlist resta la stessa in Navidrome, con lo stesso file e lo stesso ID – Symfonium non se ne accorge. L\'originale viene salvato prima di essere sovrascritto per la prima volta.',
   'Take over “{name}”':
-    'Adotta «{name}»',
+    'Prendi in gestione «{name}»',
   'Take over':
-    'Adotta',
+    'Prendi in gestione',
   '“{name}” taken over':
-    '«{name}» adottata',
+    '«{name}» presa in gestione',
   'Playlist':
     'Playlist',
   'own rules':
@@ -488,6 +502,8 @@ export default {
     'Un album intero, nell\'ordine dell\'album – lunedì prossimo ce n\'è uno nuovo. Fino ad allora l\'elenco resta uguale – comodo per l\'offline in Symfonium.',
   'one whole album a week, from {n} never played':
     'un album intero a settimana, tra {n} mai ascoltati',
+  'from {n} album never played':
+    'da {n} album mai ascoltato',
   'from {n} albums never played':
     'tra {n} album mai ascoltati',
   'Album of the week · new every Monday':

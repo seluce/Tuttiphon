@@ -30,14 +30,14 @@
 <Card title={t('Understand music')} icon="brain">
   <p class="muted small">{t('Tuttiphon listens to every song – completely locally, without a cloud and without costs. From that come sound vibes such as “Falling asleep”, mixes with smooth transitions and the classification of new bands. It works gently: mostly at night, during the day only a few minutes per run.')}</p>
   <Row label={t('Turn on sound analysis')} hint={t('Measures tempo, energy, danceability and timbre of every song.')}>
-    <Switch checked={an.enabled} onchange={(v) => (an.enabled = v)} />
+    <Switch label={t('Turn on sound analysis')} hidelabel checked={an.enabled} onchange={(v) => (an.enabled = v)} />
   </Row>
   {#if an.enabled}
     {#if intel === null}
       <div class="skel h-[44px]"></div>
     {:else if ml.available}
       <Row label={t('Add AI')} hint={t('Also recognizes mood, vocals or instrumental, instruments, themes, key and music style.')}>
-        <Switch checked={an.ml} onchange={(v) => (an.ml = v)} />
+        <Switch label={t('Add AI')} hidelabel checked={an.ml} onchange={(v) => (an.ml = v)} />
       </Row>
     {:else if intel}
       <!-- one note: the server's reason (Essentia or models missing) if there is one, otherwise the general one -->
@@ -47,13 +47,13 @@
     <Depth an={an} a={intel?.audio || {}} onchange={noop} />
   {/if}
   <Row label={t('Make audio fingerprints')} hint={t('Finds the same recording stored twice – also as another format, in another folder or on another album. About 3 KB per song.')}>
-    <Switch checked={an.fingerprints} onchange={(v) => (an.fingerprints = v)} />
+    <Switch label={t('Make audio fingerprints')} hidelabel checked={an.fingerprints} onchange={(v) => (an.fingerprints = v)} />
   </Row>
   {#if intel && fp.available === false}
     <div class="small warn-t">{t('fpcalc is {why} – it is included in the Docker image.', { why: fp.why || t('not installed') })}</div>
   {/if}
   <Row label={t('Night analysis')} hint={t('At night Tuttiphon works through whatever is still open, without a time limit. On a NAS the first pass of a large library takes several nights – after that only new songs are left. The nightly Deezer refresh and the weekly cover search also run in this window.')}>
-    <Switch checked={an.night.enabled} onchange={(v) => (an.night.enabled = v)} />
+    <Switch label={t('Night analysis')} hidelabel checked={an.night.enabled} onchange={(v) => (an.night.enabled = v)} />
   </Row>
   {#if an.night.enabled}
     <Row label={t('Time window')}>

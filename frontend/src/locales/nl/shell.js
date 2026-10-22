@@ -46,8 +46,8 @@ export default {
     'Welke muziek, welke stemming en tot slot de afwerking. Bovenaan zie je waar je bent.',
   'For whom?':
     'Voor wie?',
-  'The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.':
-    'De persoon bepaalt naar welk Navidrome-account de playlist gaat en wiens sterren meetellen. Daarna kies je de muziekwereld.',
+  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
+    'De persoon bepaalt in welk Navidrome-account de playlist terechtkomt – de sterren van dat account tellen mee. Daarna kies je de muziekwereld.',
   'Choose music':
     'Kies muziek',
   'Tap one or more music worlds. “All” takes the whole library.':
@@ -120,8 +120,8 @@ export default {
     'Iedereen logt in met een eigen Navidrome-account. Hier kies je per account: beheerder, gebruiker of geen toegang.',
   'People':
     'Personen',
-  'One person per account: suggestions and mixes are made for them with their favorites and dislikes.':
-    'Eén persoon per account: suggesties en mixen worden voor hen gemaakt met hun favorieten en “Liever niet”.',
+  'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
+    'Eén persoon per account: voor die persoon ontstaan suggesties en mixen met de eigen favorieten en zonder wat die liever niet hoort.',
   'Make suggestions better':
     'Suggesties verbeteren',
   'Open my profile':
@@ -351,7 +351,7 @@ export default {
   'Let’s go':
     'Aan de slag',
   'Show me':
-    'Laat zien',
+    'Laat maar zien',
   'Today for all of you':
     'Vandaag voor jullie',
   'Your mixes of the day, large with cover':
@@ -536,6 +536,8 @@ export default {
     'In de songtekst',
   'Bands, songs, mood, lyric line …':
     'Bands, nummers, stemming, tekstregel …',
+  'Mix · {n} matching song, new every week':
+    'Mix · {n} passend nummer, elke week nieuw',
   'Mix · {n} matching songs, new every week':
     'Mix · {n} passende nummers, elke week nieuw',
   '{songs} · create as mix':

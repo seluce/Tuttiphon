@@ -243,6 +243,8 @@ export default {
   'How closely to listen?': 'Wie genau anhören?',
   'The more of a song Tuttiphon hears, the more reliably it recognizes tempo and mood – especially with songs that start quiet and end loud. In return, the first pass takes longer.': 'Je mehr Tuttiphon von einem Song hört, desto sicherer erkennt es Tempo und Stimmung – besonders bei Liedern, die ruhig anfangen und laut enden. Dafür dauert der erste Durchgang länger.',
   '“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.': '„Tempo-Treffer“: wie oft das Tempo mit der Stufe „Tief“ übereinstimmt. Die Zeiten sind Richtwerte, auf dem NAS dauert es je nach Prozessor deutlich länger. Läuft im Hintergrund mit Zeitlimit pro Lauf und lässt sich jederzeit stoppen.',
+  '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.':
+    '{n} Song wurde bisher weniger genau angehört und wird nach und nach neu gemessen, neue Songs zuerst.',
   '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.': '{n} Songs wurden bisher weniger genau angehört und werden nach und nach neu gemessen, neue Songs zuerst.',
 
   // settings/PasswordForm.svelte
@@ -264,6 +266,8 @@ export default {
   'Send test': 'Test senden',
   'Turned off for this device': 'Auf diesem Gerät ausgeschaltet',
   'Turn off': 'Ausschalten',
+  '{n} device is registered.':
+    '{n} Gerät ist angemeldet.',
   '{n} devices are registered.': '{n} Geräte sind angemeldet.',
   'Turned on for this device': 'Auf diesem Gerät eingeschaltet',
   'Turn on for this device': 'Auf diesem Gerät einschalten',

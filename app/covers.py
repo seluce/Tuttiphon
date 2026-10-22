@@ -424,6 +424,15 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()[:16]
 
 
+def served_digest(native, navidrome_id, data):
+    """The checksum of the image as Navidrome serves it right after an upload – the same as `data` unless Navidrome
+    changes uploaded images; if it cannot be fetched, that of `data`."""
+    try:
+        return digest(native.playlist_image(navidrome_id))
+    except Exception:   # noqa: BLE001 – the uploaded data is the best guess then
+        return digest(data)
+
+
 def set_by_hand(native, cv, np):
     """Is the image in Navidrome no longer the one Tuttiphon uploaded? Navidrome names the file after the playlist
     (<id>_<name>.<type>), so an image of the same type set there by hand keeps the name – its content tells (Navidrome
@@ -463,6 +472,10 @@ def refresh_auto(cfg, lib, native, by_file, log=print, dropped=None):
         if cv.get("style") == "eigenes":
             changed += _restore_own(p, cv, np, native, log)
             continue
+        if cv.get("style") == "navidrome" and cv.get("nid") and cv["nid"] != np["id"]:
+            p.pop("cover", None)   # Navidrome created the playlist anew: the image set there is gone with it
+            cv = {}
+            changed += 1
         if cv.get("style") in STYLES and cv.get("img") and cv.get("nid") == np["id"] \
                 and np.get("uploadedImage", cv["img"]) != cv["img"]:   # changed in Navidrome itself: it stays
             p["cover"] = {"style": "navidrome" if np.get("uploadedImage") else "none", "at": today,
@@ -499,7 +512,7 @@ def refresh_auto(cfg, lib, native, by_file, log=print, dropped=None):
             upload(native, np["id"], data)
             if not cv:   # the format's own cover, the first time
                 cv = p["cover"] = {"style": style, "auto": True, "at": today}
-            cv["sig"], cv["nid"], cv["hash"] = sig, np["id"], digest(data)
+            cv["sig"], cv["nid"], cv["hash"] = sig, np["id"], served_digest(native, np["id"], data)
             cv.pop("img", None)
             uploaded.append(cv)
             changed += 1

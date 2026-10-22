@@ -27,7 +27,7 @@ export default {
   'Connect to Navidrome':
     'Ligar ao Navidrome',
   'Tuttiphon reads your library from Navidrome and writes the playlists back there. For that it needs the address of Navidrome and an admin account – in the background, for scans, playlists and their owners.':
-    'O Tuttiphon lê a sua biblioteca a partir do Navidrome e escreve lá as playlists. Para isso precisa do endereço do Navidrome e de uma conta de administrador – em segundo plano, para verificações, playlists e os seus proprietários.',
+    'O Tuttiphon lê a sua biblioteca a partir do Navidrome e escreve lá as playlists. Para isso precisa do endereço do Navidrome e de uma conta de administrador – em segundo plano, para as leituras do Navidrome, as playlists e os seus proprietários.',
   'Connected – Navidrome {version}':
     'Ligado – Navidrome {version}',
   'Tuttiphon cannot reach Navidrome yet: {error}':
@@ -71,7 +71,7 @@ export default {
   'Deleted originals cannot be restored – the backup of Tuttiphon contains only its own data, not your music.':
     'Os originais eliminados não podem ser restaurados – a cópia de segurança do Tuttiphon contém apenas os seus próprios dados, não a sua música.',
   'Tuttiphon looks up missing lyrics and saves them as files next to the songs: synced lyrics as .lrc, plain text as .txt. Navidrome reads them at the next scan, and many players show them – Symfonium even line by line while the song plays.':
-    'O Tuttiphon procura as letras em falta e guarda-as como ficheiros ao lado das músicas: letras sincronizadas como .lrc, texto simples como .txt. O Navidrome lê-as na verificação seguinte e muitos leitores mostram-nas – o Symfonium até verso a verso enquanto a música toca.',
+    'O Tuttiphon procura as letras em falta e guarda-as como ficheiros ao lado das músicas: letras sincronizadas como .lrc, texto simples como .txt. O Navidrome incorpora-as na leitura seguinte e muitos leitores mostram-nas – o Symfonium até verso a verso enquanto a música toca.',
   'Only adds files next to the songs – the music files stay untouched.':
     'Só adiciona ficheiros ao lado das músicas – os ficheiros de música ficam intactos.',
   'At least one provider must stay on.':

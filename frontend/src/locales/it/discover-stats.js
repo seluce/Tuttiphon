@@ -3,17 +3,17 @@ export default {
   'Discover':
     'Scopri',
   'For all of you':
-    'Per voi',
+    'Per la famiglia',
   'For you':
     'Per te',
   'Ready-made playlists from your library – matching your preferences and the season. One click creates them, ✕ hides a suggestion for six months.':
-    'Playlist pronte dalla vostra libreria – in base alle vostre preferenze e alla stagione. Un clic le crea, ✕ nasconde un suggerimento per sei mesi.',
+    'Playlist pronte dalla libreria di casa – in base alle preferenze della famiglia e alla stagione. Un clic le crea, ✕ nasconde un suggerimento per sei mesi.',
   'Ready-made playlists from your library – matching your taste and the season. “Create” adds them, ✕ hides a suggestion for six months.':
-    'Playlist pronte dalla vostra libreria – in base ai tuoi gusti e alla stagione. «Crea» le aggiunge, ✕ nasconde un suggerimento per sei mesi.',
+    'Playlist pronte dalla libreria di casa – in base ai tuoi gusti e alla stagione. «Crea» le aggiunge, ✕ nasconde un suggerimento per sei mesi.',
   'Suggestions could not be computed':
     'Impossibile calcolare i suggerimenti',
   'Looking for matching playlists in your library …':
-    'Cerco playlist adatte nella vostra libreria …',
+    'Cerco playlist adatte nella libreria …',
   'Collapse':
     'Comprimi',
   'Expand':
@@ -25,7 +25,7 @@ export default {
   'For {name}':
     'Per {name}',
   'Scenes whose typical bands are already on your shelf':
-    'Scene le cui band tipiche sono già sui vostri scaffali',
+    'Scene le cui band tipiche sono già sugli scaffali di casa',
   'Preferences →':
     'Preferenze →',
   'Change taste →':
@@ -33,7 +33,7 @@ export default {
   'No new suggestions right now':
     'Nessun nuovo suggerimento al momento',
   'You already have everything that fits. New music or different preferences bring new ideas.':
-    'Avete già tutto ciò che fa per voi. Nuova musica o preferenze diverse portano nuove idee.',
+    'Hai già tutto ciò che fa per te. Nuova musica o preferenze diverse portano nuove idee.',
   'You already have everything that fits. More favorite worlds or bands in your profile bring new ideas.':
     'Hai già tutto ciò che fa per te. Più mondi o band preferiti nel profilo portano nuove idee.',
   'My profile':
@@ -47,7 +47,7 @@ export default {
   'Show again now':
     'Mostra di nuovo ora',
   'You might still be missing':
-    'Forse vi manca ancora',
+    'Forse ti manca ancora',
   'You might also like – not in your library yet':
     'Potrebbe piacerti anche – non ancora nella libreria',
   'All combinations as a table':
@@ -70,6 +70,8 @@ export default {
     'per {name}',
   'hits only':
     'solo le hit',
+  '{n} song, changes on the first of the month':
+    '{n} brano, cambia il primo del mese',
   '{n} songs, changes on the first of the month':
     '{n} brani, cambia il primo del mese',
   '{n} minutes':
@@ -91,7 +93,7 @@ export default {
   'Customize':
     'Personalizza',
   'With a free Last.fm key, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
-    'Con una chiave Last.fm gratuita, Tuttiphon mostra qui band simili ai vostri preferiti ma non ancora nella libreria.',
+    'Con una chiave Last.fm gratuita, Tuttiphon mostra qui band simili ai tuoi preferiti ma non ancora nella libreria.',
   'Enter key →':
     'Inserisci la chiave →',
   'The administrator sets this up.':
@@ -133,13 +135,13 @@ export default {
   'My statistics':
     'Le mie statistiche',
   'What really gets played in your home – from the plays Symfonium reports to Navidrome.':
-    'Cosa si ascolta davvero da voi – dagli ascolti che Symfonium segnala a Navidrome.',
+    'Cosa si ascolta davvero in casa – dagli ascolti che Symfonium segnala a Navidrome.',
   'What you really listen to – from the plays Symfonium reports to Navidrome.':
     'Cosa ascolti davvero – dagli ascolti che Symfonium segnala a Navidrome.',
   'Password missing':
     'Password mancante',
   'Counting your plays …':
-    'Conto i vostri ascolti …',
+    'Conto gli ascolti …',
   'No statistics for {name}':
     'Nessuna statistica per {name}',
   'No statistics for this person':
@@ -190,10 +192,14 @@ export default {
     '{names} usano lo stesso account Navidrome «{account}» – per questo i loro numeri sono uguali.',
   'Plays':
     'Ascolti',
+  'from {n} different song':
+    'da {n} brano',
   'from {n} different songs':
     'da {n} brani diversi',
   'Listening time':
     'Tempo di ascolto',
+  '≈ {n} day non-stop':
+    '≈ {n} giorno di fila',
   '≈ {n} days non-stop':
     '≈ {n} giorni di fila',
   'Bands played':
@@ -234,14 +240,16 @@ export default {
     'Crea come playlist',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Nota: Navidrome salva per ogni brano solo quante volte e quando è stato ascoltato l\'ultima volta – non tiene una cronologia nel tempo.',
+  '“{name}” saved with {n} song – coming to Symfonium shortly':
+    '«{name}» salvata con {n} brano – arriva a breve in Symfonium',
   '“{name}” saved with {n} songs – coming to Symfonium shortly':
     '«{name}» salvata con {n} brani – arriva a breve in Symfonium',
   'Nothing counted yet':
     'Ancora niente di contato',
   'Tuttiphon has been keeping track of plays since {date}. As soon as you listen, the most played music shows up here.':
-    'Tuttiphon registra gli ascolti dal {date}. Appena ascoltate qualcosa, qui compare la musica più ascoltata.',
+    'Tuttiphon registra gli ascolti dal {date}. Appena si ascolta qualcosa, qui compare la musica più ascoltata.',
   'From now on Tuttiphon remembers every day what you listened to – Navidrome itself keeps no history.':
-    'Da ora Tuttiphon memorizza ogni giorno cosa avete ascoltato – Navidrome da solo non tiene una cronologia.',
+    'Da ora Tuttiphon memorizza ogni giorno cosa è stato ascoltato – Navidrome da solo non tiene una cronologia.',
   '{title} · counted since {date}':
     '{title} · contati dal {date}',
   '{n} of music':
@@ -250,6 +258,8 @@ export default {
     '{n} band',
   '{n} bands':
     '{n} band',
+  '{n} different song':
+    '{n} brano diverso',
   '{n} different songs':
     '{n} brani diversi',
   '{n} newly discovered':
@@ -270,6 +280,8 @@ export default {
     'Giorno per giorno',
   'Newly discovered':
     'Nuove scoperte',
+  '{n} new song':
+    '{n} brano nuovo',
   '{n} new songs':
     '{n} brani nuovi',
   'For the Navidrome account “{user}”. Tuttiphon records its play counts every day – most recently {when}.':
@@ -342,16 +354,18 @@ export default {
     'Mood',
   'Sounds like:':
     'Suona come:',
+  'from the sound analysis of {n} song':
+    'dall\'analisi del suono di {n} brano',
   'from the sound analysis of {n} songs':
     'dall\'analisi del suono di {n} brani',
   'In your playlists':
-    'Nelle vostre playlist',
+    'Nelle tue playlist',
   'In these playlists':
     'In queste playlist',
   'Similar bands in your library':
-    'Band simili nella vostra libreria',
+    'Band simili nella tua libreria',
   'Similar bands you are still missing':
-    'Band simili che vi mancano ancora',
+    'Band simili che ti mancano ancora',
   'Sounds like these bands':
     'Suona come queste band',
   'By the sound of the songs – recognized by the AI sound analysis.':
@@ -361,7 +375,7 @@ export default {
   'According to Last.fm – tap to listen in.':
     'Secondo Last.fm – tocca per ascoltare.',
   'With a Last.fm key under Settings → Intelligence you get tags here, more accurate similar bands and bands you are still missing.':
-    'Con una chiave Last.fm in Impostazioni → Intelligenza qui trovi tag, band simili più precise e band che vi mancano ancora.',
+    'Con una chiave Last.fm in Impostazioni → Intelligenza qui trovi tag, band simili più precise e band che ti mancano ancora.',
   'Four album covers with title':
     'Quattro copertine di album con titolo',
   'Its own look for this format, renewed with every new selection':
@@ -413,11 +427,11 @@ export default {
   'More like this':
     'Altri simili',
   'Similar songs from your library – they play after this one.':
-    'Brani simili dalla vostra libreria – suonano dopo questo.',
+    'Brani simili dalla tua libreria – suonano dopo questo.',
   'Keep as radio mix':
     'Tieni come radio mix',
   'Your library has nothing similar to this song.':
-    'Nella vostra libreria non c\'è niente di simile a questo brano.',
+    'Nella tua libreria non c\'è niente di simile a questo brano.',
   'Appears in':
     'Compare in',
   'Song lyrics':

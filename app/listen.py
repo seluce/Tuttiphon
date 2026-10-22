@@ -48,7 +48,10 @@ STATES = ("starting", "playing", "paused", "stopped", "expired")
 _lock = threading.Lock()
 _seen = {"at": None, "events": 0, "accounts": set(), "pruned": {}}
 _versions = defaultdict(int)   # per account: changes with every event kept (for caches)
+_active = {}                   # account (lower case) -> (time, state) of its last event – also of accounts whose plays
+                               # are not kept (memory only): they count as playing in listener()
 _days = {}                     # path -> ((size, mtime), rows) – a day file is parsed again only when it changed
+_summary_days = {}             # (account folder, day) -> (signature of the day files, (skips, plays)) – summary()
 
 
 def _folder(user):
@@ -89,6 +92,10 @@ def record(user, kind, song_id, t=None, position=None, state=None, player=None, 
         raise ValueError(_("invalid request")) from None
     if kind not in KINDS or not isinstance(song_id, str) or not song_id or len(song_id) > 100:
         raise ValueError(_("invalid request"))
+    with _lock:   # someone is playing – noted even if nothing of it is kept
+        _active[user.lower()] = (now_t, state if state in STATES else None)
+        if len(_active) > 1000:
+            _active.pop(next(iter(_active)))
     if cfg is not None and not allowed(cfg, user):
         return False
     if kind == "start" and _number(position) and position > START_SECONDS:
@@ -123,7 +130,7 @@ def record(user, kind, song_id, t=None, position=None, state=None, player=None, 
         finally:
             os.close(fd)
         _versions[user.lower()] += 1
-        _seen["at"] = dt.datetime.fromtimestamp(now_t).isoformat(timespec="seconds")
+        _seen["at"] = dt.datetime.fromtimestamp(now_t).astimezone().isoformat(timespec="seconds")
         _seen["events"] += 1
         _seen["accounts"].add(user)
     if kind == "play":
@@ -177,6 +184,13 @@ def _prune(user, now_t):
         if path.stem[5:] < cutoff:
             path.unlink(missing_ok=True)
             _days.pop(str(path), None)
+
+
+def played_lately(days, now=None):
+    """Live plays of any account in the last `days` days (day files on disk)?"""
+    from .rueckblick import PLAYS_DIR
+    cutoff = (dt.date.fromtimestamp(now or time.time()) - dt.timedelta(days=days)).isoformat()
+    return any(p.stem[5:] >= cutoff for p in PLAYS_DIR.glob("*/live-*.jsonl"))
 
 
 def prune_all(now=None):
@@ -258,24 +272,38 @@ def _recent(folder, since, now_t):
     return rows
 
 
+def _on(state):
+    return state not in ("stopped", "expired")
+
+
 def listener(ids, now=None):
-    """Who is listening – the account folder (config.slug of the account) or None if that is unclear. `ids`: the
-    song asked about (or the songs of the band or album asked about). The account that played one of them in the
-    last LISTENER_SONG seconds – if it is exactly one; if none did, the one account playing anything right now (its
-    last event at most LISTENER_ACTIVE seconds ago and not "stopped")."""
+    """Who is listening -> (account folder (config.slug of the account), sure) – (None, False) if that is unclear.
+    `ids`: the song asked about (or the songs of the band or album asked about).
+    sure: the latest event of exactly one account is one of these songs – it is playing it right now.
+    Otherwise a guess: the one account that played one of them in the last LISTENER_SONG seconds, or – if none did –
+    the one account playing anything right now (its last event at most LISTENER_ACTIVE seconds ago and not
+    "stopped"). Accounts whose plays are not kept (no person, blocked) count as playing too (_active), so a question
+    of theirs is never taken for someone else's."""
+    from .config import slug
     from .rueckblick import PLAYS_DIR
     now_t = now or time.time()
     try:
         folders = [f for f in PLAYS_DIR.iterdir() if f.is_dir()]
     except OSError:
-        return None
+        return None, False
     recent = {f.name: _recent(f, now_t - LISTENER_SONG, now_t) for f in folders}
+    now_playing = [a for a, rows in recent.items() if rows and rows[-1]["id"] in ids and _on(rows[-1].get("st"))]
+    if now_playing:
+        return (now_playing[0], True) if len(now_playing) == 1 else (None, False)
     hit = [a for a, rows in recent.items() if any(r["id"] in ids for r in rows)]
     if hit:
-        return hit[0] if len(hit) == 1 else None
-    playing = [a for a, rows in recent.items()
-               if rows and rows[-1]["t"] >= now_t - LISTENER_ACTIVE and rows[-1].get("st") not in ("stopped", "expired")]
-    return playing[0] if len(playing) == 1 else None
+        return (hit[0], False) if len(hit) == 1 else (None, False)
+    playing = {a for a, rows in recent.items()
+               if rows and rows[-1]["t"] >= now_t - LISTENER_ACTIVE and _on(rows[-1].get("st"))}
+    with _lock:
+        playing |= {slug(a) for a, (t, st) in _active.items() if t >= now_t - LISTENER_ACTIVE and _on(st)}
+    one = next(iter(playing)) if len(playing) == 1 else None
+    return (one, False) if one in recent else (None, False)
 
 
 def sequence(user, seconds=3600, now=None):
@@ -343,11 +371,10 @@ def _skipped(segs, heard):
     return out
 
 
-def summary(user, start, end):
-    """Skips and plays of these days, read once: ({song id: [days skipped]}, {song id: plays}). Per player from its
-    reports; without reports from the account's starts near the beginning of a song (two devices playing at once on
-    one account can look like a skip there – one skip weighs little)."""
-    rows = events(user, start - dt.timedelta(days=1), end + dt.timedelta(days=1))
+def _summarize(rows, start, end):
+    """Skips and plays among these events that started on the days start…end: ({song id: {days}}, {song id: plays}).
+    Per player from its reports; without reports from the account's starts near the beginning of a song (two devices
+    playing at once on one account can look like a skip there – one skip weighs little)."""
     played = defaultdict(list)
     plays_ = defaultdict(int)
     for r in rows:
@@ -373,6 +400,46 @@ def summary(user, start, end):
         day = _local(t).date()
         if start <= day <= end:
             skipped[sid].add(day.isoformat())
+    return skipped, dict(plays_)
+
+
+def _day(user, day):
+    """The skips and plays of one day (with its neighbours for the context) – worked out again only when one of the
+    three day files changed, so a new event costs one day, not 120."""
+    folder = _folder(user)
+    sig = []
+    for d in (day - dt.timedelta(days=1), day, day + dt.timedelta(days=1)):
+        try:
+            st = (folder / f"live-{d.isoformat()}.jsonl").stat()
+            sig.append((st.st_size, st.st_mtime_ns))
+        except OSError:
+            sig.append(None)
+    if sig[1] is None:
+        return {}, {}   # nothing started on this day
+    key, sig = (str(folder), day), tuple(sig)
+    with _lock:
+        hit = _summary_days.get(key)
+    if hit and hit[0] == sig:
+        return hit[1]
+    out = _summarize(events(user, day - dt.timedelta(days=1), day + dt.timedelta(days=1)), day, day)
+    with _lock:
+        if len(_summary_days) > 5000:
+            _summary_days.clear()
+        _summary_days[key] = (sig, out)
+    return out
+
+
+def summary(user, start, end):
+    """Skips and plays of these days: ({song id: [days skipped]}, {song id: plays}) – day by day (_day())."""
+    skipped, plays_ = defaultdict(set), defaultdict(int)
+    day = start
+    while day <= end:
+        s, p = _day(user, day)
+        for sid, days in s.items():
+            skipped[sid] |= days
+        for sid, n in p.items():
+            plays_[sid] += n
+        day += dt.timedelta(days=1)
     return {sid: sorted(days) for sid, days in skipped.items()}, dict(plays_)
 
 

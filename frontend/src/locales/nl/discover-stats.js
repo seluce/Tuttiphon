@@ -70,6 +70,8 @@ export default {
     'voor {name}',
   'hits only':
     'alleen de hits',
+  '{n} song, changes on the first of the month':
+    '{n} nummer, wisselt op de eerste van de maand',
   '{n} songs, changes on the first of the month':
     '{n} nummers, wisselt op de eerste van de maand',
   '{n} minutes':
@@ -190,10 +192,14 @@ export default {
     '{names} gebruiken hetzelfde Navidrome-account “{account}” – daarom zijn hun cijfers gelijk.',
   'Plays':
     'Afspeelbeurten',
+  'from {n} different song':
+    'van {n} nummer',
   'from {n} different songs':
     'van {n} verschillende nummers',
   'Listening time':
     'Luistertijd',
+  '≈ {n} day non-stop':
+    '≈ {n} dag non-stop',
   '≈ {n} days non-stop':
     '≈ {n} dagen non-stop',
   'Bands played':
@@ -234,6 +240,8 @@ export default {
     'Als playlist maken',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Let op: Navidrome slaat alleen op hoe vaak en wanneer elk nummer het laatst is gespeeld – het houdt geen geschiedenis bij.',
+  '“{name}” saved with {n} song – coming to Symfonium shortly':
+    '“{name}” opgeslagen met {n} nummer – komt zo in Symfonium',
   '“{name}” saved with {n} songs – coming to Symfonium shortly':
     '“{name}” opgeslagen met {n} nummers – komt zo in Symfonium',
   'Nothing counted yet':
@@ -250,6 +258,8 @@ export default {
     '{n} band',
   '{n} bands':
     '{n} bands',
+  '{n} different song':
+    '{n} nummer',
   '{n} different songs':
     '{n} verschillende nummers',
   '{n} newly discovered':
@@ -270,6 +280,8 @@ export default {
     'Dag voor dag',
   'Newly discovered':
     'Nieuw ontdekt',
+  '{n} new song':
+    '{n} nieuw nummer',
   '{n} new songs':
     '{n} nieuwe nummers',
   'For the Navidrome account “{user}”. Tuttiphon records its play counts every day – most recently {when}.':
@@ -327,7 +339,7 @@ export default {
   'Do you like the band?':
     'Vind je de band leuk?',
   'Your profiles':
-    'Jullie profielen',
+    'Jouw profielen',
   'Favorite':
     'Favoriet',
   '“Favorite”: shows up more often in your mixes. “never”: never gets into your playlists.':
@@ -342,6 +354,8 @@ export default {
     'Stemming',
   'Sounds like:':
     'Klinkt als:',
+  'from the sound analysis of {n} song':
+    'uit de klankanalyse van {n} nummer',
   'from the sound analysis of {n} songs':
     'uit de klankanalyse van {n} nummers',
   'In your playlists':
@@ -423,7 +437,7 @@ export default {
   'Song lyrics':
     'Songtekst',
   'The lyrics follow along while playing. Tap a line to jump there.':
-    'De songtekst loopt mee tijdens het afspelen. Tik op een regel om daarheen te springen.',
+    'De songtekst scrolt mee tijdens het afspelen. Tik op een regel om daarheen te springen.',
   'show the whole text':
     'de hele tekst tonen',
   'There are no lyrics for this song.':

@@ -289,7 +289,7 @@ export default {
   'Hello!':
     'Ciao!',
   'Tuttiphon puts together playlists from your music library – matching your taste, and they keep themselves up to date. You then find them in Symfonium as usual.':
-    'Tuttiphon crea per te playlist dalla vostra libreria musicale – in base ai tuoi gusti, e si aggiornano da sole. Poi le trovi in Symfonium come sempre.',
+    'Tuttiphon crea per te playlist dalla libreria di casa – in base ai tuoi gusti, e si aggiornano da sole. Poi le trovi in Symfonium come sempre.',
   'Made for you':
     'Su misura per te',
   'You say what you like to hear – Tuttiphon suggests ready-made playlists.':

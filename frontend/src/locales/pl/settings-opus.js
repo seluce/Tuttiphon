@@ -1,4 +1,4 @@
-// Same keys as ../de/settings-opus.js (tools/translate.py)
+// Same keys as ../de/settings-opus.js
 export default {
   'At least one format':
     'Co najmniej jeden format',
@@ -79,7 +79,7 @@ export default {
   'Leveling on':
     'Wyrównywanie włączone',
   'Writes once into every music file. Each file is copied and checked first, only then replaced. Values that already came from elsewhere stay.':
-    'Zapisuje jednorazowo w każdym pliku muzycznym. Każdy plik jest najpierw kopiowany i sprawdzany, dopiero potem zastępowany. Wartości, które pochodziły już skądinąd, zostają.',
+    'Zapisuje jednorazowo w każdym pliku muzycznym. Każdy plik jest najpierw kopiowany i sprawdzany, dopiero potem zastępowany. Wartości, które pochodziły już z innego miejsca, zostają.',
   'Album values too':
     'Także wartości albumowe',
   'For albums you listen to in one go: quiet and loud songs of an album keep their balance.':

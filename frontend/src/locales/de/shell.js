@@ -25,7 +25,8 @@ export default {
   'For whom, which music, which mood and finally the finishing touches. At the top you see where you are.': 'Für wen, welche Musik, welche Stimmung und zum Schluss der Feinschliff. Oben siehst du, wo du gerade bist.',
   'Which music, which mood and finally the finishing touches. At the top you see where you are.': 'Welche Musik, welche Stimmung und zum Schluss der Feinschliff. Oben siehst du, wo du gerade bist.',
   'For whom?': 'Für wen?',
-  'The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.': 'Die Person bestimmt, in welchem Navidrome-Konto die Playlist landet und wessen Sterne zählen. Danach wählst du die Musikwelt.',
+  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
+    'Die Person bestimmt, in welchem Navidrome-Konto die Playlist landet und wessen Sterne zählen. Danach wählst du die Musikwelt.',
   'Choose music': 'Musik wählen',
   'Tap one or more music worlds. “All” takes the whole library.': 'Tippe eine oder mehrere Musikwelten an. „Alle“ nimmt die ganze Bibliothek.',
   'On to the mood': 'Weiter zur Stimmung',
@@ -62,7 +63,8 @@ export default {
   'Who may do what?': 'Wer darf was?',
   'Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account.': 'Jede:r meldet sich mit dem eigenen Navidrome-Konto an. Hier wählst du je Konto Administrator, Benutzer oder kein Zugang.',
   'People': 'Personen',
-  'One person per account: suggestions and mixes are made for them with their favorites and dislikes.': 'Eine Person je Konto: Für sie entstehen Vorschläge und Mixe mit ihren Lieblingen und ohne das, was sie nicht mag.',
+  'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
+    'Eine Person je Konto: Für sie entstehen Vorschläge und Mixe mit ihren Lieblingen und ohne das, was sie nicht mag.',
   'Make suggestions better': 'Vorschläge besser machen',
   'Open my profile': 'Mein Profil öffnen',
   'Add what was recognized with “+”': 'Erkanntes mit „+“ hinzufügen',
@@ -281,6 +283,8 @@ export default {
   'Songs': 'Songs',
   'In the lyrics': 'Im Liedtext',
   'Bands, songs, mood, lyric line …': 'Bands, Songs, Stimmung, Liedzeile …',
+  'Mix · {n} matching song, new every week':
+    'Mix · {n} passender Song, jede Woche neu',
   'Mix · {n} matching songs, new every week': 'Mix · {n} passende Songs, jede Woche neu',
   '{songs} · create as mix': '{songs} · als Mix anlegen',
   'Instruments': 'Instrumente',

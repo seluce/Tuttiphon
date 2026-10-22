@@ -79,7 +79,7 @@ export default {
   'You can only change your own profile.':
     'Solo puedes cambiar tu propio perfil.',
   'Who is a playlist for? The person decides the owner in Navidrome and so whose stars & favorites count, who sees it – and what never goes in.':
-    '¿Para quién es una playlist? La persona determina el propietario en Navidrome y, con ello, qué estrellas y favoritos cuentan, quién la ve – y qué nunca entra.',
+    '¿Para quién es una playlist? La persona determina el propietario en Navidrome y, con ello, de quién son las estrellas y favoritos que cuentan, quién la ve – y qué nunca entra.',
   'Add person':
     'Añadir persona',
   'Default':
@@ -289,7 +289,7 @@ export default {
   'Hello!':
     '¡Hola!',
   'Tuttiphon puts together playlists from your music library – matching your taste, and they keep themselves up to date. You then find them in Symfonium as usual.':
-    'Tuttiphon prepara playlists a partir de tu biblioteca musical – a tu gusto, y se mantienen al día solas. Luego las encuentras en Symfonium como siempre.',
+    'Tuttiphon prepara playlists a partir de tu biblioteca musical – a tu gusto, y se mantienen al día por sí solas. Luego las encuentras en Symfonium como siempre.',
   'Made for you':
     'Hecho para ti',
   'You say what you like to hear – Tuttiphon suggests ready-made playlists.':

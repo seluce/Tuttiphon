@@ -1,4 +1,4 @@
-// Same keys as ../de/settings-a.js (tools/translate.py)
+// Same keys as ../de/settings-a.js
 export default {
   'testing …':
     'testowanie …',
@@ -131,8 +131,9 @@ export default {
     'Klucz wpisany',
   'No key yet':
     'Jeszcze brak klucza',
-  '{n} bands loaded':
-    'Wczytane zespoły: {n}',
+  '{n} band loaded':
+    'Wczytano {n} zespół',
+  '{n} bands loaded': { few: 'Wczytano {n} zespoły', many: 'Wczytano {n} zespołów' },
   ' · last run {when}':
     ' · ostatni przebieg: {when}',
   'The key is set in docker-compose.yaml as LASTFM_API_KEY.':
@@ -177,8 +178,9 @@ export default {
     'Automatycznie od',
   'Only very confident matches are classified directly; the rest stays a suggestion.':
     'Bezpośrednio klasyfikowane są tylko bardzo pewne dopasowania; reszta pozostaje propozycją.',
-  '{n} songs · {why}':
-    'piosenki: {n} · {why}',
+  '{n} song · {why}':
+    '{n} piosenka · {why}',
+  '{n} songs · {why}': { few: '{n} piosenki · {why}', many: '{n} piosenek · {why}' },
   'add':
     'dodaj',
   'No bands without a music world right now.':
@@ -338,7 +340,7 @@ export default {
   'Search all missing now':
     'Szukaj teraz wszystkich brakujących',
   'Retry recent misses too':
-    'Ponów też niedawne nietrafienia',
+    'Szukaj ponownie także niedawno nieznalezionych',
   '“Search all missing now” runs without a time limit and can be stopped at any time. For the lyrics to appear in Navidrome, a scan is needed afterwards. With “Update everything” this happens automatically.':
     '„Szukaj teraz wszystkich brakujących” działa bez limitu czasu i można go w każdej chwili zatrzymać. Aby teksty pojawiły się w Navidrome, potrzebny jest potem skan. Przy „Zaktualizuj wszystko” dzieje się to automatycznie.',
   '{band}: {songs} blocked again':
@@ -401,14 +403,15 @@ export default {
     'dozwolone',
   'allow':
     'zezwól',
-  'Show {n} more bands':
-    'Pokaż więcej zespołów ({n})',
+  'Show {n} more band':
+    'Pokaż jeszcze {n} zespół',
+  'Show {n} more bands': { few: 'Pokaż jeszcze {n} zespoły', many: 'Pokaż jeszcze {n} zespołów' },
   'The levels must go up: ★ < ★★ < …':
     'Poziomy muszą rosnąć: ★ < ★★ < …',
   'Recalculate stars?':
     'Przeliczyć gwiazdki?',
   'All stars are set again from the stored ranks with the new levels – without asking Deezer again. Stars given by hand stay, unless you allow overwriting below.':
-    'Wszystkie gwiazdki zostaną ustawione ponownie z zapisanych rang według nowych poziomów – bez ponownego pytania Deezer. Gwiazdki nadane ręcznie zostają, chyba że niżej zezwolisz na nadpisywanie.',
+    'Wszystkie gwiazdki zostaną ustawione ponownie z zapisanych rankingów według nowych poziomów – bez ponownego pytania Deezer. Gwiazdki nadane ręcznie zostają, chyba że niżej zezwolisz na nadpisywanie.',
   'Recalculate':
     'Przelicz',
   'Check everything again?':
@@ -420,17 +423,17 @@ export default {
   'From popularity to stars':
     'Od popularności do gwiazdek',
   'Deezer knows a popularity rank from 0 to about 1 million for almost every song – the higher, the more popular. Tuttiphon turns this into stars – and “Only the hits” takes the songs with the most stars.':
-    'Deezer zna dla niemal każdej piosenki rangę popularności od 0 do ok. 1 miliona – im wyższa, tym popularniejsza. Tuttiphon zamienia ją na gwiazdki – a „Tylko hity” bierze piosenki z największą liczbą gwiazdek.',
+    'Deezer zna dla niemal każdej piosenki ranking popularności od 0 do ok. 1 miliona – im wyższy, tym piosenka popularniejsza. Tuttiphon zamienia go na gwiazdki – a „Tylko hity” bierze piosenki z największą liczbą gwiazdek.',
   '{stars} from rank':
-    '{stars} od rangi',
+    '{stars} od rankingu',
   '{k} stars: {n} songs · {pct}%':
     'Gwiazdki: {k} – piosenki: {n} · {pct}%',
   'no stars':
     'bez gwiazdek',
   'This is how {n} songs with a known Deezer rank are distributed; {missing} were not found on Deezer.':
-    'Tak rozkładają się piosenki ze znaną rangą Deezer ({n}); nie znaleziono w Deezer: {missing}.',
+    'Tak rozkładają się piosenki ze znanym rankingiem Deezer ({n}); nie znaleziono w Deezer: {missing}.',
   'This is how {n} songs with a known Deezer rank are distributed.':
-    'Tak rozkładają się piosenki ze znaną rangą Deezer ({n}).',
+    'Tak rozkładają się piosenki ze znanym rankingiem Deezer ({n}).',
   'Defaults':
     'Domyślne',
   'Recalculate stars now':
@@ -474,7 +477,7 @@ export default {
   'Rate new ones now':
     'Oceń teraz nowe',
   'Retry not found':
-    'Ponów nieznalezione',
+    'Szukaj ponownie nieznalezionych',
   'Check everything again':
     'Sprawdź wszystko ponownie',
   'also overwrite stars given by hand':
@@ -643,8 +646,8 @@ export default {
     'Jeśli lista już istnieje, wstaw przed nią „tuttiphon,” – bez niej to są domyślne wartości Navidrome. Wiersz w docker-compose ma pierwszeństwo przed navidrome.toml. Potem uruchom ponownie Navidrome; gdzie Tuttiphon nie ma odpowiedzi, Navidrome pyta kolejnych.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'W Navidrome w <b>Settings → Plugins</b> włącz „Tuttiphon”, wpisz adres i klucz i zezwól na <b>all users</b> – wszystkich użytkowników (dla odtworzeń). Najlepiej adres w sieci domowej, np. <code>http://&lt;NAS&gt;:8765</code> – nie adres https przez reverse proxy, który może odrzucić Navidrome. Ta przeglądarka łączy się z Tuttiphon pod <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'W Symfonium włącz dla serwera Navidrome <b>„Use similar tracks for Radio Mix”</b> (Settings → Media providers → serwer).',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'W Symfonium włącz dla serwera Navidrome <b>„Use similar tracks for Radio Mix”</b> („Manage media providers” → serwer) i wybierz <b>„Sonic Analysis”</b> dla inteligentnej kolejki w odtwarzaczu.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
     'Navidrome nie mówi, kto pyta. Jeśli piosenka gra na dokładnie jednym koncie – albo gra tylko jedno konto – odpowiedź jest dla tej osoby: bez tego, czego nie lubi, bez tego, co właśnie słyszała lub oceniła na 1 gwiazdkę; to, co często pomija, pojawia się później, a po dwóch piosenkach jednego zespołu pierwszeństwo mają inne zespoły. W przeciwnym razie dla rodziny. Muzyka dziecięca tylko do piosenek dla dzieci i bez piosenek z wulgarnymi tekstami, gdy tylko któryś profil ma tryb dla dzieci albo jest profilem dziecka.',
   'Create a new key?':
@@ -666,7 +669,13 @@ export default {
   'Nothing yet? Put the new plugin file into Navidrome, restart it and allow the plugin all users.':
     'Jeszcze nic? Umieść nowy plik wtyczki w Navidrome, uruchom go ponownie i zezwól wtyczce na wszystkich użytkowników.',
   '{when} · for {name}':
-    '{when} · dla: {name}',
+    '{when} · dla osoby {name}',
   '{when} · for the family':
     '{when} · dla rodziny',
+  '{when} · probably for {name}':
+    '{when} · prawdopodobnie dla osoby {name}',
+  'Last answer with similar songs':
+    'Ostatnia odpowiedź z podobnymi piosenkami',
+  'Copy {what}':
+    'Kopiuj: {what}',
 }

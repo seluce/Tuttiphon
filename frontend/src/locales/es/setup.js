@@ -113,7 +113,7 @@ export default {
   'Stars given by hand are lost with the next rating – they cannot be restored.':
     'Las estrellas puestas a mano se pierden con la siguiente valoración – no se pueden recuperar.',
   'What should run by itself?':
-    '¿Qué debe funcionar solo?',
+    '¿Qué debe funcionar automáticamente?',
   'Tuttiphon can keep everything up to date by itself every day – and pick up new music as soon as it lands in the music folder. Both run as long as Tuttiphon is running, ideally in the Docker container on the NAS.':
     'Tuttiphon puede mantenerlo todo al día cada día por sí solo – y procesar la música nueva en cuanto llega a la carpeta de música. Ambas cosas funcionan mientras Tuttiphon esté en marcha, idealmente en el contenedor Docker del NAS.',
   '“Playlists” rebuilds the mixes that are due and switches seasons. “Everything” also runs the steps of “Update everything” – conversion, lyrics, covers, understanding music and Deezer, as far as they are on.':
@@ -183,5 +183,5 @@ export default {
   'Run the setup assistant again':
     'Volver a ejecutar el asistente de configuración',
   'Goes through the most important settings once more: connection, conversion, lyrics, understanding music, Deezer stars and what runs by itself. Apart from the connection, nothing changes until you tap “Finish”.':
-    'Repasa de nuevo los ajustes más importantes: conexión, conversión, letras, entender la música, estrellas de Deezer y lo que funciona solo. Aparte de la conexión, nada cambia hasta que toques «Finalizar».',
+    'Repasa de nuevo los ajustes más importantes: conexión, conversión, letras, entender la música, estrellas de Deezer y lo que funciona automáticamente. Aparte de la conexión, nada cambia hasta que toques «Finalizar».',
 }

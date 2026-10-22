@@ -1,4 +1,4 @@
-// Same keys as ../de/help-admin.js (tools/translate.py)
+// Same keys as ../de/help-admin.js
 export default {
   'Show me – step by step on the page':
     'Pokaż mi – krok po kroku na stronie',
@@ -41,7 +41,7 @@ export default {
   'What do you like?':
     'Co lubisz?',
   'Favorite bands, dislikes':
-    'Ulubione zespoły, nielubiane',
+    'Ulubione zespoły, „Nie lubię”',
   'Playlist':
     'Playlista',
   '“Family · Kids’ rock · Party”':
@@ -120,8 +120,8 @@ export default {
     'Stare i ręcznie zrobione playlisty',
   'The easiest way is the assistant under <a class="link" href="#/neu">New playlist</a>. It asks step by step – “For whom?” only when there are several people:':
     'Najprościej przez kreator w <a class="link" href="#/neu">Nowa playlista</a>. Pyta krok po kroku – „Dla kogo?” tylko wtedy, gdy jest kilka osób:',
-  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to and whose stars count.':
-    '<b>Dla kogo?</b> – osoba decyduje, na które konto Navidrome trafi playlista i czyje gwiazdki się liczą.',
+  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to; the stars of that account count.':
+    '<b>Dla kogo?</b> – osoba decyduje, na które konto Navidrome trafia playlista; liczą się gwiazdki tego konta.',
   '<b>Music world</b> – who’s playing: e.g. “Kids’ rock”, “Medieval” or several together. “All” takes the whole library.':
     '<b>Świat muzyczny</b> – kto gra: np. „Rock dla dzieci”, „Średniowiecze” albo kilka naraz. „Wszystkie” obejmuje całą bibliotekę.',
   '<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.':
@@ -264,8 +264,8 @@ export default {
     'Umieść plik – nierozpakowany i nazwany dokładnie <b>tuttiphon.ndp</b> – w folderze wtyczek Navidrome, ustaw <code>tuttiphon</code> na początku listy agentów Navidrome (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) i uruchom ponownie Navidrome.',
   'In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.':
     'W Navidrome w „Settings → Plugins” włącz „Tuttiphon”, wpisz adres Tuttiphon w sieci domowej i klucz, i zezwól mu na wszystkich użytkowników.',
-  'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Settings → Media providers).':
-    'W Symfonium włącz dla serwera Navidrome „Use similar tracks for Radio Mix” (Settings → Media providers).',
+  'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.':
+    'W Symfonium włącz dla serwera Navidrome „Use similar tracks for Radio Mix” („Manage media providers” → serwer) i wybierz „Sonic Analysis” dla inteligentnej kolejki w odtwarzaczu.',
   'The home page shows at a glance what’s going on: the big <b>“Update everything”</b> button, your mixes, <b>“To review”</b> with what needs you – such as new bands or missing passwords – and what was played and added. You arrange the sections under <a class="link" href="#/einstellungen/start">Settings → Home page</a>.':
     'Strona główna pokazuje na pierwszy rzut oka, co się dzieje: duży przycisk <b>„Zaktualizuj wszystko”</b>, twoje mixy, <b>„Do przejrzenia”</b> z tym, co wymaga twojej uwagi – np. nowe zespoły albo brakujące hasła – oraz to, co grało i zostało dodane. Sekcje układasz w <a class="link" href="#/einstellungen/start">Ustawienia → Strona główna</a>.',
   '<b>“Update everything”</b> runs all steps in order – convert, lyrics, covers, sound analysis, playlists, scan, Deezer stars. Which steps take part you set under <a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>; the log is under <a class="link" href="#/verlauf">History</a>.':
@@ -331,11 +331,11 @@ export default {
   'For “Only the hits” and the order of top songs in Symfonium, Tuttiphon gives stars by popularity on Deezer – day to day only for new songs. A match only counts if band and title fit.':
     'Dla „Tylko hity” i kolejności najlepszych piosenek w Symfonium Tuttiphon nadaje gwiazdki według popularności w Deezer – na co dzień tylko nowym piosenkom. Dopasowanie liczy się tylko wtedy, gdy zgadzają się zespół i tytuł.',
   'Under <a class="link" href="#/einstellungen/deezer">Settings → Deezer stars</a> you set how many stars each popularity rank gets – the chart shows the distribution right away.':
-    'W <a class="link" href="#/einstellungen/deezer">Ustawienia → Gwiazdki Deezer</a> ustawiasz, ile gwiazdek dostaje każda ranga popularności – wykres od razu pokazuje rozkład.',
+    'W <a class="link" href="#/einstellungen/deezer">Ustawienia → Gwiazdki Deezer</a> ustawiasz, ile gwiazdek dostaje każdy ranking popularności – wykres od razu pokazuje rozkład.',
   '<b>Highlight top tracks per band</b> – if many songs of a band share the top star count, the most popular get one more.':
     '<b>Wyróżniaj najlepsze utwory każdego zespołu</b> – jeśli wiele piosenek zespołu ma najwyższą liczbę gwiazdek, najpopularniejsze dostają jedną więcej.',
   '<b>Refresh every night</b>, <b>Retry not found</b> and <b>Check everything again</b> keep the stars up to date.':
-    '<b>Odświeżaj co noc</b>, <b>Ponów nieznalezione</b> i <b>Sprawdź wszystko ponownie</b> utrzymują gwiazdki na bieżąco.',
+    '<b>Odświeżaj co noc</b>, <b>Szukaj ponownie nieznalezionych</b> i <b>Sprawdź wszystko ponownie</b> utrzymują gwiazdki na bieżąco.',
   'Tuttiphon finds missing lyrics and puts them next to the songs – synced ones scroll along in Symfonium. Navidrome reads them at the next scan.':
     'Tuttiphon znajduje brakujące teksty i zapisuje je obok piosenek – zsynchronizowane przewijają się w Symfonium. Navidrome wczytuje je przy następnym skanie.',
   '<b>Fast:</b> each run searches a few minutes at most, new songs first; the rest follows.':
@@ -358,16 +358,16 @@ export default {
     '<b>To samo nagranie dwa razy:</b> znajduje je odcisk audio, także w innym formacie; wynik jest w <a class="link" href="#/einstellungen/bibliothek">Ustawienia → Sprawdź bibliotekę</a>.',
   '<b>Radio and gaps:</b> “Start radio” in the band window plays the band with similar bands; Discover shows similar bands you are still missing.':
     '<b>Radio i luki:</b> „Uruchom radio” w oknie zespołu odtwarza zespół razem z podobnymi; Odkrywaj pokazuje podobne zespoły, których jeszcze ci brakuje.',
-  'The analysis works through what is open at night (1–5 a.m.). The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
-    'Analiza przerabia nocą (od 1:00 do 5:00) to, co jeszcze czeka. Pierwszy przebieg AI zajmuje na NAS kilka nocy; potem dochodzą tylko nowe piosenki. Last.fm wymaga darmowego klucza. Szczegóły są w <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">podręczniku</a>.',
+  'The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
+    'Analiza przerabia nocą to, co jeszcze czeka. Pierwszy przebieg AI zajmuje na NAS kilka nocy; potem dochodzą już tylko nowe piosenki. Last.fm potrzebuje darmowego klucza. Szczegóły są w <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">podręczniku</a>.',
   'If you like, Tuttiphon watches the music folder (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation → Folder watch</a>). New music – e.g. from Lidarr – is then processed on its own: converted, lyrics, scan, sound, Deezer stars.':
     'Jeśli chcesz, Tuttiphon obserwuje folder muzyki (<a class="link" href="#/einstellungen/ablaeufe">Ustawienia → Automatyzacja → Obserwowanie folderu</a>). Nowa muzyka – np. z Lidarr – jest wtedy przetwarzana automatycznie: konwersja, teksty, skan, brzmienie, gwiazdki Deezer.',
-  'It looks every 5–60 minutes and gives freshly copied files two minutes of rest.':
-    'Sprawdza co 5–60 minut i daje świeżo skopiowanym plikom dwie minuty spokoju.',
+  'It looks every 5–60 minutes and waits until freshly copied files are complete.':
+    'Sprawdza co 5–60 minut i czeka, aż świeżo skopiowane pliki będą kompletne.',
   'Under <a class="link" href="#/einstellungen/speicher">Settings → Storage locations</a> you see where music, playlists and the archive are; in Docker you set them in docker-compose.yaml.':
     'W <a class="link" href="#/einstellungen/speicher">Ustawienia → Lokalizacje</a> widzisz, gdzie są muzyka, playlisty i archiwum; w Dockerze ustawiasz je w docker-compose.yaml.',
-  'The AI sound analysis needs about 850 MB of extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
-    'Analiza brzmienia AI potrzebuje podczas działania ok. 850 MB dodatkowej pamięci; ile rdzeni procesora może używać, ustawiasz w <a class="link" href="#/einstellungen/intel">Ustawienia → Inteligencja</a>.',
+  'The AI sound analysis needs extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
+    'Analiza brzmienia AI potrzebuje podczas działania dodatkowej pamięci operacyjnej; ile rdzeni procesora może używać, ustawiasz w <a class="link" href="#/einstellungen/intel">Ustawienia → Inteligencja</a>.',
   'Tuttiphon converts new lossless files such as FLAC to <b>Opus</b> or <b>AAC</b> – sounds the same with about a fifth of the space. Opus suits Android, AAC iPhone and Mac.':
     'Tuttiphon konwertuje nowe pliki bezstratne, takie jak FLAC, do <b>Opus</b> lub <b>AAC</b> – brzmią tak samo, a zajmują ok. jednej piątej miejsca. Opus pasuje do Androida, AAC do iPhone’a i Maca.',
   'The original only goes to the archive once the new file has been checked; nothing there is ever overwritten.':
@@ -398,8 +398,8 @@ export default {
     'Kreator konfiguracji przechodzi krok po kroku przez najważniejsze ustawienia. Przy nowej instalacji otwiera się sam; później uruchomisz go w <a class="link" href="#/einstellungen/allgemein">Ustawienia → Ogólne</a>.',
   'Only the connection is saved right away, everything else with <b>“Finish”</b>; <b>“Skip setup”</b> leaves the rest as it is.':
     'Od razu zapisywane jest tylko połączenie, wszystko inne przez <b>„Zakończ”</b>; <b>„Pomiń konfigurację”</b> zostawia resztę bez zmian.',
-  'The <b>language of the server</b> applies to notifications, logs and the names Tuttiphon gives playlists and music worlds.':
-    '<b>Język serwera</b> dotyczy powiadomień, dzienników i nazw, które Tuttiphon nadaje playlistom i światom muzycznym.',
+  'The <b>language of the server</b> applies to logs, the administrators’ ntfy topic and the names Tuttiphon gives playlists and music worlds. Notifications on phones and in the browser follow the language of the device.':
+    '<b>Język serwera</b> dotyczy dzienników, tematu ntfy administratorów i nazw, które Tuttiphon nadaje playlistom i światom muzycznym. Powiadomienia na telefonie i w przeglądarce są w języku urządzenia.',
   'Every day Tuttiphon backs up everything that cannot be restored on its own – settings, playlists, credentials, Deezer, sound analysis and the listening history – as a ZIP file. Under <a class="link" href="#/einstellungen/sicherung">Settings → Backup</a> you back up right away, download backups and set how many are kept.':
     'Codziennie Tuttiphon zabezpiecza wszystko, czego nie da się samemu odtworzyć – ustawienia, playlisty, dane logowania, Deezer, analizę brzmienia i historię słuchania – jako plik ZIP. W <a class="link" href="#/einstellungen/sicherung">Ustawienia → Kopia zapasowa</a> tworzysz kopię od razu, pobierasz kopie i ustawiasz, ile ich jest przechowywanych.',
   '<b>User</b> – own home page, playlists and profile; sees others’ playlists only if they are shared with everyone.':

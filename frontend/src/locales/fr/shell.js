@@ -46,8 +46,8 @@ export default {
     'Quelle musique, quelle humeur et enfin les finitions. En haut, vous voyez où vous en êtes.',
   'For whom?':
     'Pour qui ?',
-  'The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.':
-    'La personne détermine dans quel compte Navidrome va la playlist et quelles étoiles comptent. Ensuite, vous choisissez l’univers musical.',
+  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
+    'La personne détermine dans quel compte Navidrome arrive la playlist – ce sont les étoiles de ce compte qui comptent. Ensuite, vous choisissez l’univers musical.',
   'Choose music':
     'Choisir la musique',
   'Tap one or more music worlds. “All” takes the whole library.':
@@ -120,12 +120,12 @@ export default {
     'Chacun se connecte avec son propre compte Navidrome. Ici, vous choisissez pour chaque compte : administrateur, utilisateur ou aucun accès.',
   'People':
     'Personnes',
-  'One person per account: suggestions and mixes are made for them with their favorites and dislikes.':
+  'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
     'Une personne par compte : les suggestions et les mix sont faits pour elle, avec ses favoris et sans ce qu’elle n’aime pas.',
   'Make suggestions better':
     'Améliorer les suggestions',
   'Open my profile':
-    'Ouvrez mon profil',
+    'Ouvrez « Mon profil »',
   'Add what was recognized with “+”':
     'Ajoutez ce qui a été reconnu avec « + »',
   'Add favorites and dislikes':
@@ -385,7 +385,7 @@ export default {
   'new FLAC files → Opus or AAC, archive originals as set':
     'nouveaux fichiers FLAC → Opus ou AAC, archiver les originaux selon le réglage',
   'Find & tidy up lyrics':
-    'Trouver & ranger les paroles',
+    'Trouver & nettoyer les paroles',
   'fetch missing lyrics with a time limit, delete duplicate .txt':
     'récupérer les paroles manquantes avec une limite de temps, supprimer les .txt en double',
   'Fetch missing covers':
@@ -419,7 +419,7 @@ export default {
   '{n} lyrics found':
     'Paroles trouvées : {n}',
   '{n} lyrics tidied up':
-    'Paroles rangées : {n}',
+    'Paroles nettoyées : {n}',
   '{n} playlist written, {removed} removed':
     '{n} playlist écrite, {removed} en moins',
   '{n} playlists written, {removed} removed':
@@ -535,7 +535,9 @@ export default {
   'In the lyrics':
     'Dans les paroles',
   'Bands, songs, mood, lyric line …':
-    'Groupes, titres, humeur, ligne de paroles…',
+    'Groupes, titres, humeur, vers de chanson…',
+  'Mix · {n} matching song, new every week':
+    'Mix · {n} titre adapté, renouvelé chaque semaine',
   'Mix · {n} matching songs, new every week':
     'Mix · {n} titres adaptés, renouvelé chaque semaine',
   '{songs} · create as mix':

@@ -319,7 +319,7 @@ export default {
   'What do you like to listen to?':
     'O que gosta de ouvir?',
   'Tap everything you like – you can pick several. A music world groups similar bands together.':
-    'Toque em tudo o que gosta – pode escolher vários. Um mundo musical agrupa bandas semelhantes.',
+    'Toque em tudo aquilo de que gosta – pode escolher vários. Um mundo musical agrupa bandas semelhantes.',
   'What you listen to most in Symfonium is already selected. Tap whatever does not fit or is missing.':
     'O que mais ouve no Symfonium já está selecionado. Toque no que não encaixa ou no que falta.',
   'Your favorite bands':
@@ -363,7 +363,7 @@ export default {
   'Your mixes of today and new suggestions – your home page.':
     'Os seus mixes de hoje e novas sugestões – a sua página inicial.',
   'Change favorite bands and dislikes at any time.':
-    'Altere a qualquer momento as bandas favoritas e o que não gosta.',
+    'Altere a qualquer momento as bandas favoritas e aquilo de que não gosta.',
   'Questions? The question mark next to every heading explains the page.':
     'Dúvidas? O ponto de interrogação junto a cada título explica a página.',
   'Short tour':
@@ -415,9 +415,9 @@ export default {
   'only for you':
     'só para si',
   'Who should play? Choose one or more music worlds – or “All” for the whole library.':
-    'Quem deve tocar? Escolha um ou mais mundos musicais – ou «Tudo» para a biblioteca inteira.',
+    'Quem deve tocar? Escolha um ou mais mundos musicais – ou «Todos» para a biblioteca inteira.',
   'All':
-    'Tudo',
+    'Todos',
   'The whole library':
     'A biblioteca inteira',
   'without the world “{list}”':

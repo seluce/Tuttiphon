@@ -71,6 +71,8 @@ export default {
   'Free with your own key: similar bands for radio, suggestions and “You might still be missing”, plus genre and mood tags for classifying new bands. Everything is cached for 30 days.': 'Kostenlos mit eigenem Schlüssel: ähnliche Bands für Radio, Vorschläge und „Fehlt euch vielleicht noch“ sowie Genre- und Stimmungs-Tags für die Einordnung neuer Bands. Alles wird 30 Tage zwischengespeichert.',
   'Key entered': 'Schlüssel eingetragen',
   'No key yet': 'Noch kein Schlüssel',
+  '{n} band loaded':
+    '{n} Band geladen',
   '{n} bands loaded': '{n} Bands geladen',
   ' · last run {when}': ' · zuletzt {when}',
   'The key is set in docker-compose.yaml as LASTFM_API_KEY.': 'Der Schlüssel ist in docker-compose.yaml als LASTFM_API_KEY festgelegt.',
@@ -94,6 +96,8 @@ export default {
   'Bands that are new in the library, e.g. from Lidarr, go straight into their music world with a confident match of 75% or more. “To review” then shows what was classified, with “Undo”.': 'Bands, die neu in der Bibliothek sind, etwa von Lidarr, kommen bei einem sicheren Treffer ab 75 % direkt in ihre Musikwelt. Unter „Zu prüfen“ steht dann, was eingeordnet wurde, mit „Rückgängig“.',
   'Automatic from': 'Automatisch ab',
   'Only very confident matches are classified directly; the rest stays a suggestion.': 'Nur sehr sichere Treffer werden direkt eingeordnet; der Rest bleibt ein Vorschlag.',
+  '{n} song · {why}':
+    '{n} Song · {why}',
   '{n} songs · {why}': '{n} Songs · {why}',
   'add': 'aufnehmen',
   'No bands without a music world right now.': 'Gerade keine Bands ohne Musikwelt.',
@@ -212,6 +216,8 @@ export default {
   '“{word}”': '„{word}“',
   'allowed': 'erlaubt',
   'allow': 'erlauben',
+  'Show {n} more band':
+    'Weitere {n} Band zeigen',
   'Show {n} more bands': 'Weitere {n} Bands zeigen',
 
   // Deezer.svelte
@@ -346,8 +352,8 @@ export default {
     'Steht dort schon eine Liste, setze „tuttiphon,“ davor – ohne eigene Liste sind das die Voreinstellungen von Navidrome. Die Zeile in docker-compose gewinnt gegen navidrome.toml. Starte Navidrome danach neu; wo Tuttiphon keine Antwort hat, fragt Navidrome die nächsten.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'Schalte in Navidrome unter <b>Einstellungen → Plugins</b> „Tuttiphon“ ein, trage Adresse und Schlüssel ein und gib es für <b>alle Benutzer</b> frei (für die Wiedergaben). Am besten die Adresse im Heimnetz, z. B. <code>http://&lt;NAS&gt;:8765</code> – keine https-Adresse über einen Reverse Proxy, der Navidrome abweisen kann. Dieser Browser erreicht Tuttiphon unter <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'Schalte in Symfonium für den Navidrome-Server <b>„Ähnliche Titel für Radio-Mix verwenden“</b> ein (Medienquellen verwalten → der Server).',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'Schalte in Symfonium für den Navidrome-Server <b>„Ähnliche Titel für Radio-Mix verwenden“</b> ein (Medienquellen verwalten → der Server) und wähle im Player bei der intelligenten Warteschlange <b>„Basierend auf Sonic Analysis“</b>.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
     'Navidrome verrät nicht, wer fragt. Läuft der Song gerade auf genau einem Konto – oder spielt nur ein Konto –, gilt die Antwort dieser Person: ohne ihre Abneigungen, ohne das, was sie gerade gehört oder mit 1 Stern bewertet hat; was sie oft überspringt, kommt später, und nach zwei Songs einer Band kommen erst andere Bands. Sonst gilt sie der Familie. Kindermusik nur zu Kinderliedern, und ohne Songs mit derben Texten, sobald ein Profil Kinderschutz hat oder ein Kinderprofil ist.',
   'Create a new key?': 'Neuen Schlüssel erzeugen?',
@@ -368,4 +374,8 @@ export default {
     '{when} · für {name}',
   '{when} · for the family':
     '{when} · für die Familie',
+  '{when} · probably for {name}':
+    '{when} · vermutlich für {name}',
+  'Last answer with similar songs': 'Letzte Antwort mit ähnlichen Songs',
+  'Copy {what}': '{what} kopieren',
 }

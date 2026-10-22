@@ -193,7 +193,7 @@ export default {
   'Music worlds':
     'Mundos musicales',
   'A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, Last.fm, AI music style, language and decade.':
-    'Un mundo musical dice quién toca. Tuttiphon los crea a partir de tu biblioteca y clasifica solo las bandas nuevas – por géneros, Last.fm, estilo musical según la IA, idioma y década.',
+    'Un mundo musical dice quién toca. Tuttiphon los crea a partir de tu biblioteca y clasifica automáticamente las bandas nuevas – por géneros, Last.fm, estilo musical según la IA, idioma y década.',
   'Your music sorted by kind. Tap a world to see which bands belong to it – with “Like” you keep a world in mind for your suggestions.':
     'Tu música ordenada por tipo. Toca un mundo para ver qué bandas forman parte – con «Me gusta» tienes en cuenta un mundo para tus sugerencias.',
   'you like it':
@@ -203,7 +203,7 @@ export default {
   'created by Tuttiphon':
     'creado por Tuttiphon',
   'finds bands on its own':
-    'encuentra bandas solo',
+    'encuentra bandas por su cuenta',
   'separate world':
     'mundo aparte',
   '{n} playlist of yours':
@@ -303,7 +303,7 @@ export default {
   'Delete music world':
     'Eliminar mundo musical',
   '“auto” = found on its own, matching {scene}. × takes a band out.':
-    '«auto» = detectada sola, encaja con {scene}. × excluye una banda.',
+    '«auto» = detectada automáticamente, encaja con {scene}. × excluye una banda.',
   '× removes a band. Tip: with a scene further down, typical bands are added automatically.':
     '× quita una banda. Consejo: con una escena (más abajo), las bandas típicas se añaden automáticamente.',
   'auto':
@@ -399,7 +399,7 @@ export default {
   'Visible only to you – your stars & favorites count.':
     'Visible solo para ti – cuentan tus estrellas y favoritos.',
   'This playlist shows the most played songs – from what is played in Symfonium. It changes on its own on the first of the month; it always stays one playlist.':
-    'Esta playlist muestra las canciones más escuchadas – según lo que se escucha en Symfonium. Cambia sola el día 1 de cada mes; siempre sigue siendo una sola playlist.',
+    'Esta playlist muestra las canciones más escuchadas – según lo que se escucha en Symfonium. Cambia automáticamente el día 1 de cada mes; siempre sigue siendo una sola playlist.',
   'Period':
     'Período',
   'the last month':
@@ -517,11 +517,11 @@ export default {
   'Smart playlist':
     'Playlist inteligente',
   'Mix – renews itself':
-    'Mix – se renueva solo',
+    'Mix – se renueva por sí solo',
   'Mix – renews itself. This vibe picks by sound; only Tuttiphon can do that, so it is only available as a mix.':
-    'Mix – se renueva solo. Este ambiente elige por el sonido; eso solo lo puede hacer Tuttiphon, por eso solo existe como mix.',
+    'Mix – se renueva por sí solo. Este ambiente elige por el sonido; eso solo lo puede hacer Tuttiphon, por eso solo existe como mix.',
   'Mix – renews itself. The songs are picked by their sound; only Tuttiphon can do that, so it is only available as a mix.':
-    'Mix – se renueva solo. Las canciones se eligen por su sonido; eso solo lo puede hacer Tuttiphon, por eso solo existe como mix.',
+    'Mix – se renueva por sí solo. Las canciones se eligen por su sonido; eso solo lo puede hacer Tuttiphon, por eso solo existe como mix.',
   'Tuttiphon rebuilds the list regularly: a few songs per band, never the same band twice in a row. In between it stays the same – ideal if Symfonium should save it offline and update it automatically.':
     'Tuttiphon rehace la lista con regularidad: pocas canciones por banda, nunca la misma banda dos veces seguidas. Entretanto no cambia – ideal si Symfonium debe guardarla sin conexión y actualizarla automáticamente.',
   'Navidrome reshuffles from all matching songs every time the playlist is loaded – always fresh, but unsuitable for offline downloads in Symfonium because the list keeps changing.':

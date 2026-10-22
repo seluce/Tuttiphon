@@ -224,8 +224,8 @@ export default {
     'Seulement si vous avez choisi « Toute la famille » dans votre profil. Même dans ce cas, ils ne peuvent pas les modifier. À part vous, seul l’administrateur voit vos statistiques et votre profil.',
   'My statistics are empty.':
     'Mes statistiques sont vides.',
-  'Then Tuttiphon doesn’t have your password: turn it on under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
-    'Alors Tuttiphon n’a pas votre mot de passe : activez-le sous Paramètres → Mon compte. Ou vous n’avez rien écouté depuis. Symfonium doit signaler les écoutes au serveur ; c’est normalement activé.',
+  'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
+    'Alors Tuttiphon n’a pas votre mot de passe : activez « Statistiques & étoiles » sous Paramètres → Mon compte. Ou vous n’avez rien écouté depuis. Symfonium doit signaler les écoutes au serveur ; c’est normalement le cas.',
   'Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.':
     'Tuttiphon les détecte lui-même dans votre bibliothèque – comme les tubes des années 80, l’Eurodance ou le rap allemand – et y classe tout seul les nouveaux groupes. Les univers que vous écoutez sont tout devant.',
   'A band is missing or in the wrong place.':
@@ -235,7 +235,7 @@ export default {
   'Yes: “Undo” in the message at the bottom. Deleted playlists stay in the trash for 30 days and can be restored until then.':
     'Oui : « Annuler » dans le message en bas. Les playlists supprimées restent 30 jours dans la corbeille et peuvent être restaurées jusque-là.',
   'I only know one line of the song.':
-    'Je ne connais qu’une ligne du titre.',
+    'Je ne connais qu’un vers de la chanson.',
   'Can I listen to music here?':
     'Puis-je écouter de la musique ici ?',
   'Why is a song missing from my child’s playlists?':
@@ -245,7 +245,7 @@ export default {
   'Music world':
     'Univers musical',
   'Who plays: a group of similar bands, e.g. kids’ rock or medieval.':
-    'Qui joue : un groupe de groupes similaires, par ex. rock pour enfants ou médiéval.',
+    'Qui joue : un ensemble de groupes similaires, par ex. rock pour enfants ou médiéval.',
   'Vibe':
     'Ambiance',
   'What plays: mood, occasion, decade, season.':
@@ -381,7 +381,7 @@ export default {
   '<b>“to fall asleep”</b>, <b>“no vocals”</b> or <b>“calm piano music”</b> – finds songs by their sound.':
     '<b>« pour s’endormir »</b>, <b>« sans voix »</b> ou <b>« piano calme »</b> – trouve des titres d’après leur son.',
   '<b>A line of the lyrics</b>, such as “hands up in the air” – finds the song by its words.':
-    '<b>Une ligne des paroles</b>, comme « les mains en l’air » – trouve le titre d’après ses mots.',
+    '<b>Un vers des paroles</b>, comme « les mains en l’air » – trouve la chanson d’après ses mots.',
   '<a class="link" href="#/playlists">My playlists</a> lists all your playlists. Tap one to see its songs and bands – a tap on a song plays it.':
     '<a class="link" href="#/playlists">Mes playlists</a> liste toutes vos playlists. Appuyez sur l’une d’elles pour voir ses titres et ses groupes – un appui sur un titre le lance.',
   '<Ui icon="pin">Keep this mix</Ui> – the current selection as a fixed playlist that never changes.':
@@ -399,7 +399,7 @@ export default {
   '<b>Radio and smart queue by sound:</b> in Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers) and choose “Sonic Analysis” for the smart queue in the player. The next songs then come from Tuttiphon – picked for you and with variety between bands.':
     '<b>Radio et file intelligente d’après le son :</b> dans Symfonium, activez « Use similar tracks for Radio Mix » pour le serveur (« Manage media providers ») et choisissez « Sonic Analysis » pour la file intelligente dans le lecteur. Les titres suivants viennent alors de Tuttiphon – choisis pour vous et variés entre les groupes.',
   'A <b>music world</b> groups similar bands, such as “Medieval” with Saltatio Mortis and In Extremo. Under <a class="link" href="#/welten">Music worlds</a>, the ones you listen to come first.':
-    'Un <b>univers musical</b> regroupe des groupes similaires, comme « Médiéval » avec Saltatio Mortis et In Extremo. Sous <a class="link" href="#/welten">Univers musicaux</a>, ceux que vous écoutez viennent en premier.',
+    'Un <b>univers musical</b> rassemble des groupes similaires, comme « Médiéval » avec Saltatio Mortis et In Extremo. Sous <a class="link" href="#/welten">Univers musicaux</a>, ceux que vous écoutez viennent en premier.',
   '<b>Tap a band</b> – albums, similar bands and <Ui icon="radio">Start radio</Ui>.':
     '<b>Appuyez sur un groupe</b> – albums, groupes similaires et <Ui icon="radio">Lancer la radio</Ui>.',
   '<a class="link" href="#/statistik">My statistics</a> shows your most played bands, songs and albums – and <b>forgotten favorites</b> you haven’t heard in a long time, as a playlist with one tap.':

@@ -1,4 +1,4 @@
-// Same keys as ../de/setup.js (tools/translate.py)
+// Same keys as ../de/setup.js
 export default {
   'Set up Tuttiphon':
     'Skonfiguruj Tuttiphon',
@@ -157,7 +157,7 @@ export default {
   'no night analysis':
     'bez analizy nocnej',
   'for {accounts}':
-    'dla: {accounts}',
+    'dla kont: {accounts}',
   'no accounts yet':
     'jeszcze brak kont',
   'overwrites stars given by hand':

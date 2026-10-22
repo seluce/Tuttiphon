@@ -203,9 +203,12 @@ class Navidrome:
                  "v": "1.16.1", "c": CLIENT, "id": cover_id, **({"size": size} if size else {})}
         try:
             with urllib.request.urlopen(f"{self.url}/rest/getCoverArt?{urllib.parse.urlencode(query)}", timeout=30) as resp:
-                return resp.read(), resp.headers.get("Content-Type", "")
+                data, ctype = resp.read(), resp.headers.get("Content-Type", "")
         except urllib.error.URLError as e:
             raise NavidromeError(_("Image not available: {error}", error=e))
+        if not ctype.startswith("image/"):   # Subsonic answers an error with 200 and a JSON/XML body
+            raise NavidromeError(_("Image not available: {error}", error=ctype or "?"))
+        return data, ctype
 
 
 class NativeApi:

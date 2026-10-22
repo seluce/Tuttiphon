@@ -4,12 +4,14 @@ import { test, expect } from '@playwright/test'
 import { login, visit } from './helpers.js'
 
 const RUNNING = { running: true, name: 'Klanganalyse (nachts)', steps: ['analyse'], step: 'analyse', results: {}, finishedAt: null, lines: [] }
+let started = 1   // the run's start time – another one is another run
 
 test.describe('Task bar', () => {
   test.beforeEach(async ({ context, page }) => {
+    started = 1
     await login(context, 'admin')
     await page.route((url) => url.pathname === '/api/task', (route) =>
-      route.request().method() === 'GET' ? route.fulfill({ json: RUNNING }) : route.fallback())
+      route.request().method() === 'GET' ? route.fulfill({ json: { ...RUNNING, startedAt: started } }) : route.fallback())
   })
   test.afterEach(async ({ page }) => page.unrouteAll({ behavior: 'ignoreErrors' }))
 
@@ -19,7 +21,10 @@ test.describe('Task bar', () => {
     await expect(bar).toBeVisible()
     await bar.getByRole('button', { name: 'Schließen' }).click()
     await expect(bar).toHaveCount(0)
-    await expect(page.locator('header button .animate-spin, .topbar button .animate-spin').first()).toBeVisible()   // the chip stays
+    await expect(page.locator('[data-task-chip]')).toBeVisible()   // the chip stays …
+    await expect(page.locator('[data-task-chip]')).toBeFocused()   // … and takes the keyboard focus
+    started = 2   // the next run (e.g. the daily refresh) – the app never saw a moment without a run
+    await expect(bar).toBeVisible({ timeout: 15000 })
   })
 
   test('swiping it aside', async ({ page }) => {

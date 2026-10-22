@@ -106,6 +106,8 @@ export default {
   'show {n} more': '{n} weitere anzeigen',
   // start/LibraryCard.svelte
   'Library': 'Bibliothek',
+  '{n} album still in MP3 – list':
+    '{n} Album noch als MP3 – Liste',
   '{n} albums still in MP3 – list': '{n} Alben noch als MP3 – Liste',
   '{loved} favorites · {played} songs with plays': '{loved} Favoriten · {played} Songs mit Wiedergaben',
   // start/WeekCard.svelte
@@ -172,10 +174,14 @@ export default {
   'Change cover': 'Cover ändern',
   'back in Symfonium from {date}': 'wieder in Symfonium ab {date}',
   'from {n} matching': 'aus {n} passenden',
+  '{n} matching song':
+    '{n} passender Song',
   '{n} matching songs': '{n} passende Songs',
   'up to {n} per request': 'bis {n} pro Abruf',
   'in Navidrome: {owner}': 'in Navidrome: {owner}',
   'Rather few songs – maybe loosen the selection or add more music worlds.': 'Recht wenige Songs – vielleicht die Auswahl lockern oder mehr Musikwelten nehmen.',
+  'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.':
+    'Der Mix ist kürzer als gewünscht, weil höchstens {n} Song pro Band erlaubt ist – mehr Bands aus weiteren Musikwelten machen ihn länger.',
   'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.': 'Der Mix ist kürzer als gewünscht, weil höchstens {n} Songs pro Band erlaubt sind – mehr Bands aus weiteren Musikwelten machen ihn länger.',
   'This playlist belongs to {name} and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.': 'Diese Playlist gehört {name} und ist für alle freigegeben. Du kannst sie in Symfonium hören – oder dir mit „Für mich kopieren“ eine eigene Version anlegen und anpassen.',
   'This playlist belongs to someone else and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.': 'Diese Playlist gehört jemand anderem und ist für alle freigegeben. Du kannst sie in Symfonium hören – oder dir mit „Für mich kopieren“ eine eigene Version anlegen und anpassen.',
@@ -192,14 +198,20 @@ export default {
   // playlist/actions.js
   'Daily Mix · new every day': 'Daily Mix · jeden Tag neu',
   'Today in the mix': 'Heute im Mix',
+  '{n} song today':
+    '{n} Song heute',
   '{n} songs today': '{n} Songs heute',
   'These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.': 'Genau diese {n} Songs stehen heute in Navidrome – morgen früh gibt es eine neue Auswahl. Bis dahin bleibt die Liste gleich – gut für Offline in Symfonium.',
   'Weekly Mix · new every week': 'Weekly Mix · jede Woche neu',
   'This week in the mix': 'Diese Woche im Mix',
+  '{n} song this week':
+    '{n} Song diese Woche',
   '{n} songs this week': '{n} Songs diese Woche',
   'These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.': 'Genau diese {n} Songs stehen diese Woche in Navidrome – nächsten Montag gibt es eine neue Auswahl. Bis dahin bleibt die Liste gleich – gut für Offline in Symfonium.',
   'Monthly Mix · new every month': 'Monthly Mix · jeden Monat neu',
   'This month in the mix': 'Diesen Monat im Mix',
+  '{n} song this month':
+    '{n} Song diesen Monat',
   '{n} songs this month': '{n} Songs diesen Monat',
   'These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.': 'Genau diese {n} Songs stehen diesen Monat in Navidrome – am Monatsersten gibt es eine neue Auswahl. Bis dahin bleibt die Liste gleich – gut für Offline in Symfonium.',
   'Paused – kept here, disappears from Navidrome shortly': 'Pausiert – bleibt hier aufgehoben, verschwindet gleich aus Navidrome',
@@ -218,6 +230,8 @@ export default {
   '{name} (copy)': '{name} (Kopie)',
   'A selection of {n} songs is saved as the fixed playlist “{name}” in Navidrome. It won’t change after that – handy when you like a mix.': 'Eine Auswahl von {n} Songs wird als feste Playlist „{name}“ in Navidrome gespeichert. Sie ändert sich danach nicht mehr – praktisch, wenn euch eine Mischung gefällt.',
   'A selection of {n} songs is saved as the fixed playlist “{name}” in Navidrome. It won’t change after that.': 'Eine Auswahl von {n} Songs wird als feste Playlist „{name}“ in Navidrome gespeichert. Sie ändert sich danach nicht mehr.',
+  '“{name}” saved with {n} song ✓':
+    '„{name}“ mit {n} Song gespeichert ✓',
   '“{name}” saved with {n} songs ✓': '„{name}“ mit {n} Songs gespeichert ✓',
   'Reshuffled – coming to Navidrome shortly': 'Neu gewürfelt – kommt gleich in Navidrome',
   'Reshuffled – bring it to Navidrome with “Apply”': 'Neu gewürfelt – mit „Übernehmen“ nach Navidrome bringen',
@@ -264,6 +278,8 @@ export default {
   '{n} more ideas': '{n} weitere Ideen',
   'One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in Symfonium.': 'Ein ganzes Album in Albumreihenfolge – nächsten Montag gibt es ein neues. Bis dahin bleibt die Liste gleich – gut für Offline in Symfonium.',
   'one whole album a week, from {n} never played': 'jede Woche ein ganzes Album, aus {n} noch nie gehörten',
+  'from {n} album never played':
+    'aus {n} noch nie gehörten Album',
   'from {n} albums never played': 'aus {n} noch nie gehörten Alben',
   'Album of the week · new every Monday': 'Album der Woche · jeden Montag neu',
   'This week’s album': 'Das Album dieser Woche',

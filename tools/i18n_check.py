@@ -10,15 +10,19 @@ Errors (exit code 1):
             in German, or str.format() would fail on an unknown name. Allowed: a form the code passes along for the
             translation instead of the English one (PLACEHOLDER_ALTERNATIVES: {Every} = {every} capitalized, {owner} =
             the German possessive of {name})
-  values    a call with a literal text and only keyword values that does not pass a placeholder of the English or
-            German text ({n} of _n()/_sn() comes by itself) – it would raise KeyError
+  values    a call with a literal text and only keyword values that does not pass a placeholder of the English text
+            or of a translation ({n} of _n()/_sn() comes by itself) – it would raise KeyError
+  format    a translation that does not format with values like the code passes them (a date for {start:%d/%m}, a
+            number for {n:,}, text otherwise)
+  markup    a translation whose tags (with their attributes) differ from the English text
   german    German text left in the code (string or f-string) – data such as word lists for language detection is
             marked with "i18n-ignore" on the line, or a block between "i18n-ignore-start" and "i18n-ignore-end"
   shadow    a function assigns to _ (or _s …) and also calls it – the call raises UnboundLocalError
   bare      a visible text that does not go through the functions: log lines, exceptions, notifications and the
             "error"/"message"/"title"/"text"/"hint" values of answers
-The other languages (every other folder in app/locales/): per entry the same placeholder check and, for an entry with
-several forms ({"few": …, "many": …}), only plural categories; a conflict as in German. These are errors too.
+The other languages (every other folder in app/locales/): per entry the same placeholder, format and markup checks and,
+for an entry with several forms ({"few": …, "many": …}), only plural categories; the plural of a count (third text of
+_n()/_sn()) with every form its language needs (Polish: few and many); a conflict as in German. These are errors too.
 Warnings:
   dynamic   a translation function without a literal text (fine for N_() constants – mark the line "i18n-ignore")
   unused    a German entry nobody uses (only with all files)
@@ -35,6 +39,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LOCALES = ROOT / "app" / "locales" / "de"
 FORMS = {"zero", "one", "two", "few", "many", "other"}
+NEEDS = {"pl": ("few", "many")}   # languages whose plural of a count has several forms – each one is needed
 GERMAN = re.compile(r"[äöüÄÖÜß]|\b(und|oder|nicht|mit|für|auf|der|das|dem|den|des|ein|eine|einen|einem|ist|sind|wird|"
                     r"werden|noch|alle|alles|keine|kein|bitte|zum|zur|vom|beim|nach|über|wenn|dann|schon|auch|nur|"
                     r"hier|jetzt|heute|gestern|neu|neue|neuen|Woche|Monat|Jahr|Tage|Tagen|Fehler|gespeichert|"
@@ -87,7 +92,45 @@ def load_dict(folder=LOCALES):
                 errors.append(f"plural    {where}: not a text of a plural category")
                 continue
             errors += _placeholder_errors(k, v, where, "German" if not lang else "it")
+            bad = _format_error(k, v)
+            if bad:
+                errors.append(f"format    {where}: {bad}")
+            if _tags(k) != _tags(v):   # whole tags with attributes – no href, onclick … of a translation's own
+                errors.append(f"markup    {where}: the tags differ from the English text")
     return merged, origin, errors
+
+
+def _format_error(en, text):
+    """Does the translation format with values like the code passes them? A date for {start:%d/%m}, a number for
+    {n:,}, text otherwise – a wrong format would only fail when the message is shown."""
+    import datetime as dt
+    specs = {}
+    for src in (en, text):
+        try:
+            for _l, name, spec, _c in string.Formatter().parse(src):
+                if name:
+                    specs.setdefault(re.split(r"[.\[]", name)[0], set()).add(spec or "")
+        except ValueError:
+            return "a single { or }"
+    values = {}
+    for name, found in specs.items():
+        if any("%" in x for x in found):
+            values[name] = dt.datetime(2026, 5, 3, 7, 5)
+        elif any(x and (x[-1] in "dfeEgGnxXob%" or "," in x) for x in found):
+            values[name] = 1234
+        else:
+            values[name] = "x"
+    if not values:
+        return None
+    try:
+        text.format(**values)
+    except (ValueError, KeyError, IndexError, TypeError) as e:
+        return f"{type(e).__name__}: {e}"
+    return None
+
+
+def _tags(text):
+    return sorted(re.sub(r"\s+", " ", t) for t in re.findall(r"</?[A-Za-z][^>]*>", text))
 
 
 def _placeholder_errors(k, v, where, who):
@@ -102,8 +145,20 @@ def _placeholder_errors(k, v, where, who):
             + (f" {who} has unknown {{{'}, {'.join(extra)}}}" if extra else "")]
 
 
+def other_dicts():
+    """{lang: dictionary} of every language folder besides German."""
+    return {d.name: load_dict(d)[0] for d in sorted(LOCALES.parent.iterdir()) if d.is_dir() and d != LOCALES}
+
+
+def _names(entry):
+    """Placeholders of a translation – of every form of an entry with several."""
+    forms = entry.values() if isinstance(entry, dict) else [entry or ""]
+    return set().union(*(placeholders(x) for x in forms if isinstance(x, str)))
+
+
 def check(files):
     de, origin, errors = load_dict()
+    others = other_dicts()   # their placeholders count at the call sites too ({owner}, {Every} …)
     warnings, used = [], set()
     # the delivered vibes, person and "all" name in app/default_config.json follow the server language
     defaults = json.loads((ROOT / "app" / "default_config.json").read_text(encoding="utf-8"))
@@ -149,7 +204,9 @@ def check(files):
                         counted = node.func.id in ("_n", "_sn")
                         if node.func.id != "N_" and (node.keywords or counted) and all(k.arg for k in node.keywords):
                             given = {k.arg for k in node.keywords} | ({"n"} if counted else set())
-                            lack = sorted((placeholders(arg.value) | placeholders(de.get(arg.value, ""))) - given)
+                            wanted = placeholders(arg.value) | placeholders(de.get(arg.value, ""))
+                            wanted |= set().union(*(_names(d.get(arg.value)) for d in others.values()))
+                            lack = sorted(wanted - given)
                             if lack and node.lineno not in ignored:
                                 errors.append(f"values    {rel}:{arg.lineno} {json.dumps(arg.value, ensure_ascii=False)[:80]}"
                                               f" – no value for {{{'}, {'.join(lack)}}}")
@@ -221,6 +278,17 @@ def check(files):
     return de, origin, used, errors, warnings
 
 
+def counted(files):
+    """The plural texts of counts: the third argument of _n()/_sn()."""
+    out = set()
+    for path in files:
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in ("_n", "_sn") \
+                    and len(node.args) > 2 and isinstance(node.args[2], ast.Constant):
+                out.add(node.args[2].value)
+    return out
+
+
 def main():
     args = [Path(a).resolve() for a in sys.argv[1:]]
     files = args or sorted((ROOT / "app").glob("*.py")) + [ROOT / "tuttiphon.py"]
@@ -235,6 +303,11 @@ def main():
             if missing:
                 warnings.append(f"missing   {folder.name}: {len(missing)} text(s), e.g. {json.dumps(sorted(missing)[0], ensure_ascii=False)[:80]}")
             warnings += [f"unused    {folder.name} \"{k}\" ({from_[k]})" for k in d if k not in used]
+        need = NEEDS.get(folder.name, ())
+        for k in sorted(counted(files)) if need else ():
+            lacks = [f for f in need if k in d and not (isinstance(d[k], dict) and d[k].get(f))]
+            if lacks:
+                errors.append(f"plural    {folder.name} {json.dumps(k, ensure_ascii=False)[:80]} ({from_[k]}): a count needs the forms {', '.join(lacks)}")
     if not args:
         warnings += [f"unused    \"{k}\" ({origin[k]})" for k in de if k not in used]
     for w in warnings:

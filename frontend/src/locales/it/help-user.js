@@ -7,9 +7,9 @@ export default {
   '“Show me” walks you through the steps right on the page. The {icon} next to every page title explains that page.':
     '«Mostrami» ti guida nei passaggi direttamente sulla pagina. L\'{icon} accanto al titolo di ogni pagina spiega quella pagina.',
   'You say <b>who</b> should play and <b>what</b> kind of mood – from that, Tuttiphon builds playlists that keep themselves up to date: new albums are included automatically, stars from Deezer pick out the hits, and what you listen to in Symfonium makes the suggestions personal.':
-    'Voi dite <b>chi</b> deve suonare e <b>che</b> mood volete – da qui Tuttiphon crea playlist che si aggiornano da sole: i nuovi album entrano in automatico, le stelle di Deezer selezionano le hit e ciò che ascoltate in Symfonium rende i suggerimenti personali.',
+    'Tu dici <b>chi</b> deve suonare e <b>che</b> mood vuoi – da qui Tuttiphon crea playlist che si aggiornano da sole: i nuovi album entrano in automatico, le stelle di Deezer selezionano le hit e ciò che ascolti in Symfonium rende i suggerimenti personali.',
   'You say <b>what music</b> you like and <b>what you’re in the mood for</b> – from that, Tuttiphon builds playlists from your library that keep themselves up to date. Along the way it learns from what you listen to in Symfonium. You listen to everything in Symfonium as usual.':
-    'Tu dici <b>quale musica</b> ti piace e <b>che cosa ti va di ascoltare</b> – da qui Tuttiphon crea dalla vostra libreria playlist che si aggiornano da sole. Strada facendo impara da ciò che ascolti in Symfonium. Ascolti tutto in Symfonium come sempre.',
+    'Tu dici <b>quale musica</b> ti piace e <b>che cosa ti va di ascoltare</b> – da qui Tuttiphon crea dalla tua libreria playlist che si aggiornano da sole. Strada facendo impara da ciò che ascolti in Symfonium. Ascolti tutto in Symfonium come sempre.',
   'Help & guide':
     'Aiuto e guida',
   'Search help':
@@ -117,7 +117,7 @@ export default {
   '<Ui icon="heart">Like</Ui> – saves the world as a favorite world in your profile.':
     '<Ui icon="heart">Mi piace</Ui> – salva il mondo come mondo preferito nel tuo profilo.',
   'If a band is missing or in the wrong world, let the administrator know – they look after the music worlds for everyone.':
-    'Se una band manca o è nel mondo sbagliato, avvisa l\'amministratore – cura i mondi musicali per tutti.',
+    'Se una band manca o è nel mondo sbagliato, avvisa l\'amministratore – è lui che cura i mondi musicali per tutti.',
   'You sign in with your <b>Navidrome account</b> – with the same name and password as in Symfonium. You stay signed in for 90 days.':
     'Accedi con il tuo <b>account Navidrome</b> – con lo stesso nome e la stessa password di Symfonium. Resti connesso per 90 giorni.',
   '<b>Sign out:</b> tap your name at the bottom left → “Sign out”. On your phone, your name is at the top right.':
@@ -151,7 +151,7 @@ export default {
   'Does Deezer overwrite my own stars?':
     'Deezer sovrascrive le mie stelle?',
   'No. Tuttiphon recognizes stars you changed yourselves and leaves them alone – Deezer only fills gaps and updates stars it set itself.':
-    'No. Tuttiphon riconosce le stelle che avete cambiato voi e le lascia stare – Deezer riempie solo i vuoti e aggiorna le stelle che ha assegnato lui.',
+    'No. Tuttiphon riconosce le stelle che hai cambiato tu e le lascia stare – Deezer riempie solo i vuoti e aggiorna le stelle che ha assegnato lui.',
   'Does this also run when my PC is off?':
     'Funziona anche quando il mio PC è spento?',
   'Yes, as a Docker container on the NAS – more under “Storage locations & Docker”. On the PC, Tuttiphon catches up on the daily refresh the next time it starts.':
@@ -224,10 +224,10 @@ export default {
     'Solo se nel tuo profilo hai scelto «Tutta la famiglia». Anche in quel caso non possono modificarle. Oltre a te, le tue statistiche e il tuo profilo li vede solo l\'amministratore.',
   'My statistics are empty.':
     'Le mie statistiche sono vuote.',
-  'Then Tuttiphon doesn’t have your password: turn it on under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
-    'Allora Tuttiphon non ha la tua password: attivala in Impostazioni → Il mio account. Oppure da allora non hai ancora ascoltato niente. Symfonium deve segnalare gli ascolti al server; di solito è attivo.',
+  'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
+    'Allora a Tuttiphon manca la tua password: attiva «Statistiche e stelle» in Impostazioni → Il mio account. Oppure da allora non hai ancora ascoltato nulla. Symfonium deve segnalare gli ascolti al server; di norma è attivo.',
   'Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.':
-    'Tuttiphon li riconosce da solo dalla vostra libreria – come hit anni \'80, Eurodance o rap tedesco – e inserisce da solo le nuove band. I mondi che ascolti sono in prima fila.',
+    'Tuttiphon li riconosce da solo dalla tua libreria – come hit anni \'80, Eurodance o rap tedesco – e inserisce da solo le nuove band. I mondi che ascolti sono in prima fila.',
   'A band is missing or in the wrong place.':
     'Una band manca o è nel posto sbagliato.',
   'The administrator looks after the music worlds for everyone – just let them know. For yourself, you can mark a band as “Favorite” or “never” in the band window.':
@@ -273,7 +273,7 @@ export default {
   'Radio':
     'Radio',
   'Mix with one band and similar bands from your library, new every week.':
-    'Mix con una band e band simili dalla vostra libreria, nuovo ogni settimana.',
+    'Mix con una band e band simili dalla tua libreria, nuovo ogni settimana.',
   'Apply':
     'Applica',
   'Write playlists to Navidrome and let Navidrome do a quick scan.':
@@ -283,7 +283,7 @@ export default {
   'Navidrome reads in new files and playlists.':
     'Navidrome legge i nuovi file e le nuove playlist.',
   'Keep this mix':
-    'Tieni questa selezione',
+    'Tieni questo mix',
   'In the “…” menu of a mix: save the current selection as a fixed playlist that never changes. For a smart playlist it is called “Save as fixed playlist”.':
     'Nel menu «…» di un mix: salva la selezione attuale come playlist fissa che non cambia mai. Per una playlist intelligente si chiama «Salva come playlist fissa».',
   'Shared':
@@ -319,7 +319,7 @@ export default {
   'At night, Tuttiphon works through whatever the sound analysis and AI still have left, without a time limit.':
     'Di notte Tuttiphon elabora, senza limite di tempo, ciò che resta all\'analisi del suono e all\'IA.',
   'Under <a class="link" href="#/einstellungen/allgemein">Settings → General</a> you choose the language and light or dark. “Automatic” and “System” follow your phone or computer. The choice applies to this device.':
-    'In <a class="link" href="#/einstellungen/allgemein">Impostazioni → Generali</a> scegli la lingua e il tema chiaro o scuro. «Automatica» e «Sistema» seguono il tuo telefono o computer. La scelta vale per questo dispositivo.',
+    'In <a class="link" href="#/einstellungen/allgemein">Impostazioni → Generali</a> scegli la lingua e la modalità chiara o scura. «Automatica» e «Sistema» seguono il tuo telefono o computer. La scelta vale per questo dispositivo.',
   'Where do I find the setup code?':
     'Dove trovo il codice di configurazione?',
   'I forgot the password of the local administrator.':
@@ -385,7 +385,7 @@ export default {
   '<a class="link" href="#/playlists">My playlists</a> lists all your playlists. Tap one to see its songs and bands – a tap on a song plays it.':
     '<a class="link" href="#/playlists">Le mie playlist</a> elenca tutte le tue playlist. Toccane una per vedere brani e band – un tocco su un brano lo riproduce.',
   '<Ui icon="pin">Keep this mix</Ui> – the current selection as a fixed playlist that never changes.':
-    '<Ui icon="pin">Tieni questa selezione</Ui> – la selezione attuale come playlist fissa che non cambia mai.',
+    '<Ui icon="pin">Tieni questo mix</Ui> – la selezione attuale come playlist fissa che non cambia mai.',
   '<Ui icon="trash">Move to trash</Ui> – can be restored for 30 days.':
     '<Ui icon="trash">Sposta nel cestino</Ui> – si può ripristinare per 30 giorni.',
   '<b>Seasonal playlists</b> such as Christmas are only in Symfonium during their season and come back by themselves.':

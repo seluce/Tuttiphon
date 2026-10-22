@@ -70,6 +70,8 @@ export default {
     'pour {name}',
   'hits only':
     'tubes seulement',
+  '{n} song, changes on the first of the month':
+    '{n} titre, change le premier du mois',
   '{n} songs, changes on the first of the month':
     '{n} titres, change le premier du mois',
   '{n} minutes':
@@ -190,10 +192,14 @@ export default {
     '{names} utilisent le même compte Navidrome « {account} » – leurs chiffres sont donc identiques.',
   'Plays':
     'Écoutes',
+  'from {n} different song':
+    'de {n} titre différent',
   'from {n} different songs':
     'de {n} titres différents',
   'Listening time':
     'Temps d’écoute',
+  '≈ {n} day non-stop':
+    '≈ {n} jour sans interruption',
   '≈ {n} days non-stop':
     '≈ {n} jours sans interruption',
   'Bands played':
@@ -234,6 +240,8 @@ export default {
     'Créer en playlist',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Remarque : Navidrome enregistre seulement combien de fois et quand chaque titre a été joué pour la dernière fois – il ne garde aucun historique dans le temps.',
+  '“{name}” saved with {n} song – coming to Symfonium shortly':
+    '« {name} » enregistrée avec {n} titre – arrive bientôt dans Symfonium',
   '“{name}” saved with {n} songs – coming to Symfonium shortly':
     '« {name} » enregistrée avec {n} titres – arrive bientôt dans Symfonium',
   'Nothing counted yet':
@@ -250,6 +258,8 @@ export default {
     '{n} groupe',
   '{n} bands':
     '{n} groupes',
+  '{n} different song':
+    '{n} titre différent',
   '{n} different songs':
     '{n} titres différents',
   '{n} newly discovered':
@@ -270,6 +280,8 @@ export default {
     'Jour après jour',
   'Newly discovered':
     'Nouvelles découvertes',
+  '{n} new song':
+    '{n} nouveau titre',
   '{n} new songs':
     '{n} nouveaux titres',
   'For the Navidrome account “{user}”. Tuttiphon records its play counts every day – most recently {when}.':
@@ -342,6 +354,8 @@ export default {
     'Humeur',
   'Sounds like:':
     'Sonne comme :',
+  'from the sound analysis of {n} song':
+    'd’après l’analyse sonore de {n} titre',
   'from the sound analysis of {n} songs':
     'd’après l’analyse sonore de {n} titres',
   'In your playlists':
@@ -423,7 +437,7 @@ export default {
   'Song lyrics':
     'Paroles',
   'The lyrics follow along while playing. Tap a line to jump there.':
-    'Les paroles défilent pendant la lecture. Appuyez sur une ligne pour y aller.',
+    'Les paroles défilent pendant la lecture. Appuyez sur un vers pour y aller.',
   'show the whole text':
     'afficher tout le texte',
   'There are no lyrics for this song.':

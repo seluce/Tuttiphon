@@ -124,6 +124,46 @@ class AutoTest(unittest.TestCase):
         self.assertEqual(cfg["playlists"][1]["cover"]["hash"], covers.digest(JPEG))
         self.assertEqual(n, 3)
 
+    def test_an_error_answer_is_no_image(self):
+        """Subsonic answers an error with 200 and a JSON body – that is no image set by hand, the cover is renewed."""
+        from app import navidrome
+
+        class Answer:
+            def __init__(self, ctype):
+                self.headers = {"Content-Type": ctype}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def read(self):
+                return b'{"subsonic-response": {"status": "failed"}}'
+        nav = navidrome.Navidrome("http://navidrome.test", "admin", "pw")
+        with mock.patch("urllib.request.urlopen", lambda *a, **k: Answer("application/json")):
+            with self.assertRaises(navidrome.NavidromeError):
+                nav.cover_art("pl-x")
+        cfg = base_config()
+        ours = {"style": "format", "auto": True, "sig": "old", "img": "n_t.jpeg", "hash": covers.digest(JPEG), "nid": "n-u"}
+        cfg["playlists"] = [playlist("u", unheard=True, cover=dict(ours))]
+        n, calls = self.run_refresh(cfg, {"u.nsp": {"id": "n-u", "uploadedImage": "n_t.jpeg"}}, images={"n-u": None})
+        self.assertEqual([c.args[0] for c in calls], ["n-u"])   # unknown: renewed, not frozen
+        self.assertEqual(cfg["playlists"][0]["cover"]["style"], "format")
+
+    def test_the_checksum_of_what_navidrome_serves(self):
+        cfg = base_config()
+        cfg["playlists"] = [playlist("u", unheard=True)]
+        self.run_refresh(cfg, {"u.nsp": {"id": "n-u"}}, reported={"n-u": "n_t.jpeg"}, images={"n-u": b"as served"})
+        self.assertEqual(cfg["playlists"][0]["cover"]["hash"], covers.digest(b"as served"))
+
+    def test_an_image_set_in_navidrome_goes_with_a_new_playlist(self):
+        cfg = base_config()
+        cfg["playlists"] = [playlist("u", unheard=True, cover={"style": "navidrome", "nid": "n-old", "at": "2026-10-01"})]
+        n, calls = self.run_refresh(cfg, {"u.nsp": {"id": "n-new"}}, reported={"n-new": "n_t.jpeg"})
+        self.assertEqual([c.args[0] for c in calls], ["n-new"])   # the format cover comes back
+        self.assertEqual(cfg["playlists"][0]["cover"]["style"], "format")
+
     def test_no_longer_a_format(self):
         cfg = base_config()
         cfg["playlists"] = [{**playlist("r"), "welt": "kinder", "stil": "wiederentdecken", "type": None,

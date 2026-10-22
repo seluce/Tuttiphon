@@ -188,6 +188,7 @@ class ListenerTest(unittest.TestCase):
         from app import listen, rueckblick
         shutil.rmtree(rueckblick.PLAYS_DIR, ignore_errors=True)
         listen._seen["pruned"].clear()
+        listen._active.clear()
         sonic._memo.clear()
         sonic._stars.clear()
 
@@ -260,16 +261,35 @@ class ListenerTest(unittest.TestCase):
             self.assertEqual(sonic._rated_one(self.lib, "Oma"), {theirs.songs[3]["id"]})
 
     def test_the_own_person_of_a_shared_account(self):
-        """The shared person on a parent's account ("Family" on ferris' account): the parent's own person listens."""
+        """The shared person on a parent's account: the parent's own person listens – with the family's dislikes."""
         self.cfg["personen"][0]["user"] = "niklas"   # the shared person "Familie" uses Niklas' account too
+        self.cfg["personen"][0]["dislikes"] = {"artists": ["Stahl"], "genres": []}
         self.play("niklas", "Eisen-0")
-        self.assertNotIn("Blech", self.ask()[1])
+        bands = self.ask()[1]
+        self.assertFalse({"Blech", "Stahl"} & set(bands))   # his and the family's dislikes
         self.assertEqual(sonic.status()["lastFor"], "Niklas")
         self.cfg["personen"][2]["user"] = "oma"   # now only the shared person is left on the account: it listens
         self.clean()
         self.play("niklas", "Eisen-0")
         self.ask()
         self.assertEqual(sonic.status()["lastFor"], "Familie")
+
+    def test_a_guess_never_brings_a_child_s_music(self):
+        """root (no person, plays not kept) asks about a metal song while a child listens: not the child's answer."""
+        self.cfg["personen"][1]["child"] = True   # Jonas
+        self.cfg["personen"][1]["dislikes"] = {"artists": [], "genres": []}
+        self.play("jonas", "Kita-0")
+        from app import listen
+        import time
+        self.assertFalse(listen.record("root", "report", "Eisen-0", position=5, state="playing", player="web",
+                                       cfg=self.cfg, now=time.time()))   # not kept, but playing
+        bands = self.ask("Eisen-0")[1]
+        self.assertIsNone(sonic.status()["lastFor"])   # two playing: unclear
+        self.assertFalse({"Kita", "Sandkasten"} & set(bands))
+        listen._active.pop("root")
+        bands = self.ask("Eisen-0")[1]                  # only Jonas playing: a guess for him …
+        self.assertEqual((sonic.status()["lastFor"], sonic.status()["lastGuess"]), ("Jonas", True))
+        self.assertFalse({"Kita", "Sandkasten"} & set(bands))   # … but without the children's music of his profile
 
     def test_not_one_band_all_the_time(self):
         self.play("niklas", "Eisen-0")

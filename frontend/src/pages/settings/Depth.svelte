@@ -3,7 +3,7 @@
   import Row from './Row.svelte'
   import { changed } from '../../lib/state.svelte.js'
   import { fmt } from '../../lib/format.js'
-  import { t } from '../../lib/i18n.svelte.js'
+  import { t, tn } from '../../lib/i18n.svelte.js'
 
   /** an: settings.analysis (or a draft of it) · a: state of the sound analysis from /api/intel (audio) ·
    *  onchange: after a choice – saves by default (the setup assistant passes its own) */
@@ -34,7 +34,7 @@
     {/each}
   </div>
   <div class="hint">{t('“Tempo matches”: how often the tempo agrees with the “Deep” level. The times are rough figures; on the NAS it takes considerably longer depending on the processor. Runs in the background with a time limit per run and can be stopped at any time.')
-    + (behind ? ' ' + t('{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.', { n: fmt(behind) }) : '')}</div>
+    + (behind ? ' ' + tn(behind, '{n} song was listened to less closely so far and is measured again bit by bit, new songs first.', '{n} songs were listened to less closely so far and are measured again bit by bit, new songs first.') : '')}</div>
 </Row>
 
 <style>

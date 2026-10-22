@@ -74,7 +74,7 @@ Almost everything is set in the interface. Environment variables in `docker-comp
 
 | Variable | Meaning |
 |---|---|
-| `TUTTIPHON_ADMIN_PASSWORD` | optional: the password of the local administrator in plain text instead of setting it in the browser – then it can only be changed here (at least 8 characters, `$` written as `$$`). Without it and without a password set in the browser, the container waits for the setup with the code |
+| `TUTTIPHON_ADMIN_PASSWORD` | optional: the password of the local administrator in plain text instead of setting it in the browser – then it can only be changed here (at least 8 characters, `$` written as `$$`). Without it and without a password set in the browser, the container waits for the setup with the code – which also takes the language of your browser as the server language; with it, the server starts in English (change it under Settings → General) |
 | `NAV_URL` | Navidrome as seen from the container |
 | `NAV_PUBLIC_URL` | Navidrome address for "Open in Navidrome" links, if different |
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | Navidrome admin – better entered in the interface (stored in `config/.env`) |

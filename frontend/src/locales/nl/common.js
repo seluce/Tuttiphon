@@ -85,7 +85,7 @@ export default {
   'Settings':
     'Instellingen',
   'Language & theme':
-    'Taal & thema',
+    'Taal & kleurenschema',
   'Help':
     'Help',
 }

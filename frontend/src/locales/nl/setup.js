@@ -89,7 +89,7 @@ export default {
   'Finds the same recording stored twice – also as another format, in another folder or on another album. About 3 KB per song.':
     'Vindt dezelfde opname die twee keer is opgeslagen – ook als ander formaat, in een andere map of op een ander album. Ongeveer 3 KB per nummer.',
   'At night Tuttiphon works through whatever is still open, without a time limit. On a NAS the first pass of a large library takes several nights – after that only new songs are left. The nightly Deezer refresh and the weekly cover search also run in this window.':
-    '’s Nachts werkt Tuttiphon af wat nog openstaat, zonder tijdslimiet. Op een NAS duurt de eerste ronde van een grote bibliotheek meerdere nachten – daarna blijven alleen nieuwe nummers over. De nachtelijke Deezer-verversing en de wekelijkse coverzoektocht lopen ook in dit tijdvenster.',
+    '’s Nachts werkt Tuttiphon af wat nog openstaat, zonder tijdslimiet. Op een NAS duurt de eerste ronde van een grote bibliotheek meerdere nachten – daarna blijven alleen nieuwe nummers over. De nachtelijke Deezer-verversing en de wekelijkse coverzoektocht vinden ook in dit tijdvenster plaats.',
   'Start and end must not be the same.':
     'Begin en einde mogen niet gelijk zijn.',
   'Star ratings from Deezer':
@@ -113,9 +113,9 @@ export default {
   'Stars given by hand are lost with the next rating – they cannot be restored.':
     'Handmatig gegeven sterren gaan bij de volgende beoordeling verloren – ze kunnen niet worden hersteld.',
   'What should run by itself?':
-    'Wat moet er vanzelf lopen?',
+    'Wat moet er vanzelf gebeuren?',
   'Tuttiphon can keep everything up to date by itself every day – and pick up new music as soon as it lands in the music folder. Both run as long as Tuttiphon is running, ideally in the Docker container on the NAS.':
-    'Tuttiphon kan alles elke dag zelf up-to-date houden – en nieuwe muziek oppakken zodra die in de muziekmap belandt. Beide lopen zolang Tuttiphon draait, het liefst in de Docker-container op de NAS.',
+    'Tuttiphon kan alles elke dag zelf up-to-date houden – en nieuwe muziek oppakken zodra die in de muziekmap belandt. Beide werken zolang Tuttiphon draait, het liefst in de Docker-container op de NAS.',
   '“Playlists” rebuilds the mixes that are due and switches seasons. “Everything” also runs the steps of “Update everything” – conversion, lyrics, covers, understanding music and Deezer, as far as they are on.':
     '“Playlists” bouwt de mixen opnieuw op die aan de beurt zijn en wisselt seizoenen. “Alles” voert ook de stappen van “Alles bijwerken” uit – conversie, songteksten, covers, muziek begrijpen en Deezer, voor zover ze aan staan.',
   'Anything missed is caught up at the next start.':
@@ -183,5 +183,5 @@ export default {
   'Run the setup assistant again':
     'De installatieassistent opnieuw doorlopen',
   'Goes through the most important settings once more: connection, conversion, lyrics, understanding music, Deezer stars and what runs by itself. Apart from the connection, nothing changes until you tap “Finish”.':
-    'Loopt de belangrijkste instellingen nog een keer door: verbinding, conversie, songteksten, muziek begrijpen, Deezer-sterren en wat er vanzelf loopt. Behalve de verbinding verandert er niets tot je op “Afronden” tikt.',
+    'Loopt de belangrijkste instellingen nog een keer door: verbinding, conversie, songteksten, muziek begrijpen, Deezer-sterren en wat er vanzelf gebeurt. Behalve de verbinding verandert er niets tot je op “Afronden” tikt.',
 }

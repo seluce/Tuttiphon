@@ -5,7 +5,7 @@
   import { S } from '../lib/state.svelte.js'
   import { state as pushState, enable, disable, test } from '../lib/push.js'
   import { fmt } from '../lib/format.js'
-  import { t } from '../lib/i18n.svelte.js'
+  import { t, tn } from '../lib/i18n.svelte.js'
 
   let st = $state(null)
   let busy = $state(false)
@@ -49,7 +49,7 @@
       <button class="btn sm ghost" disabled={busy} onclick={() => run(disable, t('Turned off for this device'))}>{t('Turn off')}</button>
     </span>
   </div>
-  {#if st.devices > 1}<div class="hint">{t('{n} devices are registered.', { n: fmt(st.devices) })}</div>{/if}
+  {#if st.devices > 1}<div class="hint">{tn(st.devices, '{n} device is registered.', '{n} devices are registered.')}</div>{/if}
 {:else}
   <button class="btn sm primary justify-self-start" disabled={busy || !enabled} onclick={() => run(enable, t('Turned on for this device'))}>
     <Icon name="bell" size={15} />{t('Turn on for this device')}

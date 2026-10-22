@@ -1106,7 +1106,8 @@ first 16 hex digits of the SHA-256 of the uploaded image, `covers.digest()`). Ow
 remove `cover` – for a format `cover = {style: "none"}` instead, so that it does not get its format cover again
 (`status()` treats `none` like no cover; the sheet offers “Navidrome default” for a format even before its cover first
 came). All of them require the playlist to be in Navidrome already. After applying, the image name Navidrome reports
-for the playlist (`uploadedImage`, `covers.image_name()`) is kept as `cover.img`.
+for the playlist (`uploadedImage`, `covers.image_name()`) is kept as `cover.img`, and the checksum of the image as
+Navidrome serves it as `cover.hash` (`served_digest()`).
 
 **Automatic renewal.** `refresh_auto()` runs after every sync: for every active playlist with a designed
 style (not `eigenes`) that is in Navidrome, the signature (`signature()`: hash of covers, the four largest
@@ -1124,16 +1125,19 @@ format (e.g. rediscover moved to one world) loses its format cover again: the im
 `cover` removed. The checklist (“Give a playlist a cover”) does not count `auto` covers.
 
 **Images set in Navidrome itself stay.** After every upload `refresh_auto()` reads once which image Navidrome now
-reports (`uploadedImage`) and keeps it as `cover.img`, and the checksum of the uploaded image as `cover.hash`. If
+reports (`uploadedImage`) and keeps it as `cover.img`, and the checksum of the image as Navidrome serves it right after
+the upload as `cover.hash` (`served_digest()`; that of the uploaded data if it cannot be fetched). If
 Navidrome later reports another name for the same playlist (`nid` unchanged), it was set there by hand: `cover =
 {style: "navidrome", at, rev, nid}` – never renewed, shown as the playlist's image in Tuttiphon, the sheet says so. If
 it reports none any more, it was removed there: `none`. The name alone is not enough: Navidrome names the file after
 the playlist (`<id>_<name>.<type>`), so an image of the same type set by hand keeps it. Therefore, before every
 renewal, `set_by_hand()` fetches the image Navidrome serves (`getCoverArt` of `pl-<id>` without a size – the uploaded
 file byte for byte, `NativeApi.playlist_image()`) and compares its checksum with `cover.hash`: another image, the
-same name – set by hand, it stays. Without `hash` (uploaded before 1.6) or when the image cannot be fetched, only the
-name counts, and the cover is renewed as before. Without the field `uploadedImage` (older Navidrome) nothing is
-compared.
+same name – set by hand, it stays. Without `hash` (uploaded before 1.6) or when the image cannot be fetched – an
+answer that is not an image (`navidrome.cover_art()` checks the content type) counts as that –, only the name
+counts, and the cover is renewed as before. Without the field `uploadedImage` (older Navidrome) nothing is
+compared. If Navidrome creates such a playlist anew (`cover.nid` ≠ ID), the image set there is gone with it: `cover`
+is removed, and a format gets its own cover again in the same pass.
 
 **Writing back.** `tasks._refresh_covers()` keeps a copy of every `cover` before the pass and writes its results into
 the fresh configuration only where `cover` is still exactly as before – a choice made during the run wins. If a cover

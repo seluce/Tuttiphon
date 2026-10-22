@@ -46,7 +46,7 @@ RUN_FACTOR = 0.2       # … (that band's scores times this)
 HOUR_FACTOR = 0.85     # a band heard several times in the last hour: times this for every further song of it
 _lock = threading.Lock()
 _memo = {}
-_seen = {"at": None, "calls": 0, "for": None}   # the last call of the plugin (for the settings page)
+_seen = {"at": None, "calls": 0, "for": None, "forAt": None, "guess": False}   # the plugin's last call (settings page)
 _stars = {}   # account (lower case) -> (time, song ids rated 1 star by hand) – loaded in the background (_rated_one())
 STARS_AGE = 3600
 _FAMILY = (None, frozenset(), {})   # (person id, indices to leave out, {index: factor}): an answer for the family
@@ -54,6 +54,11 @@ _last = threading.local()
 
 
 # ---------------------------------------------------------------------------- the plugin's key
+
+def _now():
+    """Now with the time zone – the interface shows "2 min ago" in the browser's time zone."""
+    return dt.datetime.now().astimezone().isoformat(timespec="seconds")
+
 
 def _stored():
     try:
@@ -68,7 +73,7 @@ def new_key():
     key = "tp_" + secrets.token_urlsafe(32)
     KEY_FILE.parent.mkdir(parents=True, exist_ok=True)
     write_atomic(KEY_FILE, json.dumps({"sha256": hashlib.sha256(key.encode()).hexdigest(),
-                                       "at": dt.datetime.now().isoformat(timespec="seconds")}))
+                                       "at": _now()}))
     return key
 
 
@@ -79,6 +84,26 @@ def remove_key():
 def has_key():
     """Is the plugin set up (a key created)?"""
     return _stored() is not None
+
+
+def in_use():
+    """Does Navidrome use the plugin? A key – and a question or a play since the start, or live plays of the last 30
+    days on disk (looked up at most every 10 minutes)."""
+    if not has_key():
+        return False
+    if _seen["at"]:
+        return True
+    from . import listen
+    if listen.status()["lastEvent"]:
+        return True
+    with _lock:
+        hit = _memo.get("in_use")
+    if hit and time.time() - hit[0] < 600:
+        return hit[1]
+    used = listen.played_lately(30)
+    with _lock:
+        _memo["in_use"] = (time.time(), used)
+    return used
 
 
 def check_key(key):
@@ -98,15 +123,17 @@ def status():
     """For the settings page: is there a key, when did the plugin last ask, how many songs have a sound vector."""
     stored = _stored()
     return {"key": bool(stored), "keyAt": (stored or {}).get("at"), "lastCall": _seen["at"], "calls": _seen["calls"],
-            "lastFor": _seen["for"], "vectors": similar.count()}
+            "lastFor": _seen["for"], "lastForAt": _seen["forAt"], "lastGuess": _seen["guess"], "vectors": similar.count()}
 
 
 # ---------------------------------------------------------------------------- the songs that may come
 
-def _view(cfg, pid=None):
-    """The configuration as the plugin sees the library: the person listening (pid) or the shared person – kid-safe as
-    soon as any profile is a child profile or has kid-safe mode on. Without a shared person a stand-in without
-    dislikes. -> (configuration, person id)"""
+def _view(cfg, who=None):
+    """The configuration as the plugin sees the library: the person listening or the shared person – kid-safe as soon
+    as any profile is a child profile or has kid-safe mode on. Without a shared person a stand-in without dislikes.
+    who: (person id, ids of people whose dislikes count too, plain) from _who() – plain: without the children's music
+    of a child profile (a guess, an account shared with the family). -> (configuration, person id)"""
+    pid, also, plain = who or (None, (), False)
     default = pid or cfg["settings"].get("defaultPerson")
     clean = any(p.get("child") or p.get("clean") for p in cfg.get("personen", []))
     personen = [dict(p) for p in cfg.get("personen", [])]
@@ -114,6 +141,11 @@ def _view(cfg, pid=None):
     if me is None:
         me = {"id": "_sonic", "name": "", "user": ""}
         personen.append(me)
+    for other in (p for p in personen if p["id"] in also):   # what the family dislikes stays out as well
+        mine, theirs = me.get("dislikes") or {}, other.get("dislikes") or {}
+        me["dislikes"] = {k: sorted(set(mine.get(k) or []) | set(theirs.get(k) or [])) for k in ("artists", "genres")}
+    if plain:
+        me["child"] = False
     if clean:
         me["clean"] = True
     return {**cfg, "personen": personen}, me["id"]
@@ -142,14 +174,14 @@ def _recall(kind, key):
         return _memo.get(kind, {}).get(key)
 
 
-def _pool(cfg, lib, worlds=(), pid=None):
-    """Indices of the songs that may come: "All" for the person listening (pid) or the shared person (minimum rating
-    0) – plus the separate worlds `worlds` (those of the song asked for)."""
-    key = (ml.lib_key(lib), _cfg_key(cfg), tuple(sorted(worlds)), pid)
+def _pool(cfg, lib, worlds=(), who=None):
+    """Indices of the songs that may come: "All" for the person listening (who, see _view()) or the shared person
+    (minimum rating 0) – plus the separate worlds `worlds` (those of the song asked for)."""
+    key = (ml.lib_key(lib), _cfg_key(cfg), tuple(sorted(worlds)), who)
     hit = _recall("pool", key)
     if hit is not None:
         return hit
-    view, person = _view(cfg, pid)
+    view, person = _view(cfg, who)
     base = {"id": "_sonic", "person": person, "welt": rules.ALL, "stil": rules.ALL, "minRating": 0}
     ctx = rules.BuildContext(lib)
     ids = set(lib.match(rules.build_nsp(view, base, ctx)))
@@ -181,20 +213,26 @@ def _all_batch():
 
 
 def _listener(cfg, ids):
-    """The person listening to one of these songs right now (listen.listener()) – the person of that account; if the
-    shared person uses the account too ("Family" on a parent's account), the account's own person. None if that is
-    unclear."""
+    """The person listening to one of these songs (listen.listener()) -> (person, sure, shared): the person of that
+    account; if the shared person uses the account too ("Family" on a parent's account), the account's own person –
+    and the shared person in `shared`. (None, False, ()) if that is unclear (also: two accounts behind one folder
+    name)."""
     from . import listen
     from .config import slug
-    folder = listen.listener(ids)
+    folder, sure = listen.listener(ids)
     if not folder:
-        return None
+        return None, False, ()
     people = [p for p in cfg.get("personen", []) if p.get("user") and slug(p["user"]) == folder]
+    if len({p["user"].lower() for p in people}) > 1:
+        return None, False, ()
+    shared = ()
     if len(people) > 1:
-        people = [p for p in people if p["id"] != cfg["settings"].get("defaultPerson")]
+        default = cfg["settings"].get("defaultPerson")
+        shared = tuple(p for p in people if p["id"] == default)
+        people = [p for p in people if p["id"] != default]
     if len(people) != 1 or not listen.allowed(cfg, people[0]["user"]):
-        return None
-    return people[0]
+        return None, False, ()
+    return people[0], sure, shared
 
 
 def _rated_one(lib, user):
@@ -264,26 +302,33 @@ def _variety(lib, user, seed):
 
 
 def _who(cfg, lib, ids, personal, seed=None):
-    """For whom the answer is: (person id, indices to leave out, {index: factor}) of the person listening to one of
-    these song ids – what they heard in the last hours (listen.heard()) or rated 1 star by hand stays out, what they
-    skip comes further down (feedback.factors(), with "Mixes that learn" on); for the songs like `seed` (the smart
-    queue) also variety between bands (_variety()). _FAMILY if not asked or unclear."""
-    _last.person = None
-    person = _listener(cfg, ids) if personal else None
+    """For whom the answer is: (view, indices to leave out, {index: factor}) – view for _pool()/_view(): (person id,
+    ids of people whose dislikes count too, plain). For the person listening to one of these song ids:
+    * sure (the song is playing on their account right now): their "All" and dislikes; what they heard in the last
+      hours (listen.heard()) or rated 1 star by hand stays out, what they skip comes further down
+      (feedback.factors(), with "Mixes that learn" on), and for the songs like `seed` (the smart queue) variety
+      between bands (_variety());
+    * a guess: their dislikes, what they just heard and skip – but no children's music of a child profile, no 1-stars,
+      no variety (it may be someone else asking);
+    * an account the shared person uses too: the dislikes of both, no children's music.
+    _FAMILY if not asked or unclear."""
+    _last.person, _last.guess = None, False
+    person, sure, shared = _listener(cfg, ids) if personal else (None, False, ())
     if not person:
         return _FAMILY
     from . import feedback, listen
-    _last.person = person.get("name") or person["id"]
+    _last.person, _last.guess = person.get("name") or person["id"], not sure
     user = person["user"]
     index = lib.index_of()
-    leave = frozenset(index[s] for s in listen.heard(user) | _rated_one(lib, user) if s in index)
+    out = set(listen.heard(user)) | (set(_rated_one(lib, user)) if sure else set())
+    leave = frozenset(index[s] for s in out if s in index)
     factor = {}
     if cfg["settings"].get("mixLearn", True):
         factor = {index[s]: f for s, f in feedback.factors(user).items() if s in index}
-    if seed is not None:
+    if seed is not None and sure:
         for j, f in _variety(lib, user, seed).items():
             factor[j] = factor.get(j, 1.0) * f
-    return person["id"], leave, factor
+    return (person["id"], tuple(p["id"] for p in shared), not sure or bool(shared)), leave, factor
 
 
 def _favour(scored, factor):
@@ -594,7 +639,7 @@ def answer(cfg, lib, what, query):
     """One request of the plugin: what = similar | artist | album | artists | path. -> JSON-able dict"""
     started = time.time()
     with _lock:   # for the settings page: the last question (plays do not count here)
-        _seen["at"] = dt.datetime.now().isoformat(timespec="seconds")
+        _seen["at"] = _now()
         _seen["calls"] += 1
     _last.person = None
     if what == "similar":
@@ -612,8 +657,8 @@ def answer(cfg, lib, what, query):
         out = {"songs": as_songs(lib, path(cfg, lib, query.get("from", ""), query.get("to", ""), query.get("count", 25)))}
     else:
         raise KeyError(what)
-    if what in ("similar", "artist", "album"):   # whom the last song answer was for (None: the family)
+    if what in ("similar", "artist", "album"):   # whom the last song answer was for (None: the family), and when
         with _lock:
-            _seen["for"] = getattr(_last, "person", None)
+            _seen.update({"for": getattr(_last, "person", None), "guess": getattr(_last, "guess", False), "forAt": _now()})
     out["ms"] = round((time.time() - started) * 1000)
     return out

@@ -129,9 +129,9 @@ export default {
   '“{name}” deleted':
     'Supprimé : « {name} »',
   '{n} playlist uses this vibe – it moves to the trash.':
-    '{n} playlist utilise cette ambiance – elle va à la corbeille.',
+    '{n} playlist utilise cette ambiance – elle ira à la corbeille.',
   '{n} playlists use this vibe – they move to the trash.':
-    '{n} playlists utilisent cette ambiance – elles vont à la corbeille.',
+    '{n} playlists utilisent cette ambiance – elles iront à la corbeille.',
   'No playlist uses this vibe.':
     'Aucune playlist n’utilise cette ambiance.',
   'Create a playlist with it':
@@ -273,9 +273,9 @@ export default {
   '{name} added':
     '{name} ajouté',
   '{n} playlist uses this music world – it moves to the trash.':
-    '{n} playlist utilise cet univers musical – elle va à la corbeille.',
+    '{n} playlist utilise cet univers musical – elle ira à la corbeille.',
   '{n} playlists use this music world – they move to the trash.':
-    '{n} playlists utilisent cet univers musical – elles vont à la corbeille.',
+    '{n} playlists utilisent cet univers musical – elles iront à la corbeille.',
   'No playlist uses this music world.':
     'Aucune playlist n’utilise cet univers musical.',
   'The bands then come only from the scene, and so do the name and icon: “{name}”. Excluded titles, stars and the other fine-tuning stay.':
@@ -415,7 +415,7 @@ export default {
   'half a year':
     'six mois',
   'This playlist still has its own rules, taken over unchanged. You can change name, person, count and order – or switch it to the builder, then everything can be set.':
-    'Cette playlist a encore ses propres règles, reprises telles quelles. Vous pouvez changer le nom, la personne, le nombre et l’ordre – ou la passer à l’éditeur, alors tout est réglable.',
+    'Cette playlist a encore ses propres règles, conservées telles quelles lors de la prise en charge. Vous pouvez changer le nom, la personne, le nombre et l’ordre – ou la passer à l’éditeur, alors tout est réglable.',
   'What everyone likes – whose taste counts?':
     'Ce que tout le monde aime – quels goûts comptent ?',
   'Songs everyone likes come up more often. Everyone’s dislikes count.':

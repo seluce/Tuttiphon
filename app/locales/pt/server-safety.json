@@ -19,7 +19,7 @@
  "Max. songs per playlist": "Máx. de músicas por playlist",
  "Minimum length": "Duração mínima",
  "“Only the hits”": "«Só os êxitos»",
- "Minimum rating for “All”": "Classificação mínima para «Tudo»",
+ "Minimum rating for “All”": "Classificação mínima para «Todos»",
  "  ⚠ {name}: cannot be built ({error}) – left out": "  ⚠ {name}: não pode ser montada ({error}) – deixada de fora",
  "⚠ Playlist “{name}” cannot be built: {error}": "⚠ A playlist «{name}» não pode ser montada: {error}",
  "⚠ Deezer: the file with the ranks was damaged – set aside as {name}.": "⚠ Deezer: o ficheiro com as posições estava danificado – posto de parte como {name}.",

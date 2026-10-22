@@ -7,11 +7,11 @@ export default {
   'Bring everything up to date':
     'Ponerlo todo al día',
   'Open the home page':
-    'Abrir la página de inicio',
+    'Abre la página de inicio',
   'Tap “Update everything”':
-    'Tocar «Actualizar todo»',
+    'Toca «Actualizar todo»',
   'Follow the progress below':
-    'Seguir el progreso abajo',
+    'Sigue el progreso abajo',
   'scan navidrome apply write deezer lyrics opus aac analysis automatic folder':
     'escanear escaneo navidrome aplicar escribir deezer letras opus aac análisis automático carpeta',
   'One click for everything':
@@ -29,11 +29,11 @@ export default {
   'Put together your own playlist':
     'Crear tu propia playlist',
   'Tap a music world':
-    'Tocar un mundo musical',
+    'Toca un mundo musical',
   'Choose a vibe':
-    'Elegir un ambiente',
+    'Elige un ambiente',
   'Look at the preview and create':
-    'Ver la vista previa y crear',
+    'Mira la vista previa y créala',
   'new create make assistant music world vibe mood':
     'nuevo nueva crear hacer asistente mundo musical ambiente estado de ánimo',
   'Four short steps':
@@ -46,8 +46,8 @@ export default {
     'Qué música, qué estado de ánimo y, al final, los últimos retoques. Arriba ves en qué paso estás.',
   'For whom?':
     '¿Para quién?',
-  'The person decides which Navidrome account the playlist goes to and whose stars count. Then you choose the music world.':
-    'La persona decide en qué cuenta de Navidrome acaba la playlist y qué estrellas cuentan. Luego eliges el mundo musical.',
+  'The person decides which Navidrome account the playlist goes to – the stars of that account count. Then you choose the music world.':
+    'La persona determina a qué cuenta de Navidrome va la playlist – cuentan las estrellas de esa cuenta. Después eliges el mundo musical.',
   'Choose music':
     'Elegir música',
   'Tap one or more music worlds. “All” takes the whole library.':
@@ -61,9 +61,9 @@ export default {
   'Create a mix':
     'Crear un mix',
   'Download it once in Symfonium':
-    'Descargarlo una vez en Symfonium',
+    'Descárgalo una vez en Symfonium',
   'New songs arrive on their own':
-    'Las canciones nuevas llegan solas',
+    'Las canciones nuevas llegan automáticamente',
   'offline download on the go auto daily weekly reshuffle symfonium':
     'sin conexión offline descargar descarga fuera de casa auto diario semanal mezclar de nuevo symfonium',
   'Ready-made mixes':
@@ -73,41 +73,41 @@ export default {
   'Your mix':
     'Tu mix',
   'A mix renews itself daily, weekly or monthly. “Reshuffle” puts together a different selection right away.':
-    'Un mix se renueva solo cada día, cada semana o cada mes. «Mezclar de nuevo» prepara al instante otra selección.',
+    'Un mix se renueva automáticamente cada día, cada semana o cada mes. «Mezclar de nuevo» prepara al instante otra selección.',
   'Or put it together yourself':
     'O créalo a tu gusto',
   'In the assistant you choose music and mood and, in the last step, “Mix”.':
     'En el asistente eliges música y estado de ánimo y, en el último paso, «Mix».',
   'Download in Symfonium':
-    'Descargar en Symfonium',
+    'Descárgalo en Symfonium',
   'Open the mix in Symfonium under Playlists and download it once. When it renews, Symfonium fetches the new songs on its own at the next sync.':
-    'Abre el mix en Symfonium, en Playlists, y descárgalo una vez. Cuando se renueve, Symfonium traerá solo las canciones nuevas en la próxima sincronización.',
+    'Abre el mix en Symfonium, en Playlists, y descárgalo una vez. Cuando se renueve, Symfonium traerá automáticamente las canciones nuevas en la próxima sincronización.',
   'Adjust music worlds':
     'Ajustar mundos musicales',
   'Open music worlds':
-    'Abrir Mundos musicales',
+    'Abre Mundos musicales',
   'Tap a world: add or remove bands':
-    'Tocar un mundo: añadir o quitar bandas',
+    'Toca un mundo: añade o quita bandas',
   'Your own world with “New music world”':
     'Tu propio mundo con «Nuevo mundo musical»',
   'scene genre bands classify catalog automatic delete':
     'escena género bandas clasificar catálogo automático eliminar',
   'Music worlds form on their own':
-    'Los mundos musicales se forman solos',
+    'Los mundos musicales se forman por sí solos',
   'Tuttiphon recognizes from your library which worlds there are, and classifies new bands on its own. Tapping shows all bands of a world – there you remove bands or add some.':
-    'Tuttiphon reconoce en tu biblioteca qué mundos hay y clasifica solo las bandas nuevas. Al tocar un mundo ves todas sus bandas – ahí quitas bandas o añades otras.',
+    'Tuttiphon reconoce en tu biblioteca qué mundos hay y clasifica automáticamente las bandas nuevas. Al tocar un mundo ves todas sus bandas – ahí quitas bandas o añades otras.',
   'Your own music world':
     'Tu propio mundo musical',
   'For your own selection: quickest from the scene catalog, then matching bands are added here on their own too.':
-    'Para una selección propia: lo más rápido es el catálogo de escenas; así las bandas que encajen también se añaden aquí solas.',
+    'Para una selección propia: lo más rápido es el catálogo de escenas; así las bandas que encajen también se añaden aquí automáticamente.',
   'Set up the family':
     'Configurar la familia',
   'Enter the passwords of the accounts':
-    'Introducir las contraseñas de las cuentas',
+    'Introduce las contraseñas de las cuentas',
   'Set roles':
-    'Definir roles',
+    'Define los roles',
   'Create one person per account':
-    'Crear una persona por cuenta',
+    'Crea una persona por cuenta',
   'user account password role rights sign in person access':
     'usuario cuenta contraseña rol permisos iniciar sesión persona acceso',
   'Accounts & passwords':
@@ -120,16 +120,16 @@ export default {
     'Cada uno inicia sesión con su propia cuenta de Navidrome. Aquí eliges para cada cuenta: administrador, usuario o sin acceso.',
   'People':
     'Personas',
-  'One person per account: suggestions and mixes are made for them with their favorites and dislikes.':
+  'One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.':
     'Una persona por cuenta: para ella se crean sugerencias y mixes con sus favoritos y sin lo que no le gusta.',
   'Make suggestions better':
     'Mejorar las sugerencias',
   'Open my profile':
-    'Abrir Mi perfil',
+    'Abre Mi perfil',
   'Add what was recognized with “+”':
-    'Añadir lo detectado con «+»',
+    'Añade lo detectado con «+»',
   'Add favorites and dislikes':
-    'Añadir favoritos y «No me gusta»',
+    'Añade favoritos y «No me gusta»',
   'profile preferences favorites favorite bands favorite worlds recommendations taste listening':
     'perfil preferencias favoritos bandas favoritas mundos favoritos recomendaciones gusto escuchar',
   'From listening':
@@ -153,11 +153,11 @@ export default {
   'Find music by mood':
     'Buscar música por estado de ánimo',
   'Type into the search field at the top':
-    'Escribir en el campo de búsqueda de arriba',
+    'Escribe en el campo de búsqueda de arriba',
   'For example “calm children’s songs”':
     'Por ejemplo «canciones infantiles tranquilas»',
   'Tap “Create as mix”':
-    'Tocar «Crear como mix»',
+    'Toca «Crear como mix»',
   'search searching find mood band song combination':
     'búsqueda buscar encontrar estado de ánimo banda canción combinación',
   'Just type':
@@ -173,7 +173,7 @@ export default {
   'Band or genre under “Dislikes”':
     'Banda o género en «No me gusta»',
   'Rate the song 1 star in Symfonium':
-    'Dar 1 estrella a la canción en Symfonium',
+    'Dale 1 estrella a la canción en Symfonium',
   'What you skip comes less often':
     'Lo que saltas sale menos',
   'hide block ban never dislike star skip annoying':
@@ -187,15 +187,15 @@ export default {
   'Change or share a playlist':
     'Cambiar o compartir una playlist',
   'Tap a playlist':
-    'Tocar una playlist',
+    'Toca una playlist',
   'Choose “Edit”, or “…” for the cover and more':
-    'Elegir «Editar», o «…» para la portada y más',
+    'Elige «Editar», o «…» para la portada y más',
   'Set sharing in the profile':
-    'Ajustar el uso compartido en el perfil',
+    'Ajusta el uso compartido en el perfil',
   'edit rename name cover picture pause delete trash share family visible copy':
     'editar renombrar nombre portada imagen pausar eliminar papelera compartir familia visible copiar',
   'Open a playlist':
-    'Abrir una playlist',
+    'Abre una playlist',
   'Tap a playlist to open it.':
     'Toca una playlist para abrirla.',
   'All playlists show up here as soon as there is a first one.':
@@ -205,7 +205,7 @@ export default {
   '“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves Symfonium for a while and stays kept here – or move it to the trash.':
     '«Editar» cambia la música y el nombre. En «…» diseñas la portada, pausas la playlist – desaparece un tiempo de Symfonium, pero se guarda aquí – o la mandas a la papelera.',
   'Share with the family':
-    'Compartir con la familia',
+    'Comparte con la familia',
   'With “visible to everyone”, all accounts see this person’s playlists in Navidrome and Symfonium.':
     'Con «visible para todos», todas las cuentas ven las playlists de esta persona en Navidrome y Symfonium.',
   'Here you set whether only you see your playlists or the whole family. Only you can change them.':
@@ -213,7 +213,7 @@ export default {
   'Turn on kid-safe mode':
     'Activar la protección infantil',
   'Open the profile':
-    'Abrir el perfil',
+    'Abre el perfil',
   '“Leave out songs with explicit lyrics”':
     '«Omitir canciones con letras explícitas»',
   'Applies to all playlists and mixes':
@@ -233,11 +233,11 @@ export default {
   'Notifications on your phone':
     'Notificaciones en el teléfono',
   'Open Tuttiphon on the phone':
-    'Abrir Tuttiphon en el teléfono',
+    'Abre Tuttiphon en el teléfono',
   'Turn on for this device':
     'Activar en este dispositivo',
   'Allow notifications':
-    'Permitir notificaciones',
+    'Permite las notificaciones',
   'ntfy push message phone notification app device':
     'ntfy push mensaje teléfono móvil celular notificación app dispositivo',
   'Turn on':
@@ -257,9 +257,9 @@ export default {
   'Turn on statistics and learning':
     'Activar estadísticas y aprendizaje',
   'Open settings':
-    'Abrir Ajustes',
+    'Abre Ajustes',
   'Turn on “Statistics & stars”':
-    'Activar «Estadísticas y estrellas»',
+    'Activa «Estadísticas y estrellas»',
   'From then on Tuttiphon learns along':
     'A partir de ahí, Tuttiphon aprende contigo',
   'password recap week year played learn stars':
@@ -287,7 +287,7 @@ export default {
   'Playlists':
     'Playlists',
   'All playlists Tuttiphon looks after for you. Tapping opens preview, “Who’s in it?”, cover and editing.':
-    'Todas las playlists que Tuttiphon cuida por ti. Al tocar una se abren la escucha previa, «¿Quién está?», la portada y la edición.',
+    'Todas las playlists que Tuttiphon cuida por ti. Al tocar una se abren la escucha previa, «¿Quién suena?», la portada y la edición.',
   'Discover':
     'Descubrir',
   'Ready-made suggestions matching your preferences and the season – one click creates them.':
@@ -295,7 +295,7 @@ export default {
   'Music worlds':
     'Mundos musicales',
   'Who plays what: kids’ rock, medieval, … Tuttiphon recognizes typical bands by itself.':
-    'Quién toca qué: rock infantil, medieval, … Tuttiphon reconoce solo las bandas típicas.',
+    'Quién toca qué: rock infantil, medieval, … Tuttiphon reconoce por su cuenta las bandas típicas.',
   'Who the playlists are for: Navidrome account, favorite worlds, dislikes. On the phone under “More”.':
     'Para quién son las playlists: cuenta de Navidrome, mundos favoritos, «No me gusta». En el teléfono, en «Más».',
   'Statistics & recap':
@@ -536,6 +536,8 @@ export default {
     'En la letra',
   'Bands, songs, mood, lyric line …':
     'Bandas, canciones, estado de ánimo, verso …',
+  'Mix · {n} matching song, new every week':
+    'Mix · {n} canción afín, nuevo cada semana',
   'Mix · {n} matching songs, new every week':
     'Mix · {n} canciones afines, nuevo cada semana',
   '{songs} · create as mix':
@@ -571,7 +573,7 @@ export default {
   'Tuttiphon could not start':
     'Tuttiphon no pudo iniciarse',
   'Tuttiphon cannot be reached right now. It starts by itself as soon as the server is back.':
-    'Ahora mismo no se puede conectar con Tuttiphon. Se iniciará solo en cuanto vuelva el servidor.',
+    'Ahora mismo no se puede conectar con Tuttiphon. Se iniciará automáticamente en cuanto vuelva el servidor.',
   'Tuttiphon – Sign in':
     'Tuttiphon – Iniciar sesión',
   'Sign in with your Navidrome account – with the same name and password as in Symfonium.':

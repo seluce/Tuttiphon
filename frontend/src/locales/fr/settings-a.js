@@ -134,6 +134,8 @@ export default {
     'Clé saisie',
   'No key yet':
     'Pas encore de clé',
+  '{n} band loaded':
+    '{n} groupe chargé',
   '{n} bands loaded':
     '{n} groupes chargés',
   ' · last run {when}':
@@ -180,6 +182,8 @@ export default {
     'Automatique à partir de',
   'Only very confident matches are classified directly; the rest stays a suggestion.':
     'Seules les correspondances très sûres sont classées directement ; le reste reste une suggestion.',
+  '{n} song · {why}':
+    '{n} titre · {why}',
   '{n} songs · {why}':
     '{n} titres · {why}',
   'add':
@@ -211,7 +215,7 @@ export default {
   'Forget password?':
     'Oublier le mot de passe ?',
   'Then there are no personal statistics and no Deezer stars of your own until you enter it again. You can still sign in.':
-    'Il n’y a alors plus de statistiques personnelles ni d’étoiles Deezer à vous jusqu’à ce que vous le saisissiez à nouveau. Vous pouvez toujours vous connecter.',
+    'Il n’y aura alors plus de statistiques personnelles ni d’étoiles Deezer à vous jusqu’à ce que vous le saisissiez à nouveau. Vous pourrez toujours vous connecter.',
   'Forget':
     'Oublier',
   'Password forgotten':
@@ -353,7 +357,7 @@ export default {
   'Lyrics search & kid-safe mode':
     'Recherche dans les paroles & mode enfants',
   'Tuttiphon reads in all lyrics. This lets the search find songs by a line from the lyrics, and kid-safe mode detects explicit lyrics. You turn on kid-safe mode per person in their profile.':
-    'Tuttiphon lit toutes les paroles. Ainsi, la recherche trouve les titres par une ligne des paroles, et le mode enfants détecte les paroles explicites. Vous activez le mode enfants par personne, dans son profil.',
+    'Tuttiphon lit toutes les paroles. Ainsi, la recherche trouve les titres à partir d’un vers des paroles, et le mode enfants détecte les paroles explicites. Vous activez le mode enfants par personne, dans son profil.',
   'The status could not be loaded.':
     'Impossible de charger l’état.',
   'Lyrics read in':
@@ -404,6 +408,8 @@ export default {
     'autorisé',
   'allow':
     'autoriser',
+  'Show {n} more band':
+    'Afficher {n} groupe de plus',
   'Show {n} more bands':
     'Afficher {n} groupes de plus',
   'The levels must go up: ★ < ★★ < …':
@@ -646,18 +652,18 @@ export default {
     'S’il existe déjà une liste, placez « tuttiphon, » devant – sans liste, ce sont les valeurs par défaut de Navidrome. La ligne de docker-compose l’emporte sur navidrome.toml. Redémarrez ensuite Navidrome ; là où Tuttiphon n’a pas de réponse, Navidrome interroge les suivants.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'Dans Navidrome, sous <b>Settings → Plugins</b>, activez « Tuttiphon », saisissez l’adresse et la clé et autorisez-le pour <b>tous les utilisateurs</b> (pour les écoutes). Idéalement l’adresse du réseau domestique, par ex. <code>http://&lt;NAS&gt;:8765</code> – pas une adresse https via un reverse proxy, qui peut refuser Navidrome. Ce navigateur joint Tuttiphon à l’adresse <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Settings → Media providers → the server).':
-    'Dans Symfonium, activez <b>« Use similar tracks for Radio Mix »</b> pour le serveur Navidrome (Settings → Media providers → le serveur).',
+  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'Dans Symfonium, activez <b>« Use similar tracks for Radio Mix »</b> pour le serveur Navidrome (« Manage media providers » → le serveur) et choisissez <b>« Sonic Analysis »</b> pour la file d’attente intelligente dans le lecteur.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a profile has kid-safe mode or is a child profile.':
     'Navidrome ne dit pas qui demande. Si le titre est joué sur exactement un compte – ou si un seul compte écoute –, la réponse vaut pour cette personne : sans ce qu’elle n’aime pas, sans ce qu’elle vient d’écouter ou a noté 1 étoile, ce qu’elle passe souvent vient plus tard, et après deux titres d’un groupe, d’autres groupes passent d’abord. Sinon pour la famille. La musique pour enfants seulement après des chansons pour enfants, et sans titres aux paroles explicites dès qu’un profil a le mode enfants ou est un profil enfant.',
   'Create a new key?':
     'Créer une nouvelle clé ?',
   'The old key stops working – enter the new one in Navidrome afterwards.':
-    'L’ancienne clé cesse de fonctionner – saisissez ensuite la nouvelle dans Navidrome.',
+    'L’ancienne clé cessera de fonctionner – saisissez ensuite la nouvelle dans Navidrome.',
   'Remove the key?':
     'Supprimer la clé ?',
   'Navidrome then gets no more answers from Tuttiphon and uses its other sources again – turn the plugin off in Navidrome as well.':
-    'Navidrome ne reçoit alors plus de réponses de Tuttiphon et utilise de nouveau ses autres sources – désactivez aussi le plugin dans Navidrome.',
+    'Navidrome ne recevra alors plus de réponses de Tuttiphon et utilisera de nouveau ses autres sources – désactivez aussi le plugin dans Navidrome.',
   'Plays from Navidrome':
     'Écoutes depuis Navidrome',
   'Every play as it happens – exact listening times and real skips; for accounts without a stored password also the recap.':
@@ -672,4 +678,10 @@ export default {
     '{when} · pour {name}',
   '{when} · for the family':
     '{when} · pour la famille',
+  '{when} · probably for {name}':
+    '{when} · probablement pour {name}',
+  'Last answer with similar songs':
+    'Dernière réponse avec des titres similaires',
+  'Copy {what}':
+    'Copier {what}',
 }

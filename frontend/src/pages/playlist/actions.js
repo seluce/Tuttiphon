@@ -6,32 +6,32 @@ import { openSheet, toast, confirmDialog } from '../../lib/overlay.svelte.js'
 import { go } from '../../lib/router.svelte.js'
 import { api } from '../../lib/api.js'
 import { clone, uid, today } from '../../lib/format.js'
-import { t, tn, locale, translated } from '../../lib/i18n.svelte.js'
+import { t, tn, tword, locale, translated } from '../../lib/i18n.svelte.js'
 import { plName } from '../../lib/playlist.js'
 import { openEditor } from '../../lib/editor.js'
 import CoverSheet from '../../components/sheets/CoverSheet.svelte'
 
 /**
- * How often a mix is put together anew – texts of the playlist page. songs: template with {n} (shown in bold),
+ * How often a mix is put together anew – texts of the playlist page. songs(n): template with {n} (shown in bold),
  * about(n): the sentence under the track list.
  */
 export const MIXEVERY = translated(() => ({
   day: {
     eyebrow: t('Daily Mix · new every day'),
     title: t('Today in the mix'),
-    songs: t('{n} songs today'),
+    songs: (n) => tword(n, '{n} song today', '{n} songs today'),
     about: (n) => t('These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.', { n }),
   },
   week: {
     eyebrow: t('Weekly Mix · new every week'),
     title: t('This week in the mix'),
-    songs: t('{n} songs this week'),
+    songs: (n) => tword(n, '{n} song this week', '{n} songs this week'),
     about: (n) => t('These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.', { n }),
   },
   month: {
     eyebrow: t('Monthly Mix · new every month'),
     title: t('This month in the mix'),
-    songs: t('{n} songs this month'),
+    songs: (n) => tword(n, '{n} song this month', '{n} songs this month'),
     about: (n) => t('These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.', { n }),
   },
 }))
@@ -97,7 +97,7 @@ export async function snapshotMix(p, d) {
   if (!ok) return
   try {
     const r = await api('/api/snapshot', { body: { id: p.id } })
-    toast(t('“{name}” saved with {n} songs ✓', { name: r.name, n: r.count }))
+    toast(tn(r.count, '“{name}” saved with {n} song ✓', '“{name}” saved with {n} songs ✓', { name: r.name }))
   } catch (e) { toast(e.message, { error: true }) }
 }
 

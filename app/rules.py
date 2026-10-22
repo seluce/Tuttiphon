@@ -237,7 +237,7 @@ def review_period(kind, day):
     end = first - dt.timedelta(days=1)
     if kind == "year":
         return dt.date(end.year, 1, 1), end, _s("year {year}", year=end.year)
-    return end.replace(day=1), end, f"{_s(MONTH_NAMES[end.month - 1])} {end.year}"   # i18n-ignore: N_ constant
+    return end.replace(day=1), end, _s("{month} {year}", month=_s(MONTH_NAMES[end.month - 1]), year=end.year)   # i18n-ignore – N_ month
 
 
 def review_name(cfg, playlist, day=None):

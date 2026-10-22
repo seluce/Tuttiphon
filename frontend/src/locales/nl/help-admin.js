@@ -1,15 +1,15 @@
 // Same keys as ../de/help-admin.js
 export default {
   'Show me – step by step on the page':
-    'Laat zien – stap voor stap op de pagina',
+    'Laat maar zien – stap voor stap op de pagina',
   'Open full help':
     'Volledige help openen',
   'Show me':
-    'Laat zien',
+    'Laat maar zien',
   'Jump right in':
     'Meteen beginnen',
   'Show me: {title}':
-    'Laat zien: {title}',
+    'Laat maar zien: {title}',
   'Music world':
     'Muziekwereld',
   'Who’s playing?':
@@ -120,8 +120,8 @@ export default {
     'Oude & handgemaakte playlists',
   'The easiest way is the assistant under <a class="link" href="#/neu">New playlist</a>. It asks step by step – “For whom?” only when there are several people:':
     'De makkelijkste weg is de assistent onder <a class="link" href="#/neu">Nieuwe playlist</a>. Die vraagt stap voor stap – “Voor wie?” alleen als er meerdere personen zijn:',
-  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to and whose stars count.':
-    '<b>Voor wie?</b> – de persoon bepaalt naar welk Navidrome-account de playlist gaat en wiens sterren meetellen.',
+  '<b>For whom?</b> – the person decides which Navidrome account the playlist goes to; the stars of that account count.':
+    '<b>Voor wie?</b> – de persoon bepaalt in welk Navidrome-account de playlist terechtkomt; de sterren van dat account tellen mee.',
   '<b>Music world</b> – who’s playing: e.g. “Kids’ rock”, “Medieval” or several together. “All” takes the whole library.':
     '<b>Muziekwereld</b> – wie er speelt: bijv. “Kinderrock”, “Middeleeuws” of meerdere samen. “Alle” neemt de hele bibliotheek.',
   '<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.':
@@ -264,8 +264,8 @@ export default {
     'Zet het bestand – niet uitgepakt en precies als <b>tuttiphon.ndp</b> – in de pluginmap van Navidrome, zet <code>tuttiphon</code> vooraan in de lijst met agents van Navidrome (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) en start Navidrome opnieuw.',
   'In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.':
     'Schakel in Navidrome onder “Settings → Plugins” “Tuttiphon” in, voer het adres van Tuttiphon in het thuisnetwerk en de sleutel in, en geef het vrij voor alle gebruikers.',
-  'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Settings → Media providers).':
-    'Schakel in Symfonium “Use similar tracks for Radio Mix” in voor de Navidrome-server (Settings → Media providers).',
+  'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.':
+    'Schakel in Symfonium voor de Navidrome-server “Use similar tracks for Radio Mix” in (“Manage media providers” → de server) en kies in de speler “Sonic Analysis” voor de slimme wachtrij.',
   'The home page shows at a glance what’s going on: the big <b>“Update everything”</b> button, your mixes, <b>“To review”</b> with what needs you – such as new bands or missing passwords – and what was played and added. You arrange the sections under <a class="link" href="#/einstellungen/start">Settings → Home page</a>.':
     'De startpagina laat in één oogopslag zien wat er speelt: de grote knop <b>“Alles bijwerken”</b>, je mixen, <b>“Te controleren”</b> met wat jouw aandacht nodig heeft – zoals nieuwe bands of ontbrekende wachtwoorden – en wat er is gespeeld en toegevoegd. De onderdelen orden je onder <a class="link" href="#/einstellungen/start">Instellingen → Startpagina</a>.',
   '<b>“Update everything”</b> runs all steps in order – convert, lyrics, covers, sound analysis, playlists, scan, Deezer stars. Which steps take part you set under <a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>; the log is under <a class="link" href="#/verlauf">History</a>.':
@@ -337,11 +337,11 @@ export default {
   '<b>Refresh every night</b>, <b>Retry not found</b> and <b>Check everything again</b> keep the stars up to date.':
     '<b>Elke nacht verversen</b>, <b>Niet gevonden opnieuw proberen</b> en <b>Alles opnieuw controleren</b> houden de sterren up-to-date.',
   'Tuttiphon finds missing lyrics and puts them next to the songs – synced ones scroll along in Symfonium. Navidrome reads them at the next scan.':
-    'Tuttiphon vindt ontbrekende songteksten en zet ze naast de nummers – gesynchroniseerde lopen mee in Symfonium. Navidrome leest ze bij de volgende scan in.',
+    'Tuttiphon vindt ontbrekende songteksten en zet ze naast de nummers – gesynchroniseerde scrollen mee in Symfonium. Navidrome leest ze bij de volgende scan in.',
   '<b>Fast:</b> each run searches a few minutes at most, new songs first; the rest follows.':
     '<b>Snel:</b> elke run zoekt hoogstens een paar minuten, nieuwe nummers eerst; de rest volgt.',
   '<b>Lyrics search & kid-safe mode:</b> all lyrics go into a search index – so the search finds songs by a line, and kid-safe mode detects explicit lyrics.':
-    '<b>Zoeken in songteksten & kindveilige modus:</b> alle songteksten gaan in een zoekindex – zo vindt de zoekfunctie nummers aan een regel, en herkent de kindveilige modus grove teksten.',
+    '<b>Zoeken in songteksten & kindveilige modus:</b> alle songteksten gaan in een zoekindex – zo vindt de zoekfunctie nummers aan de hand van een regel, en herkent de kindveilige modus grove teksten.',
   'Tuttiphon gets to know your music – locally and free of charge. Set it up under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
     'Tuttiphon leert je muziek kennen – lokaal en gratis. Stel het in onder <a class="link" href="#/einstellungen/intel">Instellingen → Intelligentie</a>.',
   '<b>Sound analysis:</b> measures tempo, energy and mood of every song. This gives sound vibes such as “Falling asleep” or “Danceable” – as mixes, because Navidrome doesn’t know the sound.':
@@ -358,16 +358,16 @@ export default {
     '<b>Dezelfde opname dubbel:</b> een audiovingerafdruk vindt hem, ook in een ander formaat; het resultaat staat onder <a class="link" href="#/einstellungen/bibliothek">Instellingen → Bibliotheek controleren</a>.',
   '<b>Radio and gaps:</b> “Start radio” in the band window plays the band with similar bands; Discover shows similar bands you are still missing.':
     '<b>Radio en gaten:</b> “Radio starten” in het bandvenster speelt de band met vergelijkbare bands; Ontdekken toont vergelijkbare bands die je nog mist.',
-  'The analysis works through what is open at night (1–5 a.m.). The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
-    'De analyse werkt ’s nachts af wat openstaat (1–5 uur ’s nachts). De eerste ronde van de AI duurt op een NAS meerdere nachten; daarna komen alleen nieuwe nummers erbij. Last.fm heeft een gratis sleutel nodig. Details staan in het <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handboek</a>.',
+  'The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
+    '’s Nachts werkt de analyse af wat nog openstaat. De eerste ronde van de AI duurt op een NAS meerdere nachten; daarna komen er alleen nieuwe nummers bij. Last.fm heeft een gratis sleutel nodig. Details staan in het <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handboek</a>.',
   'If you like, Tuttiphon watches the music folder (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation → Folder watch</a>). New music – e.g. from Lidarr – is then processed on its own: converted, lyrics, scan, sound, Deezer stars.':
     'Als je wilt, houdt Tuttiphon de muziekmap in de gaten (<a class="link" href="#/einstellungen/ablaeufe">Instellingen → Automatisering → Mapbewaking</a>). Nieuwe muziek – bijv. van Lidarr – wordt dan vanzelf verwerkt: geconverteerd, songteksten, scan, klank, Deezer-sterren.',
-  'It looks every 5–60 minutes and gives freshly copied files two minutes of rest.':
-    'Hij kijkt elke 5–60 minuten en geeft vers gekopieerde bestanden twee minuten rust.',
+  'It looks every 5–60 minutes and waits until freshly copied files are complete.':
+    'Tuttiphon kijkt elke 5–60 minuten en wacht tot vers gekopieerde bestanden compleet zijn.',
   'Under <a class="link" href="#/einstellungen/speicher">Settings → Storage locations</a> you see where music, playlists and the archive are; in Docker you set them in docker-compose.yaml.':
     'Onder <a class="link" href="#/einstellungen/speicher">Instellingen → Opslaglocaties</a> zie je waar muziek, playlists en het archief staan; in Docker stel je ze in docker-compose.yaml in.',
-  'The AI sound analysis needs about 850 MB of extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
-    'De AI-klankanalyse heeft tijdens het draaien ongeveer 850 MB extra geheugen nodig; hoeveel processorkernen ze mag gebruiken, stel je in onder <a class="link" href="#/einstellungen/intel">Instellingen → Intelligentie</a>.',
+  'The AI sound analysis needs extra memory while it runs; how many processor cores it may use you set under <a class="link" href="#/einstellungen/intel">Settings → Intelligence</a>.':
+    'De AI-klankanalyse heeft extra werkgeheugen nodig zolang ze draait; hoeveel processorkernen ze mag gebruiken, stel je in onder <a class="link" href="#/einstellungen/intel">Instellingen → Intelligentie</a>.',
   'Tuttiphon converts new lossless files such as FLAC to <b>Opus</b> or <b>AAC</b> – sounds the same with about a fifth of the space. Opus suits Android, AAC iPhone and Mac.':
     'Tuttiphon converteert nieuwe lossless bestanden zoals FLAC naar <b>Opus</b> of <b>AAC</b> – klinkt hetzelfde met ongeveer een vijfde van de ruimte. Opus past bij Android, AAC bij iPhone en Mac.',
   'The original only goes to the archive once the new file has been checked; nothing there is ever overwritten.':
@@ -398,8 +398,8 @@ export default {
     'De installatieassistent loopt stap voor stap de belangrijkste instellingen door. Bij een nieuwe installatie opent hij vanzelf; later start je hem onder <a class="link" href="#/einstellungen/allgemein">Instellingen → Algemeen</a>.',
   'Only the connection is saved right away, everything else with <b>“Finish”</b>; <b>“Skip setup”</b> leaves the rest as it is.':
     'Alleen de verbinding wordt meteen opgeslagen, al het andere met <b>“Afronden”</b>; <b>“Installatie overslaan”</b> laat de rest zoals het is.',
-  'The <b>language of the server</b> applies to notifications, logs and the names Tuttiphon gives playlists and music worlds.':
-    'De <b>taal van de server</b> geldt voor meldingen, logboeken en de namen die Tuttiphon aan playlists en muziekwerelden geeft.',
+  'The <b>language of the server</b> applies to logs, the administrators’ ntfy topic and the names Tuttiphon gives playlists and music worlds. Notifications on phones and in the browser follow the language of the device.':
+    'De <b>taal van de server</b> geldt voor logboeken, het ntfy-topic van de beheerders en de namen die Tuttiphon aan playlists en muziekwerelden geeft. Meldingen op de telefoon en in de browser volgen de taal van het apparaat.',
   'Every day Tuttiphon backs up everything that cannot be restored on its own – settings, playlists, credentials, Deezer, sound analysis and the listening history – as a ZIP file. Under <a class="link" href="#/einstellungen/sicherung">Settings → Backup</a> you back up right away, download backups and set how many are kept.':
     'Elke dag maakt Tuttiphon een back-up van alles wat niet vanzelf kan worden hersteld – instellingen, playlists, inloggegevens, Deezer, klankanalyse en de luistergeschiedenis – als ZIP-bestand. Onder <a class="link" href="#/einstellungen/sicherung">Instellingen → Back-up</a> maak je meteen een back-up, download je back-ups en stel je in hoeveel er worden bewaard.',
   '<b>User</b> – own home page, playlists and profile; sees others’ playlists only if they are shared with everyone.':
@@ -411,7 +411,7 @@ export default {
   'Symfonium syncs only now and then – wait or refresh the media source there. Private playlists are only visible to their own account.':
     'Symfonium synchroniseert maar af en toe – wacht of vernieuw daar de mediabron. Privéplaylists zijn alleen zichtbaar voor hun eigen account.',
   'The deeper it listens, the more accurate: “Deep” listens to the whole song, “Fast” only briefly. Tempo and energy are reliable; the mood is an estimate – the AI sound analysis in the Docker image makes it much better.':
-    'Hoe dieper het luistert, hoe nauwkeuriger: “Diep” luistert het hele nummer, “Snel” maar kort. Tempo en energie zijn betrouwbaar; de stemming is een schatting – de AI-klankanalyse in het Docker-image maakt die veel beter.',
+    'Hoe dieper het luistert, hoe nauwkeuriger: “Diep” luistert naar het hele nummer, “Snel” maar kort. Tempo en energie zijn betrouwbaar; de stemming is een schatting – de AI-klankanalyse in het Docker-image maakt die veel beter.',
   'Mixes learn: what someone skips comes up less often for a while, songs they rate 1 star themselves not at all. Switch: Settings → Playlists → “Mixes that learn”.':
     'Mixen leren mee: wat iemand overslaat, komt een tijdje minder vaak, nummers die iemand zelf 1 ster geeft helemaal niet. Schakelaar: Instellingen → Playlists → “Mixen die meeleren”.',
   'Navidrome delivers the playlist differently from Tuttiphon’s calculation. For a mix, Navidrome usually can’t find some files – “Update everything” writes it again; for a smart playlist, open it and save it again.':

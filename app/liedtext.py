@@ -383,7 +383,7 @@ def text_of(song_id):
 
 
 def _words(q):
-    return [w for w in re.findall(r"[0-9a-zäöüßéèàáñ']+", q.lower()) if len(w) >= 2][:12]   # i18n-ignore
+    return [w for w in re.findall(r"[^\W_']+(?:'[^\W_']+)*", q.lower()) if len(w) >= 2][:12]   # letters of every language
 
 
 def search(q, limit=6):
@@ -415,7 +415,7 @@ def search(q, limit=6):
 
 
 def _fold(text):
-    return " ".join(re.findall(r"[0-9a-zäöüßéèàáñ']+", text.lower()))   # i18n-ignore
+    return " ".join(re.findall(r"[^\W_']+(?:'[^\W_']+)*", text.lower()))   # letters of every language
 
 
 def derb(allow=()):

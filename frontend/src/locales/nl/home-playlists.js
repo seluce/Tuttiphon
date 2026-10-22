@@ -119,7 +119,7 @@ export default {
   'Customize start page':
     'Startpagina aanpassen',
   'Stopping …':
-    'Stoppen …',
+    'Wordt gestopt …',
   'last scanned {when}':
     'laatst gescand {when}',
   'running …':
@@ -194,6 +194,8 @@ export default {
     'nog {n} tonen',
   'Library':
     'Bibliotheek',
+  '{n} album still in MP3 – list':
+    '{n} album nog in MP3 – lijst',
   '{n} albums still in MP3 – list':
     '{n} albums nog in MP3 – lijst',
   '{loved} favorites · {played} songs with plays':
@@ -314,6 +316,8 @@ export default {
     'vanaf {date} weer in Symfonium',
   'from {n} matching':
     'uit {n} passende',
+  '{n} matching song':
+    '{n} passend nummer',
   '{n} matching songs':
     '{n} passende nummers',
   'up to {n} per request':
@@ -322,6 +326,8 @@ export default {
     'in Navidrome: {owner}',
   'Rather few songs – maybe loosen the selection or add more music worlds.':
     'Vrij weinig nummers – maak de selectie misschien ruimer of voeg meer muziekwerelden toe.',
+  'The mix is shorter than wanted because at most {n} song per band is allowed – more bands from other music worlds make it longer.':
+    'De mix is korter dan gewenst, omdat er hoogstens {n} nummer per band mag – meer bands uit andere muziekwerelden maken hem langer.',
   'The mix is shorter than wanted because at most {n} songs per band are allowed – more bands from other music worlds make it longer.':
     'De mix is korter dan gewenst, omdat er hoogstens {n} nummers per band mogen – meer bands uit andere muziekwerelden maken hem langer.',
   'This playlist belongs to {name} and is shared with everyone. You can listen to it in Symfonium – or create your own version with “Copy for me” and adjust it.':
@@ -352,6 +358,8 @@ export default {
     'Daily Mix · elke dag nieuw',
   'Today in the mix':
     'Vandaag in de mix',
+  '{n} song today':
+    '{n} nummer vandaag',
   '{n} songs today':
     '{n} nummers vandaag',
   'These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -360,6 +368,8 @@ export default {
     'Weekly Mix · elke week nieuw',
   'This week in the mix':
     'Deze week in de mix',
+  '{n} song this week':
+    '{n} nummer deze week',
   '{n} songs this week':
     '{n} nummers deze week',
   'These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -368,6 +378,8 @@ export default {
     'Monthly Mix · elke maand nieuw',
   'This month in the mix':
     'Deze maand in de mix',
+  '{n} song this month':
+    '{n} nummer deze maand',
   '{n} songs this month':
     '{n} nummers deze maand',
   'These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
@@ -404,6 +416,8 @@ export default {
     'Een selectie van {n} nummers wordt als vaste playlist “{name}” in Navidrome opgeslagen. Daarna verandert hij niet meer – handig als je een mix mooi vindt.',
   'A selection of {n} songs is saved as the fixed playlist “{name}” in Navidrome. It won’t change after that.':
     'Een selectie van {n} nummers wordt als vaste playlist “{name}” in Navidrome opgeslagen. Daarna verandert hij niet meer.',
+  '“{name}” saved with {n} song ✓':
+    '“{name}” opgeslagen met {n} nummer ✓',
   '“{name}” saved with {n} songs ✓':
     '“{name}” opgeslagen met {n} nummers ✓',
   'Reshuffled – coming to Navidrome shortly':
@@ -488,6 +502,8 @@ export default {
     'Eén heel album, in albumvolgorde – volgende maandag is er een nieuw. Tot dan blijft de lijst gelijk – handig voor offline in Symfonium.',
   'one whole album a week, from {n} never played':
     'elke week een heel album, uit {n} nooit gespeelde',
+  'from {n} album never played':
+    'uit {n} nooit gespeeld album',
   'from {n} albums never played':
     'uit {n} nooit gespeelde albums',
   'Album of the week · new every Monday':

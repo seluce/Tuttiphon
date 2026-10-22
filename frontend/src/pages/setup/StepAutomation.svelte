@@ -26,7 +26,7 @@
     </Row>
   {/if}
   <Row label={t('Turn on folder watch')} hint={t('If you like, Tuttiphon regularly checks whether new music has landed in the music folder, e.g. from Lidarr, and processes it right away: convert, search lyrics, scan Navidrome, rate on Deezer.')}>
-    <Switch checked={d.watch.enabled} onchange={(v) => (d.watch.enabled = v)} />
+    <Switch label={t('Turn on folder watch')} hidelabel checked={d.watch.enabled} onchange={(v) => (d.watch.enabled = v)} />
   </Row>
   {#if d.watch.enabled}
     <Row label={t('Check every')}>

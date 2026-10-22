@@ -555,7 +555,11 @@ separate worlds unless asked for one of their songs, without the shared person's
 profile has kid-safe mode or is a child profile) – and `POST /api/sonic/listen`, which only adds plays of an account
 with a person in Tuttiphon that is not blocked (`listen.allowed()`; whoever has the key could add made-up plays, never
 read any; the day files `plays/<account>/live-….jsonl` with permissions 0640); nothing of accounts, people, playlists
-or settings. Wrong keys count toward a lockout like passwords, but only per address (`_limited()`, key
+or settings. The answers are personal all the same: for a song that one account is playing, `/api/sonic/…` answers
+for that account's person – without their dislikes and without what they just heard or rated 1 star –, so whoever
+has the key can read from the answers roughly what was played lately. Keep the key like a password. Where it is
+unclear who is listening, Tuttiphon guesses from the plays (a guess leaves the 1-star songs in and never brings a
+child profile's music) or answers for the family. Wrong keys count toward a lockout like passwords, but only per address (`_limited()`, key
 `plugin|<address>`, 30 in 10 minutes) – the right key always passes, so wrong guesses from elsewhere never shut the
 plugin out. Creating, removing and the status
 (`/api/plugin…`) and the download of the plugin are admin only. In Navidrome the key is in the plugin's settings

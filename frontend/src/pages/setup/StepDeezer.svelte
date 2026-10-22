@@ -25,7 +25,7 @@
 <Card title={t('Star ratings from Deezer')} icon="star">
   <p class="muted small">{t('Deezer knows how popular almost every song is. Tuttiphon turns that into stars in Navidrome: apps like Symfonium then sort the top tracks of every band correctly, and the “Only the hits” playlists know which songs are the hits. No Deezer account needed.')}</p>
   <Row label={t('Set stars from Deezer')} hint={t('New songs are rated during “Update everything”; in the time window of the night analysis a portion is checked again every night.')}>
-    <Switch checked={dz.on} onchange={(v) => (dz.on = v)} />
+    <Switch label={t('Set stars from Deezer')} hidelabel checked={dz.on} onchange={(v) => (dz.on = v)} />
   </Row>
   {#if dz.on}
     <Row full label={t('Who gets stars?')} hint={t('In Navidrome, stars are per account. Accounts without a password are skipped.')}>

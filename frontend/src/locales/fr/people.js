@@ -95,9 +95,9 @@ export default {
   'Delete {name}?':
     'Supprimer {name} ?',
   '{n} playlist goes to “{name}”.':
-    '{n} playlist passe à « {name} ».',
+    '{n} playlist passera à « {name} ».',
   '{n} playlists go to “{name}”.':
-    '{n} playlists passent à « {name} ».',
+    '{n} playlists passeront à « {name} ».',
   'This person has no playlists.':
     'Cette personne n’a pas de playlists.',
   '{name} deleted':
@@ -319,7 +319,7 @@ export default {
   'What do you like to listen to?':
     'Qu’aimez-vous écouter ?',
   'Tap everything you like – you can pick several. A music world groups similar bands together.':
-    'Appuyez sur tout ce qui vous plaît – vous pouvez en choisir plusieurs. Un univers musical regroupe des groupes similaires.',
+    'Appuyez sur tout ce qui vous plaît – vous pouvez en choisir plusieurs. Un univers musical rassemble des groupes similaires.',
   'What you listen to most in Symfonium is already selected. Tap whatever does not fit or is missing.':
     'Ce que vous écoutez le plus dans Symfonium est déjà sélectionné. Appuyez sur ce qui ne convient pas ou qui manque.',
   'Your favorite bands':

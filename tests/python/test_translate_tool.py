@@ -62,6 +62,11 @@ class TranslateToolTest(unittest.TestCase):
         ui = next(r for r in self.rows("es", "ui-help-user") if "<b>" in r[1])
         self.write_rows("es", "ui-help-user", [["", ui[1], ui[2], "sin negrita"]])
         self.assertIn("markup", self.run_tool(self.tool.import_, "es", self.tsv)[1])
+        self.run_tool(self.tool.export, "es", self.tsv)   # all lines again
+        link = next(r for r in self.rows("es", "ui-help-user") if 'href="#/' in r[1])
+        evil = link[3].replace('href="#/', 'href="javascript:alert(1)//#/', 1)   # the same tag names, another target
+        self.write_rows("es", "ui-help-user", [["", link[1], link[2], evil]])
+        self.assertIn("markup", self.run_tool(self.tool.import_, "es", self.tsv)[1])
 
     def test_polish_plurals_need_both_forms(self):
         self.run_tool(self.tool.export, "pl", self.tsv)
@@ -74,6 +79,15 @@ class TranslateToolTest(unittest.TestCase):
         entry = self.tool.ui_dict(self.root / "frontend/src/locales/pl/common.js")[few[1]]
         self.assertEqual(entry["few"], "piosenki?")
         self.assertTrue(entry["many"])
+
+    def test_counts_with_a_comma_in_their_text(self):
+        """The plural of a count is found by its call – a comma inside the text is text, not the next argument."""
+        keys = self.tool.plural_keys(self.root)
+        self.assertIn("Mix · {n} matching songs, new every week", keys)   # tn(n, '…, …', '…, …')
+        self.assertIn("{n} playlists written, {removed} removed", keys)
+        self.assertIn("Tuttiphon is meant to be reachable on the network, but TUTTIPHON_ADMIN_PASSWORD has only {n} "
+                      "characters ({source}).", keys)   # tuttiphon.py counts too
+        self.assertNotIn(" new every week'", "".join(keys))   # no piece of a text cut at its comma
 
     def test_missing_only_and_a_new_language(self):
         code, _out = self.run_tool(self.tool.export, "fr", self.tsv, True)
