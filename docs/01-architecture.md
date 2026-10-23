@@ -221,6 +221,7 @@ run.
 | `localadmin.py` | password of the local administrator: the hash set in the browser (`state/admin_password.json`), checking, setting, the one-time setup code of the first start ([Security](07-security.md#local-administrator)) |
 | `config.py` | paths, credentials (`.env`; which keys the interface may set: `EDITABLE_ENV`; `weak_password()`), loading, checking and saving `config.json`; `write_atomic()`, `new_temp()`/`temp_copy()` (new hidden temporary files on the music share), `read_text()` |
 | `tasks.py` | runs: `TaskRunner` executes steps, logs, writes the history, pauses briefly for an apply run (`pause_for()`); instance lock; daily tidy-up (`tidy()`) |
+| `progress.py` | progress of the running step for the interface: the part at work, how many of how many, the time still to go |
 | `events.py` | server log: `say()` writes short lines with date and time to standard output (in the container `docker logs`) |
 | `version.py` | `VERSION` – the program version (startup message, `GET /api/status`, release); matches the top section in `CHANGELOG.md` |
 | `instances.py` | multiple instances (PC, container): registration every minute, the ID of the installation (`install_id()`, `state/install_id`) and the location of the lock file in the shared folder `<playlist folder>/.tuttiphon/` |

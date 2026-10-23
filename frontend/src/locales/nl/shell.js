@@ -638,4 +638,66 @@ export default {
     'Wachtwoord vergeten?',
   'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
     'Verwijder het bestand <b>admin_password.json</b> in de map <code>state</code> van de datamap (<code>config/state</code> naast docker-compose.yaml) en laad deze pagina daarna opnieuw. Die vraagt dan om een nieuw wachtwoord – met een nieuwe installatiecode uit het logboek van de container. Al het andere blijft zoals het is.',
+  'about {time} left':
+    'nog ongeveer {time}',
+  'until {time} at the latest':
+    'uiterlijk tot {time}',
+  'Long-term maintenance':
+    'Onderhoud op lange termijn',
+  'Converting music':
+    'Muziek omzetten',
+  'Searching lyrics':
+    'Songteksten zoeken',
+  'Fetching covers':
+    'Hoezen ophalen',
+  'Fetching Last.fm knowledge':
+    'Last.fm-kennis ophalen',
+  'Measuring loudness':
+    'Luidheid meten',
+  'Classifying bands':
+    'Bands indelen',
+  'Audio fingerprints':
+    'Audiovingerafdrukken',
+  'Learning from mixes':
+    'Leren van mixen',
+  'Writing playlists':
+    'Playlists schrijven',
+  'Navidrome is reading everything in':
+    'Navidrome leest alles in',
+  'Syncing with Navidrome':
+    'Synchroniseren met Navidrome',
+  'Indexing lyrics':
+    'Songteksten indexeren',
+  'Self-check':
+    'Zelfcontrole',
+  'Looking up songs on Deezer':
+    'Nummers opzoeken op Deezer',
+  '{done} of {n} file':
+    '{done} van {n} bestand',
+  '{done} of {n} files':
+    '{done} van {n} bestanden',
+  '{done} of {n} album':
+    '{done} van {n} album',
+  '{done} of {n} albums':
+    '{done} van {n} albums',
+  '{done} of {n} band':
+    '{done} van {n} band',
+  '{done} of {n} bands':
+    '{done} van {n} bands',
+  '{done} of {n} playlist':
+    '{done} van {n} playlist',
+  '{done} of {n} playlists':
+    '{done} van {n} playlists',
+  '{done} of {n} song':
+    '{done} van {n} nummer',
+  '{done} of {n} songs':
+    '{done} van {n} nummers',
+  '{n} file read':
+    '{n} bestand gelezen',
+  '{n} files read':
+    '{n} bestanden gelezen',
+  'Getting ready …':
+    'Wordt voorbereid …',
+  'running for {time}':
+    'loopt al {time}',
 }

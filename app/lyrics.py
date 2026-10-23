@@ -23,6 +23,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from . import progress
 from .config import STATE_DIR, read_bytes, read_text, write_atomic
 from .i18n import N_, _, _s, _sn
 from .opus import SKIP_DIRS, music_dir
@@ -376,9 +377,11 @@ def fetch(cfg, lib, log=print, stop=None, dry_run=False, everything=False, budge
             return ("error", i, str(e), None)
         return (kind + ("+up" if up else ""), i, by, None)
 
+    progress.part("lyrics", len(todo), until=deadline)
     try:
         with ThreadPoolExecutor(max_workers=max(1, int(ly.get("workers") or 6))) as pool:
             for n, (kind, i, extra, _) in enumerate(pool.map(one, todo), 1):
+                progress.at(n)
                 if kind == "stop":
                     result["stopped"] = True
                     unprocessed += 1
@@ -461,7 +464,9 @@ def fetch_files(cfg, files, log=print, stop=None, dry_run=False):
         log(_s("Lyrics search is turned off in the settings."))
         return out
     clients = _clients(ly)
-    for audio in files:
+    progress.part("lyrics", len(files))
+    for k, audio in enumerate(files):
+        progress.at(k)
         if stop is not None and stop.is_set():
             break
         stem = audio.name.rsplit(".", 1)[0]

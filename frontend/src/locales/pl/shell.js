@@ -631,4 +631,66 @@ export default {
     'Nie pamiętasz hasła?',
   'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
     'Usuń plik <b>admin_password.json</b> w folderze <code>state</code> folderu danych (<code>config/state</code> obok docker-compose.yaml), a potem odśwież tę stronę. Poprosi wtedy o nowe – z nowym kodem konfiguracji z dziennika kontenera. Wszystko inne zostaje bez zmian.',
+  'about {time} left':
+    'jeszcze około {time}',
+  'until {time} at the latest':
+    'najpóźniej do {time}',
+  'Long-term maintenance':
+    'Konserwacja długoterminowa',
+  'Converting music':
+    'Konwertowanie muzyki',
+  'Searching lyrics':
+    'Szukanie tekstów',
+  'Fetching covers':
+    'Pobieranie okładek',
+  'Fetching Last.fm knowledge':
+    'Pobieranie wiedzy z Last.fm',
+  'Measuring loudness':
+    'Mierzenie głośności',
+  'Classifying bands':
+    'Przypisywanie zespołów',
+  'Audio fingerprints':
+    'Odciski audio',
+  'Learning from mixes':
+    'Nauka z miksów',
+  'Writing playlists':
+    'Zapisywanie playlist',
+  'Navidrome is reading everything in':
+    'Navidrome wczytuje wszystko',
+  'Syncing with Navidrome':
+    'Synchronizacja z Navidrome',
+  'Indexing lyrics':
+    'Indeksowanie tekstów',
+  'Self-check':
+    'Autotest',
+  'Looking up songs on Deezer':
+    'Wyszukiwanie piosenek w Deezer',
+  '{done} of {n} file':
+    '{done} z {n} pliku',
+  '{done} of {n} files':
+    { few: '{done} z {n} plików', many: '{done} z {n} plików' },
+  '{done} of {n} album':
+    '{done} z {n} albumu',
+  '{done} of {n} albums':
+    { few: '{done} z {n} albumów', many: '{done} z {n} albumów' },
+  '{done} of {n} band':
+    '{done} z {n} zespołu',
+  '{done} of {n} bands':
+    { few: '{done} z {n} zespołów', many: '{done} z {n} zespołów' },
+  '{done} of {n} playlist':
+    '{done} z {n} playlisty',
+  '{done} of {n} playlists':
+    { few: '{done} z {n} playlist', many: '{done} z {n} playlist' },
+  '{done} of {n} song':
+    '{done} z {n} piosenki',
+  '{done} of {n} songs':
+    { few: '{done} z {n} piosenek', many: '{done} z {n} piosenek' },
+  '{n} file read':
+    '{n} plik odczytany',
+  '{n} files read':
+    { few: '{n} pliki odczytane', many: '{n} plików odczytanych' },
+  'Getting ready …':
+    'Przygotowywanie …',
+  'running for {time}':
+    'trwa od {time}',
 }

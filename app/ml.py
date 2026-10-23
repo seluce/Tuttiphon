@@ -41,7 +41,7 @@ import time
 from collections import OrderedDict, defaultdict
 from pathlib import Path
 
-from . import audio, similar
+from . import audio, progress, similar
 from .config import ROOT, STATE_DIR, env_var, paths, read_text, write_atomic
 from .i18n import N_, _, _s
 from .ml_worker import HEADS, SCORES, VERSION, missing_models
@@ -826,6 +826,7 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, everything=Fals
         log(_s("AI sound analysis: no time left in this run – continuing in the next one."))
         return {"analysed": 0, "errors": 0, "later": len(todo)}
     worker = _Worker(max(1, int(an.get("mlThreads") or 2)), track, stop)
+    progress.part("ml", len(todo), until=deadline)
 
     def start_timeout():   # waiting for the models never runs past the end of the run
         return min(START_TIMEOUT, max(30, deadline - time.time())) if deadline else START_TIMEOUT
@@ -835,6 +836,7 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, everything=Fals
     try:
         worker.start(start_timeout())
         for n, (_, i, rel) in enumerate(todo, 1):
+            progress.at(n - 1)
             if (stop is not None and stop.is_set()) or (deadline and time.time() > deadline):
                 break
             s = lib.songs[i]

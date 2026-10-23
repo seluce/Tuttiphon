@@ -2,16 +2,19 @@
   Running task and applying to Navidrome.
   chip: small hint in the header while something is running.
   otherwise: floating bar at the bottom. The bar of a running task can be put away (✕ or swiped aside) until that run
-  ends – the chip in the header stays (a night analysis runs for hours). Applying to Navidrome by itself (auto-apply,
+  ends – the chip in the header stays (a night analysis runs for hours). Administrators see the step and how far it is
+  in the bar; "Progress" (and the chip) opens the run's progress in a sheet (RunProgress). Applying to Navidrome by itself (auto-apply,
   a few seconds after a change) needs no bar – the change was confirmed already; without auto-apply the bar offers
   “Apply”.
 -->
 <script>
   import Icon from '../components/Icon.svelte'
+  import RunProgress from './RunProgress.svelte'
+  import { partName } from '../components/RunPart.svelte'
   import { S, applyNow, pendingCount, isAdmin, isApplyRun } from '../lib/state.svelte.js'
-  import { route, go } from '../lib/router.svelte.js'
+  import { go } from '../lib/router.svelte.js'
+  import { openSheet } from '../lib/overlay.svelte.js'
   import { t, tn } from '../lib/i18n.svelte.js'
-  import { smooth } from '../lib/motion.js'
 
   let { chip = false } = $props()
   const auto = $derived(S.config?.settings.autoApply !== false)
@@ -47,19 +50,16 @@
     document.querySelector('[data-task-chip]')?.focus()
   }
 
-  /** "Progress": to the live log on the home page (when already there: just scroll to it) */
+  /** "Progress": the run's steps and how far each one is, in a sheet */
   function showProgress() {
-    const jump = () => {
-      const log = document.getElementById('protokoll')
-      if (log) log.open = true
-      ;(log || document.querySelector('.hero'))?.scrollIntoView({ behavior: smooth(), block: 'start' })
-    }
-    if (route.path === '/') jump()
-    else {
-      go('#/')
-      setTimeout(jump, 450)   // let the home page build first
-    }
+    openSheet({ title: S.task?.name || t('Progress'), component: RunProgress })
   }
+  // in the bar (administrators): what is at work right now and how far the run is – "Sound analysis · 45 %"
+  const now = $derived.by(() => {
+    const p = task?.progress
+    if (!isAdmin() || !p?.part) return ''
+    return p.total ? `${partName(p.part)} · ${Math.min(100, Math.floor((p.done / p.total) * 100))} %` : partName(p.part)
+  })
 </script>
 
 {#if chip}
@@ -75,7 +75,7 @@
     <div class="applybar swipe" class:dragging={drag} style:--dx="{drag?.dx ?? 0}px" style:--dy="{drag?.dy ?? 0}px"
       style:opacity={drag ? Math.max(0.2, 1 - Math.max(Math.abs(drag.dx) / 160, drag.dy / 80)) : null}
       onpointerdown={down} onpointermove={move} onpointerup={up} onpointercancel={() => (drag = null)}>
-      <Icon name="refresh" size={18} class="animate-spin shrink-0" /><span>{task.name} …</span>
+      <Icon name="refresh" size={18} class="animate-spin shrink-0" /><span>{task.name}{#if now}<span class="now">{now}</span>{:else} …{/if}</span>
       {#if isAdmin()}<button class="btn sm" onclick={showProgress}>{t('Progress')}</button>{/if}
       <button type="button" class="btn icon sm ghost shrink-0" aria-label={t('Close')} title={t('Close')} onclick={putAway}><Icon name="x" size={16} /></button>
     </div>
@@ -99,6 +99,7 @@
     .applybar > span { flex: 1; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     @keyframes up { from { transform: translateY(20px); opacity: 0; } }
   }
+  .now { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
   .swipe { touch-action: none; user-select: none; -webkit-user-select: none; transform: translate(calc(-50% - var(--sidebar) / 2 + var(--dx)), var(--dy)); }
   .swipe.dragging { transition: none; cursor: grabbing; }
   .swipe:not(.dragging) { transition: transform .2s var(--ease), opacity .2s; }

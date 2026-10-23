@@ -37,6 +37,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from . import progress
 from .config import is_inside, load_env, new_temp, paths, temp_copy
 from .i18n import _s
 
@@ -927,6 +928,7 @@ def run(cfg, log=print, stop=None, track=None, dry_run=False, files=None):
     log(_s("{n} file(s) to convert ({formats} → {format} {rate} kbit/s, original: {original}).",
            n=len(files), formats=formats, format=name, rate=rate, original=original))
     ok = failed = 0
+    progress.part("flac", len(files))
 
     def one(path):
         if stop is not None and stop.is_set():
@@ -938,9 +940,10 @@ def run(cfg, log=print, stop=None, track=None, dry_run=False, files=None):
             return "fehler"
 
     with ThreadPoolExecutor(max_workers=max(1, int(op.get("jobs") or 1))) as pool:
-        for res in pool.map(one, files):
+        for k, res in enumerate(pool.map(one, files), 1):
             ok += res == "ok"
             failed += res == "fehler"
+            progress.at(k)
     _pending_cache["key"] = None
     log(_s("Done: {ok} converted, {failed} errors.", ok=ok, failed=failed))
     return {"converted": ok, "errors": failed}

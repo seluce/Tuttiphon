@@ -138,8 +138,14 @@ non-indented, non-empty lines – header “▶ …”, step headings “━━ 
 go to the server log with date and time (`events.say()`, see [08-operations.md](08-operations.md#server-log)).
 Indented detail lines, such as the duration “   (12 s)” or individual files, are only in the log file.
 
-`status(since)` returns `running`, `name`, `steps`, the current `step`, the `results` so far, `finishedAt` and all
-lines with a number greater than `since`. The interface polls `GET /api/task?since=<n>` regularly and so gets only new
+`status(since)` returns `running`, `name`, `steps`, the current `step` and its index `pos`, `durations` (seconds per
+step), `elapsed`, `progress`, the `results` so far, `finishedAt` and all lines with a number greater than `since`.
+`progress` comes from `app/progress.py`: the steps' modules report the part they are at (`progress.part(id, total,
+until)`) and every item done (`progress.at(done)`) – conversion per file, lyrics, Last.fm, sound analysis, AI,
+loudness, fingerprints and Deezer per song or band, covers per album, playlists per playlist, the scan with the files
+Navidrome has read; maintenance, learning, classification, sync, lyrics index and self-check only name their part.
+The runner clears it at every step and at the end; the remaining time comes from the pace so far
+([API](03-api.md#runs)). The interface polls `GET /api/task?since=<n>` regularly and so gets only new
 lines. Users only see whether something is running – `lines` is always empty for them. The response also contains
 `auto` = `AutoApply.state()`: `due` (seconds until the next auto-apply, or `null`) and, as long as an auto-apply is
 scheduled and a run is in progress, `waiting: true` (see [Auto-apply](#auto-apply)). Details on the endpoints:

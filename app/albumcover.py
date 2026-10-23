@@ -20,6 +20,7 @@ import urllib.parse
 import urllib.request
 from collections import defaultdict
 
+from . import progress
 from .config import STATE_DIR, read_text, write_atomic
 from .i18n import _s, _sn
 
@@ -177,7 +178,9 @@ def run(cfg, lib, log=print, stop=None, dry_run=False):
             log(_s("Albums without any cover: {n}", n=len(todo)))
         saved = missing = 0
         owner = (cfg["settings"].get("opus") or {}).get("owner")
-        for a in todo[:MAX_PER_RUN]:
+        progress.part("cover", min(len(todo), MAX_PER_RUN))
+        for k, a in enumerate(todo[:MAX_PER_RUN]):
+            progress.at(k)
             if stop and stop():
                 break
             got = from_caa(a) or from_deezer(a)

@@ -638,4 +638,66 @@ export default {
     'Password dimenticata?',
   'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
     'Elimina il file <b>admin_password.json</b> nella cartella <code>state</code> della cartella dati (<code>config/state</code> accanto a docker-compose.yaml), poi ricarica questa pagina. Ne chiederà una nuova – con un nuovo codice di configurazione dal log del container. Tutto il resto rimane com\'è.',
+  'about {time} left':
+    'ancora circa {time}',
+  'until {time} at the latest':
+    'al più tardi fino alle {time}',
+  'Long-term maintenance':
+    'Manutenzione a lungo termine',
+  'Converting music':
+    'Conversione della musica',
+  'Searching lyrics':
+    'Ricerca dei testi',
+  'Fetching covers':
+    'Recupero delle copertine',
+  'Fetching Last.fm knowledge':
+    'Recupero dei dati di Last.fm',
+  'Measuring loudness':
+    'Misurazione del volume',
+  'Classifying bands':
+    'Classificazione delle band',
+  'Audio fingerprints':
+    'Impronte audio',
+  'Learning from mixes':
+    'Apprendimento dai mix',
+  'Writing playlists':
+    'Scrittura delle playlist',
+  'Navidrome is reading everything in':
+    'Navidrome sta leggendo tutto',
+  'Syncing with Navidrome':
+    'Sincronizzazione con Navidrome',
+  'Indexing lyrics':
+    'Indicizzazione dei testi',
+  'Self-check':
+    'Autoverifica',
+  'Looking up songs on Deezer':
+    'Ricerca dei brani su Deezer',
+  '{done} of {n} file':
+    '{done} di {n} file',
+  '{done} of {n} files':
+    '{done} di {n} file',
+  '{done} of {n} album':
+    '{done} di {n} album',
+  '{done} of {n} albums':
+    '{done} di {n} album',
+  '{done} of {n} band':
+    '{done} di {n} band',
+  '{done} of {n} bands':
+    '{done} di {n} band',
+  '{done} of {n} playlist':
+    '{done} di {n} playlist',
+  '{done} of {n} playlists':
+    '{done} di {n} playlist',
+  '{done} of {n} song':
+    '{done} di {n} brano',
+  '{done} of {n} songs':
+    '{done} di {n} brani',
+  '{n} file read':
+    '{n} file letto',
+  '{n} files read':
+    '{n} file letti',
+  'Getting ready …':
+    'Preparazione …',
+  'running for {time}':
+    'in corso da {time}',
 }

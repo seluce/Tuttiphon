@@ -13,6 +13,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from . import progress
 from .config import STATE_DIR, load_env, read_text, write_atomic
 from .i18n import _, _s, _sn
 
@@ -153,8 +154,10 @@ def refresh(names, log=print, stop=None, budget=None, everything=False):
     else:
         log(_s("Last.fm: {current} bands up to date, {todo} to load.", current=len(names) - len(todo), todo=len(todo)))
     done = later = 0
+    progress.part("lastfm", len(todo), until=deadline)
     try:
         for k, name in enumerate(todo, 1):
+            progress.at(k - 1)
             if stop is not None and stop.is_set():
                 break
             if deadline and time.time() > deadline:

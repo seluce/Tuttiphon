@@ -31,6 +31,7 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+from . import progress
 from .config import STATE_DIR, load_config, rating_users, read_text, user_password, write_atomic
 from .i18n import _, _s, _sn, said
 from .navidrome import Navidrome, NavidromeError
@@ -509,10 +510,12 @@ def _stars(rank, thresholds, boost):
 
 def _process(todo, pool_lookup, entries, users, mode, dry_run, overwrite_manual, result, log, state, started, thresholds=None,
              boosted=frozenset()):
+    progress.part("deezer", len(todo))
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         for chunk_start in range(0, len(todo), 200):
             chunk = todo[chunk_start:chunk_start + 200]
-            for song, rank, isrc in pool.map(pool_lookup, chunk):
+            for k, (song, rank, isrc) in enumerate(pool.map(pool_lookup, chunk), 1):
+                progress.at(chunk_start + k)
                 if rank == "stop":
                     result["stopped"] = True
                     continue

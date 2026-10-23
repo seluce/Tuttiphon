@@ -377,7 +377,7 @@ other indented lines are appended to the previous item. `levels` runs parallel t
 
 | Endpoint | Access | Parameters | Response | Users |
 |---|---|---|---|---|
-| `GET /api/task` | signed in | `since` = last known line number | `{"running", "name", "steps", "step", "results", "startedAt", "finishedAt", "lines[{n, t, text}]", "auto": {"due", "waiting"}}` – `startedAt` (Unix time) tells one run from the next | `lines` empty |
+| `GET /api/task` | signed in | `since` = last known line number | `{"running", "name", "steps", "step", "pos", "durations", "elapsed", "progress", "results", "startedAt", "finishedAt", "lines[{n, t, text}]", "auto": {"due", "waiting"}}` – `startedAt` (Unix time) tells one run from the next; `pos` the index of the step at work (a step can come twice), `durations` seconds per step (`null`: not run yet), `elapsed` seconds since the start, `progress` the part at work `{part, done, total, elapsed, left, until}` (see below) – all three `null` without a run | `lines` empty |
 | `POST /api/task` | Admin (function) | Body: `steps` (default: the steps of “Update everything”), optional `deezer_mode` (`new`, `missing`, `full`, `recalc`), `dry_run`, `full_scan`, `overwrite_manual`, `lyrics_all`, `lyrics_full`, `analyse_full` | run status like `GET /api/task` | `403` |
 | `POST /api/task/cancel` | Admin | – | `{"ok": true}` | – |
 | `POST /api/apply/now` | signed in (deliberately open to everyone: this is how users apply their own changes) | – | run status | `lines` empty |
@@ -392,6 +392,11 @@ other indented lines are appended to the previous item. `levels` runs parallel t
   It cancels the auto-apply only once the run has actually started or the pause is queued – if the
   start fails (run can't be paused, another instance), the auto-apply stays scheduled. `/api/task/cancel` stops the current run including
   its subprocesses and cancels the auto-apply.
+- `progress` (`app/progress.py`): `part` is an id the interface names – `maintenance`, `flac`, `lyrics`, `cover`,
+  `lastfm`, `audio`, `ml`, `loudness`, `classify`, `fingerprints`, `learn`, `playlists`, `scan`, `sync`,
+  `lyricsindex`, `selfcheck`, `deezer`; `done` and `total` items (`total` `null` where it is not known, e.g. the scan:
+  `done` = files read so far); `left` seconds still to go at the pace so far – only after 20 s and 3 items, at most
+  until `until` (Unix time by which the part stops at the latest: time limit or night window), otherwise `null`.
 - `deezer_mode` `missing` rates only songs that weren't found so far; without `deezer_mode` the setting
   `settings.deezer.pipelineMode` applies (where `missing` is called “new + not found”).
 - Errors: unknown steps or Deezer mode → `400`; something is already running → `400 "A task is already running."`;

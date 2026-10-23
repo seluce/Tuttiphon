@@ -236,8 +236,16 @@ keyboard focus. The bar shows the first thing that applies:
 
 | State | Bar |
 |---|---|
-| a (visible) run is in progress | “<name> …”, for administrators with “Progress” (jumps to the live log on the home page) |
+| a (visible) run is in progress | “<name> …” – for administrators the part at work below it (“Sound analysis · 24 %”, `progress` of `GET /api/task`) and “Progress” |
 | auto-apply off, playlists pending | “N change(s) not yet in Navidrome” with “Apply” (`applyNow()`) |
+
+**Progress** (`shell/RunProgress.svelte`, a sheet; also the indicator in the header for administrators): “Step n of m”
+with the time since the start and a bar over the whole run (finished steps plus the share of the part at work), then
+every step of the run with its state (✓, warning, error, at work, number for the ones still open) and the duration of
+the finished ones; the step at work shows its part with `components/RunPart.svelte`: name, percent, a bar (without a
+total it only moves), “1,234 of 5,000 songs”, “about 1 h 10 min left” and “until 05:00 at the latest” (durations
+via `Intl.NumberFormat` units in the interface language). Below: “Stop” (`POST /api/task/cancel`) and the live log,
+folded. The same part shows under the running step in “What happens?” on the home page (`StartHero`).
 
 `applyNow()` first saves open changes and then calls `POST /api/apply/now` – if an analysis or similar is running,
 the server pauses it briefly for this ([Maintenance](05-maintenance.md#short-pause-for-an-apply-pause_for)). On the

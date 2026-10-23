@@ -15,7 +15,7 @@ import random
 import re
 import shutil
 
-from . import mixer, rules
+from . import mixer, progress, rules
 from .config import (BACKUP_DIR, DEFAULT_PLAYLIST_DIR, MARKER, STATE_DIR, load_config, paths, plain_playlist_file, read_text, slug,
                      write_atomic)
 from .i18n import N_, _, _s
@@ -336,7 +336,9 @@ def write(cfg, ctx, log=print, dry_run=False):
         folder.mkdir(parents=True, exist_ok=True)   # e.g. fresh in the container: create 00_SmartPlaylists
     managed = load_managed()
     broken = []
+    progress.part("playlists")
     plans = plan(cfg, ctx, log=log, failed=broken)
+    progress.at(0, len(plans))
     written, unchanged, removed, failed = [], [], [], []
     keep_current = {}   # file -> playlist id: everything the tool manages after this run
     for p, _e in broken:   # cannot be built right now: its file stays as it is (nothing is removed from Navidrome)
@@ -345,7 +347,8 @@ def write(cfg, ctx, log=print, dry_run=False):
         if plain_playlist_file(f) and (folder / f).exists() and (f in managed["current"] or _has_marker(folder / f)):
             keep_current[f] = p["id"]
     try:
-        for p, filename, nsp in plans:
+        for k, (p, filename, nsp) in enumerate(plans):
+            progress.at(k)
             path = folder / filename
             try:   # an error in one playlist must not hold up the others
                 content = render(cfg, ctx, p, nsp, keep=not dry_run)

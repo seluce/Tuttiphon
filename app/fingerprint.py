@@ -33,6 +33,7 @@ import time
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 
+from . import progress
 from .config import STATE_DIR, env_var, paths, read_text, write_atomic
 from .i18n import _, _s, _sn
 
@@ -457,6 +458,7 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, track=None):
         else:
             log(_s("Audio fingerprints: {done} songs done, {open} pending.", **counts))
         saved = time.time()
+        progress.part("fingerprints", len(todo), until=deadline)
 
         def one(item):
             _created, i, rel = item
@@ -466,7 +468,8 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, track=None):
 
         try:
             with ThreadPoolExecutor(max_workers=workers) as pool:
-                for (_created, i, rel), res in pool.map(one, todo):
+                for k, ((_created, i, rel), res) in enumerate(pool.map(one, todo), 1):
+                    progress.at(k)
                     sid = lib.songs[i]["id"]
                     if res == "later" or (res is None and stop and stop()):   # canceled: not a broken file
                         out["later"] += 1

@@ -26,6 +26,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from . import progress
 from .config import STATE_DIR, read_text, temp_copy, write_atomic
 from .i18n import _, _s, _sn
 
@@ -283,6 +284,7 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, track=None, dry
         else:
             log(_s("Loudness: {done} songs measured, {open} pending.", done=len(index) - len(todo), open=len(todo)))
         last_save = time.time()
+        progress.part("loudness", len(todo), until=deadline)
 
         def one(sid):
             if (stop and stop()) or (deadline and time.time() > deadline):
@@ -291,7 +293,8 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, track=None, dry
             return sid, measure(root / rel, track=track)
 
         with ThreadPoolExecutor(max_workers=workers) as pool:
-            for sid, res in pool.map(one, todo):
+            for k, (sid, res) in enumerate(pool.map(one, todo), 1):
+                progress.at(k)
                 if res == "later":
                     continue
                 i, rel = index[sid]

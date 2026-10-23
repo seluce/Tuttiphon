@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 import traceback
 
-from . import deezer, events, instances, playlists, rules
+from . import deezer, events, instances, playlists, progress, rules
 from .config import LOG_DIR, STATE_DIR, load_config, load_env, read_text, update_config, write_atomic
 from .i18n import N_, _, _s, _sn, english, join, said
 from .library import CACHE
@@ -183,6 +183,7 @@ class TaskRunner:
         self.name = None
         self.steps = []
         self.step = None
+        self.durations = []   # seconds per step of the run (None: not run yet)
         self.results = {}
         self.finished_at = None
         self.started_at = None   # identifies a run for the interface (a bar put away stays away for this run only)
@@ -216,7 +217,12 @@ class TaskRunner:
     def status(self, since=0):
         with self.lock:
             lines = [{"n": n, "t": t, "text": x} for n, t, x in self.lines if n > since]
-        return {"running": self.running(), "name": self.name, "steps": self.steps, "step": self.step,
+        running = self.running()
+        # pos: the step at work (a step can come twice); progress: its part and how many of how many (progress.py)
+        return {"running": running, "name": self.name, "steps": self.steps, "step": self.step,
+                "pos": self._pos if running and self.step else None, "durations": self.durations,
+                "elapsed": round(time.time() - self.started_at) if running and self.started_at else None,
+                "progress": progress.get() if running else None,
                 "results": self.results, "finishedAt": self.finished_at, "startedAt": self.started_at, "lines": lines}
 
     def running(self):
@@ -354,6 +360,8 @@ class TaskRunner:
         path = LOG_DIR / f"{started:%Y-%m-%d_%H%M%S}_{'-'.join(steps)}.log"
         self.logfile = path.open("w", encoding="utf-8")
         ctx = {"summary": {}, "steps": list(steps)}
+        self.durations = [None] * len(steps)
+        progress.clear()
         try:
             self.log("▶ " + self.name + f" – {started:%d.%m.%Y %H:%M}")   # + keeps the English form of the name
             self._langzeit(opts)
@@ -361,6 +369,7 @@ class TaskRunner:
                 if self.stop.is_set():
                     self.results[step] = "abgebrochen"
                     continue
+                progress.clear()
                 self._pos = pos
                 self.step = step
                 self.log("")
@@ -374,8 +383,10 @@ class TaskRunner:
                     self.log("❌ " + said(e))
                     if not isinstance(e, RuntimeError):
                         self.log(traceback.format_exc().strip().splitlines()[-1])
-                self.log(f"   ({int(time.time() - t0)} s)")
+                self.durations[pos] = int(time.time() - t0)
+                self.log(f"   ({self.durations[pos]} s)")
             self.step = None
+            progress.clear()
             self.log("")
             done = join(", ", (_s(RESULT_TEXTS[r], step=_s(STEP_TITLES[s])) for s, r in self.results.items()))   # i18n-ignore
             self.log(_s("■ Done. {results}", results=done))
@@ -483,6 +494,7 @@ class TaskRunner:
             except Exception as e:   # noqa: BLE001 – must never prevent the classification afterwards
                 self.log(_s("⚠ Loudness: {error}", error=e))
         mode = an.get("classify", "suggest")
+        progress.part("classify")
         if mode == "auto":
             made = []
 
@@ -531,6 +543,7 @@ class TaskRunner:
         cfg = load_config()
         if not dry_run:   # first: evaluate finished mix periods (skipped/played) so the new mixes learn
             from . import feedback
+            progress.part("learn")
             try:
                 feedback.learn(log=self.log)
                 feedback.forget_removed({p["id"] for p in cfg["playlists"]})
@@ -562,6 +575,7 @@ class TaskRunner:
             return True
         env = load_env()
         nav = admin_client(env)
+        progress.part("scan")
         if nav.scan_status().get("scanning"):
             self.log(_s("Navidrome is already scanning – waiting for it."))
         else:
@@ -572,6 +586,7 @@ class TaskRunner:
         after = nav.scan_status()
         self.log(_s("Scan finished: {files} files, {folders} folders.", files=after.get("count"), folders=after.get("folderCount")))
         CACHE.invalidate()
+        progress.part("sync")
         bctx = self._build_ctx()
         result = playlists.sync_navidrome(load_config(), env, bctx, log=self.log)
         if result["missing"] and not self.stop.is_set():   # missing playlists: files were touched -> a second, short scan
@@ -598,6 +613,7 @@ class TaskRunner:
                 self.log(_s("⚠ Notifications: {error}", error=e))
         if not self.stop.is_set():   # does Navidrome deliver what Tuttiphon expects? (differences -> “To review”)
             from . import selfcheck
+            progress.part("selfcheck")
             try:
                 ctx["summary"]["selfcheck"] = {"checked": (sc := selfcheck.run(load_config(), env, bctx, log=self.log))["checked"],
                                                "problems": len(sc["problems"])}
@@ -611,6 +627,7 @@ class TaskRunner:
         from . import langzeit
         if opts.get("dry_run") or not langzeit.due():
             return
+        progress.part("maintenance")
         try:
             langzeit.run(CACHE.get(), log=self.log)
         except Exception as e:   # noqa: BLE001 – must never prevent the run; again next time
@@ -634,6 +651,7 @@ class TaskRunner:
         if liedtext.status()["running"]:   # indexing in the background right now – do not wait for it
             self.log(_s("Lyrics are already being indexed."))
             return
+        progress.part("lyricsindex")
         if not liedtext.ready():   # the very first indexing takes a while – in the background, without holding up the run
             self.log(_s("Lyrics are being indexed in the background (for search and kid-safe mode)."))
             liedtext.update_soon(bctx.lib, force=True)

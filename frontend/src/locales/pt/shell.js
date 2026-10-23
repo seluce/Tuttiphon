@@ -638,4 +638,66 @@ export default {
     'Esqueceu-se da palavra-passe?',
   'Delete the file <b>admin_password.json</b> in the folder <code>state</code> of the data folder (<code>config/state</code> next to docker-compose.yaml), then reload this page. It asks for a new one – with a new setup code from the container log. Everything else stays as it is.':
     'Elimine o ficheiro <b>admin_password.json</b> na pasta <code>state</code> da pasta de dados (<code>config/state</code> ao lado do docker-compose.yaml) e depois recarregue esta página. Ela pede então uma nova – com um novo código de configuração do registo do contentor. Tudo o resto fica como está.',
+  'about {time} left':
+    'faltam cerca de {time}',
+  'until {time} at the latest':
+    'no máximo até às {time}',
+  'Long-term maintenance':
+    'Manutenção a longo prazo',
+  'Converting music':
+    'A converter música',
+  'Searching lyrics':
+    'A procurar letras',
+  'Fetching covers':
+    'A obter capas',
+  'Fetching Last.fm knowledge':
+    'A obter dados do Last.fm',
+  'Measuring loudness':
+    'A medir o volume',
+  'Classifying bands':
+    'A classificar bandas',
+  'Audio fingerprints':
+    'Impressões digitais de áudio',
+  'Learning from mixes':
+    'A aprender com os mixes',
+  'Writing playlists':
+    'A escrever playlists',
+  'Navidrome is reading everything in':
+    'O Navidrome está a ler tudo',
+  'Syncing with Navidrome':
+    'A sincronizar com o Navidrome',
+  'Indexing lyrics':
+    'A indexar letras',
+  'Self-check':
+    'Autoverificação',
+  'Looking up songs on Deezer':
+    'A procurar músicas no Deezer',
+  '{done} of {n} file':
+    '{done} de {n} ficheiro',
+  '{done} of {n} files':
+    '{done} de {n} ficheiros',
+  '{done} of {n} album':
+    '{done} de {n} álbum',
+  '{done} of {n} albums':
+    '{done} de {n} álbuns',
+  '{done} of {n} band':
+    '{done} de {n} banda',
+  '{done} of {n} bands':
+    '{done} de {n} bandas',
+  '{done} of {n} playlist':
+    '{done} de {n} playlist',
+  '{done} of {n} playlists':
+    '{done} de {n} playlists',
+  '{done} of {n} song':
+    '{done} de {n} música',
+  '{done} of {n} songs':
+    '{done} de {n} músicas',
+  '{n} file read':
+    '{n} ficheiro lido',
+  '{n} files read':
+    '{n} ficheiros lidos',
+  'Getting ready …':
+    'A preparar …',
+  'running for {time}':
+    'em curso há {time}',
 }

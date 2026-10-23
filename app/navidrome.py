@@ -10,6 +10,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from . import progress
 from .i18n import _, _s
 
 CLIENT = "tuttiphon"
@@ -160,6 +161,8 @@ class Navidrome:
             if not status.get("scanning"):
                 return True
             count = status.get("count")
+            if isinstance(count, int):
+                progress.at(count)
             if count != last_count and count is not None:
                 log(_s("  … scan running, {count} files processed", count=count))
                 last_count = count

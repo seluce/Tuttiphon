@@ -22,6 +22,7 @@ import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
+from . import progress
 from .config import STATE_DIR, paths, read_text, write_atomic
 from .i18n import N_, _s
 
@@ -450,6 +451,7 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, everything=Fals
         log(_s("Sound analysis ({depth}): {done} songs done, {open} pending, {workers} at a time.", **counts))
     done = errors = later = 0
     started = saved = time.time()
+    progress.part("audio", len(todo), until=deadline)
 
     def one(item):
         _, i, rel = item
@@ -476,6 +478,7 @@ def run(cfg, lib, log=print, stop=None, budget=None, until=None, everything=Fals
     try:
         with ThreadPoolExecutor(max_workers=workers) as pool:
             for n, (i, rel, res) in enumerate(pool.map(one, todo), 1):
+                progress.at(n)
                 if res in ("stop", "later"):
                     later += 1
                     continue

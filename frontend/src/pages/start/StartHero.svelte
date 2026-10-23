@@ -3,6 +3,7 @@
   import HelpLink from '../../components/HelpLink.svelte'
   import Icon from '../../components/Icon.svelte'
   import Switch from '../../components/Switch.svelte'
+  import RunPart from '../../components/RunPart.svelte'
   import { S, runTask, applyNow } from '../../lib/state.svelte.js'
   import { toast } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
@@ -77,7 +78,8 @@
             {@const st = stepState(s)}
             <div class="step {st}">
               <span class="st">{SYM[st] || i + 1}</span>
-              <div><b>{s.title}</b><div class="d">{STEP_INFO[s.id]?.[2]}</div></div>
+              <div class="min-w-0"><b>{s.title}</b><div class="d">{STEP_INFO[s.id]?.[2]}</div>
+                {#if st === 'running' && task.progress}<div class="mt-2.5 max-w-[520px]"><RunPart p={task.progress} /></div>{/if}</div>
               {#if !task.running}
                 <button class="btn sm ghost" disabled={starting} onclick={() => start(() => runTask([s.id], opts()))}>{t('Run separately')}</button>
               {/if}
