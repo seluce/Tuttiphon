@@ -70,9 +70,10 @@
       {#if tot.newSongs}{@render fact(t('{n} newly discovered'), fmt(tot.newSongs))}{/if}
       {#if busiest}{@render fact(t('most music on {n}'), busiest)}{/if}
     </div>
-    {#if canKeep}
+    {#if canKeep || year}
       <div class="btns">
-        <button class="btn sm" disabled={keeping} onclick={keep}><Icon name="pin" size={15} />{t('Keep as playlist')}</button>
+        {#if year}<a class="btn sm white" href="#/jahr/{d.person}/{d.from.slice(0, 4)}"><Icon name="play" size={15} />{t('Watch as a story')}</a>{/if}
+        {#if canKeep}<button class="btn sm" disabled={keeping} onclick={keep}><Icon name="pin" size={15} />{t('Keep as playlist')}</button>{/if}
       </div>
     {/if}
     {#if top}

@@ -170,6 +170,7 @@
 
 {#snippet statistik()}
   <p>{@html t('<a class="link" href="#/statistik">Statistics</a> shows per person the most played bands, songs and albums, the listening time – and <b>forgotten favorites</b>, as a playlist with one click. At the top you switch between week, 30 days and year; every recap can be kept as a fixed playlist.')}</p>
+  <p>{t('In December the year waits on the start page as a story – for every person and for the family, with a picture to share. Under year, “Watch as a story” opens it any time.')}</p>
   <p>{t('It is based on the plays Symfonium reports, so leave “Scrobbling” on in Symfonium. Tuttiphon counts them for accounts with a stored password or through the Navidrome plugin – the recap grows from the first day.')}</p>
 {/snippet}
 

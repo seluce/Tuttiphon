@@ -412,4 +412,6 @@ export default {
     '<b>Próximo episódio</b> – para cada série de audiodramas que ouve, o episódio que vem a seguir.',
   '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
     '<b>A fila aprende consigo:</b> se saltar duas músicas seguidas, muda logo para outro som. De poucas em poucas músicas entra uma que nunca ouviu – a frequência define-a no <a class="link" href="#/profil">seu perfil</a>.',
+  '<b>Your year as a story:</b> under year, <Ui icon="play">Watch as a story</Ui> shows it slide by slide – listening time, band of the year, discoveries and when you listen – and shares it as a picture. In December it waits for you on the start page and comes as a notification.':
+    '<b>O seu ano como história:</b> no ano, <Ui icon="play">Ver como história</Ui> mostra-o diapositivo a diapositivo – tempo de audição, banda do ano, descobertas e quando ouve – e partilha-o como imagem. Em dezembro espera por si na página inicial e chega como notificação.',
 }

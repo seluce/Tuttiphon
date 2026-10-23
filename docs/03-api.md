@@ -407,7 +407,7 @@ other indented lines are appended to the previous item. `levels` runs parallel t
 | Endpoint | Access | Parameters | Response |
 |---|---|---|---|
 | `GET /api/stats` | own | optional `person` | `user`, `totals`, `topArtists`, `topSongs`, `topAlbums`, `recent`, `welten`, `decades`, `genres`, `forgotten`, `neverPlayed`, plus `person` |
-| `GET /api/rueckblick` | own | optional `person`, `kind` = `woche` (week, default), `monat` (month), `jahr` (year); `year` for `jahr` | `kind`, `title`, `from`, `to`, `user`, `since`, `lastSnapshot`, `totals`, `topArtists`, `topSongs`, `topAlbums`, `series`, `busiest`, `discoveries`, `welten`, `decades`, `person` |
+| `GET /api/rueckblick` | own | optional `person`, `kind` = `woche` (week, default), `monat` (month), `jahr` (year); `year` for `jahr` | `kind`, `title`, `from`, `to`, `user`, `since`, `lastSnapshot`, `totals`, `topArtists`, `topSongs`, `topAlbums`, `series`, `busiest`, `weekdays`, `discoveries`, `welten`, `decades`, `person`; for `jahr` also `hours` |
 
 - Without `person`, the account's own person counts; administrators without one get the family, otherwise the first
   person (`web._default_person()`). Users may ask for their own person and the family (`_own_person()`, otherwise
@@ -415,7 +415,10 @@ other indented lines are appended to the previous item. `levels` runs parallel t
 - Both need the Navidrome password of the person's account (the family's is stored when it is set up); otherwise
   `400` “No password is stored for ‘…’ …”. Unknown person or period → `400`.
 - `/api/rueckblick` first records the current play counts if the last snapshot is older than 30 minutes. Background:
-  [06 – Intelligence](06-intelligence.md).
+  [06 – Intelligence](06-intelligence.md). `weekdays`: plays per weekday, Monday first (listening days). For `jahr`
+  `hours`: plays per hour of the day 0–23 in the year (`listenclock.year_hours()` – the hours kept per day plus the
+  moments of the days not kept yet; without a stored password only the plugin's plays) – the year story `#/jahr`
+  shows both.
 - `POST /api/rueckblick/keep` (body `person`, `kind` = `woche`, `monat` or `jahr`, optional `year`) saves up
   to 50 of the most played songs of the period as a fixed playlist in Navidrome, in the person's account – private,
   for the family public (`playlists.save_fixed()`); users for their own person and the family's when they may change
@@ -501,7 +504,8 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
   car) instead: no `FAMILY_ACCOUNT` check and no `create_user()`. The account must be in `NativeApi.users()` (`400`
   “Navidrome has no account “…”.”; list unreadable → `400` “Could not load the accounts from Navidrome: …”) and is
   stored as Navidrome spells it. Refused with `400`: an account a person uses (““…” already belongs to a person –
-  please choose another account.”), a Navidrome administrator, `NAV_ADMIN_USER` and the account signed in (““…” is an
+  please choose another account.”), a Navidrome administrator, an account with the role `admin` in Tuttiphon
+  (`accounts.<name>.role`), `NAV_ADMIN_USER` and the account signed in (““…” is an
   administrator account – the family needs an account of its own.” – shared devices would get its rights, and nobody
   signs in to Tuttiphon with the family's account), and an account whose `pass_key()` another Navidrome account
   shares (““…” cannot get a stored password – please create a new account instead.”). `password` (or, without it, the

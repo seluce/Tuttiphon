@@ -3,7 +3,7 @@
 //   #/                       Home (administrator) or “For you” (user)
 //   #/playlists  #/playlist/<id>  #/neu?person=…  #/entdecken  #/welten  #/welt/<id>
 //   #/richtungen  #/personen  #/person/<id>  #/profil  #/willkommen  #/einrichtung (setup assistant, administrators)
-//   #/statistik/<kind>  #/einstellungen/<tab>  #/verlauf  #/hilfe/<topic>
+//   #/statistik/<kind>  #/jahr/<person>/<year>  #/einstellungen/<tab>  #/verlauf  #/hilfe/<topic>
 
 function decoded(part) {
   try { return decodeURIComponent(part) } catch { return part }
@@ -18,12 +18,18 @@ function read() {
 }
 
 export const route = $state({ ...read(), key: 0 })
+let before = null   // path of the address before the current one in this tab (null: the first one)
 
 /** Re-read the address – needed when location.hash was set and the page has to be right immediately
  *  (the hashchange event only comes later). */
 export function syncRoute() {
-  Object.assign(route, read())
+  const now = read()
+  if (now.path !== route.path || now.query !== route.query) before = route.path
+  Object.assign(route, now)
 }
+
+/** Path of the address before this one (null if the tab started here) – a full-screen page closes back to it. */
+export const previous = () => before
 
 addEventListener('hashchange', syncRoute)
 

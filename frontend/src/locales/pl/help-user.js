@@ -412,4 +412,6 @@ export default {
     '<b>Następny odcinek</b> – dla każdej serii słuchowisk, której słuchasz, kolejny odcinek.',
   '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
     '<b>Kolejka uczy się na bieżąco:</b> pomiń dwa razy, a od razu przejdzie do innego brzmienia. Co kilka piosenek pojawia się taka, której jeszcze nigdy nie odtwarzano na twoim koncie – jak często, ustawiasz w <a class="link" href="#/profil">swoim profilu</a>.',
+  '<b>Your year as a story:</b> under year, <Ui icon="play">Watch as a story</Ui> shows it slide by slide – listening time, band of the year, discoveries and when you listen – and shares it as a picture. In December it waits for you on the start page and comes as a notification.':
+    '<b>Twój rok jako relacja:</b> przy roku <Ui icon="play">Obejrzyj jako relację</Ui> pokazuje go slajd po slajdzie – czas słuchania, zespół roku, odkrycia i to, kiedy słuchasz – i udostępnia jako obraz. W grudniu czeka na ciebie na stronie startowej i przychodzi jako powiadomienie.',
 }

@@ -1431,12 +1431,21 @@ def api_rueckblick(query):
     except ValueError:   # no stored password: the plays from the Navidrome plugin (if any) with the shared song list
         if not rueckblick.last_snapshot(person["user"]) and rueckblick.plays_between(
                 person["user"], dt.date.today() - dt.timedelta(days=400), dt.date.today())[1]:
-            return {**rueckblick.summary(cfg, CACHE.get(), person["user"], kind, query.get("year")), "person": person["id"]}
+            return _recap(cfg, CACHE.get(), [], person, kind, query.get("year"))   # its moments only from the plugin
         raise
     last = rueckblick.last_snapshot(person["user"])
     if not last or (dt.datetime.now() - dt.datetime.fromisoformat(last["at"])).total_seconds() > 1800:
         rueckblick.snapshot(person["user"], lib.songs)   # keep it fresh (at most every 30 min)
-    return {**rueckblick.summary(cfg, lib, person["user"], kind, query.get("year")), "person": person["id"]}
+    return _recap(cfg, lib, lib.songs, person, kind, query.get("year"))
+
+
+def _recap(cfg, lib, songs, person, kind, year):
+    """The recap of a person; the year also with its plays per hour of the day (the account's own song list: songs)."""
+    out = {**rueckblick.summary(cfg, lib, person["user"], kind, year), "person": person["id"]}
+    if kind == "jahr":
+        from . import listenclock
+        out["hours"] = listenclock.year_hours(person["user"], int(out["from"][:4]), songs)
+    return out
 
 
 def api_rueckblick_keep(body):
@@ -1792,8 +1801,9 @@ def _family(body):
 
 
 def _family_existing(cfg, account, password):
-    """An account Navidrome already has as the family's: free (no person), no administrator – shared devices get its
-    rights –, not the one signed in, and the password works. Stores it -> the name as Navidrome spells it."""
+    """An account Navidrome already has as the family's: free (no person), no administrator in Navidrome or Tuttiphon –
+    shared devices get its rights, and nobody signs in to Tuttiphon with it any more –, not the one signed in, and the
+    password works. Stores it -> the name as Navidrome spells it."""
     env = load_env()
     try:
         users = playlists.native_api(env).users()
@@ -1806,8 +1816,8 @@ def _family_existing(cfg, account, password):
     if any((p.get("user") or "").lower() == account.lower() for p in cfg["personen"]):
         raise ValueError(_("“{account}” already belongs to a person – please choose another account.",
                            account=account))
-    if nav.get("isAdmin") or account.lower() in ((env.get("NAV_ADMIN_USER") or "").lower(),
-                                                 (auth.current().get("user") or "").lower()):
+    if nav.get("isAdmin") or (cfg.get("accounts") or {}).get(account.lower(), {}).get("role") == "admin" \
+            or account.lower() in ((env.get("NAV_ADMIN_USER") or "").lower(), (auth.current().get("user") or "").lower()):
         raise ValueError(_("“{account}” is an administrator account – the family needs an account of its own.",
                            account=account))
     if any(pass_key(u.get("userName") or "") == pass_key(account) and u is not nav for u in users):

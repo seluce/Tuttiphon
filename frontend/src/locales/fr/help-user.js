@@ -412,4 +412,6 @@ export default {
     '<b>Prochain épisode</b> – pour chaque série de fictions audio que vous écoutez, l’épisode qui vient ensuite.',
   '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
     '<b>La file d’attente apprend au fil de l’écoute :</b> passez deux titres d’affilée et elle bascule aussitôt vers un autre son. Tous les quelques titres s’intercale un titre que vous n’avez jamais écouté – à quelle fréquence, vous le réglez dans <a class="link" href="#/profil">votre profil</a>.',
+  '<b>Your year as a story:</b> under year, <Ui icon="play">Watch as a story</Ui> shows it slide by slide – listening time, band of the year, discoveries and when you listen – and shares it as a picture. In December it waits for you on the start page and comes as a notification.':
+    '<b>Votre année en story :</b> sous l’année, <Ui icon="play">Voir en story</Ui> la montre diapo par diapo – temps d’écoute, groupe de l’année, découvertes et moments d’écoute – et la partage en image. En décembre, elle vous attend sur la page d’accueil et arrive en notification.',
 }

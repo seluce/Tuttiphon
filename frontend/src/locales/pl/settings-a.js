@@ -670,4 +670,8 @@ export default {
     'Ostatnia odpowiedź z podobnymi piosenkami',
   'Copy {what}':
     'Kopiuj: {what}',
+  'Your year in music':
+    'Twój rok w muzyce',
+  'In the first week of December to the person – listening time, band of the year and discoveries as a story.':
+    'W pierwszym tygodniu grudnia do danej osoby – czas słuchania, zespół roku i odkrycia jako relacja.',
 }

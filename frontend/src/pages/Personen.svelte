@@ -65,7 +65,7 @@
           <PersonAvatar p={{ id: 'familie', icon: 'i:home' }} size={64} />
           <h2>{t('Family')}</h2>
         </div>
-        <p class="muted small">{t('Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.')}</p>
+        <p class="muted small">{t('Tuttiphon creates a Navidrome account for the family or takes one that already exists. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.')}</p>
         <div class="btns">
           <button class="btn primary" onclick={setUp}><Icon name="home" size={16} />{t('Set up the family')}</button>
         </div>

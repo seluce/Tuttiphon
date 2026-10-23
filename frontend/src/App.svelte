@@ -46,6 +46,7 @@
     settings: () => import('./pages/Settings.svelte'),
     history: () => import('./pages/History.svelte'),
     stats: () => import('./pages/Stats.svelte'),
+    jahr: () => import('./pages/Jahr.svelte'),   // i18n-ignore: file name
     help: () => import('./pages/Help.svelte'),
   }
   const ADMIN_PAGES = ['setup', 'richtungen', 'personen', 'history']
@@ -57,7 +58,7 @@
 
   /** Which page with which props? (null = unknown address → home) */
   const page = $derived.by(() => {
-    const [a, b] = route.parts
+    const [a, b, c] = route.parts
     const admin = isAdmin()
     switch (a) {
       case undefined: return { C: admin ? Start : Home }
@@ -76,6 +77,7 @@
       case 'einstellungen': return lazy('settings', { tab: b || '' })   // without a section: the list on the phone
       case 'verlauf': return admin ? lazy('history') : { C: AdminOnly }
       case 'statistik': return lazy('stats', { kind: b || 'gesamt' })
+      case 'jahr': return lazy('jahr', { person: b || null, year: c || null })
       case 'hilfe': return lazy('help', { topic: b || null })
       default: return null
     }
@@ -168,8 +170,8 @@
     // (also after an update, when the files of the old version would be gone)
     const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 2500))
     idle(() => { for (const [name, load] of Object.entries(PAGES)) if (isAdmin() || !ADMIN_PAGES.includes(name)) preload(load) })
-    // tour on the very first visit – not over an assistant (the setup assistant starts it when it is done)
-    if ((isAdmin() || S.me.own) && !/^#\/(willkommen|einrichtung)/.test(location.hash)) setTimeout(() => startTour(), 1500)
+    // tour on the very first visit – not over an assistant (the setup assistant starts it when it is done) or the year story
+    if ((isAdmin() || S.me.own) && !/^#\/(willkommen|einrichtung|jahr)/.test(location.hash)) setTimeout(() => startTour(), 1500)
   }
   init()
 

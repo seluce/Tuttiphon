@@ -260,4 +260,6 @@ export default {
     '<b>Nächste Folge</b> – für jede Hörspielserie, die du hörst, die Folge, die als Nächstes kommt.',
   '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
     '<b>Die Warteschlange lernt mit:</b> Überspringst du zweimal, wechselt sie sofort zu einem anderen Klang. Alle paar Songs kommt einer, den du noch nie gehört hast – wie oft, stellst du in <a class="link" href="#/profil">deinem Profil</a> ein.',
+  '<b>Your year as a story:</b> under year, <Ui icon="play">Watch as a story</Ui> shows it slide by slide – listening time, band of the year, discoveries and when you listen – and shares it as a picture. In December it waits for you on the start page and comes as a notification.':
+    '<b>Dein Jahr als Story:</b> Beim Jahr zeigt <Ui icon="play">Als Story ansehen</Ui> es Folie für Folie – Hörzeit, Band des Jahres, Entdeckungen und wann du hörst – und teilt es als Bild. Im Dezember wartet es auf der Startseite auf dich und kommt als Mitteilung.',
 }

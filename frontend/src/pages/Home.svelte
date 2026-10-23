@@ -13,6 +13,7 @@
   import PlaylistCard from '../components/PlaylistCard.svelte'
   import TodayRow from './start/TodayRow.svelte'
   import WeekCard from './start/WeekCard.svelte'
+  import YearCard from './start/YearCard.svelte'
   import NewAlbums from './start/NewAlbums.svelte'
   import IdeaCard from './home/IdeaCard.svelte'
   import TipCards from './welcome/TipCards.svelte'
@@ -107,6 +108,7 @@
   </div>
 
   <InstallHint />
+  <YearCard person={myPerson()} />
 
   {#if steps.length}
     <Section title={t('Next steps')} icon="check-circle">

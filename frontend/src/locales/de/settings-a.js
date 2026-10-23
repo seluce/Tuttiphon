@@ -376,4 +376,8 @@ export default {
     '{when} · vermutlich für {name}',
   'Last answer with similar songs': 'Letzte Antwort mit ähnlichen Songs',
   'Copy {what}': '{what} kopieren',
+  'Your year in music':
+    'Dein Jahr in Musik',
+  'In the first week of December to the person – listening time, band of the year and discoveries as a story.':
+    'In der ersten Dezemberwoche an die Person – Hörzeit, Band des Jahres und Entdeckungen als Story.',
 }

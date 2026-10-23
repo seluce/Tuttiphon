@@ -4,8 +4,8 @@ server, the ntfy app on the phone).
 * The administrator turns them on (settings.notify) and chooses server, topic and events: run failed, new music
   processed, new bands classified.
 * Every person can enter their own topic in the profile (person.push) and gets their messages there: news from their
-  favorite bands, "Your October is here" and on Mondays "New for you this week" (discovered for you, album of the
-  week).
+  favorite bands, "Your October is here", on Mondays "New for you this week" (discovered for you, album of the
+  week) and in early December "Your year in music".
 * For protected topics on an own server: access token in .env (NTFY_TOKEN).
 * Every event goes out at most once (state/notified.json).
 * In the reader's language: a message is built by a function (make -> title, text) for every language it goes out in
@@ -22,7 +22,7 @@ from .config import STATE_DIR, load_config, load_env, read_text, write_atomic
 from .i18n import _, _s, _sn, english, speaking
 
 SENT_FILE = STATE_DIR / "notified.json"
-EVENTS = ("failed", "newMusic", "autoAssigned", "favorites", "review", "weekly")
+EVENTS = ("failed", "newMusic", "autoAssigned", "favorites", "review", "weekly", "year")
 _lock = threading.RLock()   # reentrant: once() may call once() again inside a delivery
 # Name of the runs the folder watch starts for new music (watch.py), in its English form
 NEW_MUSIC_RUN = "Process new music"   # i18n-ignore
@@ -167,7 +167,8 @@ def after_run(entry, cfg=None):
 
 
 def for_persons(cfg, lib, today=None):
-    """After the scan: news from the favorite bands and the new monthly recap – per person to their own topic."""
+    """After the scan: news from the favorite bands, the new monthly recap, the week and the year – per person to their
+    own topic and devices."""
     if not settings(cfg).get("enabled"):
         return 0
     from . import rules
@@ -185,6 +186,8 @@ def for_persons(cfg, lib, today=None):
             sent += _review(cfg, lib, person, topic, today)
         if wants(cfg, "weekly"):
             sent += _weekly(cfg, lib, person, topic, today)
+        if wants(cfg, "year"):
+            sent += _year(cfg, person, topic, today)
     return sent
 
 
@@ -231,6 +234,23 @@ def _review(cfg, lib, person, topic, today):
         return _s("{name} is here", name=name), _s("Your most played songs of last month – now in Symfonium.")
     return _to_person(f"review|{person['id']}|{day:%Y-%m}", f"reviewpush|{{account}}|{day:%Y-%m}", make,
                       ("calendar",), f"#/playlist/{p['id']}", cfg, person, topic, tag=f"review-{p['id']}")
+
+
+def _year(cfg, person, topic, today):
+    """In the first week of December: the year recap is there (#/jahr) – once a year, if the account played something
+    this year."""
+    from . import rueckblick
+    if today.month != 12 or today.day > 7:   # set up later in December: no message mid-month
+        return 0
+    if not any(rueckblick.plays_between(person["user"], dt.date(today.year, 1, 1), today)[1].values()):
+        return 0
+    year = today.year
+
+    def make():
+        return (_s("Your {year} in music", year=year),
+                _s("Listening time, band of the year, discoveries – take a look back at your year."))
+    return _to_person(f"year|{person['id']}|{year}", f"yearpush|{{account}}|{year}", make, ("tada",), "#/jahr", cfg,
+                      person, topic, tag=f"year-{year}")
 
 
 def _to_person(key, device_key, make, tags, path, cfg, person, topic, tag):

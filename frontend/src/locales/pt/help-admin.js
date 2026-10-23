@@ -464,4 +464,6 @@ export default {
     'Conta da família',
   'Navidrome account of the family – for shared devices such as the car or the kitchen tablet in Symfonium.':
     'Conta do Navidrome da família – para dispositivos partilhados, como o carro ou o tablet da cozinha, no Symfonium.',
+  'In December the year waits on the start page as a story – for every person and for the family, with a picture to share. Under year, “Watch as a story” opens it any time.':
+    'Em dezembro, o ano espera na página inicial como história – para cada pessoa e para a família, com uma imagem para partilhar. No ano, «Ver como história» abre-o a qualquer momento.',
 }

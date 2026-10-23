@@ -6,9 +6,9 @@ const SETTINGS = ['allgemein', 'konto', 'benutzer', 'start', 'navidrome', 'speic
 
 // Placeholders <playlist>, <welt>, <person> are replaced in the test with IDs from the data copy
 const adminRoutes = ['#/', '#/playlists', '#/playlist/<playlist>', '#/neu', '#/entdecken', '#/welten', '#/welt/<welt>', '#/richtungen',
-  '#/personen', '#/person/<person>', '#/statistik', '#/verlauf', '#/hilfe', ...SETTINGS.map((t) => `#/einstellungen/${t}`)]
+  '#/personen', '#/person/<person>', '#/statistik', '#/statistik/jahr', '#/jahr', '#/verlauf', '#/hilfe', ...SETTINGS.map((t) => `#/einstellungen/${t}`)]
 const fill = (route) => route.replace(/<(\w+)>/, (_, k) => state()[k])
-const userRoutes = ['#/', '#/playlists', '#/neu', '#/entdecken', '#/welten', '#/statistik', '#/profil', '#/hilfe',
+const userRoutes = ['#/', '#/playlists', '#/neu', '#/entdecken', '#/welten', '#/statistik', '#/jahr', '#/profil', '#/hilfe',
   '#/einstellungen/allgemein', '#/einstellungen/konto']
 
 test.describe('Administrator', () => {
@@ -18,6 +18,12 @@ test.describe('Administrator', () => {
       expect(await visit(page, fill(route)), route).toEqual([])
     })
   }
+  test('the year story closes with Escape', async ({ page }) => {
+    expect(await visit(page, '#/jahr')).toEqual([])
+    await expect(page.getByRole('dialog')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page).not.toHaveURL(/#\/jahr/)
+  })
 })
 
 test.describe('User', () => {

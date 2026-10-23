@@ -183,6 +183,7 @@
 {#snippet statistik()}
   <p>{@html t('<a class="link" href="#/statistik">My statistics</a> shows your most played bands, songs and albums – and <b>forgotten favorites</b> you haven’t heard in a long time, as a playlist with one tap.')}</p>
   <p>{@render rich(t('At the top you switch between week, 30 days and year; <Ui icon="pin">Keep as playlist</Ui> saves the recap as a fixed playlist.'))}</p>
+  <p>{@render rich(t('<b>Your year as a story:</b> under year, <Ui icon="play">Watch as a story</Ui> shows it slide by slide – listening time, band of the year, discoveries and when you listen – and shares it as a picture. In December it waits for you on the start page and comes as a notification.'))}</p>
   <p>{@html t('For this, Tuttiphon needs your Navidrome password once – leave “Turn on statistics & stars” checked when you sign in, or turn it on under <a class="link" href="#/einstellungen/konto">Settings → My account</a>.')}</p>
 {/snippet}
 

@@ -171,7 +171,8 @@
         "autoAssigned": true,
         "favorites": true,
         "review": true,
-        "weekly": true
+        "weekly": true,
+        "year": true
       }
     },
     "welten": {

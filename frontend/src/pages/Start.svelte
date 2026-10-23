@@ -16,6 +16,7 @@
   import TodoList from './start/TodoList.svelte'
   import TodayRow from './start/TodayRow.svelte'
   import WeekCard from './start/WeekCard.svelte'
+  import YearCard from './start/YearCard.svelte'
   import NewAlbums from './start/NewAlbums.svelte'
   import DeezerCard from './start/DeezerCard.svelte'
   import LibraryCard from './start/LibraryCard.svelte'
@@ -92,6 +93,7 @@
 <div class="page">
   <StartHero showSteps={conf.showSteps !== false} />
   <InstallHint />
+  <YearCard person={defaultOwner()} />
 
   {#each order as id (id)}
     {#if id === 'heute'}<!-- i18n-ignore: section id -->

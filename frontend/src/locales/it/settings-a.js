@@ -676,4 +676,8 @@ export default {
     'Ultima risposta con brani simili',
   'Copy {what}':
     'Copia {what}',
+  'Your year in music':
+    'Il tuo anno in musica',
+  'In the first week of December to the person – listening time, band of the year and discoveries as a story.':
+    'Nella prima settimana di dicembre alla persona – tempo di ascolto, band dell’anno e scoperte come storia.',
 }

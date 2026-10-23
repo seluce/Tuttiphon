@@ -275,8 +275,8 @@ export default {
   'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
     'In der intelligenten Warteschlange und im Instant Mix von Symfonium kommt alle paar Songs einer, den {name} noch nie gehört hat – der, der am meisten nach dem klingt, was gerade läuft.',
   'for everyone': 'für alle',
-  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
-    'Tuttiphon legt für die Familie ein Navidrome-Konto an. Ihre Playlists sind für alle – und gemeinsame Geräte, im Auto oder auf dem Küchen-Tablet, können sie in Symfonium abspielen.',
+  'Tuttiphon creates a Navidrome account for the family or takes one that already exists. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
+    'Tuttiphon legt für die Familie ein Navidrome-Konto an oder nimmt eines, das es schon gibt. Ihre Playlists sind für alle – und gemeinsame Geräte, im Auto oder auf dem Küchen-Tablet, können sie in Symfonium abspielen.',
   'The family’s account “{account}” is ready.': 'Das Konto „{account}“ der Familie ist angelegt.',
   'Password – shown only now:': 'Passwort – wird nur jetzt angezeigt:',
   'Shared devices – in the car, on the kitchen tablet – sign in to Navidrome in Symfonium with this account and play the family playlists. Nobody signs in to Tuttiphon with it.':
@@ -316,4 +316,6 @@ export default {
     'Passwort von „{user}“',
   'Tuttiphon checks the password and stores it – for the family’s stars, plays and recap. The account stays as it is.':
     'Tuttiphon prüft das Passwort und hinterlegt es – für Sterne, Wiedergaben und Rückblick der Familie. Das Konto selbst bleibt, wie es ist.',
+  'Someone already signs in to Tuttiphon with “{user}” – as the family’s account, that no longer works.':
+    'Mit „{user}“ meldet sich schon jemand bei Tuttiphon an – als Konto der Familie geht das danach nicht mehr.',
 }

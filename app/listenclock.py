@@ -81,6 +81,67 @@ def record(user, songs, new_ids, now=None):
     write_atomic(_file(user), json.dumps({"v": 1, "moments": keep[-MAX_MOMENTS:]}))
 
 
+def _hours_file(user, year):
+    from .rueckblick import _dir
+    return _dir(user) / f"hours-{int(year)}.json"
+
+
+def _hours_kept(user, year):
+    """-> (days already counted, plays per hour 0–23) of hours-<year>.json; nothing yet or unreadable: (set(), zeros)."""
+    try:
+        data = json.loads(read_text(_hours_file(user, year)))
+    except (OSError, ValueError):
+        return set(), [0] * 24
+    days = data.get("days") if isinstance(data, dict) else None
+    hours = data.get("hours") if isinstance(data, dict) else None
+    if not isinstance(days, list) or not isinstance(hours, list) or len(hours) != 24 \
+            or not all(type(h) is int and h >= 0 for h in hours):
+        return set(), [0] * 24
+    return {d for d in days if isinstance(d, str)}, hours
+
+
+def keep_hours(user, songs, now=None):
+    """Once a day (rueckblick.snapshot_all): the moments of the finished days not counted yet go into the hours of their
+    year – state/plays/<account>/hours-<YYYY>.json {"days": [day, …], "hours": [plays per hour 0–23]}. The moments
+    themselves go after KEEP_DAYS; this way the year recap knows the time of day of the whole year."""
+    now = now or dt.datetime.now()
+    today = now.date()
+    kept = {y: _hours_kept(user, y) for y in {today.year, (today - dt.timedelta(days=KEEP_DAYS)).year}}
+    latest = max((d for days, _h in kept.values() for d in days), default=None)
+    try:   # only the days since the last one counted (the first time: all moments there are)
+        back = min(KEEP_DAYS, (today - dt.date.fromisoformat(latest)).days + 1) if latest else KEEP_DAYS
+    except ValueError:
+        back = KEEP_DAYS
+    new = {}
+    for t, _sid in moments(user, songs, now, days=back):
+        day = t.date()
+        if day < today and day.year in kept and day.isoformat() not in kept[day.year][0]:
+            new.setdefault(day.year, {}).setdefault(day.isoformat(), [0] * 24)[t.hour] += 1
+    with _lock:
+        for year, days_new in new.items():
+            days, hours = _hours_kept(user, year)   # again under the lock – another run may have counted in between
+            add = [h for d, h in days_new.items() if d not in days]
+            if not add:
+                continue
+            for h in add:
+                hours = [a + b for a, b in zip(hours, h)]
+            path = _hours_file(user, year)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            write_atomic(path, json.dumps({"v": 1, "days": sorted(days | set(days_new)), "hours": hours}))
+
+
+def year_hours(user, year, songs, now=None):
+    """Plays per hour of the day (0–23, local time) in `year`: the days counted (keep_hours) and those not counted yet –
+    today and the days since the last count – from the moments."""
+    now = now or dt.datetime.now()
+    days, hours = _hours_kept(user, year)
+    hours = list(hours)
+    for t, _sid in moments(user, songs, now, days=KEEP_DAYS):
+        if t.year == int(year) and t.date().isoformat() not in days:
+            hours[t.hour] += 1
+    return hours
+
+
 def moments(user, songs, now=None, days=DAYS):
     """[(local time, song id)] of the last `days` days, oldest first – recorded moments and the last play of every
     song, each moment once. A family mix heard on a person's own account is the family's moment, not the person's

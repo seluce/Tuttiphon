@@ -1206,6 +1206,7 @@ state/plays/<account>/baseline.json     {"since": …, "at": …, "counts": {son
 state/plays/<account>/<YYYY-MM-DD>.json {song ID: plays on this listening day}
 state/plays/<account>/first.json        {song ID: day of the first play}
 state/plays/<account>/moments.json      {"v": 1, "moments": [[song ID, last play], …]}  (listening clock)
+state/plays/<account>/hours-<YYYY>.json {"v": 1, "days": [day, …], "hours": [24 counts]}  (time of day of the year)
 ```
 
 `<account>` is the account name as a slug (`config.slug()`). More in [02-data-model.md](02-data-model.md). “Mixes
@@ -1223,8 +1224,12 @@ learn” uses the same daily files to evaluate expired mix periods
 | `jahr` | January 1 to today (or December 31) of the year `year`, otherwise of the current year | per month |
 
 Result: plays, listening hours, songs, bands, days with music, newly discovered songs and bands; the 10 most played
-bands and songs, 8 albums, the strongest day, up to 8 discoveries, up to 6 music worlds, decades; plus `since`
-(start of counting) and `lastSnapshot`.
+bands and songs, 8 albums, the strongest day, plays per weekday (`weekdays`, Monday first), up to 8 discoveries, up to
+6 music worlds, decades; plus `since` (start of counting) and `lastSnapshot`. The year also gets `hours` (plays per
+hour of the day, `listenclock.year_hours()`): the moments of the listening clock only reach back 120 days, so
+`snapshot_all()` adds the finished days of every account once a day to `hours-<YYYY>.json`
+(`listenclock.keep_hours()` – after the first time only the days since the last one counted; accounts without a
+password with the plugin's plays only); the recap adds today and the days not counted yet from the moments.
 
 ### Limits
 

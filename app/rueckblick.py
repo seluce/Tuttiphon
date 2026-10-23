@@ -215,6 +215,12 @@ def summary(cfg, lib, user, kind="woche", year=None):
             series.append({"key": d.isoformat(), "n": per_day.get(d.isoformat(), 0)})
             d += dt.timedelta(days=1)
     busiest = max(per_day.items(), key=lambda x: x[1]) if per_day else None
+    weekdays = [0] * 7   # plays per weekday, Monday first (listening days)
+    for day, n in per_day.items():
+        try:
+            weekdays[dt.date.fromisoformat(day).weekday()] += n
+        except ValueError:   # a file name that is no date
+            pass
 
     # newly discovered: counted for the first time in this period
     new_ids = [index[sid] for sid, day in first.items() if start.isoformat() <= day <= end.isoformat() and sid in index]
@@ -249,7 +255,7 @@ def summary(cfg, lib, user, kind="woche", year=None):
         "topArtists": [{"name": a, "plays": n, "songs": len(artist_songs[a]), "id": aid.get(a)} for a, n in by_artist.most_common(10)],
         "topSongs": [song_row(i) for i, _ in sorted(plays.items(), key=lambda x: -x[1])[:10]],
         "topAlbums": [{**albums[a], "plays": n} for a, n in by_album.most_common(8) if a in albums],
-        "series": series, "busiest": {"day": busiest[0], "plays": busiest[1]} if busiest else None,
+        "series": series, "busiest": {"day": busiest[0], "plays": busiest[1]} if busiest else None, "weekdays": weekdays,
         "discoveries": [{"name": a, "songs": n, "id": aid.get(a)} for a, n in new_artists.most_common(8)],
         "welten": welten[:6], "decades": sorted(decades.items()),
     }
@@ -263,11 +269,17 @@ def snapshot_all(cfg=None, base_lib=None, log=lambda *_: None):
     base = base_lib or CACHE.get()
     users = [p["user"] for p in cfg["personen"]]   # one person per account
     done = {}
+    from . import listenclock
     for u in users:
+        songs = []   # without its own song list: the time of day only from the plays the plugin reported
         try:
             lib = songs_for(u, base)
-            done[u] = snapshot(u, lib.songs)
+            songs = lib.songs
+            done[u] = snapshot(u, songs)
         except Exception as e:   # no password, or a file briefly not readable -> leave out this account this time
             log(_s("Recap: {user} skipped ({error})", user=u, error=e))
-            continue
+        try:   # the time of day for the year recap – never at the cost of the counts
+            listenclock.keep_hours(u, songs)
+        except (OSError, ValueError):
+            pass
     return done

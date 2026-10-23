@@ -66,8 +66,9 @@ swallowing it (`.catch(() => {})` only where nothing depends on it).
 ## Router – `lib/router.svelte.js`
 
 `route.path`, `route.parts`, `route.query`, `params().get('person')`, `go('#/…')` (same route → page is rebuilt),
-`replace('#/…')` (redirects: no new history entry), `rerender()`. Pages get their parts as props (e.g.
-`Playlist { id }`, `Settings { tab }`, `Help { topic }`). An open sheet has a history entry of its own – the back button
+`replace('#/…')` (redirects: no new history entry), `rerender()`, `previous()` (path of the address before – a
+full-screen page such as the year story closes back to it). Pages get their parts as props (e.g.
+`Playlist { id }`, `Settings { tab }`, `Help { topic }`, `Jahr { person, year }`). An open sheet has a history entry of its own – the back button
 closes it; `go()` and links from a sheet replace that entry.
 
 ## Components – `components/`

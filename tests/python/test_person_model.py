@@ -129,6 +129,12 @@ class FamilySetupTest(unittest.TestCase):
         self.assertEqual(cfg["settings"]["deezer"]["users"], ["Jonas", "Auto"])
         self.assertEqual(self.runs, [(["deezer"], {"deezer_mode": "new"})])
 
+    def test_an_administrator_in_tuttiphon(self):
+        config.update_config(lambda c: c.setdefault("accounts", {}).update({"auto": {"role": "admin"}}))
+        with self.assertRaises(ValueError):
+            web.api_family({"account": "auto", "existing": True, "password": "pw-family"})
+        self.assertEqual(self.saved, {})
+
     def test_an_existing_account_with_a_stored_password(self):
         self.env[config.pass_key("Auto")] = "pw-family"
         self.assertEqual(web.api_family({"account": "Auto", "existing": True})["account"], "Auto")

@@ -412,4 +412,6 @@ export default {
     '<b>Volgende aflevering</b> – voor elke hoorspelserie waar je naar luistert, de aflevering die nu aan de beurt is.',
   '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
     '<b>De wachtrij leert mee:</b> sla je twee keer over, dan wisselt die meteen naar een andere klank. Om de paar nummers zit er een tussen dat je nog nooit hebt gespeeld – hoe vaak, stel je in <a class="link" href="#/profil">je profiel</a> in.',
+  '<b>Your year as a story:</b> under year, <Ui icon="play">Watch as a story</Ui> shows it slide by slide – listening time, band of the year, discoveries and when you listen – and shares it as a picture. In December it waits for you on the start page and comes as a notification.':
+    '<b>Jouw jaar als story:</b> bij jaar toont <Ui icon="play">Bekijken als story</Ui> het dia voor dia – luistertijd, band van het jaar, ontdekkingen en wanneer je luistert – en deelt het als afbeelding. In december wacht het op je op de startpagina en komt het als melding.',
 }

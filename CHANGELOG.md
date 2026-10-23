@@ -7,9 +7,13 @@ released.
 
 ## Unreleased
 
+- **Your year in music:** a story slide by slide – listening time, band of the year, top bands and songs, discoveries,
+  when the music plays and the world of the year –, for every person and for the family (“Our 2026”). Share it as a
+  picture or keep it as a playlist. In December it waits on the start page and comes as a notification in the first
+  week; under Statistics → Year it opens any time. The time of day is now kept for the whole year.
 - **The family can use an account Navidrome already has:** “Set up the family” offers “Existing account” –
   for example the one in the car. Tuttiphon checks its password and stores it; the account stays as it is. One that
-  looks like a family account is chosen right away.
+  looks like a family account is chosen right away; administrator accounts are not offered.
 - **Fewer messages:** with automatic applying, changes reach Navidrome by themselves a few seconds later – without a
   countdown bar and without a number on “Playlists”; both only appear when applying by hand.
 - **A mix stays the same until its next edition:** songs played from “Discovered” or stars Deezer set anew no longer

@@ -676,4 +676,8 @@ export default {
     'Laatste antwoord met vergelijkbare nummers',
   'Copy {what}':
     '{what} kopiëren',
+  'Your year in music':
+    'Jouw jaar in muziek',
+  'In the first week of December to the person – listening time, band of the year and discoveries as a story.':
+    'In de eerste week van december aan de persoon – luistertijd, band van het jaar en ontdekkingen als story.',
 }

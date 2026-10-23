@@ -412,4 +412,6 @@ export default {
     '<b>Prossimo episodio</b> – per ogni serie di radiodrammi che ascolti, l\'episodio successivo.',
   '<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.':
     '<b>La coda impara con te:</b> salta due brani e passa subito a un altro suono. Ogni pochi brani ne arriva uno che non hai mai ascoltato – quanto spesso, lo imposti nel <a class="link" href="#/profil">tuo profilo</a>.',
+  '<b>Your year as a story:</b> under year, <Ui icon="play">Watch as a story</Ui> shows it slide by slide – listening time, band of the year, discoveries and when you listen – and shares it as a picture. In December it waits for you on the start page and comes as a notification.':
+    '<b>Il tuo anno come storia:</b> in anno, <Ui icon="play">Guarda come storia</Ui> lo mostra schermata dopo schermata – tempo di ascolto, band dell’anno, scoperte e quando ascolti – e lo condivide come immagine. A dicembre ti aspetta nella pagina iniziale e arriva come notifica.',
 }

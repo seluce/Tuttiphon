@@ -589,4 +589,80 @@ export default {
     'Hasło dla „{user}”',
   'Saved ✓':
     'Zapisano ✓',
+  'To the statistics':
+    'Do statystyk',
+  'Nothing has been counted for this year yet.':
+    'Za ten rok nic jeszcze nie policzono.',
+  'The year in music – counted since {date}':
+    'Rok w muzyce – liczony od {date}',
+  'The year in music':
+    'Rok w muzyce',
+  '{n} hour of music':
+    '{n} godzina muzyki',
+  '{n} hours of music':
+    { few: '{n} godziny muzyki', many: '{n} godzin muzyki' },
+  '{n} play':
+    '{n} odtworzenie',
+  '{n} plays':
+    { few: '{n} odtworzenia', many: '{n} odtworzeń' },
+  'Music on {n} day':
+    'Muzyka przez {n} dzień',
+  'Music on {n} days':
+    { few: 'Muzyka przez {n} dni', many: 'Muzyka przez {n} dni' },
+  'Song of the year':
+    'Piosenka roku',
+  '{n} new band':
+    '{n} nowy zespół',
+  '{n} new bands':
+    { few: '{n} nowe zespoły', many: '{n} nowych zespołów' },
+  '{n} song heard for the first time':
+    '{n} piosenka usłyszana po raz pierwszy',
+  '{n} songs heard for the first time':
+    { few: '{n} piosenki usłyszane po raz pierwszy', many: '{n} piosenek usłyszanych po raz pierwszy' },
+  'When the music plays':
+    'Kiedy gra muzyka',
+  'Favorite day: {day}':
+    'Ulubiony dzień: {day}',
+  'The most music on {date} – {n} play':
+    'Najwięcej muzyki {date} – {n} odtworzenie',
+  'The most music on {date} – {n} plays':
+    { few: 'Najwięcej muzyki {date} – {n} odtworzenia', many: 'Najwięcej muzyki {date} – {n} odtworzeń' },
+  'World of the year':
+    'Świat roku',
+  'World of the year: {name}':
+    'Świat roku: {name}',
+  'Most played decade: {decade}':
+    'Najczęściej słuchana dekada: {decade}',
+  'Share as a picture':
+    'Udostępnij jako obraz',
+  'Watch again':
+    'Obejrzyj ponownie',
+  'No person yet – set one up under People first.':
+    'Nie ma jeszcze żadnej osoby – najpierw dodaj ją w Osobach.',
+  'Picture saved':
+    'Obraz zapisany',
+  'The picture could not be made.':
+    'Nie udało się utworzyć obrazu.',
+  'Our {year}':
+    'Nasz {year}',
+  'My {year}':
+    'Mój {year}',
+  'Your {year}':
+    'Twój {year}',
+  'Mostly in the morning':
+    'Najczęściej rano',
+  'Mostly around noon':
+    'Najczęściej w południe',
+  'Mostly in the afternoon':
+    'Najczęściej po południu',
+  'Mostly in the evening':
+    'Najczęściej wieczorem',
+  'Mostly at night':
+    'Najczęściej w nocy',
+  'Band of the year: {name}':
+    'Zespół roku: {name}',
+  'Look back':
+    'Zobacz',
+  'Watch as a story':
+    'Obejrzyj jako relację',
 }

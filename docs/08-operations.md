@@ -417,11 +417,12 @@ there.
 | `autoAssigned` | administrators' devices, the administrator's topic | bands were automatically assigned to a music world |
 | `favorites` | devices of the person's account, their topic (`person.push`) | an album by a favorite band was added in the last 3 days (after the scan, once per album) |
 | `review` | devices of the person's account, their topic | in the first three days of the month, if the person has a recap playlist “Your month” |
+| `year` | devices of the person's account, their topic | “Your <year> in music” in the first week of December (1st to 7th – set up later in December, nothing comes mid-month), if the account played something this year; tapping opens the year story `#/jahr` |
 | `weekly` | devices of the person's account, their topic | “New for you this week” on Monday (still on Tuesday if no run came on Monday), if the person has an active “Discovered for you” or “Album of the week” that renews weekly and was renewed this week: how many never played songs and which album – to the topic once per person and week, to the devices of the account once per week; tapping opens the first of them |
 
 Each event is sent only once (`state/notified.json`): per person to its ntfy topic (`fav|<person>|<album>`,
-`review|<person>|<month>`, `weekly|<person>|<week>`) and per account to its devices (`favpush|…`, `reviewpush|…`,
-`weeklypush|…`). One person per Navidrome account, so the devices of an account get exactly their person's news.
+`review|<person>|<month>`, `weekly|<person>|<week>`, `year|<person>|<year>`) and per account to its devices
+(`favpush|…`, `reviewpush|…`, `weeklypush|…`, `yearpush|…`). One person per Navidrome account, so the devices of an account get exactly their person's news.
 The family is a person like the others (`notify.for_persons()`): its favorite bands, its recap and its weekly news –
 from the plays on its account. Nobody signs in with the family's account, so it has no devices of its own; its
 messages go only to an ntfy topic entered for it.

@@ -123,6 +123,7 @@ link) replaces it, so “back” afterwards leads to the page before. The steps 
 | `#/personen`, `#/person/<id>`, `#/person/neu` | people (with the family and its setup), profile, assistant for a new person | profile: own; rest: administrator |
 | `#/profil` | “My profile”: straight to the own person (`myPerson()`), without one to `#/willkommen`; the local administrator → people | everyone |
 | `#/statistik/<gesamt\|woche\|monat\|jahr>` | statistics and recap | everyone (users: their own person and the family) |
+| `#/jahr[/<person>[/<year>]]` | the year as a story | everyone (users: their own person and the family) |
 | `#/einstellungen`, `#/einstellungen/<section>` | `Settings.svelte` – fifteen sections in five groups (`allgemein`, `konto` · `benutzer`, `start`, `benachrichtigungen` · `navidrome`, `speicher` · `playlists`, `deezer`, `lyrics`, `opus`, `intel`, `bibliothek` · `ablaeufe`, `sicherung`); without a section the list on the phone, the first section on the computer – see [Settings](#settings) | everyone (users only `allgemein` and `konto`) |
 | `#/verlauf` | history of all runs | administrator |
 | `#/hilfe/<topic>` | help (one version per role), expands the topic and jumps to it | everyone |
@@ -292,6 +293,7 @@ sections by `settings.start.sections` ([Data model](02-data-model.md#home-page))
 | Section | Contents |
 |---|---|
 | Header | date, greeting with first name, number of own playlists and mixes, songs in the library; “New playlist”, “Discover”. Without own playlists, a sentence about what will appear here |
+| The year | in December and January: the year story card (`YearCard`) right below the header – only with plays this year |
 | Next steps | only if there are any: entries from `GET /api/inbox` (profile, preferences – only as long as Tuttiphon doesn't already know the taste from listening, `taste.profile()` with `enough` –, first playlist, password); “later” adds them to `ignored`. Without an own playlist, “Your first playlist” is left out – “Let’s go” covers that |
 | Let’s go | only without an own playlist, instead of “Your mixes” and “Your own playlists”: a sentence about mixes and up to three mix suggestions to tap – no buttons of its own, “New playlist” and “Discover” are in the header |
 | Your mixes | as soon as there are own playlists: the active mixes of your own person only – not the family's, those are under “Family playlists” (`TodayRow`); without a mix, a row with mix suggestions and “Create your own mix” |
@@ -452,18 +454,20 @@ One person per Navidrome account; the family is an optional person with an accou
 ([Data model](02-data-model.md#personen)). `pages/Personen.svelte` (`#/personen`):
 
 - **The family card first** – `familyPerson()` with the pill “Family”, its account and “for everyone”. Without a family
-  a dashed card **“Set up the family”** explains that Tuttiphon creates a Navidrome account for the family, that its
-  playlists are for everyone and that shared devices (car, kitchen tablet) can play them in Symfonium (the sheet
-  can also take an account Navidrome already has).
+  a dashed card **“Set up the family”** explains that Tuttiphon creates a Navidrome account for the family or takes
+  one that already exists, that its playlists are for everyone and that shared devices (car, kitchen tablet) can play
+  them in Symfonium.
 - Then **one card per person** (account, number of active playlists, password stored or missing, favorite worlds) and
   the dashed card “Add person”.
 
 **Set up the family** (`pages/personen/FamilySetup.svelte`, a sheet): name (prefilled with the translated “Family”)
 and account name (follows the name – letters without accents, digits, `.`, `_`, `-` – until it is edited). Has
-Navidrome free accounts (`users()` without a person, no administrators, not the own one), a segmented control offers
-**“New account”** / **“Existing account”**; one whose name or full name looks like a family account
-(“famil…”, “famig…”, “gezin”, “rodzin…”) chooses “Existing account” with it right away. There: a select of
-the free accounts, the password (or “✓ A password is already stored for this account.”) and the hint that Tuttiphon
+Navidrome free accounts (`GET /api/accounts` without a person or the family, no administrator in Navidrome or
+Tuttiphon, not the own one), a segmented control offers **“New account”** / **“Existing account”**; one whose name
+or full name looks like a family account (“famil…”, “famig…”, “gezin”, “rodzin…”) and that nobody signs in to
+Tuttiphon with (`lastLogin`) chooses “Existing account” with it right away. There: a select of the free accounts, a
+note for an account somebody signs in to Tuttiphon with (“Someone already signs in to Tuttiphon with “…” – as the
+family’s account, that no longer works.”), the password (or “✓ A password is already stored for this account.”) and the hint that Tuttiphon
 checks and stores it and the account stays as it is. “Set up the family” saves open changes first, then
 `POST /api/family` with `{name, account}` (or `{name, account, existing: true, password}`); errors from the server
 (name taken in Navidrome or by a person, a wrong password …) appear in the sheet. After that the sheet shows the
@@ -644,7 +648,38 @@ family (`ownerOrder()`), lock icon if the password is missing – then the perio
 phone with short labels (Overall · Week · 30 days · <year>). Both rows scroll sideways when they don't fit
 (`showChosen`). In the bars of the overview and the recap, the music worlds get a wider name column (`Bars` with
 `wide`: up to 46 %, long names wrap to two lines instead of being cut off). The recap (week, 30 days, year;
-`pages/stats/Rueckblick.svelte`) has “Keep as playlist” below the numbers → `POST /api/rueckblick/keep`.
+`pages/stats/Rueckblick.svelte`) has “Keep as playlist” below the numbers → `POST /api/rueckblick/keep`; the year
+also “Watch as a story” → `#/jahr/<person>/<year>`.
+
+### The year as a story
+
+`pages/Jahr.svelte` (`#/jahr[/<person>[/<year>]]`, lazy): the year of a person or the family slide by slide, full
+screen above the shell (`z-index` 55 – below sheets and toasts), from `GET /api/rueckblick?kind=jahr`. Person: the
+one in the address if one may see it (administrators everyone, users their own and the family), otherwise
+`defaultOwner()`; year: the one in the address, otherwise `recapYear()` (`pages/jahr/year.js`: in January the year
+just ended, otherwise the current one). Heading `yearTitle()`: “Your 2026” (own person), “Our 2026” (the family),
+otherwise “Anna · 2026”. Slides, each only with something to show: intro (avatar, heading, “counted since …” when
+counting started during the year, “Let’s go”) · listening time (hours counting up, plays, songs, days, “≈ n days
+non-stop” from 48 h) · band of the year · the 5 most played bands · song of the year with places 2–5 · newly
+discovered (new bands, songs heard for the first time, up to 6 faces) · when the music plays (a 24-hour clock from
+`hours`, the part of the day with the most plays – `partOfDay()` morning 5–10, around noon 10–14, afternoon 14–18,
+evening 18–22, night 22–5 –, the favorite weekday from `weekdays`, the day with the most music) · world of the year
+(top 5 worlds, the most played decade) · the end: summary, “Share as a picture”, “Keep as playlist” (`canKeep` as in
+the statistics), from the own year to the family's (“Our 2026”, in place) and back, “Watch again”. Progress bars at
+the top; tapping the left third goes back, the rest on; ←/→/space, Esc and × close – back to where it was opened
+from (`previous()` in `lib/router.svelte.js`), opened directly (a notification) to the start page. The tour does not
+start over it. Counting up and the entrances keep still with `prefers-reduced-motion`. Without plays: “Nothing has
+been counted for this year yet.”
+
+“Share as a picture” (`pages/jahr/share.js`): a 1080 × 1920 PNG drawn on a canvas in the interface language –
+“My 2026”/“Our 2026”, hours, plays and bands, band of the year with its picture (`/img/ar-<id>`, same origin, so the
+canvas stays readable; without one its initials), the 5 most played bands and songs, world and decade of the year.
+Where the browser can share files (`navigator.canShare`), the share menu opens; otherwise the picture is saved as
+`tuttiphon-<year>.png` (“Picture saved”).
+
+In December and January a card (`pages/start/YearCard.svelte`) under the header of both home pages opens the story –
+for the own person (administrators without one: `defaultOwner()`), only when something was counted this year, with
+the band of the year, the hours and “Look back” (hidden below 520 px, the whole card is the link).
 
 ### Settings
 

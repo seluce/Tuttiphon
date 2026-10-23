@@ -598,4 +598,80 @@ export default {
     'Contraseña de «{user}»',
   'Saved ✓':
     'Guardado ✓',
+  'To the statistics':
+    'A las estadísticas',
+  'Nothing has been counted for this year yet.':
+    'Todavía no se ha contado nada de este año.',
+  'The year in music – counted since {date}':
+    'El año en música – contado desde el {date}',
+  'The year in music':
+    'El año en música',
+  '{n} hour of music':
+    '{n} hora de música',
+  '{n} hours of music':
+    '{n} horas de música',
+  '{n} play':
+    '{n} reproducción',
+  '{n} plays':
+    '{n} reproducciones',
+  'Music on {n} day':
+    'Música en {n} día',
+  'Music on {n} days':
+    'Música en {n} días',
+  'Song of the year':
+    'Canción del año',
+  '{n} new band':
+    '{n} banda nueva',
+  '{n} new bands':
+    '{n} bandas nuevas',
+  '{n} song heard for the first time':
+    '{n} canción escuchada por primera vez',
+  '{n} songs heard for the first time':
+    '{n} canciones escuchadas por primera vez',
+  'When the music plays':
+    'Cuándo suena la música',
+  'Favorite day: {day}':
+    'Día favorito: {day}',
+  'The most music on {date} – {n} play':
+    'Más música el {date} – {n} reproducción',
+  'The most music on {date} – {n} plays':
+    'Más música el {date} – {n} reproducciones',
+  'World of the year':
+    'Mundo del año',
+  'World of the year: {name}':
+    'Mundo del año: {name}',
+  'Most played decade: {decade}':
+    'Década más escuchada: {decade}',
+  'Share as a picture':
+    'Compartir como imagen',
+  'Watch again':
+    'Ver de nuevo',
+  'No person yet – set one up under People first.':
+    'Todavía no hay ninguna persona – crea primero una en Personas.',
+  'Picture saved':
+    'Imagen guardada',
+  'The picture could not be made.':
+    'No se pudo crear la imagen.',
+  'Our {year}':
+    'Nuestro {year}',
+  'My {year}':
+    'Mi {year}',
+  'Your {year}':
+    'Tu {year}',
+  'Mostly in the morning':
+    'Sobre todo por la mañana',
+  'Mostly around noon':
+    'Sobre todo a mediodía',
+  'Mostly in the afternoon':
+    'Sobre todo por la tarde',
+  'Mostly in the evening':
+    'Sobre todo por la noche',
+  'Mostly at night':
+    'Sobre todo de madrugada',
+  'Band of the year: {name}':
+    'Banda del año: {name}',
+  'Look back':
+    'Revivir',
+  'Watch as a story':
+    'Ver como historia',
 }

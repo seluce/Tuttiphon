@@ -1,8 +1,9 @@
 <!--
   "Set up the family" (administrators, in a sheet): name and account name. POST /api/family: Tuttiphon creates the
   Navidrome account with a random password and adds the family; the password is shown here once (for shared devices
-  in Symfonium). Has Navidrome free accounts (no person, no administrator), one of them can be the family's instead
-  ({existing: true} with its password) – one that looks like a family account is chosen right away.
+  in Symfonium). Has Navidrome free accounts (GET /api/accounts: no person, no administrator), one of them can be the
+  family's instead ({existing: true} with its password) – one that looks like a family account and nobody signs in to
+  Tuttiphon with is chosen right away; for one somebody signs in with, a note says that this ends.
 -->
 <script>
   import Icon from '../../components/Icon.svelte'
@@ -12,7 +13,7 @@
   import { S, save, reloadConfig, loadStatus } from '../../lib/state.svelte.js'
   import { closeSheet, toast } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
-  import { users, forgetUsers, takenAccounts, pwOk } from './shared.js'
+  import { forgetUsers, pwOk } from './shared.js'
   import { t } from '../../lib/i18n.svelte.js'
 
   let name = $state(t('Family'))
@@ -29,14 +30,14 @@
   let pw = $state('')
   /** Looks like a family account: "familie", "family", "famiglia", "gezin", "rodzina" … in its name or full name. */
   const familyLike = (u) => [u.name, u.fullName || ''].some((x) => /famil|famig|gezin|rodzin/.test(fromName(x)))
-  users().then((all) => {
-    const taken = takenAccounts()
+  api('/api/accounts').then((all) => {
     const me = (S.me?.user || '').toLowerCase()
-    free = all.filter((u) => !u.admin && u.name.toLowerCase() !== me && !taken.has(u.name.toLowerCase()))
-    const guess = free.find(familyLike)
-    picked = (guess || free[0])?.name || ''
+    free = all.filter((u) => !u.person && !u.family && !u.navidromeAdmin && u.role !== 'admin' && u.name.toLowerCase() !== me)
+    const guess = free.find((u) => familyLike(u) && !u.lastLogin)
+    picked = (guess || free.find((u) => !u.lastLogin) || free[0])?.name || ''
     if (guess) mode = 'existing'
-  })
+  }).catch(() => {})   // without the list only a new account
+  const signsIn = $derived(!!free.find((u) => u.name === picked)?.lastLogin)
 
   let busy = $state(false)
   let error = $state('')
@@ -119,6 +120,9 @@
       <label class="f">{t('Navidrome account')}
         <Select options={free.map((u) => [u.name, u.fullName && u.fullName !== u.name ? `${u.name} · ${u.fullName}` : u.name])} value={picked} onchange={(v) => { picked = v; pw = ''; error = '' }} />
       </label>
+      {#if signsIn}
+        <div class="note warn-t">{t('Someone already signs in to Tuttiphon with “{user}” – as the family’s account, that no longer works.', { user: picked })}</div>
+      {/if}
       {#if pwOk(picked)}
         <div class="note">{t('✓ A password is already stored for this account.')}</div>
       {:else}

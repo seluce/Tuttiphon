@@ -598,4 +598,80 @@ export default {
     'Wachtwoord voor “{user}”',
   'Saved ✓':
     'Opgeslagen ✓',
+  'To the statistics':
+    'Naar de statistieken',
+  'Nothing has been counted for this year yet.':
+    'Voor dit jaar is nog niets geteld.',
+  'The year in music – counted since {date}':
+    'Het jaar in muziek – geteld sinds {date}',
+  'The year in music':
+    'Het jaar in muziek',
+  '{n} hour of music':
+    '{n} uur muziek',
+  '{n} hours of music':
+    '{n} uur muziek',
+  '{n} play':
+    '{n} afspeelbeurt',
+  '{n} plays':
+    '{n} afspeelbeurten',
+  'Music on {n} day':
+    'Muziek op {n} dag',
+  'Music on {n} days':
+    'Muziek op {n} dagen',
+  'Song of the year':
+    'Nummer van het jaar',
+  '{n} new band':
+    '{n} nieuwe band',
+  '{n} new bands':
+    '{n} nieuwe bands',
+  '{n} song heard for the first time':
+    '{n} nummer voor het eerst gehoord',
+  '{n} songs heard for the first time':
+    '{n} nummers voor het eerst gehoord',
+  'When the music plays':
+    'Wanneer de muziek speelt',
+  'Favorite day: {day}':
+    'Favoriete dag: {day}',
+  'The most music on {date} – {n} play':
+    'De meeste muziek op {date} – {n} afspeelbeurt',
+  'The most music on {date} – {n} plays':
+    'De meeste muziek op {date} – {n} afspeelbeurten',
+  'World of the year':
+    'Wereld van het jaar',
+  'World of the year: {name}':
+    'Wereld van het jaar: {name}',
+  'Most played decade: {decade}':
+    'Meest beluisterde decennium: {decade}',
+  'Share as a picture':
+    'Delen als afbeelding',
+  'Watch again':
+    'Opnieuw bekijken',
+  'No person yet – set one up under People first.':
+    'Nog geen persoon – maak er eerst een aan onder Personen.',
+  'Picture saved':
+    'Afbeelding opgeslagen',
+  'The picture could not be made.':
+    'De afbeelding kon niet worden gemaakt.',
+  'Our {year}':
+    'Ons {year}',
+  'My {year}':
+    'Mijn {year}',
+  'Your {year}':
+    'Jouw {year}',
+  'Mostly in the morning':
+    'Vooral ’s ochtends',
+  'Mostly around noon':
+    'Vooral rond het middaguur',
+  'Mostly in the afternoon':
+    'Vooral ’s middags',
+  'Mostly in the evening':
+    'Vooral ’s avonds',
+  'Mostly at night':
+    'Vooral ’s nachts',
+  'Band of the year: {name}':
+    'Band van het jaar: {name}',
+  'Look back':
+    'Terugkijken',
+  'Watch as a story':
+    'Bekijken als story',
 }

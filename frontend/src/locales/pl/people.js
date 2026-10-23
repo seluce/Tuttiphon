@@ -491,8 +491,8 @@ export default {
     'W inteligentnej kolejce i Instant Mix w Symfonium co kilka piosenek pojawia się taka, której osoba {name} jeszcze nigdy nie odtwarzała – ta, która brzmieniem najbardziej przypomina to, co właśnie gra.',
   'for everyone':
     'dla wszystkich',
-  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
-    'Tuttiphon utworzy konto Navidrome dla rodziny. Jej playlisty są dla wszystkich – a wspólne urządzenia, w aucie albo na tablecie w kuchni, mogą je odtwarzać w Symfonium.',
+  'Tuttiphon creates a Navidrome account for the family or takes one that already exists. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
+    'Tuttiphon utworzy konto Navidrome dla rodziny albo użyje takiego, które już istnieje. Jej playlisty są dla wszystkich – a wspólne urządzenia, w aucie albo na tablecie w kuchni, mogą je odtwarzać w Symfonium.',
   'The family’s account “{account}” is ready.':
     'Konto rodziny „{account}” jest gotowe.',
   'Password – shown only now:':
@@ -541,4 +541,6 @@ export default {
     'Hasło konta „{user}”',
   'Tuttiphon checks the password and stores it – for the family’s stars, plays and recap. The account stays as it is.':
     'Tuttiphon sprawdza hasło i je zapisuje – dla gwiazdek, odtworzeń i podsumowania rodziny. Samo konto pozostaje bez zmian.',
+  'Someone already signs in to Tuttiphon with “{user}” – as the family’s account, that no longer works.':
+    'Ktoś już loguje się do Tuttiphon kontem „{user}” – jako konto rodziny przestanie to działać.',
 }

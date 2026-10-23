@@ -256,7 +256,7 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 | `notify.server` | string | `"https://ntfy.sh"` | ntfy server | `http(s)://…` |
 | `notify.topic` | string | `""` | the administrator's topic (run failed, new music, classified bands) | `[A-Za-z0-9_-]{1,64}` |
 | `notify.url` | string | `""` | Tuttiphon's address; tapping the message opens it (with a target, such as `#/verlauf`) | `http(s)://…` |
-| `notify.events.<event>` | boolean | `true` | `failed`, `newMusic`, `autoAssigned` (to the administrator), `favorites`, `review`, `weekly` (to the people's topics) | – |
+| `notify.events.<event>` | boolean | `true` | `failed`, `newMusic`, `autoAssigned` (to the administrator), `favorites`, `review`, `weekly`, `year` (to the people's topics) | – |
 
 Of these, users see only `notify.enabled` and `notify.server` (`auth.view_config()`), so that the profile knows whether
 to show the field for their own topic.
@@ -845,6 +845,7 @@ One folder `plays/<account>/` per Navidrome account (name via `slug()`, i.e. low
 | `<YYYY-MM-DD>.json` | `{song-id: n}`: new plays of this listening day – the day midway between the previous and this measurement (measurement at 05:30 or 07:00: the previous day; a second one in the afternoon: today); without an earlier measurement, the time minus 6 hours |
 | `first.json` | `{song-id: day}`: when a song was counted for the first time |
 | `moments.json` | `{"v": 1, "moments": [[song-id, played], …]}`: listening clock – for every song with new plays its last play (`played` from Navidrome, UTC) at the time of the snapshot, so a later play doesn't erase it; kept 120 days, at most 30,000 (`listenclock.record()`, [06](06-intelligence.md#listening-clock-applistenclockpy)) |
+| `hours-<YYYY>.json` | `{"v": 1, "days": [day, …], "hours": [plays per hour 0–23]}`: the time of day of the year for the year recap – once a day (`rueckblick.snapshot_all()` → `listenclock.keep_hours()`) the moments of the finished days not counted yet are added, so the hours stay when the moments go after 120 days; unreadable or damaged → counted anew from the moments there are |
 | `live-<YYYY-MM-DD>.jsonl` | live plays from the Navidrome plugin (`listen.record()`), one event per line: `{"t": Unix seconds, "k": "start" \| "play" \| "report", "id": song-id, "pos": seconds, "dur": the song's length in seconds, "st": state, "pl": player}` – the day of `t` in local time, permissions 0640, only for accounts with a person in Tuttiphon that are not blocked; kept 120 days (`KEEP_DAYS`: older days go with the next event of the account and with the long-term maintenance, [Maintenance](05-maintenance.md#long-term-maintenance)). A broken line (cut off while writing, a damaged byte) is skipped when reading, the rest of the day counts. For an account without `baseline.json` every `play` also goes into `<YYYY-MM-DD>.json` and `first.json` (the listening day: time minus 6 hours) – with the first counter snapshot that stops ([Playlists](04-playlists.md#mixes-that-learn-appfeedbackpy)) |
 
 Navidrome only knows counters, not a history – what is missing here can't be recovered. Counter snapshots are taken at

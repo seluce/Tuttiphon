@@ -74,6 +74,7 @@ import Headphones from '@lucide/svelte/icons/headphones'
 import Sunrise from '@lucide/svelte/icons/sunrise'
 import Flag from '@lucide/svelte/icons/flag'
 import Calendar from '@lucide/svelte/icons/calendar'
+import Share2 from '@lucide/svelte/icons/share-2'
 import Trophy from '@lucide/svelte/icons/trophy'
 import Eraser from '@lucide/svelte/icons/eraser'
 import ScrollText from '@lucide/svelte/icons/scroll-text'
@@ -133,7 +134,7 @@ export const ICONS = {
   inbox: Inbox, wand: WandSparkles, folder: Folder, image: ImageIcon, help: CircleQuestionMark, chart: ChartColumn,
   dice: Dices, upload: Upload, download: Download, puzzle: Puzzle, 'check-circle': CircleCheck, trending: TrendingUp, palette: Palette, plug: Plug,
   smartphone: Smartphone, info: Info, key: KeyRound, zap: Zap, mic: Mic, headphones: Headphones, sunrise: Sunrise,
-  flag: Flag, calendar: Calendar, trophy: Trophy, eraser: Eraser, text: ScrollText, archive: Archive,
+  flag: Flag, calendar: Calendar, share: Share2, trophy: Trophy, eraser: Eraser, text: ScrollText, archive: Archive,
   'folder-search': FolderSearch, server: Server, shield: Shield, 'shield-check': ShieldCheck, bell: Bell, drive: HardDrive, route: Route, brain: Brain,
   new: CirclePlus, repeat: Repeat, user: User, 'arrow-up': ArrowUp, 'arrow-down': ArrowDown,
   'thumbs-up': ThumbsUp, 'thumbs-down': ThumbsDown, loader: LoaderCircle, 'skip-back': SkipBack, 'skip-forward': SkipForward,

@@ -335,4 +335,80 @@ export default {
   // lib/account.js
   'Password for “{user}”': 'Passwort für „{user}“',
   'Saved ✓': 'Gespeichert ✓',
+  'To the statistics':
+    'Zur Statistik',
+  'Nothing has been counted for this year yet.':
+    'Für dieses Jahr wurde noch nichts gezählt.',
+  'The year in music – counted since {date}':
+    'Das Jahr in Musik – gezählt seit {date}',
+  'The year in music':
+    'Das Jahr in Musik',
+  '{n} hour of music':
+    '{n} Stunde Musik',
+  '{n} hours of music':
+    '{n} Stunden Musik',
+  '{n} play':
+    '{n} Wiedergabe',
+  '{n} plays':
+    '{n} Wiedergaben',
+  'Music on {n} day':
+    'Musik an {n} Tag',
+  'Music on {n} days':
+    'Musik an {n} Tagen',
+  'Song of the year':
+    'Song des Jahres',
+  '{n} new band':
+    '{n} neue Band',
+  '{n} new bands':
+    '{n} neue Bands',
+  '{n} song heard for the first time':
+    '{n} Song zum ersten Mal gehört',
+  '{n} songs heard for the first time':
+    '{n} Songs zum ersten Mal gehört',
+  'When the music plays':
+    'Wann die Musik läuft',
+  'Favorite day: {day}':
+    'Lieblingstag: {day}',
+  'The most music on {date} – {n} play':
+    'Die meiste Musik am {date} – {n} Wiedergabe',
+  'The most music on {date} – {n} plays':
+    'Die meiste Musik am {date} – {n} Wiedergaben',
+  'World of the year':
+    'Welt des Jahres',
+  'World of the year: {name}':
+    'Welt des Jahres: {name}',
+  'Most played decade: {decade}':
+    'Meistgehörtes Jahrzehnt: {decade}',
+  'Share as a picture':
+    'Als Bild teilen',
+  'Watch again':
+    'Nochmal ansehen',
+  'No person yet – set one up under People first.':
+    'Noch keine Person – richte zuerst unter Personen eine ein.',
+  'Picture saved':
+    'Bild gespeichert',
+  'The picture could not be made.':
+    'Das Bild ließ sich nicht erstellen.',
+  'Our {year}':
+    'Unser {year}',
+  'My {year}':
+    'Mein {year}',
+  'Your {year}':
+    'Dein {year}',
+  'Mostly in the morning':
+    'Meistens morgens',
+  'Mostly around noon':
+    'Meistens mittags',
+  'Mostly in the afternoon':
+    'Meistens nachmittags',
+  'Mostly in the evening':
+    'Meistens abends',
+  'Mostly at night':
+    'Meistens nachts',
+  'Band of the year: {name}':
+    'Band des Jahres: {name}',
+  'Look back':
+    'Ansehen',
+  'Watch as a story':
+    'Als Story ansehen',
 }

@@ -598,4 +598,80 @@ export default {
     'Mot de passe pour « {user} »',
   'Saved ✓':
     'Enregistré ✓',
+  'To the statistics':
+    'Vers les statistiques',
+  'Nothing has been counted for this year yet.':
+    'Rien n’a encore été compté pour cette année.',
+  'The year in music – counted since {date}':
+    'L’année en musique – comptée depuis le {date}',
+  'The year in music':
+    'L’année en musique',
+  '{n} hour of music':
+    '{n} heure de musique',
+  '{n} hours of music':
+    '{n} heures de musique',
+  '{n} play':
+    '{n} écoute',
+  '{n} plays':
+    '{n} écoutes',
+  'Music on {n} day':
+    'De la musique sur {n} jour',
+  'Music on {n} days':
+    'De la musique sur {n} jours',
+  'Song of the year':
+    'Titre de l’année',
+  '{n} new band':
+    '{n} nouveau groupe',
+  '{n} new bands':
+    '{n} nouveaux groupes',
+  '{n} song heard for the first time':
+    '{n} titre écouté pour la première fois',
+  '{n} songs heard for the first time':
+    '{n} titres écoutés pour la première fois',
+  'When the music plays':
+    'Quand la musique joue',
+  'Favorite day: {day}':
+    'Jour préféré : {day}',
+  'The most music on {date} – {n} play':
+    'Le plus de musique le {date} – {n} écoute',
+  'The most music on {date} – {n} plays':
+    'Le plus de musique le {date} – {n} écoutes',
+  'World of the year':
+    'Univers de l’année',
+  'World of the year: {name}':
+    'Univers de l’année : {name}',
+  'Most played decade: {decade}':
+    'Décennie la plus écoutée : {decade}',
+  'Share as a picture':
+    'Partager en image',
+  'Watch again':
+    'Revoir',
+  'No person yet – set one up under People first.':
+    'Aucune personne pour l’instant – créez-en d’abord une sous Personnes.',
+  'Picture saved':
+    'Image enregistrée',
+  'The picture could not be made.':
+    'Impossible de créer l’image.',
+  'Our {year}':
+    'Notre {year}',
+  'My {year}':
+    'Mon {year}',
+  'Your {year}':
+    'Votre {year}',
+  'Mostly in the morning':
+    'Surtout le matin',
+  'Mostly around noon':
+    'Surtout vers midi',
+  'Mostly in the afternoon':
+    'Surtout l’après-midi',
+  'Mostly in the evening':
+    'Surtout le soir',
+  'Mostly at night':
+    'Surtout la nuit',
+  'Band of the year: {name}':
+    'Groupe de l’année : {name}',
+  'Look back':
+    'Revivre',
+  'Watch as a story':
+    'Voir en story',
 }
