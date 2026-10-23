@@ -5,16 +5,16 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 2.2.0
 
-- **Progress at a glance:** “Progress” now shows how far a run is – step 4 of 7, every step with its state and
-  duration, and for the step at work what it is doing with how many of how many (“1,234 of 5,000 songs”), the time
-  still to go and, at night, by when it stops. The bar at the bottom says the same in short (“Sound analysis · 24 %”);
-  the live log is folded below.
 - **Your year in music:** a story slide by slide – listening time, band of the year, top bands and songs, discoveries,
   when the music plays and the world of the year –, for every person and for the family (“Our 2026”). Share it as a
   picture or keep it as a playlist. In December it waits on the start page and comes as a notification in the first
   week; under Statistics → Year it opens any time. The time of day is now kept for the whole year.
+- **Progress at a glance:** “Progress” now shows how far a run is – step 4 of 7, every step with its state and
+  duration, and for the step at work what it is doing with how many of how many (“1,234 of 5,000 songs”), the time
+  still to go and, at night, by when it stops. The bar at the bottom says the same in short (“Sound analysis · 24 %”);
+  the live log is folded below.
 - **The family can use an account Navidrome already has:** “Set up the family” offers “Existing account” –
   for example the one in the car. Tuttiphon checks its password and stores it; the account stays as it is. One that
   looks like a family account is chosen right away; administrator accounts are not offered.
