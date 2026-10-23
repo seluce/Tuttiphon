@@ -53,7 +53,7 @@ Tuttiphon does: [Features](features.md). Operation in depth (Docker image, updat
 From then on everyone signs in with their own Navidrome account. New users get a short welcome assistant that creates
 their profile – one per account – and a tour. For playlists everyone shares, set up the family under **People → Set up
 the family**: Tuttiphon creates a Navidrome account for it and shows its password once, for shared devices in
-Symfonium.
+Symfonium – or takes one Navidrome already has, such as the car's.
 The password of the local administrator can be changed under **Settings → Users & permissions**.
 
 **Password forgotten?** Delete `config/state/admin_password.json`. Within a few seconds Tuttiphon waits for the setup

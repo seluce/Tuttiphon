@@ -434,7 +434,7 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `POST /api/lastfm/test` | Body optional `key` (otherwise the stored key) | `{"ok": true, "tags"}` or `{"ok": false, "error"}` |
 | `GET /api/users` | – | `[{name, admin, fullName}]` of the Navidrome accounts; Navidrome unreachable → `400 {"error"}` |
 | `GET /api/accounts` | – | `[{name, fullName, navidromeAdmin, role, override, lastLogin, person, family, passwordStored, passwordRejected}]` – `person`: the id of the account's person or `null` (`auth.own_person()`), `family`: it is the family's account (its role is always `none`) |
-| `POST /api/family` | Body `{"name"?, "account"?}` | `{"person", "account", "password"}` – sets up the family (see below) |
+| `POST /api/family` | Body `{"name"?, "account"?}` – or `{"name"?, "account", "existing": true, "password"?}` for an account Navidrome already has | `{"person", "account", "password"}` – sets up the family (see below); with `existing` without `"password"` |
 | `PUT /api/accounts` | Body `{"user", "role"}`, `role` = `admin`, `user`, `none` or `null` (remove the override) | `{"ok": true}` |
 | `POST /api/admin-password` | Body `{"current", "password"}` – `current` only needed once a password is set | `{"ok": true}`, for the local administrator itself (and on the PC without sign-in) with `Set-Cookie: tuttiphon=…` – see below |
 | `GET /api/intel` | – | `{"lastfm", "audio", "ml", "classify", "stile", "moods", "fingerprints"}` – status of Last.fm, sound analysis, AI sound analysis, classification and audio fingerprints (see below) |
@@ -497,6 +497,18 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
   account the stars of the songs rated before (`deezer._catch_up()`; while a task runs, the next Deezer run does
   it). Only this answer carries the password – shown once, for shared devices in Symfonium; nobody signs in
   to Tuttiphon with it.
+  With `"existing": true` the family takes an account Navidrome already has (`_family_existing()`, e.g. the one in the
+  car) instead: no `FAMILY_ACCOUNT` check and no `create_user()`. The account must be in `NativeApi.users()` (`400`
+  “Navidrome has no account “…”.”; list unreadable → `400` “Could not load the accounts from Navidrome: …”) and is
+  stored as Navidrome spells it. Refused with `400`: an account a person uses (““…” already belongs to a person –
+  please choose another account.”), a Navidrome administrator, `NAV_ADMIN_USER` and the account signed in (““…” is an
+  administrator account – the family needs an account of its own.” – shared devices would get its rights, and nobody
+  signs in to Tuttiphon with the family's account), and an account whose `pass_key()` another Navidrome account
+  shares (““…” cannot get a stored password – please create a new account instead.”). `password` (or, without it, the
+  one already stored – `user_password()`; neither → `400` “Please enter the password.”) must work in a ping
+  (`400` “The password does not work: …”); it goes to `NAV_PASS_<ACCOUNT>` and counts as working
+  (`auth.note_password()`). The account itself stays as it is. Entry, Deezer list and Deezer run as above; the answer
+  has no `password`.
 - `POST /api/notify/test` is the only endpoint in this section that is also open to users – but only with
   `person` set to their own person (otherwise `403`) and only to that person's topic (`topic`
   or the stored one): the administrator's topic or one another person uses → `403`, no topic → `400 "No topic

@@ -7,6 +7,9 @@ released.
 
 ## Unreleased
 
+- **The family can use an account Navidrome already has:** “Set up the family” offers “Existing account” –
+  for example the one in the car. Tuttiphon checks its password and stores it; the account stays as it is. One that
+  looks like a family account is chosen right away.
 - **Fewer messages:** with automatic applying, changes reach Navidrome by themselves a few seconds later – without a
   countdown bar and without a number on “Playlists”; both only appear when applying by hand.
 - **A mix stays the same until its next edition:** songs played from “Discovered” or stars Deezer set anew no longer

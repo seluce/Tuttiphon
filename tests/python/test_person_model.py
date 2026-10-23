@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 
 from app import config, sonic, web
+from app.navidrome import NavidromeError
 from tests.python.factory import base_config
 
 
@@ -66,7 +67,8 @@ class FamilySetupTest(unittest.TestCase):
 
         class Api:
             def users(api):
-                return [{"userName": "root"}, {"userName": "Taken"}, {"userName": "anna-lena"}]
+                return [{"userName": "root", "isAdmin": True}, {"userName": "Taken"}, {"userName": "anna-lena"},
+                        {"userName": "anna.lena"}, {"userName": "Jonas"}, {"userName": "Auto"}]
 
             def create_user(api, name, full, password):
                 self.created.append((name, full, password))
@@ -75,7 +77,9 @@ class FamilySetupTest(unittest.TestCase):
                    mock.patch.object(web, "save_env", lambda values: self.saved.update(values)),
                    mock.patch.object(web.auth, "navidrome_users", lambda force=False: []),
                    mock.patch.object(web, "load_env", lambda: self.env),
-                   mock.patch.object(web.RUNNER, "start", lambda steps, **opts: self.runs.append((steps, opts)))]
+                   mock.patch.object(web.RUNNER, "start", lambda steps, **opts: self.runs.append((steps, opts))),
+                   mock.patch.object(web.auth, "note_password", lambda user, ok: None),
+                   mock.patch.object(web, "Navidrome", Nav)]
         for p in patches:
             p.start()
             self.addCleanup(p.stop)
@@ -101,6 +105,45 @@ class FamilySetupTest(unittest.TestCase):
                 web.api_family(body)
         self.assertEqual(self.created, [])
         self.assertFalse(any(p.get("family") for p in config.load_config()["personen"]))
+
+    def test_an_existing_account(self):
+        for body, why in (({"account": "nobody"}, "not in Navidrome"),
+                          ({"account": "jonas", "password": "pw-family"}, "Jonas' account"),
+                          ({"account": "root", "password": "pw-family"}, "an administrator"),
+                          ({"account": "anna-lena", "password": "pw-family"}, "the same password key as anna.lena"),
+                          ({"account": "auto"}, "no password"),
+                          ({"account": "auto", "password": "wrong"}, "a wrong password")):
+            with self.assertRaises(ValueError, msg=why):
+                web.api_family({**body, "existing": True})
+        with mock.patch.object(web.auth, "current", lambda: {"user": "Auto", "role": "admin"}), \
+                self.assertRaises(ValueError):                         # the account one is signed in with
+            web.api_family({"account": "auto", "existing": True, "password": "pw-family"})
+        self.assertEqual(self.saved, {})
+        out = web.api_family({"name": "Wir", "account": "auto", "existing": True, "password": "pw-family"})
+        self.assertEqual(out, {"person": "familie", "account": "Auto"})   # as Navidrome spells it, no password
+        self.assertEqual(self.created, [])                             # the account stays as it is
+        self.assertEqual(self.saved, {config.pass_key("Auto"): "pw-family"})
+        cfg = config.load_config()
+        family = next(p for p in cfg["personen"] if p.get("family"))
+        self.assertEqual((family["user"], family["name"]), ("Auto", "Wir"))
+        self.assertEqual(cfg["settings"]["deezer"]["users"], ["Jonas", "Auto"])
+        self.assertEqual(self.runs, [(["deezer"], {"deezer_mode": "new"})])
+
+    def test_an_existing_account_with_a_stored_password(self):
+        self.env[config.pass_key("Auto")] = "pw-family"
+        self.assertEqual(web.api_family({"account": "Auto", "existing": True})["account"], "Auto")
+        self.assertEqual(self.saved, {})
+
+
+class Nav:
+    """Navidrome for a password check: only "pw-family" works."""
+    def __init__(self, url, user, password):
+        self.password = password
+
+    def ping(self):
+        if self.password != "pw-family":
+            raise NavidromeError("Wrong username or password", code=40)
+        return {}
 
 
 class SuggestionKeyTest(unittest.TestCase):

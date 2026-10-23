@@ -294,7 +294,8 @@ There are three roles (`auth.ROLES`): `admin`, `user`, `none`. `auth.role_of()` 
   a person gets the welcome assistant, which creates exactly one ([Writing](#writing-merge_user_changes)). Admins see
   all people (`persons`), users only their own (`[own]` or `[]`); the local administrator has `own: null`.
 - **The family** (optional, `auth.family_id()`): a person with `family: true` and an account of its own that Tuttiphon
-  created (`POST /api/family`, admins only). Its account has the role `none` – nobody signs in with it; shared devices
+  created or that Navidrome already had (`POST /api/family`, admins only; never an administrator account – shared
+  devices would get its rights). Its account has the role `none` – nobody signs in with it; shared devices
   (car, kitchen tablet) can use it in Symfonium. Its playlists are for everyone; who may change them is
   `settings.familyEdit` (see [What the server filters for users](#what-the-server-filters-for-users)).
 

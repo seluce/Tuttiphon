@@ -442,8 +442,8 @@ export default {
     'Rodzina',
   'If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in Symfonium.':
     'Jeśli chcesz, Tuttiphon utworzy konto Navidrome dla rodziny. Jej playlisty są dla wszystkich – wspólne urządzenia, takie jak auto, używają go w Symfonium.',
-  '<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.':
-    '<b>Rodzina</b> (opcjonalnie): „Skonfiguruj rodzinę” tworzy dla niej własne konto Navidrome. Jej playlisty są dla wszystkich – wspólne urządzenia, takie jak auto albo tablet w kuchni, używają go w Symfonium.',
+  '<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it – or takes one Navidrome already has, such as the car’s. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.':
+    '<b>Rodzina</b> (opcjonalnie): „Skonfiguruj rodzinę” tworzy dla niej własne konto Navidrome – albo korzysta z konta, które już jest w Navidrome, na przykład tego z auta. Jej playlisty są dla wszystkich – wspólne urządzenia, takie jak auto albo tablet w kuchni, używają go w Symfonium.',
   'With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in four short steps:':
     'Przez <a class="link" href="#/neu">Nowa playlista</a> układasz własną – w czterech krótkich krokach:',
   '<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and Symfonium.':

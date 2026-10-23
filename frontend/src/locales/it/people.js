@@ -538,4 +538,14 @@ export default {
     'Solo amministratori',
   'The family’s account – for shared devices in Symfonium, nobody signs in to Tuttiphon with it':
     'L\'account della famiglia – per i dispositivi condivisi in Symfonium, nessuno lo usa per accedere a Tuttiphon',
+  'New account':
+    'Nuovo account',
+  'Existing account':
+    'Account esistente',
+  'The family uses an account Navidrome already has – for example the one in the car. Its playlists are for everyone – every account sees them in Navidrome and Symfonium.':
+    'La famiglia usa un account che esiste già in Navidrome – per esempio quello dell’auto. Le sue playlist sono per tutti – ogni account le vede in Navidrome e Symfonium.',
+  'Password of “{user}”':
+    'Password di «{user}»',
+  'Tuttiphon checks the password and stores it – for the family’s stars, plays and recap. The account stays as it is.':
+    'Tuttiphon controlla la password e la salva – per le stelle, gli ascolti e il riepilogo della famiglia. L’account resta com’è.',
 }

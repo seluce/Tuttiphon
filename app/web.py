@@ -1733,7 +1733,9 @@ def api_family(body):
 def _family(body):
     """Set up the family: Tuttiphon creates its Navidrome account (native API, random password – stored like any
     account password, so its stars, plays and recap work) and adds the entry {"family": true}. -> {"person", "account",
-    "password"} – the password only now, for shared devices in Symfonium."""
+    "password"} – the password only now, for shared devices in Symfonium. With {"existing": true} it takes an account
+    Navidrome already has (no person, no administrator, not the own one): its password is checked and stored, the
+    account stays as it is. -> without "password"."""
     import secrets
     from .config import FAMILY_NAME, slug
     cfg = load_config()
@@ -1741,26 +1743,31 @@ def _family(body):
         raise ValueError(_("There already is a family."))
     name = " ".join(str(body.get("name") or "").split())[:60] or _s(FAMILY_NAME)   # i18n-ignore – N_ constant
     account = str(body.get("account") or "").strip() or slug(name)
-    if not FAMILY_ACCOUNT.fullmatch(account):
+    if body.get("existing"):
+        account = _family_existing(cfg, account, body.get("password"))
+        password = None
+    elif not FAMILY_ACCOUNT.fullmatch(account):
         raise ValueError(_("Please choose an account name of 2 to 40 letters, digits, dots, hyphens or underscores."))
-    if any((p.get("user") or "").lower() == account.lower() for p in cfg["personen"]):
-        raise ValueError(_("“{account}” already belongs to a person – please choose another name.", account=account))
-    native = playlists.native_api(load_env())
-    try:
-        taken = [u.get("userName") or "" for u in native.users()]
-    except NavidromeError as e:
-        raise ValueError(_("Navidrome could not create the account: {error}", error=i18n.said(e))) from None
-    # the stored password goes to NAV_PASS_<ACCOUNT>: "anna.lena" and "anna-lena" would share it
-    if any(u.lower() == account.lower() or pass_key(u) == pass_key(account) for u in taken) \
-            or pass_key(account) in load_env():
-        raise ValueError(_("Navidrome already has an account “{account}” – please choose another name.",
-                           account=account))
-    password = secrets.token_urlsafe(18)
-    try:
-        native.create_user(account, name, password)
-    except NavidromeError as e:
-        raise ValueError(_("Navidrome could not create the account: {error}", error=i18n.said(e))) from None
-    save_env({pass_key(account): password})
+    else:
+        if any((p.get("user") or "").lower() == account.lower() for p in cfg["personen"]):
+            raise ValueError(_("“{account}” already belongs to a person – please choose another name.",
+                               account=account))
+        native = playlists.native_api(load_env())
+        try:
+            taken = [u.get("userName") or "" for u in native.users()]
+        except NavidromeError as e:
+            raise ValueError(_("Navidrome could not create the account: {error}", error=i18n.said(e))) from None
+        # the stored password goes to NAV_PASS_<ACCOUNT>: "anna.lena" and "anna-lena" would share it
+        if any(u.lower() == account.lower() or pass_key(u) == pass_key(account) for u in taken) \
+                or pass_key(account) in load_env():
+            raise ValueError(_("Navidrome already has an account “{account}” – please choose another name.",
+                               account=account))
+        password = secrets.token_urlsafe(18)
+        try:
+            native.create_user(account, name, password)
+        except NavidromeError as e:
+            raise ValueError(_("Navidrome could not create the account: {error}", error=i18n.said(e))) from None
+        save_env({pass_key(account): password})
     auth.navidrome_users(force=True)
     ids = {p["id"] for p in cfg["personen"]}
     pid = next(x for x in ["familie"] + [f"familie-{n}" for n in range(2, 100)] if x not in ids)   # i18n-ignore – id
@@ -1781,7 +1788,42 @@ def _family(body):
             RUNNER.start(["deezer"], deezer_mode="new")
         except RuntimeError:
             pass
-    return {"person": pid, "account": account, "password": password}
+    return {"person": pid, "account": account, **({"password": password} if password else {})}
+
+
+def _family_existing(cfg, account, password):
+    """An account Navidrome already has as the family's: free (no person), no administrator – shared devices get its
+    rights –, not the one signed in, and the password works. Stores it -> the name as Navidrome spells it."""
+    env = load_env()
+    try:
+        users = playlists.native_api(env).users()
+    except NavidromeError as e:
+        raise ValueError(_("Could not load the accounts from Navidrome: {error}", error=i18n.said(e))) from None
+    nav = next((u for u in users if (u.get("userName") or "").lower() == account.lower()), None)
+    if nav is None:
+        raise ValueError(_("Navidrome has no account “{account}”.", account=account))
+    account = nav["userName"]
+    if any((p.get("user") or "").lower() == account.lower() for p in cfg["personen"]):
+        raise ValueError(_("“{account}” already belongs to a person – please choose another account.",
+                           account=account))
+    if nav.get("isAdmin") or account.lower() in ((env.get("NAV_ADMIN_USER") or "").lower(),
+                                                 (auth.current().get("user") or "").lower()):
+        raise ValueError(_("“{account}” is an administrator account – the family needs an account of its own.",
+                           account=account))
+    if any(pass_key(u.get("userName") or "") == pass_key(account) and u is not nav for u in users):
+        raise ValueError(_("“{account}” cannot get a stored password – please create a new account instead.",
+                           account=account))
+    password = password if isinstance(password, str) and password else user_password(env, account)
+    if not password:
+        raise ValueError(_("Please enter the password."))
+    try:
+        Navidrome(env.get("NAV_URL", ""), account, password).ping()
+    except NavidromeError as e:
+        raise ValueError(_("The password does not work: {error}", error=i18n.said(e))) from None
+    if env.get(pass_key(account)) != password:
+        save_env({pass_key(account): password})
+    auth.note_password(account, True)
+    return account
 
 
 def api_task_status(query):

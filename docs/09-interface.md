@@ -453,15 +453,22 @@ One person per Navidrome account; the family is an optional person with an accou
 
 - **The family card first** – `familyPerson()` with the pill “Family”, its account and “for everyone”. Without a family
   a dashed card **“Set up the family”** explains that Tuttiphon creates a Navidrome account for the family, that its
-  playlists are for everyone and that shared devices (car, kitchen tablet) can play them in Symfonium.
+  playlists are for everyone and that shared devices (car, kitchen tablet) can play them in Symfonium (the sheet
+  can also take an account Navidrome already has).
 - Then **one card per person** (account, number of active playlists, password stored or missing, favorite worlds) and
   the dashed card “Add person”.
 
 **Set up the family** (`pages/personen/FamilySetup.svelte`, a sheet): name (prefilled with the translated “Family”)
-and account name (follows the name – letters without accents, digits, `.`, `_`, `-` – until it is edited). “Set up the
-family” saves open changes first, then `POST /api/family` with `{name, account}`; errors from the server (name taken in Navidrome or by a
-person …) appear in the sheet. After that the sheet shows the password **once** with “Copy” – for shared devices in
-Symfonium; nobody signs in to Tuttiphon with it – and reloads the configuration, the status and the account list.
+and account name (follows the name – letters without accents, digits, `.`, `_`, `-` – until it is edited). Has
+Navidrome free accounts (`users()` without a person, no administrators, not the own one), a segmented control offers
+**“New account”** / **“Existing account”**; one whose name or full name looks like a family account
+(“famil…”, “famig…”, “gezin”, “rodzin…”) chooses “Existing account” with it right away. There: a select of
+the free accounts, the password (or “✓ A password is already stored for this account.”) and the hint that Tuttiphon
+checks and stores it and the account stays as it is. “Set up the family” saves open changes first, then
+`POST /api/family` with `{name, account}` (or `{name, account, existing: true, password}`); errors from the server
+(name taken in Navidrome or by a person, a wrong password …) appear in the sheet. After that the sheet shows the
+password of a new account **once** with “Copy” – for shared devices in Symfonium; nobody signs in to Tuttiphon with
+it – and reloads the configuration, the status and the account list.
 
 **Add person** (`pages/personen/NewPerson.svelte`, `#/person/neu`): Who? (name, icon, color) → Navidrome (only accounts
 without a person – never the family's; “Every Navidrome account already has a person.” otherwise, with a link to

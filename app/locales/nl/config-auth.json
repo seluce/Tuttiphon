@@ -126,5 +126,11 @@
  "“{account}” already belongs to a person – please choose another name.": "“{account}” hoort al bij een persoon – kies een andere naam.",
  "Navidrome could not create the account: {error}": "Navidrome kon het account niet aanmaken: {error}",
  "Navidrome already has an account “{account}” – please choose another name.": "Navidrome heeft al een account “{account}” – kies een andere naam.",
- "Family set up: Navidrome account {account}": "Gezin ingesteld: Navidrome-account {account}"
+ "Family set up: Navidrome account {account}": "Gezin ingesteld: Navidrome-account {account}",
+ "Could not load the accounts from Navidrome: {error}": "Kon de accounts niet uit Navidrome laden: {error}",
+ "Navidrome has no account “{account}”.": "Navidrome heeft geen account “{account}”.",
+ "“{account}” already belongs to a person – please choose another account.": "“{account}” hoort al bij een persoon – kies een ander account.",
+ "“{account}” is an administrator account – the family needs an account of its own.": "“{account}” is een beheerdersaccount – het gezin heeft een eigen account nodig.",
+ "“{account}” cannot get a stored password – please create a new account instead.": "Voor “{account}” kan geen wachtwoord worden opgeslagen – maak in plaats daarvan een nieuw account aan.",
+ "The password does not work: {error}": "Het wachtwoord werkt niet: {error}"
 }

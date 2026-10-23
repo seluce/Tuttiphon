@@ -126,5 +126,11 @@
  "“{account}” already belongs to a person – please choose another name.": "„{account}“ gehört schon zu einer Person – bitte wähle einen anderen Namen.",
  "Navidrome could not create the account: {error}": "Navidrome konnte das Konto nicht anlegen: {error}",
  "Navidrome already has an account “{account}” – please choose another name.": "In Navidrome gibt es schon ein Konto „{account}“ – bitte wähle einen anderen Namen.",
- "Family set up: Navidrome account {account}": "Familie eingerichtet: Navidrome-Konto {account}"
+ "Family set up: Navidrome account {account}": "Familie eingerichtet: Navidrome-Konto {account}",
+ "Could not load the accounts from Navidrome: {error}": "Die Konten ließen sich nicht aus Navidrome laden: {error}",
+ "Navidrome has no account “{account}”.": "In Navidrome gibt es kein Konto „{account}“.",
+ "“{account}” already belongs to a person – please choose another account.": "„{account}“ gehört schon zu einer Person – bitte wähle ein anderes Konto.",
+ "“{account}” is an administrator account – the family needs an account of its own.": "„{account}“ ist ein Administratorkonto – die Familie braucht ein eigenes Konto.",
+ "“{account}” cannot get a stored password – please create a new account instead.": "Für „{account}“ lässt sich kein Passwort hinterlegen – bitte lege stattdessen ein neues Konto an.",
+ "The password does not work: {error}": "Das Passwort funktioniert nicht: {error}"
 }

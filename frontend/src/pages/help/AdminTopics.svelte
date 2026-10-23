@@ -163,7 +163,7 @@
     <li>{@html t('<b>Kid-safe mode:</b> “Leave out songs with explicit lyrics” in the profile; songs detected wrongly can be allowed under <a class="link" href="#/einstellungen/lyrics">Settings → Lyrics</a>.')}</li>
     <li>{@html t('<b>Child profile:</b> for a child with an account of their own – children’s music belongs to their whole library, and kid-safe mode stays on.')}</li>
     <li>{@html t('<b>To the phone:</b> with notifications on, every person turns on their devices in their profile.')}</li>
-    <li>{@html t('<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.')}</li>
+    <li>{@html t('<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it – or takes one Navidrome already has, such as the car’s. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.')}</li>
   </Bullets>
   <p>{@html t('With their own sign-in, everyone maintains their own profile – more under <a class="link" href="#/hilfe/konten">Users & sign-in</a>.')}</p>
 {/snippet}
