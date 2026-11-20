@@ -5,6 +5,19 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
+## Unreleased
+
+- **Texts for every music app:** the interface and the server's messages no longer assume Symfonium – they speak of
+  your music app, whichever you use with Navidrome. Symfonium is only named for its own settings (radio mix with
+  similar songs, smart queue by sonic analysis) and where only apps like it do something (top tracks by stars,
+  offline playlists that update themselves).
+- **Similar bands without Last.fm:** from 1 December 2026, Last.fm keys only work with a Pro subscription. Similar
+  bands and tags now come from ListenBrainz (with the tags of MusicBrainz) and Deezer – free and without a key, each
+  can be turned off under Settings → Intelligence. A Last.fm key stays optional and adds its data; what Last.fm has
+  delivered so far stays in use. Settings → Intelligence shows when Last.fm no longer accepts the key, and the key can
+  be removed there. The time limit now applies per source (default 3 minutes) – a time limit set for Last.fm before
+  has to be set again.
+
 ## 2.2.0
 
 - **Your year in music:** a story slide by slide – listening time, band of the year, top bands and songs, discoveries,

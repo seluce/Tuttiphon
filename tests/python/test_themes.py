@@ -9,7 +9,7 @@ import os
 import unittest
 from unittest import mock
 
-from app import audio, classify, config, lastfm, ml, rules, similar
+from app import audio, bandinfo, classify, config, ml, rules, similar
 from app.rules import ALL, BuildContext, Library
 from tests.python.factory import base_config, song
 
@@ -58,7 +58,7 @@ class ThemeTest(unittest.TestCase):
             self.assertIn(env.ROOT, path.parents)   # never the real data
         reset()
         self.addCleanup(reset)
-        patcher = mock.patch.object(lastfm, "artist", return_value=None)
+        patcher = mock.patch.object(bandinfo, "artist", return_value=None)
         patcher.start()
         self.addCleanup(patcher.stop)
         self.lib = library()

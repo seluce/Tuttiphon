@@ -1,12 +1,12 @@
 """Understanding music – locally and free of charge:
 
 * Classify bands automatically: which music world (and which vibe) fits a band that is nowhere yet? Four weighted
-  signals: Last.fm tags, similar bands (Last.fm) in a world, genres in the files, scene catalog. Result with a match
-  score 0–1 and a reason.
+  signals: tags and similar bands in a world (band knowledge, bandinfo.py: ListenBrainz/MusicBrainz, Deezer, Last.fm),
+  genres in the files, scene catalog. Result with a match score 0–1 and a reason.
 * Radio: bands that resemble a seed band and are in the library.
 * Still missing: similar bands that are not in the library.
-* Mood: AI sound analysis (ml.py) and Last.fm tags (happy, sad, chill …) refine the sound estimate.
-* Without Last.fm data: the music styles of the AI sound analysis (averaged per band) replace the tags.
+* Mood: AI sound analysis (ml.py) and the band's tags (happy, sad, chill …) refine the sound estimate.
+* Without tags: the music styles of the AI sound analysis (averaged per band) replace the tags.
 * Sound similarity (similar.py, AI sound vectors): one more signal for the classification, bands that sound alike
   for the radio and the artist window, and "More like this" ranked by sound.
 """
@@ -18,11 +18,11 @@ import threading
 import unicodedata
 from collections import Counter, OrderedDict, defaultdict
 
-from . import audio, lastfm, ml, rules, scenes, similar
+from . import audio, bandinfo, ml, rules, scenes, similar
 from .config import STATE_DIR, read_text, write_atomic
 from .i18n import _
 
-# Last.fm tags that say nothing about the music; tag word lists (data, partly German tags)
+# Tags that say nothing about the music; tag word lists (data, partly German tags)
 # i18n-ignore-start
 NOISE = {"seen live", "favorites", "favourite", "favorite", "my favorite", "awesome", "love", "beautiful", "albums i own",
          "german", "deutsch", "germany", "male vocalists", "female vocalists", "spotify", "under 2000 listeners", "all",
@@ -44,12 +44,12 @@ def _norm(s):
 
 
 def _tags(name):
-    a = lastfm.artist(name)
+    a = bandinfo.artist(name)
     return {t: c for t, c in (a or {}).get("tags", []) if t not in NOISE and c >= 5}
 
 
 def tag_valence(name):
-    """Basic mood from Last.fm tags: 0 (sad) … 1 (happy), or None if there is nothing to go on."""
+    """Basic mood from the band's tags: 0 (sad) … 1 (happy), or None if there is nothing to go on."""
     tags = _tags(name)
     pos = sum(c for t, c in tags.items() if t in POSITIVE)
     neg = sum(c for t, c in tags.items() if t in NEGATIVE)
@@ -59,7 +59,7 @@ def tag_valence(name):
 
 
 def song_features(lib):
-    """Index -> features (own measurement + AI sound analysis + Last.fm mood per band). Cached.
+    """Index -> features (own measurement + AI sound analysis + tag mood per band). Cached.
 
     The one place where tempo, key and instruments come together: "bpm" is the AI tempo when its windows agree
     (ml.TEMPO_AGREE, or our own measurement found none) – then "bsrc": "ml" and danceability, arousal and mood follow
@@ -70,7 +70,7 @@ def song_features(lib):
     feats = audio.features()
     mlf = ml.features()
     tempo, keys, instr, scores, themes = ml.tempo(), ml.keys(), ml.instruments(), ml.scores(), ml.themes()
-    stamps = (audio._cache["stamp"], ml.stamp(), lastfm._mem["stamp"])
+    stamps = (audio._cache["stamp"], ml.stamp(), bandinfo.stamp())
     key = ("feat", ml.songs_key(lib), *stamps)
     with _lock:
         if key in _memo:
@@ -120,7 +120,7 @@ def song_features(lib):
 # ---------------------------------------------------------------------------- Classification
 
 def _vectors(lib):
-    """One feature vector per band from Last.fm tags, file genres and the styles of the AI sound analysis (TF-IDF, normalized)."""
+    """One feature vector per band from its tags, file genres and the styles of the AI sound analysis (TF-IDF, normalized)."""
     count, genres, _, _ = rules.artist_stats(lib.songs)
     styles = ml.artist_styles(lib)
     raw = {}
@@ -130,7 +130,7 @@ def _vectors(lib):
             v["t:" + t] += c / 100
         for g, c in (genres.get(artist) or {}).items():
             v["g:" + g.lower()] += 0.6 * c / n
-        for k, x in styles.get(artist, {}).items():   # sound – helps above all with bands Last.fm does not know
+        for k, x in styles.get(artist, {}).items():   # sound – helps above all with bands without tags
             v["k:" + k] += 0.7 * x
         raw[artist] = v
     df = Counter(k for v in raw.values() for k in v)
@@ -178,7 +178,7 @@ def suggestions(cfg, lib, ctx=None, min_songs=3):
     for artist, n in count.items():
         if artist in assigned or artist in excluded or n < min_songs or artist in ("Various Artists", ""):
             continue
-        sim = [(present.get(s.lower()), m) for s, m in (lastfm.artist(artist) or {}).get("similar", [])]
+        sim = [(present.get(s.lower()), m) for s, m in (bandinfo.artist(artist) or {}).get("similar", [])]
         sim = [(s, m) for s, m in sim if s]
         mine = cents.get(artist)
         mine = mine[0] if mine and mine[1] >= 3 else None   # the band's sound: from 3 analyzed songs
@@ -313,7 +313,7 @@ def remember(made):
 
 
 def stil_suggestions(cfg, lib, limit=40):
-    """Bands without matching genre tags in the files -> vibes based on the Last.fm tags (otherwise the styles of the
+    """Bands without matching genre tags in the files -> vibes based on the band's tags (otherwise the styles of the
     AI sound analysis)."""
     count, genres, untagged, _rest = rules.artist_stats(lib.songs)
     styles = ml.artist_styles(lib)
@@ -342,7 +342,7 @@ def stil_suggestions(cfg, lib, limit=40):
 # ---------------------------------------------------------------------------- Radio & discover
 
 def radio_artists(seeds, lib, limit=25, min_match=0.12):
-    """Seed bands + similar bands that are in the library (sorted by similarity): Last.fm's similar bands and – with
+    """Seed bands + similar bands that are in the library (sorted by similarity): the similar bands of the band knowledge and – with
     the AI's sound vectors – bands that sound like the seed band (centroid ≥ RADIO_SOUND_MIN, 0.8 × similarity: a
     band that is similar by both counts most)."""
     present = {a.lower(): a for a in rules.artist_stats(lib.songs)[0]}
@@ -350,18 +350,18 @@ def radio_artists(seeds, lib, limit=25, min_match=0.12):
     for seed in seeds:
         real = present.get(seed.lower(), seed)
         score[real] += 10
-        for name, m in (lastfm.artist(real) or {}).get("similar", []):
+        for name, m in (bandinfo.artist(real) or {}).get("similar", []):
             hit = present.get(name.lower())
             if hit and m >= min_match:
                 score[hit] += m
-    by_lastfm = len(score)
+    by_knowledge = len(score)
     idx = similar.index(lib)
     if idx:
         for seed in seeds:
             for a, x in idx.similar_artists(present.get(seed.lower(), seed), k=limit):
                 if x >= RADIO_SOUND_MIN:
                     score[a] += 0.8 * x
-    if by_lastfm <= len(seeds):   # without Last.fm data: genre similarity in addition
+    if by_knowledge <= len(seeds):   # without similar bands: genre similarity in addition
         vecs, _ = _vectors(lib)
         for seed in seeds:
             sv = vecs.get(present.get(seed.lower(), seed), {})
@@ -405,7 +405,7 @@ def library_artist_parts(lib):
 
 
 def in_library(name, known):
-    """Is a band (e.g. a suggestion from Last.fm) already in the library? Yes if every part of its name is an artist
+    """Is a band (e.g. a similar band from the band knowledge) already in the library? Yes if every part of its name is an artist
     of the library or a part of one: "Rolf Zuckowski" ↔ "Rolf Zuckowski und seine Freunde",
     "A, B, Die C" ↔ "A, B & die C". known: library_artist_parts()."""
     parts = artist_parts(name)
@@ -417,7 +417,7 @@ def missing_artists(seeds, lib, limit=24):
     known = library_artist_parts(lib)
     score, because = Counter(), defaultdict(list)
     for seed in seeds:
-        for name, m in (lastfm.artist(seed) or {}).get("similar", [])[:30]:
+        for name, m in (bandinfo.artist(seed) or {}).get("similar", [])[:30]:
             if m >= 0.2 and not in_library(name, known):
                 score[name] += m
                 because[name].append(seed)
@@ -426,7 +426,8 @@ def missing_artists(seeds, lib, limit=24):
 
 def artist_profile(name, lib):
     """For the artist panel: tags, similar bands (present/missing), sound profile."""
-    a = lastfm.artist(name) or {}
+    known = bandinfo.artist(name)
+    a = known or {}
     present = {x.lower(): x for x in rules.artist_stats(lib.songs)[0]}
     sim_here, sim_missing = [], []
     for s, m in a.get("similar", [])[:40]:
@@ -445,7 +446,7 @@ def artist_profile(name, lib):
                                                      if c >= max(2, len(mine) // 4)],
                 "styles": [ml.style_label(k) for k, x in ml.artist_styles(lib).get(name, {}).items() if x >= 0.4][:4]}
     return {"tags": [t for t, c in a.get("tags", []) if t not in NOISE][:8], "similar": sim_here[:12],
-            "missing": sim_missing[:10], "sound": prof, "lastfm": bool(a), "soundsLike": sounds_like}
+            "missing": sim_missing[:10], "sound": prof, "known": known is not None, "soundsLike": sounds_like}
 
 
 def song_details(lib, i):

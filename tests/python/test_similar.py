@@ -13,7 +13,7 @@ import time
 import unittest
 from unittest import mock
 
-from app import audio, classify, lastfm, mixer, ml, rules, similar
+from app import audio, bandinfo, classify, mixer, ml, rules, similar
 from app.rules import Library
 from tests.python.factory import base_config, song
 
@@ -299,7 +299,7 @@ class TestUses(SimilarTest):
     def setUp(self):
         super().setUp()
         self.lib = library()
-        patcher = mock.patch.object(lastfm, "artist", return_value=None)   # without Last.fm data
+        patcher = mock.patch.object(bandinfo, "artist", return_value=None)   # without similar bands
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -337,7 +337,7 @@ class TestClassification(SimilarTest):
         self.cfg["welten"] = [{"id": "kinder", "name": "Kinder", "artists": ["Kita", "Sandkasten"]},
                               {"id": "metal", "name": "Metal", "artists": ["Eisen", "Stahl"]}]
         self.lib = library(bands={**{b: s for b, s in BANDS.items() if s != "folk"}}, genres=["Rock"])
-        patcher = mock.patch.object(lastfm, "artist", return_value=None)
+        patcher = mock.patch.object(bandinfo, "artist", return_value=None)
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -390,7 +390,7 @@ class TestEndpoints(SimilarTest):
                "cent": 1800, "flat": 0.2, "flux": 60.0, "path": "x"}
         audio.STATE_FILE.write_text(json.dumps({"songs": {s["id"]: raw for s in self.lib.songs}}))
         for patcher in (mock.patch.object(web.CACHE, "get", return_value=self.lib),
-                        mock.patch.object(lastfm, "artist", return_value=None),
+                        mock.patch.object(bandinfo, "artist", return_value=None),
                         mock.patch.object(images, "artist_info", return_value={}),
                         mock.patch.object(web, "_structured_lyrics", return_value=(None, None))):
             patcher.start()

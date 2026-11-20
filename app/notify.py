@@ -231,7 +231,7 @@ def _review(cfg, lib, person, topic, today):
     name = rules.review_name(cfg, p, day)   # as in Navidrome
 
     def make():
-        return _s("{name} is here", name=name), _s("Your most played songs of last month – now in Symfonium.")
+        return _s("{name} is here", name=name), _s("Your most played songs of last month – now in your music app.")
     return _to_person(f"review|{person['id']}|{day:%Y-%m}", f"reviewpush|{{account}}|{day:%Y-%m}", make,
                       ("calendar",), f"#/playlist/{p['id']}", cfg, person, topic, tag=f"review-{p['id']}")
 

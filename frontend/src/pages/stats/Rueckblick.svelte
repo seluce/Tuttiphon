@@ -34,7 +34,7 @@
     keeping = true
     try {
       const r = await api('/api/rueckblick/keep', { body: { person: d.person, kind, year: year ? d.from.slice(0, 4) : undefined } })
-      toast(tn(r.count, '“{name}” saved with {n} song – coming to Symfonium shortly', '“{name}” saved with {n} songs – coming to Symfonium shortly', { name: r.name }))
+      toast(tn(r.count, '“{name}” saved with {n} song – coming to your music app shortly', '“{name}” saved with {n} songs – coming to your music app shortly', { name: r.name }))
     } catch (e) { toast(e.message, { error: true }) } finally { keeping = false }
   }
 

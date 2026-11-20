@@ -12,8 +12,8 @@ export default {
     '{greeting}, {name}!',
   '{greeting}!':
     '{greeting}!',
-  'This is where your own playlists are made. Pick a suggestion below – one tap creates it and it shows up in Symfonium.':
-    'Tutaj powstają twoje własne playlisty. Wybierz propozycję poniżej – jedno dotknięcie ją tworzy, a ona pojawia się w Symfonium.',
+  'This is where your own playlists are made. Pick a suggestion below – one tap creates it and it shows up in your music app.':
+    'Tutaj powstają twoje własne playlisty. Wybierz propozycję poniżej – jedno dotknięcie ją tworzy, a ona pojawia się w twojej aplikacji muzycznej.',
   '{n} playlist of your own':
     '{n} własna playlista',
   '{n} playlists of your own': { few: '{n} własne playlisty', many: '{n} własnych playlist' },
@@ -44,14 +44,14 @@ export default {
     'Odkryte dla ciebie',
   'Your week':
     'Twój tydzień',
-  'For your personal listening stats, Tuttiphon needs your Navidrome password once – the same one as in Symfonium. It stays on your NAS.':
-    'Do twoich osobistych statystyk słuchania Tuttiphon potrzebuje raz twojego hasła Navidrome – tego samego co w Symfonium. Zostaje ono na twoim NAS.',
+  'For your personal listening stats, Tuttiphon needs your Navidrome password once – the same one as in your music app. It stays on your NAS.':
+    'Do twoich osobistych statystyk słuchania Tuttiphon potrzebuje raz twojego hasła Navidrome – tego samego co w aplikacji muzycznej. Zostaje ono na twoim NAS.',
   'Turn on stats':
     'Włącz statystyki',
   'Tuttiphon has been counting since {date} – as soon as you listen, this shows what you played most.':
     'Tuttiphon liczy od {date} – gdy tylko zaczniesz słuchać, zobaczysz tu, co grało najczęściej.',
-  'You haven’t listened to anything this week yet – or Symfonium hasn’t reported the plays yet.':
-    'W tym tygodniu nie było jeszcze u ciebie odtworzeń – albo Symfonium jeszcze ich nie zgłosiło.',
+  'You haven’t listened to anything this week yet – or your music app hasn’t reported the plays yet.':
+    'W tym tygodniu nie było jeszcze u ciebie odtworzeń – albo twoja aplikacja muzyczna jeszcze ich nie zgłosiła.',
   'Nothing new has been added lately.':
     'Ostatnio nie dodano nic nowego.',
   'How it works':
@@ -60,10 +60,9 @@ export default {
     'Twój gust',
   'In “My profile” you set your favorite worlds, favorite bands and dislikes. The suggestions are based on them.':
     'W „Mój profil” ustawiasz ulubione światy, ulubione zespoły i to, czego nie lubisz. Na tej podstawie powstają propozycje.',
-  'Listen in Symfonium':
-    'Słuchaj w Symfonium',
-  'New playlists go to Navidrome automatically. They show up in Symfonium after the next sync.':
-    'Nowe playlisty trafiają do Navidrome automatycznie. Pojawiają się w Symfonium po następnej synchronizacji.',
+  'Listen in your music app': 'Słuchaj w aplikacji muzycznej',
+  'New playlists go to Navidrome automatically. They show up in your music app after the next sync.':
+    'Nowe playlisty trafiają do Navidrome automatycznie. Pojawiają się w twojej aplikacji muzycznej po następnej synchronizacji.',
   'Who sees what':
     'Kto co widzi',
   'Your playlists are just for you. The family playlists are for everyone.':
@@ -92,8 +91,8 @@ export default {
     'Odtwarzane w tym tygodniu',
   'Tuttiphon has been counting since {date} – once the family listens, this shows what played most.':
     'Tuttiphon liczy od {date} – gdy rodzina zacznie słuchać, zobaczysz tu, co grało najczęściej.',
-  'Nothing has been played this week yet – or Symfonium is not reporting any plays.':
-    'W tym tygodniu nic jeszcze nie grało – albo Symfonium nie zgłasza odtworzeń.',
+  'Nothing has been played this week yet – or the music apps are not reporting any plays.':
+    'W tym tygodniu nic jeszcze nie grało – albo aplikacje muzyczne nie zgłaszają odtworzeń.',
   'New in your library':
     'Nowe w twojej bibliotece',
   'Family playlists':
@@ -212,8 +211,8 @@ export default {
     'Moje playlisty',
   'Everything Tuttiphon looks after for you. Navidrome reshuffles smart playlists on every request – paused and deleted ones are kept here.':
     'Wszystko, czym Tuttiphon się dla ciebie zajmuje. Navidrome przy każdym zapytaniu na nowo miesza inteligentne playlisty – wstrzymane i usunięte są przechowywane tutaj.',
-  'Your playlists and the family’s – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.':
-    'Twoje playlisty i playlisty rodziny – Tuttiphon dba o ich aktualność, a słuchać ich możesz w Symfonium.',
+  'Your playlists and the family’s – Tuttiphon keeps them up to date, and you can listen to them in your music app.':
+    'Twoje playlisty i playlisty rodziny – Tuttiphon dba o ich aktualność, a słuchać ich możesz w aplikacji muzycznej.',
   'All':
     'Wszystkie',
   'Search playlists …':
@@ -232,8 +231,8 @@ export default {
     'Gust →',
   'No playlists for {name} yet.':
     'Brak jeszcze playlist dla osoby {name}.',
-  'to listen to in Symfonium, can be copied and adjusted':
-    'do słuchania w Symfonium, można skopiować i dostosować',
+  'to listen to in your music app, can be copied and adjusted':
+    'do słuchania w aplikacji muzycznej, można skopiować i dostosować',
   'Not in Navidrome, but kept here – one click brings them back.':
     'Nie ma ich w Navidrome, ale są tu przechowywane – jedno kliknięcie je przywraca.',
   'Handmade – not in the tool yet':
@@ -296,8 +295,7 @@ export default {
     'Przenieś do kosza',
   'Change cover':
     'Zmień okładkę',
-  'back in Symfonium from {date}':
-    'z powrotem w Symfonium od {date}',
+  'back in the music apps from {date}': 'z powrotem w aplikacjach muzycznych od {date}',
   'from {n} matching':
     'z {n} pasujących',
   '{n} matching song':
@@ -339,8 +337,8 @@ export default {
   '{n} song today':
     '{n} piosenka dzisiaj',
   '{n} songs today': { few: '{n} piosenki dzisiaj', many: '{n} piosenek dzisiaj' },
-  'These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
-    'Dokładnie te piosenki ({n}) są dziś w Navidrome – jutro rano będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
+  'These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in the music app.':
+    'Dokładnie te piosenki ({n}) są dziś w Navidrome – jutro rano będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w aplikacji muzycznej.',
   'Weekly Mix · new every week':
     'Weekly Mix · nowy co tydzień',
   'This week in the mix':
@@ -348,8 +346,8 @@ export default {
   '{n} song this week':
     '{n} piosenka w tym tygodniu',
   '{n} songs this week': { few: '{n} piosenki w tym tygodniu', many: '{n} piosenek w tym tygodniu' },
-  'These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
-    'Dokładnie te piosenki ({n}) są w tym tygodniu w Navidrome – w następny poniedziałek będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
+  'These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in the music app.':
+    'Dokładnie te piosenki ({n}) są w tym tygodniu w Navidrome – w następny poniedziałek będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w aplikacji muzycznej.',
   'Monthly Mix · new every month':
     'Monthly Mix · nowy co miesiąc',
   'This month in the mix':
@@ -357,8 +355,8 @@ export default {
   '{n} song this month':
     '{n} piosenka w tym miesiącu',
   '{n} songs this month': { few: '{n} piosenki w tym miesiącu', many: '{n} piosenek w tym miesiącu' },
-  'These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.':
-    'Dokładnie te piosenki ({n}) są w tym miesiącu w Navidrome – pierwszego dnia miesiąca będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
+  'These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in the music app.':
+    'Dokładnie te piosenki ({n}) są w tym miesiącu w Navidrome – pierwszego dnia miesiąca będzie nowy wybór. Do tego czasu lista się nie zmienia – dobre do trybu offline w aplikacji muzycznej.',
   'Paused – kept here, disappears from Navidrome shortly':
     'Wstrzymana – przechowywana tutaj, wkrótce zniknie z Navidrome',
   'Paused – kept here':
@@ -408,8 +406,8 @@ export default {
     'Przełącz na konstruktor: {what}',
   '{n} songs · with automatically detected bands, a more precise live filter and all the tool’s settings.':
     'Piosenki: {n} · z automatycznie wykrytymi zespołami, dokładniejszym filtrem na żywo i wszystkimi ustawieniami narzędzia.',
-  'The playlist stays the same in Navidrome, with the same file and the same ID – Symfonium won’t notice. The original is backed up before it is overwritten for the first time.':
-    'Playlista pozostaje w Navidrome ta sama, z tym samym plikiem i tym samym ID – Symfonium tego nie zauważy. Przed pierwszym nadpisaniem oryginał trafia do kopii zapasowej.',
+  'The playlist stays the same in Navidrome, with the same file and the same ID – the music apps won’t notice. The original is backed up before it is overwritten for the first time.':
+    'Playlista pozostaje w Navidrome ta sama, z tym samym plikiem i tym samym ID – aplikacje muzyczne tego nie zauważą. Przed pierwszym nadpisaniem oryginał trafia do kopii zapasowej.',
   'Take over “{name}”':
     'Przejmij „{name}”',
   'Take over':
@@ -464,8 +462,8 @@ export default {
   'One more idea':
     'Jeszcze jeden pomysł',
   '{n} more ideas': { few: '{n} kolejne pomysły', many: '{n} kolejnych pomysłów' },
-  'One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in Symfonium.':
-    'Jeden cały album, w kolejności z albumu – w następny poniedziałek będzie nowy. Do tego czasu lista się nie zmienia – dobre do trybu offline w Symfonium.',
+  'One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in the music app.':
+    'Jeden cały album, w kolejności z albumu – w następny poniedziałek będzie nowy. Do tego czasu lista się nie zmienia – dobre do trybu offline w aplikacji muzycznej.',
   'one whole album a week, from {n} never played':
     'co tydzień cały album, spośród {n} nigdy nieodtwarzanych',
   'from {n} album never played':
@@ -490,20 +488,20 @@ export default {
   '{n} track':
     '{n} utwór',
   '{n} tracks': { few: '{n} utwory', many: '{n} utworów' },
-  'For the whole family – everyone sees it in Navidrome and Symfonium. Only administrators may change it.':
-    'Dla całej rodziny – wszyscy widzą ją w Navidrome i Symfonium. Zmieniać ją mogą tylko administratorzy.',
-  'For the whole family – everyone sees it in Navidrome and Symfonium. Everyone may change it.':
-    'Dla całej rodziny – wszyscy widzą ją w Navidrome i Symfonium. Zmieniać ją może każdy.',
+  'For the whole family – everyone sees it in Navidrome and the music apps. Only administrators may change it.':
+    'Dla całej rodziny – wszyscy widzą ją w Navidrome i aplikacjach muzycznych. Zmieniać ją mogą tylko administratorzy.',
+  'For the whole family – everyone sees it in Navidrome and the music apps. Everyone may change it.':
+    'Dla całej rodziny – wszyscy widzą ją w Navidrome i aplikacjach muzycznych. Zmieniać ją może każdy.',
   'Only for {name} – their stars & favorites count.':
     'Tylko dla osoby {name} – liczą się jej gwiazdki i ulubione.',
   'For the family':
     'Dla rodziny',
-  'For the whole family – everyone hears them in Symfonium, and you can change them here too.':
-    'Dla całej rodziny – wszyscy słuchają ich w Symfonium, a ty możesz je też tutaj zmieniać.',
-  'For the whole family – everyone hears them in Symfonium. With “Copy for me” you get your own version to adjust.':
-    'Dla całej rodziny – wszyscy słuchają ich w Symfonium. Przez „Kopia dla mnie” dostajesz własną wersję do dostosowania.',
-  'Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.':
-    'Twoje playlisty – Tuttiphon dba o ich aktualność, a słuchać ich możesz w Symfonium.',
+  'For the whole family – everyone hears them in their music app, and you can change them here too.':
+    'Dla całej rodziny – wszyscy słuchają ich w swoich aplikacjach muzycznych, a ty możesz je też tutaj zmieniać.',
+  'For the whole family – everyone hears them in their music app. With “Copy for me” you get your own version to adjust.':
+    'Dla całej rodziny – wszyscy słuchają ich w swoich aplikacjach muzycznych. Przez „Kopia dla mnie” dostajesz własną wersję do dostosowania.',
+  'Your playlists – Tuttiphon keeps them up to date, and you can listen to them in your music app.':
+    'Twoje playlisty – Tuttiphon dba o ich aktualność, a słuchać ich możesz w aplikacji muzycznej.',
   'Yours':
     'Twoje',
   'Only administrators change the family’s playlists – with “Copy for me” you get your own version.':

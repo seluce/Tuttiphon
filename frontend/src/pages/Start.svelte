@@ -131,7 +131,7 @@
             <p class="muted">
               {since(woche.d)
                 ? t('Tuttiphon has been counting since {date} – once the family listens, this shows what played most.', { date: new Date(woche.d.since).toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })
-                : t('Nothing has been played this week yet – or Symfonium is not reporting any plays.')}
+                : t('Nothing has been played this week yet – or the music apps are not reporting any plays.')}
             </p>
           </div>
         {:else}

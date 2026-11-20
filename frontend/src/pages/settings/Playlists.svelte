@@ -26,7 +26,7 @@
 </Card>
 
 <Card title={t('Keep it tidy')} icon="sparkles">
-  <Row label={t('Seasonal playlists only in season')} hint={t('Christmas, Halloween, summer … are not in Symfonium outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.')}>
+  <Row label={t('Seasonal playlists only in season')} hint={t('Christmas, Halloween, summer … are not in the music apps outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.')}>
     <Toggle label={t('Seasonal playlists only in season')} obj={s} key="seasonRest" />
   </Row>
 </Card>

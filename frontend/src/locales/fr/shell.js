@@ -64,12 +64,11 @@ export default {
     'Un mix pour votre téléphone',
   'Create a mix':
     'Créer un mix',
-  'Download it once in Symfonium':
-    'Le télécharger une fois dans Symfonium',
+  'Download it once in your music app': 'Le télécharger une fois dans votre appli de musique',
   'New songs arrive on their own':
     'Les nouveaux titres arrivent tout seuls',
-  'offline download on the go auto daily weekly reshuffle symfonium':
-    'hors ligne télécharger téléchargement en route auto quotidien hebdomadaire remélanger symfonium',
+  'offline download on the go auto daily weekly reshuffle music app symfonium':
+    'hors ligne télécharger téléchargement en route auto quotidien hebdomadaire remélanger appli musique symfonium',
   'Ready-made mixes':
     'Mix tout prêts',
   'Here are mixes and playlists that match your taste. “Create” adds one of them right away.':
@@ -82,10 +81,9 @@ export default {
     'Ou composez-le vous-même',
   'In the assistant you choose music and mood and, in the last step, “Mix”.':
     'Dans l’assistant, vous choisissez la musique et l’humeur et, à la dernière étape, « Mix ».',
-  'Download in Symfonium':
-    'Télécharger dans Symfonium',
-  'Open the mix in Symfonium under Playlists and download it once. When it renews, Symfonium fetches the new songs on its own at the next sync.':
-    'Ouvrez le mix dans Symfonium sous Playlists et téléchargez-le une fois. Quand il se renouvelle, Symfonium récupère de lui-même les nouveaux titres à la prochaine synchronisation.',
+  'Download in your music app': 'Télécharger dans votre appli de musique',
+  'Open the mix in your music app under Playlists and download it once. When it renews, apps like Symfonium fetch the new songs on their own at the next sync.':
+    'Ouvrez le mix dans votre appli de musique sous Playlists et téléchargez-le une fois. Quand il se renouvelle, les applis comme Symfonium récupèrent d’elles-mêmes les nouveaux titres à la prochaine synchronisation.',
   'Adjust music worlds':
     'Ajuster les univers musicaux',
   'Open music worlds':
@@ -140,10 +138,10 @@ export default {
     'D’après l’écoute',
   'From your listening':
     'D’après votre écoute',
-  'Tuttiphon recognizes from what is played in Symfonium which music people like. “+” turns it into a favorite.':
-    'Tuttiphon reconnaît, d’après ce qui est écouté dans Symfonium, quelle musique les gens aiment. « + » en fait un favori.',
-  'Tuttiphon recognizes from what you play in Symfonium which music you like. “+” turns it into a favorite.':
-    'Tuttiphon reconnaît, d’après ce que vous écoutez dans Symfonium, quelle musique vous aimez. « + » en fait un favori.',
+  'Tuttiphon recognizes from what is played in the music apps which music people like. “+” turns it into a favorite.':
+    'Tuttiphon reconnaît, d’après ce qui est écouté dans les applis de musique, quelle musique les gens aiment. « + » en fait un favori.',
+  'Tuttiphon recognizes from what you play in your music app which music you like. “+” turns it into a favorite.':
+    'Tuttiphon reconnaît, d’après ce que vous écoutez dans votre appli de musique, quelle musique vous aimez. « + » en fait un favori.',
   'Preferences':
     'Préférences',
   'What you like to hear':
@@ -176,8 +174,7 @@ export default {
     'Ne plus entendre quelque chose',
   'Band or genre under “Dislikes”':
     'Groupe ou genre sous « Je n’aime pas »',
-  'Rate the song 1 star in Symfonium':
-    'Notez le titre 1 étoile dans Symfonium',
+  'Rate the song 1 star in your music app': 'Notez le titre 1 étoile dans votre appli de musique',
   'What you skip comes less often':
     'Ce que vous passez revient moins souvent',
   'hide block ban never dislike star skip annoying':
@@ -186,16 +183,16 @@ export default {
     'Les groupes et genres listés ici ne se retrouvent jamais dans les playlists – quels que soient l’univers musical ou l’humeur.',
   'Single songs':
     'Titres isolés',
-  'Rate a song 1 star in Symfonium. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
-    'Notez un titre 1 étoile dans Symfonium. Il n’entre alors plus dans vos mix. Ce que vous passez souvent dans le mix revient de lui-même moins souvent.',
+  'Rate a song 1 star in your music app. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
+    'Notez un titre 1 étoile dans votre appli de musique. Il n’entre alors plus dans vos mix. Ce que vous passez souvent dans le mix revient de lui-même moins souvent.',
   'Change a playlist':
     'Modifier une playlist',
   'Tap a playlist':
     'Appuyez sur une playlist',
   'Choose “Edit”, or “…” for the cover and more':
     'Choisissez « Modifier », ou « … » pour la pochette et plus encore',
-  'Symfonium shows the change after the next sync':
-    'Symfonium affiche la modification après la prochaine synchronisation',
+  'Your music app shows the change after the next sync':
+    'Votre appli de musique affiche la modification après la prochaine synchronisation',
   'edit rename name cover picture pause delete trash share family visible copy':
     'modifier renommer nom pochette image pause supprimer corbeille partager famille visible copie',
   'Open a playlist':
@@ -206,12 +203,12 @@ export default {
     'Toutes les playlists apparaissent ici dès qu’il en existe une première.',
   'Everything at a glance':
     'Tout en un coup d’œil',
-  '“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves Symfonium for a while and stays kept here – or move it to the trash.':
-    '« Modifier » change la musique et le nom. Sous « … », vous créez la pochette, mettez la playlist en pause – elle quitte alors Symfonium un moment et reste conservée ici – ou la placez dans la corbeille.',
+  '“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves the music apps for a while and stays kept here – or move it to the trash.':
+    '« Modifier » change la musique et le nom. Sous « … », vous créez la pochette, mettez la playlist en pause – elle quitte alors les applis de musique un moment et reste conservée ici – ou la placez dans la corbeille.',
   'Share with the family':
     'Partager avec la famille',
-  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and Symfonium.':
-    'Dans « Modifier », choisissez la famille sous « Pour qui ? » – tout le monde voit alors la playlist dans Navidrome et Symfonium.',
+  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and the music apps.':
+    'Dans « Modifier », choisissez la famille sous « Pour qui ? » – tout le monde voit alors la playlist dans Navidrome et les applis de musique.',
   'Turn on kid-safe mode':
     'Activer le mode enfants',
   'Open the profile':
@@ -394,8 +391,8 @@ export default {
     'enregistrer une pochette en cover.jpg pour les albums sans aucune image – les existantes restent',
   'Understand music':
     'Comprendre la musique',
-  'analyze the sound with our own measurement and AI, fetch Last.fm knowledge, classify new bands – with a time limit':
-    'analyser le son avec notre propre mesure et l’IA, récupérer les connaissances de Last.fm, classer les nouveaux groupes – avec une limite de temps',
+  'analyze the sound with our own measurement and AI, fetch similar bands and tags, classify new bands – with a time limit':
+    'analyser le son avec notre propre mesure et l’IA, récupérer groupes similaires et tags, classer les nouveaux groupes – avec une limite de temps',
   'Write playlists':
     'Écrire les playlists',
   'Smart playlists & mixes into the playlist folder':
@@ -570,8 +567,8 @@ export default {
     'Tuttiphon est injoignable pour le moment. Il redémarre tout seul dès que le serveur est de retour.',
   'Tuttiphon – Sign in':
     'Tuttiphon – Connexion',
-  'Sign in with your Navidrome account – with the same name and password as in Symfonium.':
-    'Connectez-vous avec votre compte Navidrome – avec le même nom et le même mot de passe que dans Symfonium.',
+  'Sign in with your Navidrome account – with the same name and password as in your music app.':
+    'Connectez-vous avec votre compte Navidrome – avec le même nom et le même mot de passe que dans votre appli de musique.',
   'Please enter your username.':
     'Veuillez saisir votre nom d’utilisateur.',
   'Please enter the password.':
@@ -652,6 +649,7 @@ export default {
     'Récupération des pochettes',
   'Fetching Last.fm knowledge':
     'Récupération des infos Last.fm',
+  'Fetching similar bands': 'Récupération des groupes similaires',
   'Measuring loudness':
     'Mesure du volume',
   'Classifying bands':

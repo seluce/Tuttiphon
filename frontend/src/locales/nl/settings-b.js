@@ -36,8 +36,7 @@ export default {
     'Conversie',
   'Intelligence':
     'Intelligentie',
-  'Sound, Last.fm, classification':
-    'Klank, Last.fm, indeling',
+  'Sound, similar bands, classification': 'Klank, vergelijkbare bands, indeling',
   'Automation':
     'Automatisering',
   'Update everything, daily, folder watch':
@@ -140,14 +139,14 @@ export default {
     'opgeslagen wachtwoord werkt niet meer',
   'Who may do what?':
     'Wie mag wat?',
-  'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.':
-    'Iedereen logt in met een eigen Navidrome-account – met dezelfde naam en hetzelfde wachtwoord als in Symfonium.',
+  'Everyone signs in with their own Navidrome account – with the same name and password as in their music app.':
+    'Iedereen logt in met een eigen Navidrome-account – met dezelfde naam en hetzelfde wachtwoord als in de muziek-app.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.':
     'Ziet en wijzigt alles: alle playlists, muziekwerelden, sferen, personen en alle instellingen – ook Deezer, songteksten en conversie.',
   'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
     'Heeft een eigen startpagina “Voor jou”, eigen playlists en een eigen profiel. Luistert naar de gezinsplaylists – en wijzigt ze, tenzij alleen beheerders dat mogen.',
-  'Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.':
-    'Kan niet inloggen in Tuttiphon. Navidrome en Symfonium blijven werken.',
+  'Cannot sign in to Tuttiphon. Navidrome and the music apps keep working.':
+    'Kan niet inloggen in Tuttiphon. Navidrome en de muziek-apps blijven werken.',
   'you':
     'jij',
   'Default: {role}':
@@ -238,8 +237,8 @@ export default {
     'Overzichtelijk houden',
   'Seasonal playlists only in season':
     'Seizoensplaylists alleen in het seizoen',
-  'Christmas, Halloween, summer … are not in Symfonium outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
-    'Kerst, Halloween, zomer … staan buiten hun seizoen niet in Symfonium en komen op tijd vanzelf terug. Losse playlists kunnen in het bewerkvenster het hele jaar worden getoond.',
+  'Christmas, Halloween, summer … are not in the music apps outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
+    'Kerst, Halloween, zomer … staan buiten hun seizoen niet in de muziek-apps en komen op tijd vanzelf terug. Losse playlists kunnen in het bewerkvenster het hele jaar worden getoond.',
   'Mixes that learn':
     'Mixen die meeleren',
   'Learn from listening':

@@ -101,4 +101,5 @@ stars and its rank levels come from there. Thanks also to [Navidrome](https://ww
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) – non-commercial use only. Other components:
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
-Tuttiphon is an independent project and not affiliated with Navidrome, Deezer, Last.fm, LRCLIB or Symfonium.
+Tuttiphon is an independent project and not affiliated with Navidrome, Deezer, ListenBrainz, MusicBrainz, Last.fm, LRCLIB
+or Symfonium.

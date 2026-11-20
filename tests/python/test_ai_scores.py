@@ -13,7 +13,7 @@ import types
 import unittest
 from unittest import mock
 
-from app import audio, classify, config, lastfm, ml, ml_worker, rules
+from app import audio, bandinfo, classify, config, ml, ml_worker, rules
 from app.rules import BuildContext, Library
 from tests.python.factory import base_config, song
 from tests.python.test_ml import TMP, FakeLib, MlTest, mtuple, values
@@ -192,7 +192,7 @@ class TestScores(MlTest):
 
     def feats(self):
         classify._memo.clear()
-        with mock.patch.object(lastfm, "artist", return_value=None):
+        with mock.patch.object(bandinfo, "artist", return_value=None):
             return classify.song_features(self.lib)
 
     def test_state_is_read(self):

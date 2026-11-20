@@ -74,8 +74,8 @@ export default {
     'Puste = użytkownik, jako który działa Tuttiphon (user: w docker-compose.yaml). W przeciwnym razie UID:GID jak w Lidarr – działa tylko przy wystarczających uprawnieniach.',
   'Even out loudness':
     'Wyrównaj głośność',
-  'At night Tuttiphon measures how loud each song is and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in Symfonium and all songs play equally loud, even in a mix from a children\'s song to metal.':
-    'Nocą Tuttiphon mierzy, jak głośna jest każda piosenka, i zapisuje wartości ReplayGain w plikach bez ponownego kodowania. Włącz ReplayGain w Symfonium, a wszystkie piosenki zagrają równie głośno, nawet w mixie od piosenki dla dzieci po metal.',
+  'At night Tuttiphon measures how loud each song is and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in the music app and all songs play equally loud, even in a mix from a children\'s song to metal.':
+    'Nocą Tuttiphon mierzy, jak głośna jest każda piosenka, i zapisuje wartości ReplayGain w plikach bez ponownego kodowania. Włącz ReplayGain w aplikacji muzycznej, a wszystkie piosenki zagrają równie głośno, nawet w mixie od piosenki dla dzieci po metal.',
   'Leveling on':
     'Wyrównywanie włączone',
   'Writes once into every music file. Each file is copied and checked first, only then replaced. Values that already came from elsewhere stay.':

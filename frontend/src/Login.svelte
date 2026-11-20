@@ -6,7 +6,7 @@
   import { t, lang } from './lib/i18n.svelte.js'
   import { appHash } from './lib/api.js'
 
-  const NORMAL_SUB = $derived(t('Sign in with your Navidrome account – with the same name and password as in Symfonium.'))
+  const NORMAL_SUB = $derived(t('Sign in with your Navidrome account – with the same name and password as in your music app.'))
   let notfall = $state(false)
   let adminOnly = $state(false)   // not connected to Navidrome yet: only the local administrator can sign in
   let firstStart = $state(false)  // no administrator password yet: setup code + new password

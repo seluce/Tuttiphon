@@ -275,7 +275,7 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 | `GET /api/library` | signed in | `refresh=1` reloads the library from Navidrome | Index: `artists[[name, songs, id]]`, `genres`, `albums`, `songs`, `suffix`, `mp3Albums`, `loved`, `played`, `similar`, `untagged`, `autoArtists`, `weltInfo`, `scenes`, `ratingsExact`, `ratingSource`, `deezer` | unfiltered |
 | `GET /api/welt` | signed in | `id` of the music world | `members`, `songs`, `covers`, `artists`, `memberList[{name, id, songs, auto}]`, `similar`, `playlists`, `excluded`, `scene`, `forMe` | `playlists` visible ones only; `forMe` always from one's own account |
 | `GET /api/welt/neu` | Admin | `id` of the music world | Preview for “Rebuild”: `name`, `icon` (from the scene), `before`, `after` (bands), `dropped`, `added`, `renamed[[old, new]]` – changes nothing; without a scene `400` | – |
-| `GET /api/artist` | signed in | `name` | `name`, `id`, `songs`, `albums`, `genres`, `welten[{id, state}]`, `stile`, `likedBy`, `dislikedBy`, `playlists`, `bio`, `similar`, `plays`, `tags`, `missing`, `sound`, `soundsLike`, `lastfm`, `scenes`, `rating`, `top` (the five most played songs as song rows, see [below](#songs--listening-in)) | `playlists` only visible active ones; `likedBy`/`dislikedBy` only one's own person; `top` without songs hidden by kid-safe mode |
+| `GET /api/artist` | signed in | `name` | `name`, `id`, `songs`, `albums`, `genres`, `welten[{id, state}]`, `stile`, `likedBy`, `dislikedBy`, `playlists`, `bio`, `similar`, `plays`, `tags`, `missing`, `sound`, `soundsLike`, `known` (a source of the band knowledge was asked for this band), `scenes`, `rating`, `top` (the five most played songs as song rows, see [below](#songs--listening-in)) | `playlists` only visible active ones; `likedBy`/`dislikedBy` only one's own person; `top` without songs hidden by kid-safe mode |
 
 - `env.users` in `/api/status` lists every person's account plus the accounts Deezer sets stars for
   (`web.accounts_ok()`, each name once, case-insensitive); `ok` means “password stored”, `rejected` “stored, but
@@ -344,7 +344,7 @@ In both cases `normalize_playlists()` then turns every playlist with a sound fil
 | `GET /api/suggestions` | signed in | optional `person` | list of suggestions (`key`, `kind`, `person`, `group`, `score`, `title`, `name`, `count`, `core` – part of the core set, listed first …) | without `person`: only suggestions they can take – for their own person and, unless only administrators may change the family's playlists (`settings.familyEdit`), for the family (`auth.editable_persons()`); no new music worlds (`kind: scene`), without the ones they hid; with `person`: their own person or the family (otherwise `403`), their own hide list |
 | `GET /api/inbox` | signed in | – | “To review”: list `{key, level, title, text, actions[]}` ([04](04-playlists.md#to-review-inbox)); if another installation's instance has checked in, an `instance` entry comes first | their own, simple list from `user_inbox()` (create profile, preferences, first playlist, store password) without the items they ignored |
 | `GET /api/matrix` | signed in | optional `date` (`YYYY-MM-DD`) | `{"counts": {"<world>\|<style>": n}, "activeSeason": [...]}` | unfiltered |
-| `GET /api/missing` | own | optional `person` (default: the account's person; administrators without one: the family, otherwise the first person) | `{"seeds", "missing[{artist, score, because}]", "lastfm"}` | own person or the family |
+| `GET /api/missing` | own | optional `person` (default: the account's person; administrators without one: the family, otherwise the first person) | `{"seeds", "missing[{artist, score, because}]", "sources"}` (`sources`: ListenBrainz or Deezer turned on, or a Last.fm key) | own person or the family |
 | `GET /api/taste` | signed in | `person` or `me=1` | `{available, enough, basis, artists, welten, moods, styles, disliked, sound, hasAccount}` – taste from plays, favorites and stars set by hand ([Intelligence](06-intelligence.md#taste-per-account-apptastepy)); `sound`: the [sound taste](06-intelligence.md#sound-taste-appsoundtastepy) is active | own person, the family or own account only |
 | `GET /api/search` | signed in | `q` (at least 2 characters, otherwise everything is empty) | `{songs, styles, moods, instruments, themes, combos, lyrics}` – songs by title, AI music styles with bands, moods with song count and matching sound vibe, AI instruments and themes with song count, combo suggestions as a mix, matches in the lyrics | `combos` with one's own person |
 | `GET /api/changelog` | signed in | – | sections from `CHANGELOG.md`: `[{version, unreleased, items, levels}]`, newest first; file missing → `[]` | unfiltered (the interface shows them to administrators only) |
@@ -393,7 +393,7 @@ other indented lines are appended to the previous item. `levels` runs parallel t
   start fails (run can't be paused, another instance), the auto-apply stays scheduled. `/api/task/cancel` stops the current run including
   its subprocesses and cancels the auto-apply.
 - `progress` (`app/progress.py`): `part` is an id the interface names – `maintenance`, `flac`, `lyrics`, `cover`,
-  `lastfm`, `audio`, `ml`, `loudness`, `classify`, `fingerprints`, `learn`, `playlists`, `scan`, `sync`,
+  `bands`, `lastfm`, `audio`, `ml`, `loudness`, `classify`, `fingerprints`, `learn`, `playlists`, `scan`, `sync`,
   `lyricsindex`, `selfcheck`, `deezer`; `done` and `total` items (`total` `null` where it is not known, e.g. the scan:
   `done` = files read so far); `left` seconds still to go at the pace so far – only after 20 s and 3 items, at most
   until `until` (Unix time by which the part stops at the latest: time limit or night window), otherwise `null`.
@@ -445,7 +445,7 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 | `POST /api/family` | Body `{"name"?, "account"?}` – or `{"name"?, "account", "existing": true, "password"?}` for an account Navidrome already has | `{"person", "account", "password"}` – sets up the family (see below); with `existing` without `"password"` |
 | `PUT /api/accounts` | Body `{"user", "role"}`, `role` = `admin`, `user`, `none` or `null` (remove the override) | `{"ok": true}` |
 | `POST /api/admin-password` | Body `{"current", "password"}` – `current` only needed once a password is set | `{"ok": true}`, for the local administrator itself (and on the PC without sign-in) with `Set-Cookie: tuttiphon=…` – see below |
-| `GET /api/intel` | – | `{"lastfm", "audio", "ml", "classify", "stile", "moods", "fingerprints"}` – status of Last.fm, sound analysis, AI sound analysis, classification and audio fingerprints (see below) |
+| `GET /api/intel` | – | `{"bands", "lastfm", "audio", "ml", "classify", "stile", "moods", "fingerprints"}` – status of the similar bands and tags, Last.fm, sound analysis, AI sound analysis, classification and audio fingerprints (see below) |
 | `GET /api/opus/info` | `refresh=1` searches anew instead of using the cache | `{"ffmpeg", "aac", "musicDir", "archiveDir", "pending", "sample"}` – `aac`: whether mutagen is available (needed for AAC) or with `error` |
 | `GET /api/lyrics/stats` | – | summary of the last lyrics run plus `lastRun`, `backlog` |
 | `GET /api/deezer/ranks` | – | `{"bucket", "counts", "notFound", "total", "perNight", "defaults"}` – rank distribution for the star levels (`deezer.rank_histogram()`: songs per 10,000 ranks, not found on Deezer, all checked songs, songs the nightly refresh checks again) |
@@ -503,7 +503,7 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
   list in `settings.deezer.users` gets the account. The server log says “Family set up: Navidrome account …”. If
   `deezer` is part of “Update everything” (`tasks.pipeline()`), a Deezer run (`deezer_mode: "new"`) gives the new
   account the stars of the songs rated before (`deezer._catch_up()`; while a task runs, the next Deezer run does
-  it). Only this answer carries the password – shown once, for shared devices in Symfonium; nobody signs in
+  it). Only this answer carries the password – shown once, for shared devices; nobody signs in
   to Tuttiphon with it.
   With `"existing": true` the family takes an account Navidrome already has (`_family_existing()`, e.g. the one in the
   car) instead: no `FAMILY_ACCOUNT` check and no `create_user()`. The account must be in `NativeApi.users()` (`400`
@@ -528,15 +528,18 @@ All endpoints in this section are admin-only – except `POST /api/notify/test` 
 - `source` in `/api/paths/check`: `docker` (environment variable), `einstellung` (setting) or `standard` (default). Format of the entries in
   [`.env`](02-data-model.md#env--credentials) and [`accounts`](02-data-model.md#accounts).
 - `/api/intel`: `audio` = `audio.stats()` over the **merged** features (`classify.song_features()`: own
-  measurement + AI + Last.fm) – so `audio.moods` also counts “no vocals” and “acoustic” –, plus `total` (songs in the
+  measurement + AI + band tags) – so `audio.moods` also counts “no vocals” and “acoustic” –, plus `total` (songs in the
   library). `ml` = `ml.stats()`: `{available, reason, analysed, errors, lastRun, open, current, vectors, styles,
   instruments, themes}`; `reason` says why the AI is not available (Essentia missing, models missing), `current` = songs
   analyzed with the current version (the rest still lack instruments, key, tempo and sound vector), `vectors` = songs
   with a sound vector, `styles` the up to 8 most frequent strongest styles per song as `[name, songs]`, `instruments`
   the up to 8 most frequent instruments (strength ≥ 0.2) as `[label, songs]`, `themes` the same for the offered
   themes (from their threshold). `moods` = `audio.MOODS` (ID → label). The response is cached via `_memoized()`; it is
-  additionally recomputed as soon as `state/audio.json`, `state/ml.json` or `state/lastfm.json` change. Calculation:
-  [06 – Intelligence](06-intelligence.md). `fingerprints` = `fingerprint.stats()`, read fresh with every request
+  additionally recomputed as soon as `state/audio.json`, `state/ml.json`, `state/bands.json` or `state/lastfm.json`
+  change. Calculation: [06 – Intelligence](06-intelligence.md). `bands` = `bandinfo.stats()`: `{artists, withTags,
+  withSimilar, listenbrainz, deezer, lastRun}` – bands with data from any source, with tags, with similar bands, found
+  by ListenBrainz (MusicBrainz ID) and by Deezer; `lastfm` = `lastfm.stats()`: `{artists, withTags, lastRun, key,
+  rejected}` (`rejected`: Last.fm refused the stored key). Both are read with every request, outside the cache. `fingerprints` = `fingerprint.stats()`, read fresh with every request
   (not cached): `{available, why, enabled, songs, total, errors, open, lastRun, comparedAt, groups, extra}` – `songs` =
   songs with a fingerprint, `total` = songs in the library, `groups`/`extra` = recordings that are there more than
   once / files beyond the first copy ([06](06-intelligence.md#same-recording-twice-appfingerprintpy)).
@@ -578,7 +581,7 @@ Each device registers itself (`lib/push.js`); the signed-in account always appli
   the up to 5 strongest instruments (strength ≥ 0.1, strongest first; from about 0.2 an instrument is clearly there);
   `themes` = `[{id, label, strength}]`, the offered themes the AI hears in the song (from their threshold, strongest
   first).
-- `/api/song/more` (“More like this”): pool of a radio starting from the song's band (Last.fm's similar bands and –
+- `/api/song/more` (“More like this”): pool of a radio starting from the song's band (the band's similar bands and –
   with sound vectors – bands that sound alike), with one's own person (`_default_person()` – the account's person, administrators without one the family's, otherwise the first person's: dislikes, kid-safe mode),
   without a minimum rating; ordered by `classify.rank_like()`: with sound vectors mainly by sound similarity to the
   song (songs without a vector after those that sound alike), plus arousal, mood and tempo, some randomness; at most

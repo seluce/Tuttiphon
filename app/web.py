@@ -16,7 +16,7 @@ from pathlib import Path
 from collections import Counter
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import audio, auth, autowelten, i18n, backup, localadmin, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, sonic, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
+from . import audio, auth, autowelten, bandinfo, i18n, backup, localadmin, classify, events, instances, lastfm, liedtext, lyrics, mixer, ml, notify, opus, pflege, taste, rueckblick, sonic, watch, webpush, covers, deezer, images, playlists, rules, scenes, stats, suggest
 from .i18n import N_, _, _s, _sn
 from .config import (CONFIG_FILE, DATA_DIR, EDITABLE_ENV, LOG_DIR, STATE_DIR,
                      WEB_DIR, ConfigDamaged, env_var, environment, load_config, load_env, pass_key, paths, paths_info,
@@ -621,7 +621,7 @@ def api_artist(query):
     info = images.artist_info(aid_any) if aid_any else {}
     known, pics = lib.artist_ids(all=True), lib.artist_ids()
     intel = classify.artist_profile(name, lib)
-    # similar bands: Last.fm (more precise), otherwise Navidrome's own list
+    # similar bands: the band knowledge (bandinfo), otherwise Navidrome's own list
     sim_names = [s for s, _score in intel["similar"]] or [s for s in info.get("similar", []) if s in known]
     similar = [{"name": s, "id": pics.get(s)} for s in sim_names][:12]
     plays = sum(lib.songs[i].get("playCount") or 0 for i in idx)
@@ -635,7 +635,7 @@ def api_artist(query):
             "dislikedBy": [p["id"] for p in cfg["personen"] if name in p.get("dislikes", {}).get("artists", []) and p["id"] in auth.current()["persons"]],
             "likedBy": [p["id"] for p in cfg["personen"] if name in p.get("likes", {}).get("artists", []) and p["id"] in auth.current()["persons"]],
             "playlists": in_pl, "bio": info.get("bio", ""), "similar": similar, "plays": plays,
-            "tags": intel["tags"], "missing": intel["missing"], "sound": intel["sound"], "lastfm": intel["lastfm"],
+            "tags": intel["tags"], "missing": intel["missing"], "sound": intel["sound"], "known": intel["known"],
             "soundsLike": [{"name": a, "id": pics.get(a), "score": round(sc, 2)} for a, sc in intel["soundsLike"]],
             "scenes": [scenes.scene(s)["name"] for s in scenes.scenes_for_artist(name)],
             "rating": round(sum((lib.field_values("rating")[i] or 0) for i in idx) / len(idx), 1)}
@@ -1347,26 +1347,27 @@ def api_paths_check(body):
 
 
 def api_intel():
-    """For Settings → Intelligence: state of Last.fm, sound analysis and classification."""
+    """For Settings → Intelligence: state of the band knowledge, sound analysis and classification."""
     lib = CACHE.get()
     cfg = load_config()
 
     def build():
         names = {w["id"]: w["name"] for w in cfg["welten"]}
         sugg = classify.suggestions(cfg, lib)
-        feats = classify.song_features(lib)   # own measurement + AI + Last.fm – so the AI moods count too
-        return {"lastfm": lastfm.stats(), "audio": {**audio.stats(feats.values()), "total": len(lib.songs)},
+        feats = classify.song_features(lib)   # own measurement + AI + band tags – so the AI moods count too
+        return {"audio": {**audio.stats(feats.values()), "total": len(lib.songs)},
                 "ml": ml.stats(), "classify": [{**x, "weltName": names.get(x["welt"])} for x in sugg[:30]],
                 "stile": classify.stil_suggestions(cfg, lib)[:20],
                 "moods": {k: _(v) for k, v in audio.MOODS.items()}}   # i18n-ignore – fixed mood labels
     audio.features()   # refresh the timestamp of the sound analysis
     from . import fingerprint   # audio fingerprints (same recording twice): small file, read fresh every time
-    return {**_memoized("intel", build, audio._cache["stamp"], ml.stamp(), lastfm._mem["stamp"]),
+    return {**_memoized("intel", build, audio._cache["stamp"], ml.stamp(), bandinfo.stamp()),
+            "bands": bandinfo.stats(), "lastfm": lastfm.stats(),   # outside the memo: the key can change any time
             "fingerprints": fingerprint.stats(cfg, lib)}
 
 
 def api_missing(query):
-    """Bands that resemble your favorites but are not in the library yet (Last.fm)."""
+    """Bands that resemble your favorites but are not in the library yet (band knowledge)."""
     lib = CACHE.get()
     cfg = load_config()
     person = next((p for p in cfg["personen"] if p["id"] == (query.get("person") or _default_person(cfg))), None)
@@ -1382,7 +1383,7 @@ def api_missing(query):
         count = rules.artist_stats(lib.songs)[0]
         seeds = [a for a, _count in count.most_common(12)]
     return {"seeds": list(dict.fromkeys(seeds))[:15], "missing": classify.missing_artists(list(dict.fromkeys(seeds)), lib),
-            "lastfm": bool(lastfm.api_key())}
+            "sources": bool(bandinfo.sources(cfg["settings"].get("analysis")) or lastfm.api_key())}
 
 
 def api_lastfm_test(body):

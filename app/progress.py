@@ -8,8 +8,8 @@ one state is enough; outside a run nobody reads it.
 import threading
 import time
 
-PARTS = ("maintenance", "flac", "lyrics", "cover", "lastfm", "audio", "ml", "loudness", "classify", "fingerprints",
-         "learn", "playlists", "scan", "sync", "lyricsindex", "selfcheck", "deezer")
+PARTS = ("maintenance", "flac", "lyrics", "cover", "bands", "lastfm", "audio", "ml", "loudness", "classify",
+         "fingerprints", "learn", "playlists", "scan", "sync", "lyricsindex", "selfcheck", "deezer")
 MIN_SECONDS = 20   # a remaining time only once the part has run this long …
 MIN_DONE = 3       # … and done this many items
 

@@ -208,7 +208,8 @@ export const STEPS = translated(() => [{ title: t('…') }])   // at module leve
   | Bibliothek (not „Sammlung“) | library (not “collection”) |
   | Sicherung | backup |
   | Ordner-Überwachung | folder watch |
-  | Abgleich (Symfonium with the server – not „Sync“) | sync |
+  | Abgleich (a music app with the server – not „Sync“) | sync |
+  | Musik-App (Symfonium, Feishin … – never only „Symfonium“; Symfonium by name only for its own settings or as „Apps wie Symfonium“) | music app |
   | Vorsilbe (in front of playlist names – not „Präfix“) | prefix |
   | Lieblingsrichtungen | favorite vibes |
   | Kein Zugang (role) | No access |

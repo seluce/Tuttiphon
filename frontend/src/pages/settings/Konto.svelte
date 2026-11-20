@@ -97,7 +97,7 @@
             <span>{t('The stored password no longer works – probably it was changed in Navidrome. Enter the new one so your statistics and stars keep working.')}</span>
           </div>
         {:else}
-          <p class="muted small">{t('For Tuttiphon to show your statistics and set Deezer stars in your account, it needs your Navidrome password once – the same as in Symfonium. It stays on your NAS.')}</p>
+          <p class="muted small">{t('For Tuttiphon to show your statistics and set Deezer stars in your account, it needs your Navidrome password once – the same as in your music app. It stays on your NAS.')}</p>
         {/if}
         <div class="frow">
           <label class="f">{t('Password')}

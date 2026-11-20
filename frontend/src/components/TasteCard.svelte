@@ -48,7 +48,7 @@
       <div class="flex-1 min-w-0 max-mobile:basis-[calc(100%-52px)]">
         <h2>{self ? t('From your listening') : t('From {name}’s listening', { name })}</h2>
         <p class="muted small">{self
-          ? t('Tuttiphon recognized this from what you listen to in Symfonium, mark as favorite and rate yourself. Your suggestions and mixes are built from it.')
+          ? t('Tuttiphon recognized this from what you listen to in your music app, mark as favorite and rate yourself. Your suggestions and mixes are built from it.')
           : t('Recognized from what {name} listens to, marks as favorite and rates. Suggestions and mixes are built from it.', { name })}
           {#if taste.sound}{self ? t('Also learns from the sound of what you play.') : t('Also learns from the sound of what {name} plays.', { name })}{/if}</p>
       </div>
@@ -103,7 +103,7 @@
   </div>
 {:else if taste?.available && !taste.enough}
   <div class="note flex gap-2.5 items-center" data-guide="taste"><Icon name="sparkles" size={18} class="shrink-0" />
-    <span>{self ? t('As soon as you listen more in Symfonium or mark favorites, Tuttiphon recognizes your taste here.') : t('{name} has not listened enough yet to recognize the taste.', { name })}</span>
+    <span>{self ? t('As soon as you listen more in your music app or mark favorites, Tuttiphon recognizes your taste here.') : t('{name} has not listened enough yet to recognize the taste.', { name })}</span>
   </div>
 {:else if taste && taste.hasAccount && !taste.available}
   <div class="note flex gap-2.5 items-center" data-guide="taste"><Icon name="key" size={18} class="shrink-0" />

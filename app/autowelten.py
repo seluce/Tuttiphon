@@ -1,16 +1,16 @@
 """Music worlds that create themselves – from the collection and from what is played.
 
-The basis is the catalog in app/scenes.json: per world a name, icon, typical bands and keywords (`keys` – genres of
-the files, Last.fm tags, AI music styles, lowercase), plus where needed language (`lang`), period (`era`: as a
-condition, e.g. rock classics up to 1999), decade world (`decade`: 80s hits, 90s hits – only the time counts there,
-and bands belong to it in addition to their main world), "broad" (`broad`, e.g. pop & charts), "separate world"
-(`separate`, e.g. kids and audio plays – left out of the all-playlists) and "niche" (`niche`: bands of these worlds
-are not also added to the decade worlds – 80s children's songs do not belong to "The 80s").
+The basis is the catalog in app/scenes.json: per world a name, icon, typical bands and keywords (`keys` – genres of the
+files, the band's tags (bandinfo.py), AI music styles, lowercase), plus where needed language (`lang`), period (`era`:
+as a condition, e.g. rock classics up to 1999), decade world (`decade`: 80s hits, 90s hits – only the time counts
+there, and bands belong to it in addition to their main world), "broad" (`broad`, e.g. pop & charts), "separate world"
+(`separate`, e.g. kids and audio plays – left out of the all-playlists) and "niche" (`niche`: bands of these worlds are
+not also added to the decade worlds – 80s children's songs do not belong to "The 80s").
 
-* profiles(lib): per band (2 songs or more) the genres of the files, Last.fm tags, AI music styles, language (lyrics,
+* profiles(lib): per band (2 songs or more) the genres of the files, band tags, AI music styles, language (lyrics,
   otherwise titles) and era (early quarter of the release years – reissues and best-ofs shift the mean)
 * assign(lib): per band its main world (best match from 0.45) and for decade worlds also the bands whose time it was
-  (early quarter of the years within the decade and middle at most six years later, or Last.fm tag "80s" …)
+  (early quarter of the years within the decade and middle at most six years later, or the tag "80s" …)
 * members(scene, lib): bands of a world – typical bands of the catalog plus the recognized ones (for rules.welt_artists())
 * candidates(cfg, lib): catalog worlds with enough bands and songs that do not exist yet – with fewer bands already when
   someone listens to them a lot (taste, taste.py)
@@ -41,17 +41,16 @@ def _norm(text):
 
 
 def _stamps():
-    from . import lastfm, liedtext, ml
+    from . import bandinfo, liedtext, ml
     # lyrics: recompute only after a finished read, not at every intermediate state
-    return (lastfm._mem.get("stamp"), ml.stamp(), liedtext.generation(), id(scenes.catalog()))
+    return (bandinfo.stamp(), ml.stamp(), liedtext.generation(), id(scenes.catalog()))
 
 
 # ---------------------------------------------------------------------------- Describing bands
 
 def profiles(lib):
     """Band -> {n, genres {name: share}, tags {name: 0–1}, styles {name: 0–1}, lang, era, decades}."""
-    from . import lastfm, liedtext, ml
-    lastfm.load()
+    from . import bandinfo, liedtext, ml
     langs = liedtext.languages()
     styles = ml.artist_styles(lib)
     by = defaultdict(list)
@@ -68,7 +67,7 @@ def profiles(lib):
             for name in names:
                 g[name] += 1
         years = sorted(y for y in (s.get("year") for s in ss) if isinstance(y, int) and y > 1900)
-        info = lastfm.artist(artist) or {}
+        info = bandinfo.artist(artist) or {}
         tags = {_norm(t): w / 100 for t, w in (info.get("tags") or []) if w >= 5}
         decades = {int(m.group(1)) + 1900 for t in tags for m in [re.fullmatch(r"(?:19)?([5-9]0)s", t)] if m}
         # language: recognized lyrics, otherwise the titles

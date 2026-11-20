@@ -1,6 +1,6 @@
 <!--
   Artist sheet: picture, albums, bio – and everywhere the band appears (music worlds, vibes, people, playlists),
-  similar bands (Last.fm) and bands that sound alike (AI sound vectors, without the ones already listed).
+  similar bands (band knowledge: ListenBrainz, Deezer, Last.fm) and bands that sound alike (AI sound vectors, without the ones already listed).
   Opened via lib/artist.js → openArtist(name).
 -->
 <script>
@@ -110,7 +110,7 @@
       </div>
       <div class="btns justify-center">
         {#each a.genres as [g]}<span class="pill">{g}</span>{/each}
-        {#each tags as tag}<span class="pill" title={t('Tag from Last.fm')}>{tag}</span>{/each}
+        {#each tags as tag}<span class="pill" title={t('Tag from MusicBrainz or Last.fm')}>{tag}</span>{/each}
         {#each a.scenes as s}<span class="pill acc">{s}</span>{/each}
       </div>
       <div class="btns justify-center mt-1.5">
@@ -266,12 +266,12 @@
             <a class="toggle" href="https://www.last.fm/music/{encodeURIComponent(m)}" target="_blank" rel="noopener">{m}<Icon name="external" size={13} /></a>
           {/each}
         </div>
-        <div class="hint">{admin ? t('According to Last.fm – to listen in or for Lidarr.') : t('According to Last.fm – tap to listen in.')}</div>
+        <div class="hint">{admin ? t('Tap to listen in on Last.fm – or for Lidarr.') : t('Tap to listen in on Last.fm.')}</div>
       </Field>
     {/if}
 
-    {#if !a.lastfm && admin}
-      <div class="note">{t('With a Last.fm key under Settings → Intelligence you get tags here, more accurate similar bands and bands you are still missing.')}</div>
+    {#if !a.known && admin}
+      <div class="note">{t('Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).')}</div>
     {/if}
   {/if}
 </div>

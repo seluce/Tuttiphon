@@ -112,7 +112,7 @@
 </Card>
 
 <Card title={t('Top tracks and refreshing')} icon="trending">
-  <Row label={t('Highlight top tracks per band')} hint={t('If many songs of a band share the highest star count, the most popular get one more star. This way Symfonium sorts the top tracks correctly. Takes effect on the next run.')}>
+  <Row label={t('Highlight top tracks per band')} hint={t('If many songs of a band share the highest star count, the most popular get one more star. This way apps like Symfonium sort the top tracks correctly. Takes effect on the next run.')}>
     <Toggle label={t('Highlight top tracks per band')} obj={dz} key="topBoost" def={true} />
   </Row>
   <Row label={t('Refresh every night')} hint={t('Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.', { n: fmt(hist?.perNight || 1500) })}>

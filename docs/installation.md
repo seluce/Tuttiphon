@@ -52,8 +52,8 @@ Tuttiphon does: [Features](features.md). Operation in depth (Docker image, updat
 
 From then on everyone signs in with their own Navidrome account. New users get a short welcome assistant that creates
 their profile – one per account – and a tour. For playlists everyone shares, set up the family under **People → Set up
-the family**: Tuttiphon creates a Navidrome account for it and shows its password once, for shared devices in
-Symfonium – or takes one Navidrome already has, such as the car's.
+the family**: Tuttiphon creates a Navidrome account for it and shows its password once, for shared devices –
+or takes one Navidrome already has, such as the car's.
 The password of the local administrator can be changed under **Settings → Users & permissions**.
 
 **Password forgotten?** Delete `config/state/admin_password.json`. Within a few seconds Tuttiphon waits for the setup
@@ -84,7 +84,7 @@ Almost everything is set in the interface. Environment variables in `docker-comp
 | `NAV_PASS_<ACCOUNT>` | password of a family member's Navidrome account, account name in capitals (e.g. `NAV_PASS_ALEX`) – for stars, statistics and taste; better entered in the interface, or by each person at sign-in (the family's account gets its password when Tuttiphon creates it) |
 | `MUSIC_DIR`, `PLAYLIST_DIR`, `ARCHIVE_DIR` | folders inside the container (playlists default to `<music>/00_SmartPlaylists`) |
 | `BACKUP_DIR` | backup folder inside the container – used while Settings → Backup has no folder of its own (there the setting wins) |
-| `LASTFM_API_KEY` | Last.fm key for similar bands and tags (free at [last.fm/api](https://www.last.fm/api)) |
+| `LASTFM_API_KEY` | optional: Last.fm key for more similar bands and tags (Last.fm gives working keys only with a Pro subscription; ListenBrainz and Deezer need none) |
 | `NTFY_TOKEN` | access token for a protected ntfy server (notifications) |
 | `TUTTIPHON_TRUSTED_PROXIES` | address or network of your reverse proxy, e.g. `172.16.0.0/12` – then the sign-in lock counts each person's own address and the session cookie is only sent via https |
 | `TUTTIPHON_HOSTS` | without a password: further host names Tuttiphon answers to |

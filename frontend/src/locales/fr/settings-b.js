@@ -36,8 +36,7 @@ export default {
     'Conversion',
   'Intelligence':
     'Intelligence',
-  'Sound, Last.fm, classification':
-    'Son, Last.fm, classification',
+  'Sound, similar bands, classification': 'Son, groupes similaires, classification',
   'Automation':
     'Automatisation',
   'Update everything, daily, folder watch':
@@ -140,14 +139,14 @@ export default {
     'le mot de passe enregistré ne fonctionne plus',
   'Who may do what?':
     'Qui peut faire quoi ?',
-  'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.':
-    'Chacun se connecte avec son propre compte Navidrome – avec le même nom et le même mot de passe que dans Symfonium.',
+  'Everyone signs in with their own Navidrome account – with the same name and password as in their music app.':
+    'Chacun se connecte avec son propre compte Navidrome – avec le même nom et le même mot de passe que dans son appli de musique.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.':
     'Voit et modifie tout : toutes les playlists, univers musicaux, ambiances, personnes et tous les réglages – y compris Deezer, les paroles et la conversion.',
   'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
     'A sa propre page d’accueil « Pour vous », ses propres playlists et son propre profil. Écoute les playlists de la famille – et les modifie, sauf si seuls les administrateurs le peuvent.',
-  'Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.':
-    'Ne peut pas se connecter à Tuttiphon. Navidrome et Symfonium continuent de fonctionner.',
+  'Cannot sign in to Tuttiphon. Navidrome and the music apps keep working.':
+    'Ne peut pas se connecter à Tuttiphon. Navidrome et les applis de musique continuent de fonctionner.',
   'you':
     'vous',
   'Default: {role}':
@@ -238,8 +237,8 @@ export default {
     'Garder les choses en ordre',
   'Seasonal playlists only in season':
     'Playlists de saison seulement en saison',
-  'Christmas, Halloween, summer … are not in Symfonium outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
-    'Noël, Halloween, l’été… ne sont pas dans Symfonium hors de leur saison et reviennent d’elles-mêmes en temps voulu. Certaines playlists peuvent être affichées toute l’année dans la fenêtre de modification.',
+  'Christmas, Halloween, summer … are not in the music apps outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
+    'Noël, Halloween, l’été… ne sont pas dans les applis de musique hors de leur saison et reviennent d’elles-mêmes en temps voulu. Certaines playlists peuvent être affichées toute l’année dans la fenêtre de modification.',
   'Mixes that learn':
     'Des mix qui apprennent',
   'Learn from listening':

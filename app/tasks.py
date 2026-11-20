@@ -26,7 +26,7 @@ STEP_TITLES = {
     "flac": N_("Convert music"),
     "lyrics": N_("Find & tidy up lyrics"),
     "cover": N_("Fetch missing covers"),
-    "analyse": N_("Understand music (sound, AI & Last.fm)"),
+    "analyse": N_("Understand music (sound, AI & similar bands)"),
     "playlists": N_("Write playlists"),
     "scan": N_("Navidrome scan & sync"),
     "deezer": N_("Deezer rating"),
@@ -443,12 +443,13 @@ class TaskRunner:
         return True
 
     def _step_analyse(self, ctx, dry_run=False, analyse_full=False, night_until=None, new_files=None, **_):
-        """Fetch Last.fm knowledge, analyze the sound (own measurement, then AI), classify new bands – all with a time limit.
+        """Fetch similar bands and tags (bandinfo: ListenBrainz and Deezer, then Last.fm with a key), analyze the sound
+        (own measurement, then AI), classify new bands – all with a time limit.
         night_until: night analysis – no time limit, but until then at the latest (time.time() value).
-        new_files: folder watch – only these new files (Last.fm for their bands, sound and AI for their songs, loudness
-        and fingerprints with a small time limit): the playlists after it must not wait for the whole backlog, that
-        follows in the regular runs."""
-        from . import audio, classify, lastfm, ml
+        new_files: folder watch – only these new files (similar bands for their bands, sound and AI for their songs,
+        loudness and fingerprints with a small time limit): the playlists after it must not wait for the whole backlog,
+        that follows in the regular runs."""
+        from . import audio, bandinfo, classify, lastfm, ml
         cfg = load_config()
         an = cfg["settings"].get("analysis") or {}
         lib = CACHE.get()
@@ -457,25 +458,36 @@ class TaskRunner:
         small = WATCH_BUDGET if only is not None else None   # minutes for loudness and fingerprints in a watch run
         if dry_run:   # dry run: measure nothing, save nothing – only say what the classification would suggest
             n = len([x for x in classify.suggestions(cfg, lib) if x["score"] >= 0.6])
-            self.log(_sn(n, "(dry run) Last.fm and sound analysis skipped. Classification: {n} confident suggestion.",
-                         "(dry run) Last.fm and sound analysis skipped. Classification: {n} confident suggestions."))
+            self.log(_sn(n, "(dry run) Similar bands and sound analysis skipped. Classification: {n} confident "
+                            "suggestion.",
+                         "(dry run) Similar bands and sound analysis skipped. Classification: {n} confident "
+                         "suggestions."))
             ctx["summary"]["analyse"] = out
             return True
         if only is not None:
             self.log(_sn(len(only), "Only the new music: {n} song.", "Only the new music: {n} songs."))
-        if lastfm.api_key() and only != set():
+        use = bandinfo.sources(an)
+        if (use or lastfm.api_key()) and only != set():
             count, _, _, _ = rules.artist_stats(lib.songs)
             known = {a for w in cfg["welten"] for a in rules.welt_artists(w, rules.BuildContext(lib))}
             names = sorted(count, key=lambda a: (a in known, -count[a]))   # bands without a world first, then the big ones
             if only is not None:   # folder watch: the bands of the new songs
                 bands = {lib._main_artist(s) for s in lib.songs if s["id"] in only}
                 names = [a for a in names if a in bands]
-            try:
-                out["lastfm"] = lastfm.refresh(names, log=self.log, stop=self.stop, budget=0 if analyse_full else an.get("lastfmBudget", 3))
-            except Exception as e:   # noqa: BLE001 – Last.fm must never prevent sound analysis and AI
-                self.log("⚠ Last.fm: " + said(e))
-        else:
-            self.log(_s("Last.fm: no key entered – similar bands and tags are missing (Settings → Intelligence)."))
+            budget = 0 if analyse_full else an.get("bandBudget", 3)   # per source
+            if use:   # ListenBrainz and Deezer first: free and without a key
+                try:
+                    out["bands"] = bandinfo.refresh(names, use, log=self.log, stop=self.stop, budget=budget)
+                except Exception as e:   # noqa: BLE001 – similar bands must never prevent sound analysis and AI
+                    self.log("⚠ " + _s("Similar bands") + ": " + said(e))
+            if lastfm.api_key() and not self.stop.is_set():
+                try:
+                    out["lastfm"] = lastfm.refresh(names, log=self.log, stop=self.stop, budget=budget)
+                except Exception as e:   # noqa: BLE001
+                    self.log("⚠ Last.fm: " + said(e))
+        elif only != set():
+            self.log(_s("Similar bands: ListenBrainz and Deezer are turned off and there is no Last.fm key – similar "
+                        "bands and tags are missing (Settings → Intelligence)."))
         if self.stop.is_set():
             return False
         if an.get("enabled", True) and only != set():

@@ -92,10 +92,8 @@ export default {
     'Crea',
   'Customize':
     'Personalizza',
-  'With a free Last.fm key, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
-    'Con una chiave Last.fm gratuita, Tuttiphon mostra qui band simili ai tuoi preferiti ma non ancora nella libreria.',
-  'Enter key →':
-    'Inserisci la chiave →',
+  'With ListenBrainz or Deezer, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
+    'Con ListenBrainz o Deezer, Tuttiphon mostra qui band simili alle tue preferite che non sono ancora nella libreria.',
   'The administrator sets this up.':
     'Lo configura l\'amministratore.',
   'No data yet – it is created during the next run of “Understand music”.':
@@ -104,10 +102,10 @@ export default {
     'simili a {names}',
   'Show all {n}':
     'Mostra tutti e {n}',
-  'According to Last.fm – to listen in or as a wish list for Lidarr.':
-    'Secondo Last.fm – da ascoltare o come lista dei desideri per Lidarr.',
-  'According to Last.fm – tap to listen in. If you like something, the administrator can add it to the library.':
-    'Secondo Last.fm – tocca per ascoltare. Se qualcosa ti piace, l\'amministratore può aggiungerlo alla libreria.',
+  'Tap to listen in on Last.fm – or as a wish list for Lidarr.':
+    'Tocca per ascoltare su Last.fm – o come lista dei desideri per Lidarr.',
+  'Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.':
+    'Tocca per ascoltare su Last.fm. Se qualcosa ti piace, l’amministratore può aggiungerlo alla libreria.',
   'All':
     'Tutti',
   'Error':
@@ -134,10 +132,10 @@ export default {
     'Statistiche',
   'My statistics':
     'Le mie statistiche',
-  'What really gets played in your home – from the plays Symfonium reports to Navidrome.':
-    'Cosa si ascolta davvero in casa – dagli ascolti che Symfonium segnala a Navidrome.',
-  'What you really listen to – from the plays Symfonium reports to Navidrome.':
-    'Cosa ascolti davvero – dagli ascolti che Symfonium segnala a Navidrome.',
+  'What really gets played in your home – from the plays your music apps report to Navidrome.':
+    'Cosa si ascolta davvero in casa – dagli ascolti che le vostre app musicali segnalano a Navidrome.',
+  'What you really listen to – from the plays your music app reports to Navidrome.':
+    'Cosa ascolti davvero – dagli ascolti che la tua app musicale segnala a Navidrome.',
   'Password missing':
     'Password mancante',
   'Counting your plays …':
@@ -186,8 +184,8 @@ export default {
     '«Preferiti dimenticati» creata',
   'No plays counted yet':
     'Ancora nessun ascolto contato',
-  'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.':
-    'Navidrome non ha ancora salvato ascolti per «{user}». In Symfonium deve essere attivo «Scrobbling» o «Report plays to the server».',
+  'Navidrome has not saved any plays for “{user}” yet. The music app has to report plays to the server – often called “Scrobbling”.':
+    'Navidrome non ha ancora salvato ascolti per «{user}». L\'app musicale deve segnalare gli ascolti al server – spesso si chiama «Scrobbling».',
   'Plays':
     'Ascolti',
   'from {n} different song':
@@ -238,10 +236,10 @@ export default {
     'Crea come playlist',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Nota: Navidrome salva per ogni brano solo quante volte e quando è stato ascoltato l\'ultima volta – non tiene una cronologia nel tempo.',
-  '“{name}” saved with {n} song – coming to Symfonium shortly':
-    '«{name}» salvata con {n} brano – arriva a breve in Symfonium',
-  '“{name}” saved with {n} songs – coming to Symfonium shortly':
-    '«{name}» salvata con {n} brani – arriva a breve in Symfonium',
+  '“{name}” saved with {n} song – coming to your music app shortly':
+    '«{name}» salvata con {n} brano – arriva a breve nella tua app musicale',
+  '“{name}” saved with {n} songs – coming to your music app shortly':
+    '«{name}» salvata con {n} brani – arriva a breve nella tua app musicale',
   'Nothing counted yet':
     'Ancora niente di contato',
   'Tuttiphon has been keeping track of plays since {date}. As soon as you listen, the most played music shows up here.':
@@ -304,8 +302,7 @@ export default {
     'caricamento …',
   '{n}× played':
     'ascoltato {n}×',
-  'Tag from Last.fm':
-    'Tag da Last.fm',
+  'Tag from MusicBrainz or Last.fm': 'Tag da MusicBrainz o da Last.fm',
   'Start radio':
     'Avvia radio',
   'Popular songs':
@@ -368,12 +365,10 @@ export default {
     'Suona come queste band',
   'By the sound of the songs – recognized by the AI sound analysis.':
     'In base al suono dei brani – riconosciuto dall\'analisi del suono con IA.',
-  'According to Last.fm – to listen in or for Lidarr.':
-    'Secondo Last.fm – da ascoltare o per Lidarr.',
-  'According to Last.fm – tap to listen in.':
-    'Secondo Last.fm – tocca per ascoltare.',
-  'With a Last.fm key under Settings → Intelligence you get tags here, more accurate similar bands and bands you are still missing.':
-    'Con una chiave Last.fm in Impostazioni → Intelligenza qui trovi tag, band simili più precise e band che ti mancano ancora.',
+  'Tap to listen in on Last.fm – or for Lidarr.': 'Tocca per ascoltare su Last.fm – o per Lidarr.',
+  'Tap to listen in on Last.fm.': 'Tocca per ascoltare su Last.fm.',
+  'Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).':
+    'Tag e band simili per questa band arrivano con la prossima esecuzione di «Capire la musica» – da ListenBrainz e Deezer (Impostazioni → Intelligenza).',
   'Four album covers with title':
     'Quattro copertine di album con titolo',
   'Its own look for this format, renewed with every new selection':
@@ -386,8 +381,8 @@ export default {
     'Copertina dell\'album principale',
   'Designing and uploading the cover …':
     'Creazione e caricamento della copertina …',
-  'Cover set ✓ – Symfonium shows it after the next sync':
-    'Copertina impostata ✓ – Symfonium la mostra dopo la prossima sincronizzazione',
+  'Cover set ✓ – your music app shows it after the next sync':
+    'Copertina impostata ✓ – la tua app musicale la mostra dopo la prossima sincronizzazione',
   'Preparing the image …':
     'Preparazione dell\'immagine …',
   'Own image set ✓':
@@ -402,8 +397,8 @@ export default {
     'Impossibile ridurre l\'immagine',
   'The playlist is not in Navidrome yet. As soon as it is applied, you can choose a cover here.':
     'La playlist non è ancora in Navidrome. Appena sarà applicata, qui potrai scegliere una copertina.',
-  'The image appears in Navidrome and – after the next sync – in Symfonium. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
-    'L\'immagine compare in Navidrome e – dopo la prossima sincronizzazione – in Symfonium. Tuttiphon rinnova da solo le copertine create quando la playlist cambia – quindi per i mix a ogni nuova selezione.',
+  'The image appears in Navidrome and – after the next sync – in the music apps. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
+    'L\'immagine compare in Navidrome e – dopo la prossima sincronizzazione – nelle app musicali. Tuttiphon rinnova da solo le copertine create quando la playlist cambia – quindi per i mix a ogni nuova selezione.',
   'not possible here':
     'non possibile qui',
   'active':
@@ -590,8 +585,8 @@ export default {
     'Annullato',
   '{name} – done ✓':
     '{name} – fatto ✓',
-  'Your changes are now in Navidrome ✓ – Symfonium shows them after the next sync':
-    'Le tue modifiche ora sono in Navidrome ✓ – Symfonium le mostra dopo la prossima sincronizzazione',
+  'Your changes are now in Navidrome ✓ – your music app shows them after the next sync':
+    'Le tue modifiche ora sono in Navidrome ✓ – la tua app musicale le mostra dopo la prossima sincronizzazione',
   'Yes':
     'Sì',
   'Password for “{user}”':

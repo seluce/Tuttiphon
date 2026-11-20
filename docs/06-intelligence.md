@@ -1,10 +1,11 @@
-# Intelligence: sound, Last.fm, classification, statistics
+# Intelligence: sound, similar bands, classification, statistics
 
 Tuttiphon understands the music without cloud services and at no cost: ffmpeg measures the sound of every song, a local AI
 (Essentia) picks out mood, vocals, music style, themes such as Christmas or film music, instruments, key and tempo, how
 easy a song is to listen to and how much it asks for close listening, and describes each song's sound as a vector,
-Last.fm supplies tags and similar bands, and from all this Tuttiphon assigns new bands to a music world. On top of that come the listening statistics per person and the recap over week,
-month and year. This chapter describes how these parts compute and where their limits are. How the `analyse` step is
+ListenBrainz, MusicBrainz and Deezer – free and without a key – supply similar bands and tags (Last.fm too, with an own
+key), and from all this Tuttiphon assigns new bands to a music world. On top of that come the listening statistics per
+person and the recap over week, month and year. This chapter describes how these parts compute and where their limits are. How the `analyse` step is
 embedded in a run and when the night analysis runs is in [05-maintenance.md](05-maintenance.md); how sound vibes and
 mixes use the results and how mixes learn from listening, in [04-playlists.md](04-playlists.md).
 
@@ -15,7 +16,7 @@ mixes use the results and how mixes learn from listening, in [04-playlists.md](0
 | Sound analysis | `app/audio.py` | `state/audio.json` | step `analyse`, night analysis |
 | AI sound analysis | `app/ml.py`, `app/ml_worker.py` | `state/ml.json`, `state/sound_vectors.json` | step `analyse` (after the sound analysis), night analysis |
 | Sound similarity | `app/similar.py` | – (computed from `state/sound_vectors.json`) | mixes, radio, “More like this”, artist window, classification |
-| Last.fm | `app/lastfm.py` | `state/lastfm.json` | step `analyse` |
+| Similar bands and tags | `app/bandinfo.py`, `app/lastfm.py` | `state/bands.json`, `state/lastfm.json` | step `analyse` |
 | Merging features, classification, radio, “You’re still missing” | `app/classify.py` | – (computed from the files above) | step `analyse`, home page “To review”, Settings → Intelligence |
 | Scene catalog | `app/scenes.py` | `app/scenes.json` (shipped with the program) | music worlds, classification, suggestions |
 | Taste per account | `app/taste.py` | – (plays from Navidrome and `state/plays/`, `state/feedback/`, `state/deezer.json`) | suggestions, mixes, profile, welcome assistant, music world page |
@@ -23,7 +24,7 @@ mixes use the results and how mixes learn from listening, in [04-playlists.md](0
 | Recap | `app/rueckblick.py` | `state/plays/<account>/` | server start, daily, when viewed |
 | Mixes learn | `app/feedback.py` | `state/mix_history.json`, `state/feedback/` | step `playlists` – described in [04-playlists.md](04-playlists.md#mixes-that-learn-appfeedbackpy) |
 | Lyrics search, kid-safe mode | `app/liedtext.py` | `state/liedtexte.db` | step `scan`, first search, Settings → Lyrics |
-| Automatic music worlds | `app/autowelten.py`, `app/scenes.json` | – (computed from the song list, Last.fm, AI, lyrics language) | server start, after saving, steps `scan` and `analyse` |
+| Automatic music worlds | `app/autowelten.py`, `app/scenes.json` | – (computed from the song list, band tags, AI, lyrics language) | server start, after saving, steps `scan` and `analyse` |
 | Check library | `app/pflege.py` | – (computed from the song list) | Settings → Check library |
 | Same recording twice (audio fingerprints) | `app/fingerprint.py` | `state/fingerprints.json`, `state/fingerprint_matches.json` | step `analyse` (last part), night analysis; shown in Settings → Check library |
 
@@ -35,7 +36,7 @@ flowchart LR
   E --> V[("state/sound_vectors.json<br>sound per song")]
   V --> SI["similar.py<br>songs and bands that sound alike"]
   SI --> U3["smooth mixes, radio, “More like this”,<br>“sounds like”, classification"]
-  L[("state/lastfm.json<br>tags, similar bands")] --> S["song_features()<br>ml.fuse(): refined mood"]
+  L[("state/bands.json, state/lastfm.json<br>tags, similar bands")] --> S["song_features()<br>ml.fuse(): refined mood"]
   D --> S
   M --> S
   S --> U1["moods, sound vibes, mix “Falling asleep”,<br>sound in preview and artist window"]
@@ -143,11 +144,11 @@ Unreadable songs (exception or less than 5 s measured) get
 `dyn` is stored but does not feed into any feature.
 
 The basic mood from the sound is rough. `classify.song_features()` refines it: if the AI sound analysis has analyzed the
-song, `ml.fuse()` merges measurement, AI and Last.fm (see [Merging](#merging-mlfuse)); otherwise, if `tag_valence()`
+song, `ml.fuse()` merges measurement, AI and the band's tags (see [Merging](#merging-mlfuse)); otherwise, if `tag_valence()`
 returns a value for the main artist, `valence = 0.45 × sound + 0.55 × tags` applies, and the song gets `vsrc: "tags"`.
 `tag_valence()` sums the counts of positive tags (happy, upbeat, party, kinderlieder …) and negative tags (sad,
 melancholic, dark, doom …) and returns `positive / (positive + negative)` – only if both together add up to at least 20.
-`song_features()` stays in memory until `state/audio.json`, `state/ml.json` or `state/lastfm.json` change – one entry
+`song_features()` stays in memory until `state/audio.json`, `state/ml.json`, `state/bands.json` or `state/lastfm.json` change – one entry
 per song list, up to eight (`ml.MEMO_SIZE`; entries of older measurements and of song lists that no longer exist –
 e.g. after a reload, `rules.RELEASED` – are dropped with the next new entry), keyed by
 `ml.songs_key(lib)`: account lists with the same songs in the same order as the default list share its entry
@@ -168,7 +169,7 @@ second check of the file's time and size).
 | `energie` | energetic | a > 0.6 |
 | `tanzbar` | danceable | dance > 0.55 |
 | `froh` | cheerful | v > 0.6 and a > 0.35 |
-| `melancholisch` | thoughtful | v < 0.35 and a < 0.55 **and** mood confirmed by Last.fm tags or AI (`vsrc` = `tags` or `ml`) |
+| `melancholisch` | thoughtful | v < 0.35 and a < 0.55 **and** mood confirmed by band tags or AI (`vsrc` = `tags` or `ml`) |
 | `schlaf` | for falling asleep | a < 0.3 and e < 0.3 and bpm < 118 and dance < 0.45 (no steady groove) |
 | `instrumental` | no vocals | `inst` ≥ 0.8 – only with AI |
 | `akustisch` | acoustic | `acoustic` ≥ 0.75 and `electronic` < 0.4 – only with AI |
@@ -254,7 +255,7 @@ must be installed, and all 29 model files from `ml_worker.FILES` must be in `MOD
 (`TUTTIPHON_MODELS`, otherwise `<project>/models`). The Docker image contains both (`/app/models`). If something is
 missing – on a PC usually Essentia –, the AI stays off, and Settings → Intelligence names the reason (“Essentia is not
 installed (included in the Docker image).” or “AI models missing (n files) – rebuild the image.”). Moods, sound vibes
-and classification then work as before with measurement and Last.fm.
+and classification then work as before with measurement and band tags.
 
 ### Models
 
@@ -389,14 +390,14 @@ A song takes a few seconds on the NAS; the first pass over the whole library the
 ### Merging (`ml.fuse()`)
 
 If the AI has analyzed a song, `classify.song_features()` computes its features with `ml.fuse(f, m, tag_valence)` from
-our own measurement `f`, the AI values `m` and the band's Last.fm mood. The AI recognizes mood much better than loudness
+our own measurement `f`, the AI values `m` and the mood of the band's tags. The AI recognizes mood much better than loudness
 and spectrum do; energy still comes from the measurement, the tempo from the AI when its windows agree (below).
 
 | Feature | Computation |
 |---|---|
 | AI basic mood (internal) | `clip(0.5 + 0.4 × (happy − sad) + 0.15 × (party − 0.5))` |
 | AI arousal (internal) | `clip(0.5 + 0.45 × (max(aggressive, party) − relaxed))` – high arousal means aggressive **or** party (kids' pop is not aggressive, but just as lively) |
-| `valence` | weighted mean of AI basic mood (0.6), sound (0.15) and Last.fm tags (0.25); without a tag value only the first two, i.e. 0.8 × AI + 0.2 × sound |
+| `valence` | weighted mean of AI basic mood (0.6), sound (0.15) and band tags (0.25); without a tag value only the first two, i.e. 0.8 × AI + 0.2 × sound |
 | `arousal` | 0.6 × sound + 0.4 × AI arousal |
 | `dance` | 0.5 × sound + 0.5 × AI danceability |
 | `inst` | 1 − `voice` (for “no vocals”) |
@@ -527,8 +528,8 @@ statistics, the taste) use `ml.lib_key(lib)`, a sequential number that the song 
 recur for a new list after garbage collection). This is used as follows:
 
 - **Classifying new bands:** `_vectors()` gets one feature `k:<style>` per style (see
-  [Signals](#signals-and-match-rate)) – this helps above all with bands that Last.fm does not know.
-- **Suggesting vibes:** Without Last.fm tags, the styles replace the tags; the reason then reads “Sound: …”.
+  [Signals](#signals-and-match-rate)) – this helps above all with bands no source has tags for.
+- **Suggesting vibes:** Without tags, the styles replace the tags; the reason then reads “Sound: …”.
 - **Artist window:** styles with a strength ≥ 0.4 (at most four) as “Sounds like: …”, spelled as in the models
   (`ml.style_label()`, e.g. “Alternative Rock”).
 - **Settings → Intelligence:** the eight most frequent styles, counted over the strongest style per song
@@ -583,7 +584,7 @@ dimension. Rounding costs less than 0.0001 in the cosine.
 | Where | How |
 |---|---|
 | Mixes | [smooth transitions](#smooth-transitions-in-mixes) (`mixer.smooth()`) |
-| Radio | `classify.radio_artists()`: bands whose centroid has a cosine ≥ 0.4 (`RADIO_SOUND_MIN`) to a seed band count 0.8 × the cosine in addition to Last.fm; in the mix `mixer.radio_sound()` weights each song by its closeness to the closest seed band: × 0.6 (cosine −0.1 and below) … × 1.4 (0.6 and above) |
+| Radio | `classify.radio_artists()`: bands whose centroid has a cosine ≥ 0.4 (`RADIO_SOUND_MIN`) to a seed band count 0.8 × the cosine in addition to the similar bands; in the mix `mixer.radio_sound()` weights each song by its closeness to the closest seed band: × 0.6 (cosine −0.1 and below) … × 1.4 (0.6 and above) |
 | “More like this” | `classify.rank_like()`: distance = (1 − cosine to the song) + 0.5 × the previous feature distance (arousal, mood, tempo) + a little chance; songs without a vector count as unrelated (1). The pool is the radio of the song's band, so it includes the bands that sound alike |
 | Artist window | `soundsLike` in `GET /api/artist` (`classify.artist_profile()`): up to 8 bands with a cosine ≥ 0.35 (`SOUNDS_LIKE_MIN`) |
 | Classification | sound of the band against the sound of each music world ([Signals](#signals-and-match-rate)) |
@@ -697,7 +698,7 @@ unclear, and `null` when it was unclear and there is no family (“for everyone�
 | Similar songs (`similar`) | every song by closeness to its sound (`_closest()`, all vectors at once with `similar.batch()`) within what may come – a song the AI has not analysed yet takes the mean sound of its album, otherwise of its band (`_sound()`); too few or no sound at all: the radio of the band (`classify.radio_artists()`) ordered by `classify.rank_like()` fills up, its similarity always below the last real one |
 | Artist radio (`artist`) | every song by closeness to the band's mean sound (`Index.centroid()`), + 0.1 for bands of its radio (`RADIO_BONUS` – only for the order, the similarity shown stays the closeness); the band itself up to a third of the songs; without vectors the radio's bands, shuffled by the day, similarity falling from 0.5 |
 | Album (`album`) | closeness to the mean sound of the album's songs (without vectors on the album: of its band), not from the album itself; without any sound like the artist radio of its band, without the album |
-| Similar bands (`artists`) | `classify.radio_artists()` (Last.fm and sound) – only bands with songs that may come for this band (separate worlds only for a band of them), never the band itself, with Navidrome's artist id |
+| Similar bands (`artists`) | `classify.radio_artists()` (similar bands and sound) – only bands with songs that may come for this band (separate worlds only for a band of them), never the band itself, with Navidrome's artist id |
 | Path (`path`) | from the start song to the end song in `count` steps: at step k the song nearest to the normalized point (1 − t)·a + t·b between the two centered sounds (t = k / (count − 1)), every song and recording once, at most `max(2, count / 8)` per band – picked from the 64 nearest (`heapq.nlargest()`), the whole library sorted only when none of those can be taken; both ends included; songs without a vector of their own take the sound of their album or band; without any sound the first half from the similar songs of the start, the second from those of the end; from a song to itself: the song and its similar songs |
 
 Every answer: at most `max(2, count / 12)` songs per band (the band asked for a quarter, the artist radio a third),
@@ -714,55 +715,91 @@ Measured on the development PC with a made-up library of 25,000 songs: the first
 about 1 s (what may come), then similar songs about 0.15 s (0.08 s for the same song again), an album 0.06 s, an
 artist radio 0.25 s, a path of 25 songs 0.2 s.
 
-## Last.fm
+## Similar bands and tags
 
-`app/lastfm.py` fetches tags and similar bands per band from Last.fm. This is free but needs your own
-API key.
+Similar bands (radio, suggestions, “You might still be missing”, classification) and a band's tags (genres and moods
+for the classification and the sound filters) come from the band knowledge, `app/bandinfo.py`. It asks free services
+that need no key and merges their answers with those of Last.fm, which needs an own key – Last.fm gives working keys
+only with a Pro subscription (since December 2026).
 
-### Key
+| Source | Delivers | Finds the band by | Setting |
+|---|---|---|---|
+| ListenBrainz (`labs.api.listenbrainz.org/similar-artists`) | similar bands from what its listeners play one after another (`LB_ALGORITHM`) | MusicBrainz ID | `settings.analysis.listenbrainz` (on) |
+| MusicBrainz via ListenBrainz (`api.listenbrainz.org/1/metadata/artist`, `inc=tag`) | the band's tags with their vote counts | MusicBrainz ID | with ListenBrainz |
+| Deezer (`api.deezer.com/artist/<id>/related`) | up to 20 similar bands in Deezer's order | exact name (`search/artist`) | `settings.analysis.deezerSimilar` (on) |
+| Last.fm (`app/lastfm.py`) | tags and up to 60 similar bands with a match value | name (`autocorrect`) | only with `LASTFM_API_KEY` |
 
-`api_key()` reads `LASTFM_API_KEY` from the credentials (`load_env()`: `.env` in the data folder, environment variables
-take precedence). It is entered under Settings → Intelligence (`PUT /api/env`) or in `docker-compose.yaml`.
-`POST /api/lastfm/test` checks a key with a sample request before it is saved. Without a key, the `analyse` step skips
-Last.fm with a notice; classification and radio then work only with genres, scenes and – with the AI sound analysis –
-the bands' music styles.
+### Finding the band
+
+The MusicBrainz ID comes from Navidrome: `navidrome_ids()` reads it once per run with Subsonic `getArtists`
+(`musicBrainzId` – Lidarr and Picard write it into the files). A band without one is searched at MusicBrainz
+(`ws/2/artist?query=artist:"<name>"`): only a hit with the exact name (`_key()`: lower case, no diacritics or
+punctuation, no leading “the”, “&” = “and”) and a score of at least 90 counts. Deezer is searched by name the same way;
+of several bands with the exact name, the one with the most fans counts. A band no source knows stays without data –
+its genres, the scene catalog and the AI's music styles still work for it.
+
+### Values
+
+| From | Stored | Value |
+|---|---|---|
+| ListenBrainz | `listenbrainz: [[band, value]]` (up to 60) | score ÷ highest score × 0.8 (`LB_WEIGHT` – its lists lean towards bands that very many people play) |
+| MusicBrainz | `tags: [[tag, value]]` (up to 30, lower case, only counts > 0) | 100 × count ÷ highest count – the scale of Last.fm |
+| Deezer | `deezer: [[band, value]]` | 1.0 for the first, 0.04 less for each further one, at least 0.2 (`DZ_STEP`) |
+| Last.fm | `similar`, `tags` in `state/lastfm.json` | Last.fm's match (0–1) and tag count (0–100) |
+
+`artist(name)` merges everything into `{"tags", "similar"}`: every tag and every similar band (case ignored) with its
+strongest value from any source, the strongest first. What Last.fm delivered stays in use without a key too.
+`stamp()` (the state of `state/bands.json` and `state/lastfm.json`) is part of the memos that depend on it –
+`song_features()`, the sound filters, the automatic music worlds and `GET /api/intel`.
 
 ### Requests
 
-`fetch_artist()` sends two requests per band to `https://ws.audioscrobbler.com/2.0/` (with `autocorrect=1`):
+`_Pace` keeps one request per 1.1 s to MusicBrainz, per 0.4 s to ListenBrainz (30 per 10 s; with
+`X-RateLimit-Remaining` ≤ 1 it waits `X-RateLimit-Reset-In`) and per 0.15 s to Deezer. The User-Agent names Tuttiphon,
+its version and the project page, as ListenBrainz and MusicBrainz ask. `_get()` retries twice on HTTP 429/500/502/503/
+504 and on network errors; 404 means “nothing there”. Deezer answers its quota (error code 4) with a pause of 5 s; error
+code 800 means “no data”. A source that fails `GIVE_UP` (5) times in a row is left out for the rest of the run (“⚠
+Deezer does not answer – left out for this run: …”).
 
-| Method | Stored |
-|---|---|
-| `artist.gettoptags` | up to 30 tags as `[name (lowercase), count]` |
-| `artist.getsimilar` (`limit=60`) | up to 60 bands as `[name, similarity 0–1]` |
+### Cache and run
 
-`Client` throttles to 4 requests per second. It retries up to twice with a pause: on HTTP 429, 500, 502, 503 and on
-network errors, timeouts and aborted or broken responses (`URLError`, `HTTPException`, `OSError`, `ValueError` – e.g.
-HTML instead of JSON). If it still fails, this becomes a `LastfmError` (“Last.fm not reachable: …”). Error code 6
-(artist unknown) yields empty lists; codes 10 and 26 (invalid key) abort the fetch; other errors are logged per band
-(“⚠ <band>: …”), and it continues with the next one. The `analyse` step catches every Last.fm error (“⚠ Last.fm: …”) –
-sound analysis, AI and classification still run.
-
-### Cache
-
-`state/lastfm.json` holds per band name `{"t": <timestamp>, "tags": [...], "similar": [...]}` and `lastRun`. An entry
-is valid for 30 days (`TTL`); after that it is fetched again in the next run. It is saved every 100 bands and at the end.
-`load()` keeps the file in memory until it changes; `artist(name)` reads from it and never queries Last.fm itself.
-
-### In the run
+`state/bands.json` holds per band `{"t", "src", "mbid", "dz", "tags", "listenbrainz", "deezer"}` and `lastRun`. `src`
+names the sources that answered. An entry is due again after 30 days (`TTL`), and as soon as a source turned on is
+missing from `src` – a source turned on later or one that failed last time; the data of a source that fails stays until
+it answers again. It is saved every 100 bands and at the end.
 
 The `analyse` step passes all album artists of the library (`rules.artist_stats()`, without “Various Artists”), first
-the bands without a music world, then by song count in descending order. `refresh()` fetches missing and expired entries
-until `settings.analysis.lastfmBudget` minutes (default 3, `0` = no limit) are up; “Analyze everything without a time
-limit” runs without a limit. In a dry run the step does not query Last.fm.
+the bands without a music world, then by song count in descending order – the folder watch only the bands of the new
+songs. First `bandinfo.refresh()` (ListenBrainz and Deezer), then, with a key, `lastfm.refresh()`; each for at most
+`settings.analysis.bandBudget` minutes (default 3, `0` = no limit; “Analyze everything without a time limit” has
+none). Errors never stop the step (“⚠ Similar bands: …”, “⚠ Last.fm: …”) – sound analysis, AI and classification still
+run. In a dry run the step asks no source. With both sources turned off and without a Last.fm key, the log says so.
+
+### Last.fm
+
+`api_key()` reads `LASTFM_API_KEY` from the credentials (`load_env()`: `.env` in the data folder, environment variables
+take precedence). It is entered under Settings → Intelligence (`PUT /api/env`, “Remove”: `null`) or in
+`docker-compose.yaml`; `POST /api/lastfm/test` checks a key with a sample request before it is saved.
+`fetch_artist()` sends two requests per band to `https://ws.audioscrobbler.com/2.0/` (`artist.gettoptags`: up to 30
+tags as `[name (lowercase), count]`; `artist.getsimilar`, `limit=60`: up to 60 bands as `[name, similarity 0–1]`).
+`Client` throttles to 4 requests per second and retries up to twice (HTTP 429, 500, 502, 503, network errors, broken
+answers); then a `LastfmError` (“Last.fm not reachable: …”). Error code 6 (artist unknown) yields empty lists; codes 10
+and 26 (invalid key) end the fetch and note a hash of the key (`keyRejected`) – Settings → Intelligence then says
+“Last.fm no longer accepts the key” until another key is entered or a request works again. Other errors are logged per
+band; after `GIVE_UP` (5) in a row Last.fm is left out for the rest of the run. `state/lastfm.json` holds per band name
+`{"t", "tags", "similar"}`, `lastRun` and possibly `keyRejected`; entries are due again after 30 days.
 
 ### Limits
 
-- The data is tied to the band name as Navidrome delivers it. Last.fm corrects spellings (`autocorrect`), but the
-  cache stays under the name from the library.
+- The data is tied to the band name as Navidrome delivers it; Deezer and the MusicBrainz search only take the exact
+  name, so a band spelled differently there stays without their data.
+- ListenBrainz' similar bands come from listening sessions: well-known bands appear for many others, and seasonal music
+  mixes in (children's songs with Christmas songs). Deezer and the other signals of the classification balance this.
+- MusicBrainz tags are fewer than Last.fm's and mostly genres; mood tags (“happy”, “sad”) are rare – the mood comes
+  from the AI then.
 - Tags are user labels: classification hides meaningless ones (`NOISE`: “seen live”, “favorites”, “german” …)
-  and only considers tags with a count ≥ 5.
-- When someone listens to a song, Tuttiphon does not report it to Last.fm – it only reads.
+  and only considers tags with a value ≥ 5.
+- When someone listens to a song, Tuttiphon does not report it anywhere – it only reads.
 
 ## Scenes
 
@@ -784,21 +821,21 @@ the scenes of the catalog. If a scene yields enough, it becomes a music world.
 | Feature per band (from 2 songs, `profiles()`) | Source |
 |---|---|
 | Genres | genres of the files, share of the band's songs. Very common genres such as Rock or Pop count less (`_specificity()`: from 25% of all bands × 0.15, from 12% × 0.5 – only from 10 bands on) |
-| Tags | Last.fm tags (`state/lastfm.json`), weight 0–1 |
+| Tags | the band's tags (`bandinfo.artist()`: MusicBrainz, Last.fm), weight 0–1 |
 | Music styles | AI sound analysis (`ml.artist_styles()`), only in the Docker image |
 | Language | `de`/`en` from the lyrics (`liedtext.languages()`, detected per song when indexing), otherwise from song and album titles – by frequent short words |
-| Era | `era` = early quarter of the release years, `mid` = middle; plus decade tags from Last.fm (“80s”) – so reissues and best-ofs barely shift a band's era |
+| Era | `era` = early quarter of the release years, `mid` = middle; plus decade tags (“80s”) – so reissues and best-ofs barely shift a band's era |
 
 **Score** (`score()`): typical band of the catalog = 1. Otherwise the strongest of genres (full match when half of the
 songs carry a matching genre), tags and AI styles, plus a quarter of the other two, at most 0.99.
 `lang`: wrong language × 0.15, unknown × 0.5. `era`: period as a condition (Rock classics, Oldies & disco). `broad`
 (Pop & charts, German pop): × 0.8. Decade worlds (`decade`: The 80s, The 90s) count only the era: 0.8 with a
-matching Last.fm decade, 0.65 if `era` lies in the decade and `mid` at most six years after it.
+matching decade tag, 0.65 if `era` lies in the decade and `mid` at most six years after it.
 
 **Assignment** (`assign()`): Each band belongs to its best world from 0.45 (main world). Decade worlds additionally get
 all bands from 0.6 – except those whose main world is a niche (`niche`: Kids' music, Audio plays & audiobooks,
 Medieval rock & folk, Classical …). `members(scene)` = typical bands that exist, plus the assigned ones. Cached
-until the song list, Last.fm, AI or lyrics index change.
+until the song list, band knowledge, AI or lyrics index change.
 
 **New worlds** (`candidates()`, `sync()`): A scene becomes a music world if it is not yet linked to any world,
 is not in `dismissed`, at most half of its bands are already in another world (decade worlds do not count here –
@@ -827,13 +864,13 @@ any music world and are not called “Various Artists”.
 
 ### Signals and match rate
 
-1. **Tag, genre and sound profile:** `_vectors()` builds a vector per band from Last.fm tags (`t:`, count / 100),
+1. **Tag, genre and sound profile:** `_vectors()` builds a vector per band from its tags (`t:`, value / 100),
    the genres in the files (`g:`, 0.6 × share of songs with this genre) and the music styles of the AI sound analysis
    (`k:`, 0.7 × strength from `ml.artist_styles()`), weighted with TF-IDF (`log((1 + bands) / (1 + bands with
    this feature)) + 0.5`) and normalized to length 1. Rare features thus count more than run-of-the-mill genres. A
    music world's profile is the normalized sum of the vectors of its bands. `tag_score` = cosine similarity of band and
    music world.
-2. **Similar bands:** Last.fm's list of similar bands, limited to bands in the library. `sim_score` = sum
+2. **Similar bands:** the band's similar bands (`bandinfo.artist()`), limited to bands in the library. `sim_score` = sum
    of the similarity values of the hits that are in this music world, divided by 1.5, at most 1.
 3. **Match rate:** `0.5 × tag_score + 0.5 × sim_score` if the band has similar bands in the library; otherwise
    `0.85 × tag_score`.
@@ -880,7 +917,7 @@ now in World” with “Undo”; this takes the band out and adds it to `exclude
 modes. So that classifying new music takes effect immediately, the folder watch in this case (and with `auto`) appends
 `playlists` and `scan` to its run ([Maintenance](05-maintenance.md#folder-watch)). Its `analyse` step only covers the
 new music (`new_files` → `tasks.new_song_ids()`, matched by path without the extension, so FLAC converted to Opus or AAC
-counts): Last.fm for the bands of the new songs, sound and AI for those songs, loudness and fingerprints with a time
+counts): similar bands for the bands of the new songs, sound and AI for those songs, loudness and fingerprints with a time
 limit of 2 minutes (`tasks.WATCH_BUDGET`; once the library is done, only the new songs are pending there, and the
 fingerprints take new songs first anyway) – the playlists after it no longer wait for the
 whole analysis backlog, which follows in the regular runs and at night.
@@ -897,16 +934,16 @@ changes. This way the interface does not overwrite the server's assignments.
 ### Suggesting vibes
 
 `stil_suggestions()` looks for matching vibes of the groups “Genre” and “Thema” (topic; not the seasons) for bands with
-at least 3 songs whose files carry no genres at all: if a Last.fm tag of the band contains one of the vibe's genre terms
+at least 3 songs whose files carry no genres at all: if a tag of the band contains one of the vibe's genre terms
 and these tags together reach a count of at least 40, the vibe is suggested
-(Settings → Intelligence, the first 20; reason “Tags: …”). If the band has no Last.fm tags, the function
+(Settings → Intelligence, the first 20; reason “Tags: …”). If the band has no tags, the function
 takes the AI's music styles instead (strength × 100 as the count; reason “Sound: …”).
 
 ### Radio and “You’re still missing”
 
 - `radio_artists()` (for radio mixes): seed bands count 10, every similar band in the library with a similarity ≥ 0.12
   its similarity value, and with sound vectors every band that sounds like a seed band (centroid cosine ≥ 0.4) 0.8 ×
-  the cosine in addition. If there is no Last.fm data, the cosine similarity of the vectors from `_vectors()`
+  the cosine in addition. If there are no similar bands, the cosine similarity of the vectors from `_vectors()`
   (genres and – with AI – sound styles; > 0.45, half weight) is added for the bands not yet in the list.
 - `missing_artists()` (Discover → “Similar bands you are still missing”, `GET /api/missing`): similar bands (the first 30 per seed band,
   similarity ≥ 0.2) that are not in the library, by summed similarity. Seed bands are the person's favorite bands
@@ -914,7 +951,7 @@ takes the AI's music styles instead (strength × 100 as the count; reason “Sou
 
 ## Taste per account (`app/taste.py`)
 
-From what a person actually listens to in Navidrome or Symfonium, a taste profile emerges – only for accounts with a
+From what a person actually listens to in Navidrome or a music app, a taste profile emerges – only for accounts with a
 stored password (otherwise Tuttiphon does not know the account's plays, favorites and stars).
 
 | Signal per song | Weight |
@@ -1131,7 +1168,7 @@ first of each group).
 ## Statistics
 
 `app/stats.py` computes a person's listening statistics live from Navidrome's counters. Navidrome stores per song and
-account only **how often** and **when last** it was played (Symfonium reports every play), no history.
+account only **how often** and **when last** it was played (the music apps report every play), no history.
 
 ### Why a password per account is needed
 
@@ -1248,7 +1285,9 @@ password with the plugin's plays only); the recap adds today and the days not co
 | `depth` | `"standard"` | `schnell`, `standard`, `gruendlich`, `tief` | analysis depth |
 | `budgetMinutes` | `10` | 0–1440 | time limit of the sound analysis per run, `0` = none |
 | `workers` | `0` | 0–32 | concurrent analyses, `0` = half the number of cores |
-| `lastfmBudget` | `3` | 0–600 | time limit for Last.fm per run (minutes), `0` = none |
+| `listenbrainz` | `true` | yes/no | similar bands and tags from ListenBrainz and MusicBrainz |
+| `deezerSimilar` | `true` | yes/no | similar bands from Deezer |
+| `bandBudget` | `3` | 0–600 | time limit for the similar bands per run and source (minutes), `0` = none |
 | `classify` | `"suggest"` | `off`, `suggest`, `auto` | what the `analyse` step does with the classification; with `off` also no classification in “To review” |
 | `autoThreshold` | `0.75` | 0.3–1 | minimum match rate for automatic classification |
 | `autoNew` | `true` | | with `classify: "suggest"`: classify new bands (at most 30 days in the library) right away from `max(0.75, autoThreshold)` ([above](#suggestion-or-automatic)) |
@@ -1262,7 +1301,8 @@ In the interface (Settings → Intelligence), sound analysis and AI are in **one
 stages: switch `enabled` (“Turn on sound analysis”) and `ml` (“Add AI”, stage 2), analysis depth, night analysis
 with time window; under “Daytime and performance” `budgetMinutes`, `mlBudget`, `workers` and `mlThreads`. `classify`,
 `autoThreshold` (only with `auto`) and `autoNew` (only with `suggest`) are in the card “Classify new bands”, the
-time limit for Last.fm in the card “Last.fm”. Stage 2 also shows how many songs the current AI version has analyzed
+`listenbrainz`, `deezerSimilar` and `bandBudget` in the card “Similar bands and tags” (with the Last.fm key folded
+below, optional). Stage 2 also shows how many songs the current AI version has analyzed
 (key, tempo, instruments, approachability and engagement), how many have a sound vector and the most common instruments. `fingerprints` has its own card
 “Same recording twice” with the progress of the fingerprints, the groups found and a button to Check library
 ([09](09-interface.md#settings--playlists-and-intelligence)).

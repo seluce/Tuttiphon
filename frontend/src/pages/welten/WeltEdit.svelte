@@ -147,7 +147,7 @@
       {/if}
       {#if preview.added.length}<p><b>{t('Newly included:')}</b> {names(preview.added)}</p>{/if}
       {#if preview.renamed.length}
-        <p class="warn-t">{tn(preview.renamed.length, 'One playlist will then have a different name, also in Symfonium: {list}', '{n} playlists will then have different names, also in Symfonium: {list}',
+        <p class="warn-t">{tn(preview.renamed.length, 'One playlist will then have a different name, also in the music apps: {list}', '{n} playlists will then have different names, also in the music apps: {list}',
           { list: preview.renamed.slice(0, 3).map(([a, b]) => t('“{from}” → “{to}”', { from: a, to: b })).join(', ') + (preview.renamed.length > 3 ? ' …' : '') })}</p>
       {/if}
     </div>
@@ -257,7 +257,7 @@
     </div>
     {#if w.scene}
       <div class="mt-3"><Switch checked={!!w.autoScene} onchange={(v) => mutate(() => (w.autoScene = v))} label={t('add matching bands automatically')} /></div>
-      <div class="hint mt-1.5">{t('The scene’s typical bands and bands that match by genres, Last.fm, AI music style, language and decade – new ones too.')}</div>
+      <div class="hint mt-1.5">{t('The scene’s typical bands and bands that match by genres, ListenBrainz, AI music style, language and decade – new ones too.')}</div>
     {/if}
   </div>
   <div class="card">

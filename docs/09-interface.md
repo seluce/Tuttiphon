@@ -308,9 +308,9 @@ sections by `settings.start.sections` ([Data model](02-data-model.md#home-page))
 | Discovered for you | up to 6 suggestions for your own person (`GET /api/suggestions`, without hidden and shared ones) as `pages/home/IdeaCard.svelte`; without suggestions the section is left out |
 | Your week | recap of the week for the own person (`GET /api/rueckblick`). Left out without an own person and without a password as long as “Next steps” shows “Turn on statistics & stars”; otherwise “Turn on stats” there |
 | Your playlists | the active playlists of your own person – only if there are any |
-| Family playlists | the family's active playlists – only if there are any: “For the whole family – everyone hears them in Symfonium”, and either “you can change them here too” (`canEdit()`) or “With “Copy for me” you get your own version” (`settings.familyEdit: "admins"`) |
+| Family playlists | the family's active playlists – only if there are any: “For the whole family – everyone hears them in their music app”, and either “you can change them here too” (`canEdit()`) or “With “Copy for me” you get your own version” (`settings.familyEdit: "admins"`) |
 | New in your library | new albums (`GET /api/home`); albums by favorite bands from the last 45 days first, with the “Favorite band” badge (`AlbumCard`, field `fav`) – the same on the administrators' home page |
-| How it works | tip cards, only as long as there is no own playlist – your taste, Symfonium, and “Who sees what”: your playlists are just for you, the family playlists are for everyone |
+| How it works | tip cards, only as long as there is no own playlist – your taste, your music app, and “Who sees what”: your playlists are just for you, the family playlists are for everyone |
 
 The mix suggestions in “Let’s go” and “Your mixes” (`mixIdeas`, up to three, for your own person) leave out the ones
 “Discovered for you” already shows as a card – no suggestion appears twice. Links to whole lists read “See all →” (“Discovered for you” →
@@ -331,7 +331,8 @@ and already offers “Rate now” for the new songs (note `deezer-…`).
 ### Discover
 
 `pages/Discover.svelte` (`#/entdecken`): ready-made suggestions per person, new music worlds, “You might also like –
-not in your library yet” (administrators: “You might still be missing”, `discover/Missing.svelte`) and, folded, the
+not in your library yet” (administrators: “You might still be missing”, `discover/Missing.svelte` – with ListenBrainz
+and Deezer turned off and without a Last.fm key, `sources: false`, a note instead) and, folded, the
 table of all music world × vibe combinations (`discover/Matrix.svelte`, computed only when first unfolded; a tap on a
 cell opens the editor for a new playlist of `defaultOwner()` – a user without a person of their own goes to the
 welcome assistant instead).
@@ -422,7 +423,7 @@ that point). Songs that
 kid-safe mode hides don't open ([API](03-api.md#songs--listening-in)).
 
 The **band window** (`components/sheets/ArtistSheet.svelte`, `openArtist(name)`) shows, after “Similar bands in your
-library” (Last.fm), “Sounds like these bands”: `soundsLike` from `GET /api/artist` (AI sound vectors) as round pictures
+library” (band knowledge), “Sounds like these bands”: `soundsLike` from `GET /api/artist` (AI sound vectors) as round pictures
 that open that band's window – without the bands already listed above; missing without sound vectors.
 
 ### Music world for users
@@ -464,7 +465,7 @@ One person per Navidrome account; the family is an optional person with an accou
 - **The family card first** – `familyPerson()` with the pill “Family”, its account and “for everyone”. Without a family
   a dashed card **“Set up the family”** explains that Tuttiphon creates a Navidrome account for the family or takes
   one that already exists, that its playlists are for everyone and that shared devices (car, kitchen tablet) can play
-  them in Symfonium.
+  them in their music app.
 - Then **one card per person** (account, number of active playlists, password stored or missing, favorite worlds) and
   the dashed card “Add person”.
 
@@ -479,7 +480,7 @@ family’s account, that no longer works.”), the password (or “✓ A passwor
 checks and stores it and the account stays as it is. “Set up the family” saves open changes first, then
 `POST /api/family` with `{name, account}` (or `{name, account, existing: true, password}`); errors from the server
 (name taken in Navidrome or by a person, a wrong password …) appear in the sheet. After that the sheet shows the
-password of a new account **once** with “Copy” – for shared devices in Symfonium; nobody signs in to Tuttiphon with
+password of a new account **once** with “Copy” – for shared devices; nobody signs in to Tuttiphon with
 it – and reloads the configuration, the status and the account list.
 
 **Add person** (`pages/personen/NewPerson.svelte`, `#/person/neu`): Who? (name, icon, color) → Navidrome (only accounts
@@ -580,7 +581,7 @@ phone).
 **Playlists** (`pages/Playlists.svelte`, users: “My playlists”): one group per person, in the order yours – the
 family's – the others (`ownerOrder()`; users only get their own and the family's). Under each name how many and who
 sees them: “only for you”, “private for {user}”, for the family “visible to everyone” – or, when you may not change
-them, “to listen to in Symfonium, can be copied and adjusted”. An empty group stays only if you may create playlists
+them, “to listen to in your music app, can be copied and adjusted”. An empty group stays only if you may create playlists
 for that person (`creatablePersons()`). The filter row: administrators All | the people by name, users All | Yours |
 Family. Paused playlists and the trash list only those you may change (`canEdit()`).
 
@@ -633,7 +634,7 @@ gets “Create playlist” all the same; it closes the sheet and leads to the we
 playlist (`needsProfile`).
 
 **For whom?** (`EditorSheet`, only when `creatablePersons()` offers more than one person): the owner, with a hint –
-the family: “For the whole family – everyone sees it in Navidrome and Symfonium” plus who may change it
+the family: “For the whole family – everyone sees it in Navidrome and the music apps” plus who may change it
 (`settings.familyEdit`); a person: “Only for you – your stars & favorites count.” / “Only for {name} – their stars &
 favorites count.” “What everyone likes” is offered only while the owner is the family. `MixFields` has “Length” (by song count or 20 minutes to 1½ hours,
 `mix.minutes`); “Blend” additionally offers “By taste”. On the playlist page, recap playlists have no “Reshuffle”,
@@ -643,9 +644,9 @@ and the header says “Recap · changes on the first of the month”. Suggestion
 
 “To review” (home page, `TodoList`) knows the actions `pause` and `pauseAll` (with “Undo”); users see
 the same hints for their own playlists under “Next steps” as a link. Resting seasonal playlists show “resting until its
-season” (`STATE.ruht`) and, in the header of the playlist page, from when they will be back in Symfonium (`back`).
+season” (`STATE.ruht`) and, in the header of the playlist page, from when they will be back in the music apps (`back`).
 Settings → Playlists: “Seasonal playlists only in season” (`seasonRest`); in the edit sheet for seasonal vibes “All year
-in Symfonium, not just in season” (`yearRound`). Settings → Check library: card “Missing covers” with a switch and
+in the music apps, not just in season” (`yearRound`). Settings → Check library: card “Missing covers” with a switch and
 “Fetch now” (steps `cover` + `scan`).
 
 ### Statistics
@@ -777,8 +778,8 @@ everyone” when it was unclear and there is no family: `lastForAt`, `lastFor`, 
 card is open. The setup steps: “Download the plugin” (only if the installation has the file, otherwise the GitHub
 release; not to unpack, keep the name), the agents lines for `navidrome.toml` and for docker-compose as read-only
 fields with “Copy” (Tuttiphon in front of Navidrome's defaults; the label above the field on the phone), the address as
-this browser reaches Tuttiphon, the Symfonium settings (“Use similar tracks for Radio Mix” and “Sonic Analysis” for
-the smart queue); below a note for whom the answers are (the one listening, otherwise the family). “Copy” uses the
+this browser reaches Tuttiphon, that music apps asking for similar songs get them from Tuttiphon, and the Symfonium
+settings (“Use similar tracks for Radio Mix” and “Sonic Analysis” for the smart queue); below a note for whom the answers are (the one listening, otherwise the family). “Copy” uses the
 browser's clipboard with https or on localhost, otherwise a hidden text field (not read-only and 16 px, so Safari on
 the iPhone selects it); its label names what it copies.
 
@@ -793,7 +794,11 @@ the iPhone selects it); its label names what it copies.
   `fpcalc` “fpcalc is not installed …”, otherwise the progress of the fingerprints (`songs` of `total`), what is open,
   not readable and the last run, after a comparison the groups found (“N recordings are there more than once”, extra
   files, when compared) with a button to Check library; the switch “Make audio fingerprints”
-  (`analysis.fingerprints`, independent of the AI).
+  (`analysis.fingerprints`, independent of the AI). Card “Similar bands and tags”: how many bands are known
+  (`bands.artists` of `GET /api/intel`), how many ListenBrainz and Deezer found and the last run, the switches
+  “ListenBrainz” (`analysis.listenbrainz`) and “Deezer” (`analysis.deezerSimilar`), the time limit per run and source
+  (`analysis.bandBudget`) and, folded, “Last.fm (optional)” – open when a key is there: key state (“Last.fm no longer
+  accepts the key” with `lastfm.rejected`), the key with “Test”, “Save” and “Remove”.
 
 ### Settings: Lyrics, Check library, Notifications
 
@@ -829,7 +834,7 @@ one card (`pages/settings/Card.svelte`) with a short explanation and the rows of
 | Conversion (`setup/StepConvert.svelte`) | Off / Opus (“smallest files, ideal for Android”, with `bitrate`) / AAC (“for iPhone, iPad and Mac”, with `aacBitrate`); when on: what is converted (the lossless files in the music folder – the first run everything, then new ones) and the check of equal length, files waiting (`GET /api/opus/info`), the original: to the archive (with path and state of the archive folder from `S.status.paths.archive`: reachable, read-only, missing), keep, delete (asks first and shows a warning) | `opus.enabled`, `codec`, `original` |
 | Lyrics (`setup/StepLyrics.svelte`) | search on/off; with search: also plain text, LRCLIB and NetEase (at least one stays on), replace plain text later; delete duplicate `.txt` | `lyrics.fetch`, `savePlain`, `providers`, `upgradePlain`, `cleanup` |
 | Understand music (`setup/StepMusic.svelte`) | sound analysis on/off; AI only when `GET /api/intel` reports it as available, otherwise one note – the server's reason (`ml.reason`, e.g. Essentia or the models missing) or “not installed here – part of the Docker image”; the depth tiles with their time estimate (`pages/settings/Depth.svelte` with its own `onchange`); audio fingerprints (with a note without `fpcalc`); night analysis with its time window (start ≠ end; the nightly Deezer refresh and the weekly cover search run in it too) | `analysis.enabled`, `ml`, `depth`, `fingerprints`, `night` |
-| Deezer stars (`setup/StepDeezer.svelte`) | why (top tracks in Symfonium, “Only the hits”), on/off, “Who gets stars?” (every person's account, `starAccounts()` as in Settings → Deezer stars; a lock for one without a password from `S.status.env.users`), stars given by hand: keep (default) or overwrite (with a warning) | step `deezer` in `pipeline`, `deezer.users`, `deezer.overwriteManual`; only when the switch was changed also `deezer.refresh` and `watch.deezer` |
+| Deezer stars (`setup/StepDeezer.svelte`) | why (top tracks in apps like Symfonium, “Only the hits”), on/off, “Who gets stars?” (every person's account, `starAccounts()` as in Settings → Deezer stars; a lock for one without a password from `S.status.env.users`), stars given by hand: keep (default) or overwrite (with a warning) | step `deezer` in `pipeline`, `deezer.users`, `deezer.overwriteManual`; only when the switch was changed also `deezer.refresh` and `watch.deezer` |
 | Automation (`setup/StepAutomation.svelte`) | daily refresh off / playlists / everything with its time, folder watch with its interval | `dailyMode`, `dailyAt`, `watch.enabled`, `watch.interval` |
 | Summary (`setup/StepSummary.svelte`) | one row per step with “Change”, the switch “Start the first run now” (only with a connection; lists the steps that will run) | – |
 
@@ -928,8 +933,8 @@ Above it, administrators find the card “Setup assistant” ([Setup assistant](
   characters wide (`max-w-[100ch]`). The search reads the text of the topics from the page after rendering
   (`data-topic`); all words must occur. Interface buttons appear in the text as `<Ui icon>` – so you recognize them on
   every device, without screenshots. Topics name their guides in `guides`. The users' topic “Listening
-  in Symfonium” explains the two Symfonium settings for the plugin (radio mix with similar tracks, smart queue by
-  sonic analysis) only when the plugin is set up (`S.status.plugin`).
+  in your music app” explains radio and smart queue by sound and the two Symfonium settings for the plugin (radio
+  mix with similar tracks, smart queue by sonic analysis) only when the plugin is set up (`S.status.plugin`).
 - **(?) next to the page title** (`components/HelpLink.svelte`, mapping route → topic is there): opens the topic as a
   sheet (`pages/help/HelpSheet.svelte`) with the matching guides at the top; without a matching topic for the role – or
   if the help file cannot be loaded, e.g. after an update – it leads to the help.

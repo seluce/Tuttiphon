@@ -21,7 +21,7 @@ flowchart LR
   S --> Y["playlists.sync_navidrome()<br>name, comment, public, owner"]
   Y --> C["covers.refresh_auto()"]
   C --> K["selfcheck.run()<br>check song counts"]
-  N --> SY["Symfonium"]
+  N --> SY["Music apps"]
 ```
 
 ## The model
@@ -36,7 +36,7 @@ A music world is a group of bands, extended by album series and genres.
 | Field | Effect |
 |---|---|
 | `artists` | bands added by hand; rule per band `is artist` **or** `is albumartist` |
-| `scene`, `autoScene` | link to a scene from `app/scenes.json`; with `autoScene: true`, its typical bands belong to the world, plus all bands that `autowelten.py` assigns to this scene (genres, Last.fm, AI style, language, decade) – including ones added later |
+| `scene`, `autoScene` | link to a scene from `app/scenes.json`; with `autoScene: true`, its typical bands belong to the world, plus all bands that `autowelten.py` assigns to this scene (genres, tags, AI style, language, decade) – including ones added later |
 | `auto` | created by Tuttiphon itself (date) – see [Intelligence](06-intelligence.md#automatic-music-worlds-appautoweltenpy) |
 | `excludedArtists` | bands taken out of the scene (affect only the automatically recognized ones) |
 | `albums` | album series: `contains album` (the album name contains the text) |
@@ -303,7 +303,7 @@ instead of the world block there is the exclusion of the separate world “kinde
 The last rule `{"is": {"missing": false}}` is in every `.nsp` that `build_nsp()` builds itself (not for
 rules taken over unchanged, see below): Navidrome keeps files that no
 longer exist (e.g. the old FLAC after the conversion to Opus) as “missing” and counts them in the evaluation
-– Symfonium leaves them out, so the playlist there would be shorter than its limit. Locally (`Library`), `missing` is
+– the music apps leave them out, so the playlist there would be shorter than its limit. Locally (`Library`), `missing` is
 always `false` because the song list from Navidrome contains only existing files.
 
 ### Rating and “Only the hits”
@@ -405,7 +405,7 @@ Navidrome's quick scan sees the change.
 ### Stable file names
 
 Navidrome identifies playlists by their file path. That is why every playlist keeps its file (field `file`), even when
-its name, rules or person change – in Navidrome and Symfonium it stays the same playlist (same ID).
+its name, rules or person change – in Navidrome and the music apps it stays the same playlist (same ID).
 
 `plan()` goes through all active playlists and assigns missing file names:
 
@@ -615,7 +615,7 @@ touches it again.
 ## Mixes (`app/mixer.py`)
 
 A mix (`type: "mix"`) is a fixed selection that Tuttiphon compiles itself and writes as `.m3u`.
-Between renewals the list stays the same – good for offline playlists in Symfonium. The rules
+Between renewals the list stays the same – good for offline playlists in the music apps. The rules
 (world, vibe, person, dislikes etc.) are the same as for smart playlists: `build_nsp()` determines the pool, the
 mixer picks from it.
 
@@ -714,7 +714,7 @@ kept.
 |---|---|---|
 | skipped | mix history + the account's daily play increments (recap, `state/plays/<account>/`) – or, with the Navidrome plugin, live: a song left within 30 s for another one | weight drops, recovers over time |
 | played | the same – live: every scrobble | partly offsets skipping |
-| 1 star by hand | the account's star in Navidrome (e.g. given in Symfonium) that was not set by the Deezer rating (rules below) | the song no longer appears in this person's mixes |
+| 1 star by hand | the account's star in Navidrome (e.g. given in a music app) that was not set by the Deezer rating (rules below) | the song no longer appears in this person's mixes |
 
 **Remembering.** `mixer.remember()` calls `feedback.record()` when writing the `.m3u`: start of the period, `every`, account
 and song IDs go to `state/mix_history.json` – per mix the last 12 periods (`KEEP_PERIODS`); of the family's mixes
@@ -820,7 +820,7 @@ mix options with `{"size": 40, "perArtist": 3, "every": "week"}`, and `validate_
 without `type: "mix"`. Songs without analysis never match.
 
 Filtering uses the merged features (`classify.song_features()`: own measurement, refined by the
-AI sound analysis and Last.fm tags). The moods `instrumental` (“no vocals”) and `akustisch` (acoustic) are only assigned by the AI –
+AI sound analysis and the band's tags). The moods `instrumental` (“no vocals”) and `akustisch` (acoustic) are only assigned by the AI –
 so a filter on them only finds songs the AI has already analyzed. None of the bundled vibes uses them;
 custom sound vibes can select them. The same goes for `instruments`: a list of instrument IDs of the AI
 (`ml.INSTRUMENTS`, e.g. `["piano"]`, `["violin", "cello"]`) – a song matches if at least one of them is clearly in it
@@ -851,7 +851,7 @@ A playlist whose vibe has a season (`season`, e.g. Christmas `11-25`–`01-06`; 
 season”) is not in Navidrome outside that time: `rules.resting()` then returns the day from which it is due
 again, `plan()` leaves it out – `write()` removes its file as for a paused playlist, and on the next write during
 the season it is created again (in Navidrome with a new ID). `status()` shows `ruht` (resting) (or `entfernen` as long as
-it is still in Navidrome) and `back` = date. Exceptions: `yearRound: true` on the playlist (“All year in Symfonium”) or
+it is still in Navidrome) and `back` = date. Exceptions: `yearRound: true` on the playlist (“All year in the music apps”) or
 `settings.seasonRest: false`. A custom cover comes back with it (see [Covers](#covers-appcoverspy)).
 
 ### Falling asleep and “Good night”
@@ -875,9 +875,9 @@ with `together` (those people as members) as soon as two of them have listened e
 ### Radio
 
 `radio: {"seed": ["Band A"], "bands": 25}` replaces the world block: the rules include the seed bands and similar
-bands from the library (`classify.radio_artists()`): seed bands count 10, similar bands according to Last.fm with
-a match ≥ 0.12 count their value, and – with the AI's sound vectors – bands that sound like a seed band (centroid
-cosine ≥ 0.4) count 0.8 × their similarity in addition; if Last.fm finds nothing, genre similarity counts too
+bands from the library (`classify.radio_artists()`): seed bands count 10, similar bands of the band knowledge
+(ListenBrainz, Deezer, Last.fm – [Intelligence](06-intelligence.md#similar-bands-and-tags)) with a match ≥ 0.12 count their value, and – with the AI's sound vectors – bands that sound like a seed band (centroid
+cosine ≥ 0.4) count 0.8 × their similarity in addition; if there are no similar bands, genre similarity counts too
 (cosine > 0.45). The best `bands` (default 25) go into the `any` block. Without the library, only the seed bands. In the
 mix, `mixer.radio_sound()` multiplies each song's weight by 0.6 … 1.4 depending on how much it sounds like the
 closest seed band (songs without a sound vector stay as they are). The interface creates radios as a
@@ -1034,7 +1034,7 @@ for new music worlds. Users only get ideas they can take – for their own perso
 | “<world>” counts for <name>’s taste (`taste-world\|<person>\|<world>`) | `taste_hints()`: a separate world makes up at least 20 % of what the person's account plays and the person keeps it in their taste ([Intelligence](06-intelligence.md#taste-per-person)) | “Set it” (profile); for children's music also “Child profile” |
 | Is <name> a child? (`child\|<person>`) | children's music makes up at least half of what the account plays (each song once, without audio plays) | “Child profile” (`childProfile`: sets `child` and `clean`, with “Undo”), “Keep it out” (profile) |
 
-Classification comes from `classify.suggestions()` (Last.fm tags, similar bands, genres, scenes; per band the world with
+Classification comes from `classify.suggestions()` (tags, similar bands, genres, scenes; per band the world with
 the highest match rate, from 0.3). If `settings.analysis.classify` is `off`, it is skipped: no
 world action for “New”, no `class|…` entries. The `auto|…` entries do not depend on it; a classified band
 is in a world and therefore no longer appears as “New”. Because a band that was taken back is then in `excludedArtists` and

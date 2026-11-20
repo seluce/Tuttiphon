@@ -35,7 +35,7 @@
 
 {#if !tot.plays}
   <Empty icon="headphones" title={t('No plays counted yet')}
-    text={t('Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.', { user: d.user })} />
+    text={t('Navidrome has not saved any plays for “{user}” yet. The music app has to report plays to the server – often called “Scrobbling”.', { user: d.user })} />
 {:else}
   <div class="kpis">
     <div class="kpi">

@@ -52,7 +52,7 @@
     status = t('Designing and uploading the cover …')
     try {
       await api('/api/cover/apply', { body: { id, style } })
-      await done(t('Cover set ✓ – Symfonium shows it after the next sync'))
+      await done(t('Cover set ✓ – your music app shows it after the next sync'))
     } catch (e) { status = ''; toast(e.message, { error: true }); stop() }
   }
 
@@ -100,7 +100,7 @@
   <div class="note">{t('The playlist is not in Navidrome yet. As soon as it is applied, you can choose a cover here.')}</div>
 {:else}
   <div class="grid gap-[18px]">
-    <p class="muted small">{t('The image appears in Navidrome and – after the next sync – in Symfonium. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.')}</p>
+    <p class="muted small">{t('The image appears in Navidrome and – after the next sync – in the music apps. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.')}</p>
     <div class="cover-grid">
       {#each Object.entries(styles || {}) as [k, label] (k)}
         <button type="button" class="cover-opt" class:on={current === k} class:busy={busyKey === k} disabled={busy || loaded[k] === 'err'}

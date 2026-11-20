@@ -1,6 +1,6 @@
 <!-- Settings → Intelligence: sound analysis (with analysis depth and night analysis), AI sound analysis (with key,
-     tempo, instruments and sound vectors), audio fingerprints (same recording twice), Last.fm, classifying new bands,
-     manual runs. -->
+     tempo, instruments and sound vectors), audio fingerprints (same recording twice), similar bands and tags
+     (ListenBrainz and Deezer, Last.fm optional with a key), classifying new bands, manual runs. -->
 <script>
   import Icon from '../../components/Icon.svelte'
   import Seg from '../../components/Seg.svelte'
@@ -12,7 +12,7 @@
   import NumInput from './NumInput.svelte'
   import Depth from './Depth.svelte'
   import { S, changed, snapshot, save, loadStatus, runTask } from '../../lib/state.svelte.js'
-  import { toast } from '../../lib/overlay.svelte.js'
+  import { toast, confirmDialog } from '../../lib/overlay.svelte.js'
   import { go } from '../../lib/router.svelte.js'
   import { api } from '../../lib/api.js'
   import { fmt, serverDate } from '../../lib/format.js'
@@ -35,6 +35,8 @@
   const a = $derived(d?.audio || {})
   const m = $derived(d?.ml || {})
   const l = $derived(d?.lastfm || {})
+  const b = $derived(d?.bands || {})
+  const bandsOn = $derived(an.listenbrainz !== false || an.deezerSimilar !== false)
   const pct = $derived(a.total ? Math.round(a.analysed / a.total * 100) : 0)
   const mlPct = $derived(a.total ? Math.round(m.analysed / a.total * 100) : 0)
   const curPct = $derived(a.total ? Math.round((m.current || 0) / a.total * 100) : 0)   // with the current AI version
@@ -84,6 +86,20 @@
     key = ''
     toast(t('Last.fm key saved ✓'))
     loadStatus()
+    load()
+  }
+  async function removeKey() {
+    if (!await confirmDialog(t('Remove the key?'), t('Tuttiphon then no longer asks Last.fm. What Last.fm has delivered so far stays in use.'), t('Remove'), true)) return
+    try {
+      await api('/api/env', { method: 'PUT', body: { LASTFM_API_KEY: null } })
+    } catch (e) {
+      toast(e.message, { error: true })
+      return
+    }
+    out = { text: '', cls: '' }
+    toast(t('Key removed'))
+    loadStatus()
+    load()
   }
 
   /* Accept suggestions – then fetch the list fresh */
@@ -228,44 +244,64 @@
     </Row>
   </Card>
 
-  <Card title="Last.fm" icon="globe">
-    <p class="muted small">{t('Free with your own key: similar bands for radio, suggestions and “You might still be missing”, plus genre and mood tags for classifying new bands. Everything is cached for 30 days.')}</p>
+  <Card title={t('Similar bands and tags')} icon="radio">
+    <p class="muted small">{t('For radio, suggestions and “You might still be missing” and for classifying new bands – free and without a key. Everything is cached for 30 days.')}</p>
     <div class="member-row">
-      <Icon name={l.key ? 'check' : 'key'} size={18} class={l.key ? 'ok-t' : 'warn-t'} />
+      <Icon name={bandsOn ? 'check' : 'alert'} size={18} class={bandsOn ? 'ok-t' : 'warn-t'} />
       <div class="flex-1 min-w-0">
-        <b>{l.key ? t('Key entered') : t('No key yet')}</b>
-        <div class="tiny muted">{tn(l.artists || 0, '{n} band loaded', '{n} bands loaded') + (l.lastRun ? t(' · last run {when}', { when: serverDate(l.lastRun) }) : '')}</div>
+        <b>{bandsOn ? tn(b.artists || 0, '{n} band known', '{n} bands known') : t('ListenBrainz and Deezer are turned off')}</b>
+        <div class="tiny muted">{t('ListenBrainz knows {lb}, Deezer {dz}', { lb: fmt(b.listenbrainz || 0), dz: fmt(b.deezer || 0) }) + (b.lastRun ? t(' · last run {when}', { when: serverDate(b.lastRun) }) : '')}</div>
       </div>
     </div>
-    {#if locked}
-      <div class="note">{t('The key is set in docker-compose.yaml as LASTFM_API_KEY.')}</div>
-    {:else}
-      <div class="frow">
-        <label class="f">{t('API key')}
-          <input class="input w-full" type="password" autocomplete="off" bind:value={key} placeholder={env.lastfm ? t('•••••• entered') : t('API key')} />
-        </label>
-      </div>
-      <div class="btns">
-        <button class="btn" onclick={test}>{t('Test')}</button>
-        <button class="btn primary" onclick={saveKey}>{t('Save')}</button>
-        <div class="small {out.cls}">{out.text}</div>
-      </div>
-    {/if}
-    <div class="hint">{t('You can get a key for free at last.fm/api/account/create. It is only stored on your NAS.')}</div>
-    <Row label={t('Time limit per run')} hint={t('Tuttiphon loads Last.fm data for at most this long. The first pass takes a few minutes.')}>
-      <div class="btns"><NumInput obj={an} key="lastfmBudget" min={0} max={600} placeholder="3" width={90} /><span class="muted small">{t('minutes')}</span></div>
+    <Row label="ListenBrainz" hint={t('Similar bands from what ListenBrainz listeners play one after another, plus the band’s tags from MusicBrainz. Tuttiphon finds the band by the MusicBrainz ID in the files – Lidarr and Picard write it – or by its exact name.')}>
+      <Toggle label="ListenBrainz" obj={an} key="listenbrainz" />
     </Row>
+    <Row label="Deezer" hint={t('Similar bands from Deezer – strong for regional music and children’s songs too. Tuttiphon finds the band by its exact name.')}>
+      <Toggle label="Deezer" obj={an} key="deezerSimilar" />
+    </Row>
+    <Row label={t('Time limit per run')} hint={t('Tuttiphon loads similar bands and tags for at most this long, per source. The first pass can take an hour or longer – the night analysis does it on the side.')}>
+      <div class="btns"><NumInput obj={an} key="bandBudget" min={0} max={600} placeholder="3" width={90} /><span class="muted small">{t('minutes')}</span></div>
+    </Row>
+    <details class="fold" open={l.key || undefined}>
+      <summary><Icon name="key" size={18} />{t('Last.fm (optional)')}</summary>
+      <div class="in grid gap-3">
+        <p class="muted small">{t('Last.fm gives working keys only with a Pro subscription. With one, its similar bands and tags are added. What Last.fm has delivered so far stays in use either way.')}</p>
+        <div class="member-row">
+          <Icon name={l.rejected ? 'alert' : l.key ? 'check' : 'key'} size={18} class={l.rejected ? 'warn-t' : l.key ? 'ok-t' : 'muted'} />
+          <div class="flex-1 min-w-0">
+            <b>{l.rejected ? t('Last.fm no longer accepts the key') : l.key ? t('Key entered') : t('No key yet')}</b>
+            <div class="tiny muted">{tn(l.artists || 0, '{n} band loaded', '{n} bands loaded') + (l.lastRun ? t(' · last run {when}', { when: serverDate(l.lastRun) }) : '')}</div>
+          </div>
+          {#if l.key && !locked}<button class="btn sm ghost" onclick={removeKey}>{t('Remove')}</button>{/if}
+        </div>
+        {#if locked}
+          <div class="note">{t('The key is set in docker-compose.yaml as LASTFM_API_KEY.')}</div>
+        {:else}
+          <div class="frow">
+            <label class="f">{t('API key')}
+              <input class="input w-full" type="password" autocomplete="off" bind:value={key} placeholder={env.lastfm ? t('•••••• entered') : t('API key')} />
+            </label>
+          </div>
+          <div class="btns">
+            <button class="btn" onclick={test}>{t('Test')}</button>
+            <button class="btn primary" onclick={saveKey}>{t('Save')}</button>
+            <div class="small {out.cls}">{out.text}</div>
+          </div>
+        {/if}
+        <div class="hint">{t('Keys are at last.fm/api/account/create. The key is only stored on your NAS.')}</div>
+      </div>
+    </details>
   </Card>
 
   <Card title={t('Music worlds')} icon="globe">
-    <p class="muted small">{t('From genres, Last.fm tags, AI music style, language and decade, Tuttiphon recognizes which music worlds your library offers – such as 80s hits, Eurodance, German rap or Schlager & party – and classifies every band. New bands go into their world on their own.')}</p>
+    <p class="muted small">{t('From genres, tags, AI music style, language and decade, Tuttiphon recognizes which music worlds your library offers – such as 80s hits, Eurodance, German rap or Schlager & party – and classifies every band. New bands go into their world on their own.')}</p>
     <Row label={t('Create music worlds automatically')} hint={t('From 4 bands and 60 songs, or from just 2 bands if someone listens to them a lot. Deleted worlds don’t come back.')}>
       <Toggle label={t('Create music worlds automatically')} obj={wl} key="auto" />
     </Row>
   </Card>
 
   <Card title={t('Classify new bands')} icon="sparkles">
-    <p class="muted small">{t('For bands without a music world, Tuttiphon works out where they fit – from similar bands on Last.fm, tags, genres, the music styles of the AI sound analysis and the scene catalog. With match rate and reasoning.')}</p>
+    <p class="muted small">{t('For bands without a music world, Tuttiphon works out where they fit – from similar bands on ListenBrainz and Deezer, tags, genres, the music styles of the AI sound analysis and the scene catalog. With match rate and reasoning.')}</p>
     <Row label={t('What happens with matches')} hint={t('“Suggest” shows them under “To review” on the home page.')}>
       <Seg options={[['off', t('nothing')], ['suggest', t('suggest')], ['auto', t('automatic')]]} value={an.classify || 'suggest'} onchange={(v) => { an.classify = v; changed() }} />
     </Row>
@@ -297,7 +333,7 @@
       <p class="muted small">{t('No bands without a music world right now.')}</p>
     {/if}
     {#if d.stile?.length}
-      <Field label={t('Vibes from Last.fm tags for bands without a genre')}>
+      <Field label={t('Vibes from tags for bands without a genre')}>
         <div class="grid grid-cols-[minmax(0,1fr)] gap-1.5">
           {#each d.stile.slice(0, 8) as x (x.artist + '|' + x.stil)}
             {@const st = S.config.stile.find((y) => y.id === x.stil)}

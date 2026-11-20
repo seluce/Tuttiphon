@@ -275,8 +275,8 @@
       <div class="hint">
         {isFamily(person)
           ? S.config.settings.familyEdit === 'admins'
-            ? t('For the whole family – everyone sees it in Navidrome and Symfonium. Only administrators may change it.')
-            : t('For the whole family – everyone sees it in Navidrome and Symfonium. Everyone may change it.')
+            ? t('For the whole family – everyone sees it in Navidrome and the music apps. Only administrators may change it.')
+            : t('For the whole family – everyone sees it in Navidrome and the music apps. Everyone may change it.')
           : person && person.id === myPerson()?.id
             ? t('Only for you – your stars & favorites count.')
             : t('Only for {name} – their stars & favorites count.', { name: person?.name || '?' })}
@@ -285,7 +285,7 @@
   {/if}
 
   {#if special === 'review'}
-    <div class="note">{t('This playlist shows the most played songs – from what is played in Symfonium. It changes on its own on the first of the month; it always stays one playlist.')}</div>
+    <div class="note">{t('This playlist shows the most played songs – from what is played in the music apps. It changes on its own on the first of the month; it always stays one playlist.')}</div>
     <div class="frow">
       <label class="f">{t('Period')}
         <Select options={[['month', t('the last month')], ['year', t('the year so far')]]} value={p.review.period || 'month'}
@@ -379,7 +379,7 @@
 
   {#if !raw && findStil(p.stil)?.season && S.config.settings.seasonRest !== false}
     <Switch checked={!!p.yearRound} onchange={(v) => { if (v) p.yearRound = true; else delete p.yearRound }}
-      label={t('All year in Symfonium, not just in season')} />
+      label={t('All year in the music apps, not just in season')} />
   {/if}
 
   {#if !raw && special !== 'review'}

@@ -20,7 +20,7 @@
     { id: 'neu', icon: 'plus', title: t('Build your own playlist'), body: neu, guides: ['playlist'] },   // i18n-ignore: topic id
     { id: 'mix', icon: 'dice', title: t('Playlist or mix?'), body: mix, guides: ['mix'] },
     { id: 'playlists', icon: 'playlists', title: t('Your playlists'), body: playlists, guides: ['aendern'] },
-    { id: 'symfonium', icon: 'smartphone', title: t('Listening in Symfonium'), body: symfonium, guides: ['mix', 'nie'] },
+    { id: 'symfonium', icon: 'smartphone', title: t('Listening in your music app'), body: symfonium, guides: ['mix', 'nie'] },
     { id: 'welten', icon: 'globe', title: t('Music worlds & bands'), body: welten, guides: ['playlist'] },
     { id: 'statistik', icon: 'chart', title: t('Your statistics & your month'), body: statistik, guides: ['statistik'] },
     { id: 'konten', icon: 'key', title: t('Signing in & your account'), body: konten, guides: ['statistik'] },
@@ -59,7 +59,7 @@
 {#snippet personen()}
   <p>{@html t('Under <a class="link" href="#/profil">My profile</a> you see what Tuttiphon knows about your taste. Your mixes and suggestions build on it.')}</p>
   <Bullets>
-    <li>{@render rich(t('<b>From your listening:</b> what you play in Symfonium, mark as a favorite or rate, Tuttiphon learns by itself. <Ui icon="plus">Remember</Ui> turns it into a favorite.'))}</li>
+    <li>{@render rich(t('<b>From your listening:</b> what you play in your music app, mark as a favorite or rate, Tuttiphon learns by itself. <Ui icon="plus">Remember</Ui> turns it into a favorite.'))}</li>
     <li>{@html t('<b>Favorite music worlds, bands and vibes:</b> come up more often in your mixes, and you get matching playlist ideas.')}</li>
     <li>{@html t('<b>Dislikes:</b> bands or genres that <b>never</b> end up in your playlists.')}</li>
     <li>{@html t('<b>Not part of your taste:</b> music that plays on your account for someone else, such as children’s music.')}</li>
@@ -107,13 +107,13 @@
   {/if}
   <Steps>
     {#if creatablePersons().length > 1}
-      <li><span>{@html t('<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and Symfonium.')}</span></li>
+      <li><span>{@html t('<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and the music apps.')}</span></li>
     {/if}
     <li><span>{@html t('<b>Music world</b> – which music? For example “Kids’ rock”. You can pick several; “All” takes the whole library.')}</span></li>
     <li><span>{@html t('<b>Vibe</b> – which mood or occasion? Such as “Party”, “Calm” or “Christmas”. The number shows how many songs match.')}</span></li>
     <li><span>{@html t('<b>Finishing touches</b> – name, <b>playlist or mix</b>, only the hits or everything. Right next to it you see which songs would be in it.')}</span></li>
   </Steps>
-  <p>{@render rich(t('After <Ui icon="check" primary>Create playlist</Ui> it is in Navidrome within a few seconds, and in Symfonium after the next sync.'))}</p>
+  <p>{@render rich(t('After <Ui icon="check" primary>Create playlist</Ui> it is in Navidrome within a few seconds, and in your music app after the next sync.'))}</p>
 {/snippet}
 
 {#snippet mix()}
@@ -126,7 +126,7 @@
     <CompareCard icon="dice" title={t('Mix')}>
       <li>{@html t('Puts itself together anew <b>daily, weekly or monthly</b> and stays the same in between.')}</li>
       <li>{t('Only a few songs per band, never the same band twice in a row.')}</li>
-      <li>{@html t('<b>Ideal for downloading:</b> save it offline in Symfonium once – new songs arrive by themselves at the next sync.')}</li>
+      <li>{@html t('<b>Ideal for downloading:</b> save it offline in your music app once – in apps like Symfonium, new songs arrive by themselves at the next sync.')}</li>
       <li>{@render rich(t('Don’t like the selection? <Ui icon="dice">Reshuffle</Ui> on the playlist page.'))}</li>
       <li>{@html t('<b>Learns as you go:</b> what you skip in a mix comes up less often. Songs you rate with 1 star yourself no longer go into your mixes.')}</li>
       <li>{@html t('<b>The family’s mixes too:</b> if you play one on your own account, Tuttiphon recognizes it by its order – then the family learns from it, not your own taste.')}</li>
@@ -138,7 +138,7 @@
 {#snippet playlists()}
   <p>{@html t('<a class="link" href="#/playlists">My playlists</a> lists all your playlists. Tap one to see its songs and bands – a tap on a song plays it.')}</p>
   <Bullets>
-    <li>{@render rich(t('<Ui icon="edit">Edit</Ui> – change music, name and type; Symfonium keeps the playlist.'))}</li>
+    <li>{@render rich(t('<Ui icon="edit">Edit</Ui> – change music, name and type; your music app keeps the playlist.'))}</li>
     <li>{@render rich(t('<Ui icon="dice">Reshuffle</Ui> – mixes only: a different selection right away.'))}</li>
   </Bullets>
   <p>{@render rich(t('Everything else is in the <Ui icon="more"></Ui> menu next to it:'))}</p>
@@ -149,22 +149,22 @@
     <li>{@render rich(t('<Ui icon="copy">Duplicate</Ui> – a copy of the playlist that you adjust first and then create.'))}</li>
     <li>{@render rich(t('<Ui icon="trash">Move to trash</Ui> – can be restored for 30 days.'))}</li>
   </Bullets>
-  <p>{@html t('<b>Seasonal playlists</b> such as Christmas are only in Symfonium during their season and come back by themselves.')}</p>
+  <p>{@html t('<b>Seasonal playlists</b> such as Christmas are only in your music app during their season and come back by themselves.')}</p>
   <p>{@render rich(t('<b>Your playlists</b> are only yours, <b>family playlists</b> are for everyone. If you may not change one, <Ui icon="copy">Copy for me</Ui> gives you your own version.'))}</p>
   <p>{@render rich(t('Almost everything can be taken back right away with <Ui icon="undo">Undo</Ui> in the message at the bottom.'))}</p>
 {/snippet}
 
 {#snippet symfonium()}
-  <p>{t('Everything you create here appears in Symfonium after the next sync – or right away if you refresh the media source there.')}</p>
+  <p>{t('Everything you create here appears in your music app after the next sync – or right away if you refresh the library there.')}</p>
   <Bullets>
-    <li>{@html t('<b>Offline:</b> download a mix in Symfonium once – when it renews itself, Symfonium downloads the new songs by itself.')}</li>
-    <li>{@html t('<b>Listening counts:</b> what you play in Symfonium shapes your statistics, taste and mixes.')}</li>
-    <li>{@html t('<b>1 star:</b> rate a song you no longer want to hear with 1 star in Symfonium – then it no longer goes into your mixes.')}</li>
+    <li>{@html t('<b>Offline:</b> download a mix in your music app once – when it renews itself, apps like Symfonium download the new songs by themselves.')}</li>
+    <li>{@html t('<b>Listening counts:</b> what you play in your music app shapes your statistics, taste and mixes.')}</li>
+    <li>{@html t('<b>1 star:</b> rate a song you no longer want to hear with 1 star in your music app – then it no longer goes into your mixes.')}</li>
     {#if familyPerson()}
-      <li>{@html t('<b>Shared devices</b> such as the car or a kitchen tablet can use the family account in Symfonium – the administrator sets it up.')}</li>
+      <li>{@html t('<b>Shared devices</b> such as the car or a kitchen tablet can use the family account in their music app – the administrator sets it up.')}</li>
     {/if}
     {#if S.status?.plugin}
-      <li>{@html t('<b>Radio and smart queue by sound:</b> in Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers) and choose “Sonic Analysis” for the smart queue in the player. The next songs then come from Tuttiphon – picked for you and with variety between bands.')}</li>
+      <li>{@html t('<b>Radio and smart queue by sound:</b> when your music app asks Navidrome for similar songs – Instant Mix, song radio –, the next songs come from Tuttiphon: picked for you and with variety between bands. In Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers) and choose “Sonic Analysis” for the smart queue in the player.')}</li>
       <li>{@html t('<b>The queue learns along:</b> skip twice and it turns to another sound at once. Every few songs one you have never played comes in – how often, you set in <a class="link" href="#/profil">your profile</a>.')}</li>
     {/if}
   </Bullets>
@@ -188,7 +188,7 @@
 {/snippet}
 
 {#snippet konten()}
-  <p>{@html t('You sign in with your <b>Navidrome account</b> – with the same name and password as in Symfonium. You stay signed in for 90 days.')}</p>
+  <p>{@html t('You sign in with your <b>Navidrome account</b> – with the same name and password as in your music app. You stay signed in for 90 days.')}</p>
   <Bullets>
     <li>{@html t('<b>Changed your password in Navidrome?</b> Under <a class="link" href="#/einstellungen/konto">My account</a>, turn statistics off and on again with the new one.')}</li>
     <li>{@html t('<b>Sign out:</b> tap your name at the bottom left → “Sign out”. On your phone, your name is at the top right.')}</li>

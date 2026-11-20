@@ -49,7 +49,7 @@
     ['deezer', 'star', t('Deezer stars'), t('Popularity → stars'), Deezer, 'music'],
     ['lyrics', 'mic', t('Lyrics'), t('Providers, search & cleanup'), Lyrics, 'music'],
     ['opus', 'headphones', t('Conversion'), 'FLAC → Opus', Opus, 'music'],
-    ['intel', 'brain', t('Intelligence'), t('Sound, Last.fm, classification'), Intelligenz, 'music'],
+    ['intel', 'brain', t('Intelligence'), t('Sound, similar bands, classification'), Intelligenz, 'music'],
     ['bibliothek', 'eraser', t('Check library'), t('Duplicates, covers, gaps'), Bibliothek, 'music'],
     ['ablaeufe', 'route', t('Automation'), t('Update everything, daily, folder watch'), Ablaeufe, 'operation'],
     ['sicherung', 'archive', t('Backup'), t('Daily backup, restore'), Sicherung, 'operation'],

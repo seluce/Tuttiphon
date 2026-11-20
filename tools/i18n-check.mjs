@@ -105,7 +105,7 @@ for (const l of readdirSync(LOCALES).filter((d) => d !== 'de' && statSync(join(L
 
 const GERMAN = /[äöüÄÖÜß]|\b(und|oder|nicht|mit|für|auf|der|das|dem|den|des|ein|eine|einen|einem|ist|sind|wird|werden|noch|alle|alles|keine|kein|bitte|zum|zur|vom|beim|nach|über|wenn|dann|schon|auch|nur|hier|jetzt|heute|gestern|morgen|neu|neue|neuen|Woche|Monat|Jahr|Tage|Tagen|Fehler|Speichern|Abbrechen|Löschen|Einstellungen|gespeichert|gelöscht|angelegt|Sterne|Wiedergaben|Vorschläge|hören|gehört|Lieder)\b/
 // Names and units that look the same in every language
-const NAMES = /\b(Tuttiphon|Navidrome|Symfonium|Deezer|Last\.fm|LRCLIB|NetEase|Lidarr|Opus|AAC|FLAC|WAV|AIFF|ALAC|APE|WavPack|MP3|ntfy|ReplayGain|MusicBrainz|Essentia|Docker|UGOS|UGREEN|NAS|GitHub|iPhone|iPad|Android|Mac|Chrome|Safari|Firefox|kbit\/s|LUFS|dB|UID|GID|ffmpeg|ffprobe|mutagen|OK|ID|URL|IP|ISRC|BPM|KI|AI|Hz|kHz|MB|GB|KB|min|h|s|ms|px)\b/g
+const NAMES = /\b(Tuttiphon|Navidrome|Symfonium|Deezer|Last\.fm|ListenBrainz|LRCLIB|NetEase|Lidarr|Opus|AAC|FLAC|WAV|AIFF|ALAC|APE|WavPack|MP3|ntfy|ReplayGain|MusicBrainz|Essentia|Docker|UGOS|UGREEN|NAS|GitHub|iPhone|iPad|Android|Mac|Chrome|Safari|Firefox|kbit\/s|LUFS|dB|UID|GID|ffmpeg|ffprobe|mutagen|OK|ID|URL|IP|ISRC|BPM|KI|AI|Hz|kHz|MB|GB|KB|min|h|s|ms|px)\b/g
 const bare = (text) => text.replace(NAMES, '').replace(/[^\p{L}]/gu, '').length >= 3
 const UI_ATTRS = new Set(['label', 'hint', 'title', 'placeholder', 'aria-label', 'alt', 'text', 'sub', 'desc', 'description', 'eyebrow', 'empty', 'confirm', 'cancel', 'action'])
 const UI_CALLS = new Set(['toast', 'confirmDialog', 'promptDialog', 'alert'])

@@ -2,7 +2,7 @@
  "Convert music": "Konwertuj muzykę",
  "Find & tidy up lyrics": "Znajdź i uporządkuj teksty",
  "Fetch missing covers": "Pobierz brakujące okładki",
- "Understand music (sound, AI & Last.fm)": "Zrozum muzykę (brzmienie, AI i Last.fm)",
+ "Understand music (sound, AI & similar bands)": "Zrozum muzykę (brzmienie, AI i podobne zespoły)",
  "Write playlists": "Zapisz playlisty",
  "Navidrome scan & sync": "Skan i synchronizacja Navidrome",
  "Deezer rating": "Ocena Deezer",
@@ -25,12 +25,12 @@
  "⏸ Short pause for “{name}” – this run continues afterwards.": "⏸ Krótka przerwa dla „{name}” – ten przebieg będzie potem kontynuowany.",
  "⚠ “{name}” could not be continued – the next run catches up.": "⚠ Nie udało się kontynuować „{name}” – następny przebieg to nadrobi.",
  "■ Done. {results}": "■ Gotowe. {results}",
- "(dry run) Last.fm and sound analysis skipped. Classification: {n} confident suggestion.": "(próbny przebieg) Pominięto Last.fm i analizę brzmienia. Klasyfikacja: {n} pewna propozycja.",
- "(dry run) Last.fm and sound analysis skipped. Classification: {n} confident suggestions.": {
-  "few": "(próbny przebieg) Pominięto Last.fm i analizę brzmienia. Klasyfikacja: {n} pewne propozycje.",
-  "many": "(próbny przebieg) Pominięto Last.fm i analizę brzmienia. Klasyfikacja: {n} pewnych propozycji."
+ "(dry run) Similar bands and sound analysis skipped. Classification: {n} confident suggestion.": "(próbny przebieg) Pominięto podobne zespoły i analizę brzmienia. Klasyfikacja: {n} pewna propozycja.",
+ "(dry run) Similar bands and sound analysis skipped. Classification: {n} confident suggestions.": {
+  "few": "(próbny przebieg) Pominięto podobne zespoły i analizę brzmienia. Klasyfikacja: {n} pewne propozycje.",
+  "many": "(próbny przebieg) Pominięto podobne zespoły i analizę brzmienia. Klasyfikacja: {n} pewnych propozycji."
  },
- "Last.fm: no key entered – similar bands and tags are missing (Settings → Intelligence).": "Last.fm: nie wpisano klucza – brakuje podobnych zespołów i tagów (Ustawienia → Inteligencja).",
+ "Similar bands: ListenBrainz and Deezer are turned off and there is no Last.fm key – similar bands and tags are missing (Settings → Intelligence).": "Podobne zespoły: ListenBrainz i Deezer są wyłączone i nie ma klucza Last.fm – brakuje podobnych zespołów i tagów (Ustawienia → Inteligencja).",
  "⚠ Loudness: {error}": "⚠ Głośność: {error}",
  "Classification: {n} band automatically assigned to a music world.": "Klasyfikacja: {n} zespół automatycznie przypisany do świata muzycznego.",
  "Classification: {n} bands automatically assigned to a music world.": {

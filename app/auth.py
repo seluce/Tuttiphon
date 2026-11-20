@@ -382,7 +382,7 @@ def login(username, password, remember=True):
         Navidrome(env.get("NAV_URL", ""), username, password).ping()
     except NavidromeError as e:
         if wrong_password(e):
-            raise LoginError(_("User name or password is wrong – it is the same as in Navidrome or Symfonium."))
+            raise LoginError(_("User name or password is wrong – it is the same as in Navidrome and your music app."))
         raise LoginError(_("Navidrome is not reachable right now. If needed, sign in as local administrator."), counts=False)
     users = navidrome_users(force=True)
     canonical = next((u["name"] for u in users if u["name"].lower() == username.lower()), username)

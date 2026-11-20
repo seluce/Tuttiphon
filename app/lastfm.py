@@ -1,10 +1,13 @@
-"""Last.fm (free, own API key): similar artists and tags.
+"""Last.fm (own API key): similar bands and tags – an optional source of the band knowledge (bandinfo.py), which
+merges them with those of ListenBrainz and Deezer. Last.fm gives working keys only with a Pro subscription; what it has
+delivered stays in use without one too.
 
-* artist.getSimilar  -> "Similar to …" radio, better suggestions, bands you are missing
+* artist.getSimilar  -> similar bands (radio, suggestions, bands you are missing, classification)
 * artist.getTopTags  -> genres/moods for the automatic classification of new bands
-Everything is cached for 30 days (state/lastfm.json) – after the first run it hardly costs any requests.
-Enter the key under Settings → Intelligence (or LASTFM_API_KEY in docker-compose).
+Everything is cached for 30 days (state/lastfm.json). The key goes under Settings → Intelligence (or LASTFM_API_KEY
+in docker-compose).
 """
+import hashlib
 import http.client
 import json
 import threading
@@ -20,6 +23,7 @@ from .i18n import _, _s, _sn
 API = "https://ws.audioscrobbler.com/2.0/"
 STATE_FILE = STATE_DIR / "lastfm.json"
 TTL = 30 * 86400
+GIVE_UP = 5   # this many errors in a row: Last.fm is left out for the rest of the run
 USER_AGENT = "Tuttiphon/1.0 (Navidrome-Helfer)"   # sent as it is (HTTP header)
 _lock = threading.Lock()
 _mem = {"stamp": None, "data": None}
@@ -29,6 +33,11 @@ class LastfmError(Exception):
     def __init__(self, message, bad_key=False):
         super().__init__(message)
         self.bad_key = bad_key   # key missing or invalid: no further request can work
+
+
+def _fingerprint(key):
+    """A short hash of the key – to remember that Last.fm rejected it without storing the key twice."""
+    return hashlib.sha256(key.encode()).hexdigest()[:16]
 
 
 def api_key(env=None):
@@ -153,7 +162,7 @@ def refresh(names, log=print, stop=None, budget=None, everything=False):
                current=len(names) - len(todo), todo=len(todo), minutes=budget))
     else:
         log(_s("Last.fm: {current} bands up to date, {todo} to load.", current=len(names) - len(todo), todo=len(todo)))
-    done = later = 0
+    done = later = fails = 0
     progress.part("lastfm", len(todo), until=deadline)
     try:
         for k, name in enumerate(todo, 1):
@@ -166,10 +175,18 @@ def refresh(names, log=print, stop=None, budget=None, everything=False):
             try:
                 arts[name] = fetch_artist(client, name)
                 done += 1
+                fails = 0
+                data.pop("keyRejected", None)
             except LastfmError as e:
                 if e.bad_key:
+                    data["keyRejected"] = _fingerprint(client.key)   # Settings → Intelligence says so – until another key
                     raise
                 log(f"  ⚠ {name}: {e}")
+                fails += 1
+                if fails >= GIVE_UP:
+                    later = len(todo) - k
+                    log(_s("⚠ Last.fm keeps answering with errors – left out for this run."))
+                    break
             if k % 100 == 0:
                 log(f"  … {k}/{len(todo)}")
                 with _lock:
@@ -190,4 +207,5 @@ def stats():
     data = load()
     arts = data.get("artists", {})
     return {"artists": len(arts), "withTags": sum(1 for a in arts.values() if a.get("tags")),
-            "lastRun": data.get("lastRun"), "key": bool(api_key())}
+            "lastRun": data.get("lastRun"), "key": bool(api_key()),
+            "rejected": bool(api_key()) and data.get("keyRejected") == _fingerprint(api_key())}

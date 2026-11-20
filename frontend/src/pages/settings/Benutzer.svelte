@@ -24,7 +24,7 @@
 
   const isMe = (u) => !!S.me?.user && u.name.toLowerCase() === S.me.user.toLowerCase()
   const info = (u, person) => (u.family
-    ? [t('The family’s account – for shared devices in Symfonium, nobody signs in to Tuttiphon with it'),
+    ? [t('The family’s account – for shared devices, nobody signs in to Tuttiphon with it'),
       u.passwordStored && u.passwordRejected ? t('stored password no longer works') : null]
     : [
       u.navidromeAdmin ? t('Navidrome admin') : t('Navidrome user'),
@@ -44,11 +44,11 @@
 </script>
 
 <Card title={t('Who may do what?')} icon="users" guide="rechte">
-  <p class="muted small">{t('Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.')}</p>
+  <p class="muted small">{t('Everyone signs in with their own Navidrome account – with the same name and password as in their music app.')}</p>
   <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2.5 mt-3 mb-4">
     <div class="role-card"><b><Icon name="shield" size={16} />{ROLE_LABEL.admin}</b><p class="muted small">{t('Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.')}</p></div>
     <div class="role-card"><b><Icon name="user" size={16} />{ROLE_LABEL.user}</b><p class="muted small">{t('Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.')}</p></div>
-    <div class="role-card"><b><Icon name="ban" size={16} />{ROLE_LABEL.none}</b><p class="muted small">{t('Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.')}</p></div>
+    <div class="role-card"><b><Icon name="ban" size={16} />{ROLE_LABEL.none}</b><p class="muted small">{t('Cannot sign in to Tuttiphon. Navidrome and the music apps keep working.')}</p></div>
   </div>
   <div>
     {#if error}

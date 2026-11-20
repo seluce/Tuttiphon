@@ -46,7 +46,7 @@
     .filter((g) => g.list.length || (!q && creatable(g.person))))
   /** The line under a group's name: how many – and who sees them */
   const groupSub = (person, n) => `${plural(n, 'playlist', 'playlists')} · ${person.family
-    ? (admin || canEdit({ person: person.id }) ? t('visible to everyone') : t('to listen to in Symfonium, can be copied and adjusted'))
+    ? (admin || canEdit({ person: person.id }) ? t('visible to everyone') : t('to listen to in your music app, can be copied and adjusted'))
     : person.id === me?.id ? t('only for you') : t('private for {user}', { user: person.user })}`
   const paused = $derived(pls.filter((p) => p.status === 'pausiert' && canEdit(p)))
   const hand = $derived(filter === 'alle' ? (S.pl?.handmade || []).filter((x) => !q || x.name.toLowerCase().includes(q)) : [])   // i18n-ignore: filter id
@@ -67,8 +67,8 @@
   <PageHead title={admin ? t('Playlists') : t('My playlists')} sub={admin
     ? t('Everything Tuttiphon looks after for you. Navidrome reshuffles smart playlists on every request – paused and deleted ones are kept here.')
     : familyPerson()
-      ? t('Your playlists and the family’s – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.')
-      : t('Your playlists – Tuttiphon keeps them up to date, and you can listen to them in Symfonium.')}>
+      ? t('Your playlists and the family’s – Tuttiphon keeps them up to date, and you can listen to them in your music app.')
+      : t('Your playlists – Tuttiphon keeps them up to date, and you can listen to them in your music app.')}>
     {#snippet actions()}
       <div class="btns"><a class="btn primary" href="#/neu"><Icon name="plus" size={18} />{t('New playlist')}</a></div><!-- i18n-ignore: route -->
     {/snippet}

@@ -472,7 +472,7 @@ def suggestions(cfg, lib, today=None, per_person=10, handmade_list=(), only_pers
                                                 "without vocals if possible")),
                              ("klang-morgen", _("half an hour every morning that starts friendly and calm and gets livelier")),
                              ("klang-toben", _("fast, loud and danceable – recognized by the sound")),
-                             ("klang-gute-laune", _("happy songs, recognized by the sound and the Last.fm mood"))):
+                             ("klang-gute-laune", _("happy songs, recognized by the sound and the mood of the tags"))):
                 st_ = next((x for x in cfg["stile"] if x["id"] == sid), None)
                 if not st_ or (sid == "klang-morgen" and prof):   # with listening data only from the clock (morning_mix)
                     continue
@@ -680,7 +680,7 @@ def playlist_tidy_items(cfg, lib, only_persons=None, user=False):
         out.append(("unused|" + "+".join(sorted(p["id"] for p in unused)), "info",
                     _("Nobody listens to {n} playlists", n=len(unused)),
                     _("Not a single song from them has played for three months: {names}. Pausing takes them out of "
-                      "Symfonium, they stay saved here.", names=", ".join(names[:5]) + (" …" if len(names) > 5 else ""))
+                      "the music apps, they stay saved here.", names=", ".join(names[:5]) + (" …" if len(names) > 5 else ""))
                     .replace("….", "…"),   # a cut list ends in “…”, not in “….”
                     [{"label": _("View"), "do": "goto", "href": "#/playlists"}] if user else
                     [{"label": _("Pause all"), "do": "pauseAll", "ids": [p["id"] for p in unused]},
@@ -688,8 +688,8 @@ def playlist_tidy_items(cfg, lib, only_persons=None, user=False):
     else:
         for p in unused:
             out.append((f"unused|{p['id']}", "info", _("Nobody listens to “{name}”", name=playlist_name(cfg, p)),
-                        _("Not a single song from it has played for three months. Pausing takes it out of Symfonium, "
-                          "here it stays kept."),
+                        _("Not a single song from it has played for three months. Pausing takes it out of the music "
+                          "apps, here it stays kept."),
                         [{"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}] if user else
                         [{"label": _("Pause"), "do": "pause", "id": p["id"]},
                          {"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}]))
@@ -707,8 +707,8 @@ def playlist_tidy_items(cfg, lib, only_persons=None, user=False):
             continue
         out.append((f"unheard-mix|{p['id']}", "info", _("Nobody listens to “{name}”", name=playlist_name(cfg, p)),
                     _n(u["periods"], "Not a single song of its last edition was played. Pausing takes it out of "
-                       "Symfonium, here it stays kept.", "Not a single song of its last {n} editions was played. Pausing "
-                       "takes it out of Symfonium, here it stays kept."),
+                       "the music apps, here it stays kept.", "Not a single song of its last {n} editions was played. Pausing "
+                       "takes it out of the music apps, here it stays kept."),
                     [{"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}] if user else
                     [{"label": _("Pause"), "do": "pause", "id": p["id"]},
                      {"label": _("View"), "do": "goto", "href": f"#/playlist/{p['id']}"}]))
@@ -753,7 +753,7 @@ def inbox(cfg, lib, env, deezer_stats, handmade_list, users_ok):
     in_welt = {a for w in cfg["welten"] for a in rules.welt_artists(w, ctx)}
     in_welt |= {a for w in cfg["welten"] for a in w.get("excludedArtists", [])}
     recent = (dt.date.today() - dt.timedelta(days=45)).isoformat()
-    # classification: Last.fm tags, similar bands, genres, scenes (classify.py) – with a confidence
+    # classification: tags, similar bands, genres, scenes (classify.py) – with a confidence
     from . import classify
     use_classify = (cfg["settings"].get("analysis") or {}).get("classify", "suggest") != "off"
     guesses = {x["artist"]: x for x in classify.suggestions(cfg, lib, ctx)} if use_classify else {}

@@ -64,12 +64,11 @@ export default {
     'Un mix per il telefono',
   'Create a mix':
     'Crea un mix',
-  'Download it once in Symfonium':
-    'Scaricalo una volta in Symfonium',
+  'Download it once in your music app': 'Scaricalo una volta nella tua app musicale',
   'New songs arrive on their own':
     'I nuovi brani arrivano da soli',
-  'offline download on the go auto daily weekly reshuffle symfonium':
-    'offline scarica download in giro auto giornaliero settimanale rimescola symfonium',
+  'offline download on the go auto daily weekly reshuffle music app symfonium':
+    'offline scarica download in giro auto giornaliero settimanale rimescola app musicale symfonium',
   'Ready-made mixes':
     'Mix pronti',
   'Here are mixes and playlists that match your taste. “Create” adds one of them right away.':
@@ -82,10 +81,9 @@ export default {
     'Oppure crealo tu',
   'In the assistant you choose music and mood and, in the last step, “Mix”.':
     'Nella procedura guidata scegli musica e mood e, nell\'ultimo passaggio, «Mix».',
-  'Download in Symfonium':
-    'Scarica in Symfonium',
-  'Open the mix in Symfonium under Playlists and download it once. When it renews, Symfonium fetches the new songs on its own at the next sync.':
-    'Apri il mix in Symfonium sotto Playlist e scaricalo una volta. Quando si rinnova, Symfonium scarica da solo i nuovi brani alla sincronizzazione successiva.',
+  'Download in your music app': 'Scarica nella tua app musicale',
+  'Open the mix in your music app under Playlists and download it once. When it renews, apps like Symfonium fetch the new songs on their own at the next sync.':
+    'Apri il mix nella tua app musicale sotto Playlist e scaricalo una volta. Quando si rinnova, app come Symfonium scaricano da sole i nuovi brani alla sincronizzazione successiva.',
   'Adjust music worlds':
     'Modifica i mondi musicali',
   'Open music worlds':
@@ -140,10 +138,10 @@ export default {
     'Dagli ascolti',
   'From your listening':
     'Dai tuoi ascolti',
-  'Tuttiphon recognizes from what is played in Symfonium which music people like. “+” turns it into a favorite.':
-    'Tuttiphon capisce da ciò che si ascolta in Symfonium quale musica piace. Con «+» diventa un preferito.',
-  'Tuttiphon recognizes from what you play in Symfonium which music you like. “+” turns it into a favorite.':
-    'Tuttiphon capisce da ciò che ascolti in Symfonium quale musica ti piace. Con «+» diventa un preferito.',
+  'Tuttiphon recognizes from what is played in the music apps which music people like. “+” turns it into a favorite.':
+    'Tuttiphon capisce da ciò che si ascolta nelle app musicali quale musica piace. Con «+» diventa un preferito.',
+  'Tuttiphon recognizes from what you play in your music app which music you like. “+” turns it into a favorite.':
+    'Tuttiphon capisce da ciò che ascolti nella tua app musicale quale musica ti piace. Con «+» diventa un preferito.',
   'Preferences':
     'Preferenze',
   'What you like to hear':
@@ -176,8 +174,7 @@ export default {
     'Non sentire più qualcosa',
   'Band or genre under “Dislikes”':
     'Band o genere in «Non mi piace»',
-  'Rate the song 1 star in Symfonium':
-    'Dai 1 stella al brano in Symfonium',
+  'Rate the song 1 star in your music app': 'Dai 1 stella al brano nella tua app musicale',
   'What you skip comes less often':
     'Ciò che salti arriva meno spesso',
   'hide block ban never dislike star skip annoying':
@@ -186,16 +183,16 @@ export default {
     'Le band e i generi elencati qui non finiscono mai nelle playlist – qualunque sia il mondo musicale o il mood.',
   'Single songs':
     'Singoli brani',
-  'Rate a song 1 star in Symfonium. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
-    'Dai 1 stella a un brano in Symfonium. Così non entra più nei tuoi mix. Ciò che salti spesso nel mix arriva da solo meno spesso.',
+  'Rate a song 1 star in your music app. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
+    'Dai 1 stella a un brano nella tua app musicale. Così non entra più nei tuoi mix. Ciò che salti spesso nel mix arriva da solo meno spesso.',
   'Change a playlist':
     'Modifica una playlist',
   'Tap a playlist':
     'Tocca una playlist',
   'Choose “Edit”, or “…” for the cover and more':
     'Scegli «Modifica», oppure «…» per la copertina e altro',
-  'Symfonium shows the change after the next sync':
-    'Symfonium mostra la modifica dopo la prossima sincronizzazione',
+  'Your music app shows the change after the next sync':
+    'La tua app musicale mostra la modifica dopo la prossima sincronizzazione',
   'edit rename name cover picture pause delete trash share family visible copy':
     'modifica rinomina nome copertina immagine pausa elimina cestino condividi famiglia visibile copia',
   'Open a playlist':
@@ -206,12 +203,12 @@ export default {
     'Qui compaiono tutte le playlist appena ce n\'è una.',
   'Everything at a glance':
     'Tutto a colpo d\'occhio',
-  '“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves Symfonium for a while and stays kept here – or move it to the trash.':
-    '«Modifica» cambia musica e nome. In «…» crei la copertina, metti in pausa la playlist – così sparisce per un po\' da Symfonium e resta conservata qui – o la sposti nel cestino.',
+  '“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves the music apps for a while and stays kept here – or move it to the trash.':
+    '«Modifica» cambia musica e nome. In «…» crei la copertina, metti in pausa la playlist – così sparisce per un po\' dalle app musicali e resta conservata qui – o la sposti nel cestino.',
   'Share with the family':
     'Condividi con la famiglia',
-  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and Symfonium.':
-    'In «Modifica», sotto «Per chi?» scegli la famiglia – così tutti vedono la playlist in Navidrome e Symfonium.',
+  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and the music apps.':
+    'In «Modifica», sotto «Per chi?» scegli la famiglia – così tutti vedono la playlist in Navidrome e nelle app musicali.',
   'Turn on kid-safe mode':
     'Attiva la modalità bambini',
   'Open the profile':
@@ -394,8 +391,8 @@ export default {
     'salva una copertina come cover.jpg per gli album senza alcuna immagine – quelle esistenti restano',
   'Understand music':
     'Capire la musica',
-  'analyze the sound with our own measurement and AI, fetch Last.fm knowledge, classify new bands – with a time limit':
-    'analizza il suono con la nostra misurazione e con l\'IA, recupera le conoscenze di Last.fm, classifica le nuove band – con un limite di tempo',
+  'analyze the sound with our own measurement and AI, fetch similar bands and tags, classify new bands – with a time limit':
+    'analizza il suono con la nostra misurazione e con l\'IA, recupera band simili e tag, classifica le nuove band – con un limite di tempo',
   'Write playlists':
     'Scrivi le playlist',
   'Smart playlists & mixes into the playlist folder':
@@ -570,8 +567,8 @@ export default {
     'Tuttiphon al momento non è raggiungibile. Si avvia da solo appena il server è di nuovo disponibile.',
   'Tuttiphon – Sign in':
     'Tuttiphon – Accedi',
-  'Sign in with your Navidrome account – with the same name and password as in Symfonium.':
-    'Accedi con il tuo account Navidrome – con lo stesso nome e la stessa password che usi in Symfonium.',
+  'Sign in with your Navidrome account – with the same name and password as in your music app.':
+    'Accedi con il tuo account Navidrome – con lo stesso nome e la stessa password che usi nella tua app musicale.',
   'Please enter your username.':
     'Inserisci il tuo nome utente.',
   'Please enter the password.':
@@ -652,6 +649,7 @@ export default {
     'Recupero delle copertine',
   'Fetching Last.fm knowledge':
     'Recupero dei dati di Last.fm',
+  'Fetching similar bands': 'Recupero delle band simili',
   'Measuring loudness':
     'Misurazione del volume',
   'Classifying bands':

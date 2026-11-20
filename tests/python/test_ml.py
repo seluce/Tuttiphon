@@ -16,7 +16,7 @@ import time
 import unittest
 from unittest import mock
 
-from app import audio, classify, config, lastfm, ml, ml_worker, similar
+from app import audio, bandinfo, classify, config, ml, ml_worker, similar
 from app.ml_worker import FILES
 from tests.python.factory import base_config, iso_days_ago, song
 
@@ -231,7 +231,7 @@ class TestFuse(unittest.TestCase):
         self.assertLess(fused["valence"], neutral["valence"])
         self.assertLess(fused["arousal"], neutral["arousal"])
 
-    def test_lastfm_mood_counts(self):
+    def test_tag_mood_counts(self):
         f, m = own(), mtuple()
         self.assertAlmostEqual(ml.fuse(f, m)["valence"], 0.5)
         self.assertAlmostEqual(ml.fuse(f, m, 1.0)["valence"], 0.625)    # (0.6·0.5 + 0.15·0.5 + 0.25·1) / 1
@@ -694,9 +694,9 @@ class TestSongFeatures(MlTest):
         self.write_ml({"mit-ki": {"v": 1, "path": "x/mit-ki.opus", "depth": "standard",
                                   "m": values(happy=0.9, sad=0.05, voice=0.1), "g": {}}})
 
-    def features(self, lastfm_data):
+    def features(self, tags):
         classify._memo.clear()
-        with mock.patch.object(lastfm, "artist", return_value=lastfm_data) as artist:
+        with mock.patch.object(bandinfo, "artist", return_value=tags) as artist:
             out = classify.song_features(self.lib)
         artist.assert_called_with("Band A")
         return out
@@ -708,11 +708,11 @@ class TestSongFeatures(MlTest):
         self.assertEqual(out[0], ml.fuse(own_f["mit-ki"], ml.features()["mit-ki"], None))
         self.assertEqual((out[0]["vsrc"], out[0]["inst"]), ("ml", 0.9))
         self.assertIn("instrumental", audio.moods(out[0]))
-        self.assertEqual(out[1], own_f["ohne-ki"])                # without AI and Last.fm: only our own measurement
+        self.assertEqual(out[1], own_f["ohne-ki"])                # without AI and tags: only our own measurement
         self.assertNotIn("vsrc", out[1])
 
-    def test_lastfm_mood_is_fused_too(self):
-        out = self.features({"tags": [["happy", 60], ["sad", 20]]})   # Last.fm mood 0.75
+    def test_tag_mood_is_fused_too(self):
+        out = self.features({"tags": [["happy", 60], ["sad", 20]]})   # tag mood 0.75
         own_f = audio.features()
         self.assertEqual(out[0], ml.fuse(own_f["mit-ki"], ml.features()["mit-ki"], 0.75))
         self.assertEqual(out[1]["vsrc"], "tags")
@@ -759,7 +759,7 @@ class TestKeyTempoInstruments(MlTest):
         self.assertIn("alt", ml.features())               # older entries stay usable
 
     def test_song_features_take_the_ai_tempo_when_it_agrees(self):
-        with mock.patch.object(lastfm, "artist", return_value=None):
+        with mock.patch.object(bandinfo, "artist", return_value=None):
             feats = classify.song_features(self.lib)
         own_f = audio.features()
         self.assertEqual((feats[0]["bpm"], feats[0]["bsrc"]), (79.8, "ml"))
@@ -783,7 +783,7 @@ class TestKeyTempoInstruments(MlTest):
             self.assertAlmostEqual(same[k], f[k], delta=0.002)
 
     def test_instruments_in_sound_filters(self):
-        with mock.patch.object(lastfm, "artist", return_value=None):
+        with mock.patch.object(bandinfo, "artist", return_value=None):
             feats = classify.song_features(self.lib)
         piano, rock = feats[0], feats[1]
         self.assertTrue(audio.matches(piano, {"instruments": ["piano"]}))
@@ -799,13 +799,13 @@ class TestKeyTempoInstruments(MlTest):
             config.validate_config(cfg)
 
     def test_song_window_details(self):
-        with mock.patch.object(lastfm, "artist", return_value=None):
+        with mock.patch.object(bandinfo, "artist", return_value=None):
             info = classify.song_details(self.lib, 0)
         self.assertEqual(info["key"], "Ab minor")
         self.assertEqual((info["camelot"], info["keyStrength"], info["bpmSource"]), ("1A", 0.9, "ai"))
         self.assertEqual([x["id"] for x in info["instruments"]], ["piano", "guitar"])
         self.assertEqual(info["instruments"][0]["label"], "piano")
-        with mock.patch.object(lastfm, "artist", return_value=None):
+        with mock.patch.object(bandinfo, "artist", return_value=None):
             self.assertEqual(classify.song_details(self.lib, 2)["bpmSource"], "measured")
             self.assertNotIn("key", classify.song_details(self.lib, 3))
 

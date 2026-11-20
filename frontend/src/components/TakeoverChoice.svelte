@@ -20,4 +20,4 @@
     <span>{t('{n} songs · with automatically detected bands, a more precise live filter and all the tool’s settings.', { n: fmt(info.mapping.count) })}</span>
   </label>
 {/if}
-<div class="note">{t('The playlist stays the same in Navidrome, with the same file and the same ID – Symfonium won’t notice. The original is backed up before it is overwritten for the first time.')}</div>
+<div class="note">{t('The playlist stays the same in Navidrome, with the same file and the same ID – the music apps won’t notice. The original is backed up before it is overwritten for the first time.')}</div>

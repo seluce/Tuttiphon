@@ -32,7 +32,7 @@
     S.config.playlists.push({ id, person: me.id, welt: w.id, stil: '*', type: 'mix', mix: { size: 50, perArtist: 3, every: 'day' },
       status: 'aktiv', created: today(), source: 'welt' })
     changed()
-    toast(t('Daily Mix from {name} created – coming to Symfonium shortly', { name: w.name }), { undo: true })
+    toast(t('Daily Mix from {name} created – coming to your music app shortly', { name: w.name }), { undo: true })
     go(`#/playlist/${encodeURIComponent(id)}`)
   }
 

@@ -43,7 +43,7 @@ GERMAN = re.compile(r"[äöüÄÖÜß]|\b(und|oder|nicht|mit|für|auf|der|das|de
                     r"werden|noch|alle|alles|keine|kein|bitte|zum|zur|vom|beim|nach|über|wenn|dann|schon|auch|nur|"
                     r"hier|jetzt|heute|gestern|neu|neue|neuen|Woche|Monat|Jahr|Tage|Tagen|Fehler|gespeichert|"
                     r"gelöscht|angelegt|Sterne|Wiedergaben|Lieder|fertig|gefunden|fehlt|unbekannt|Datei|Dateien)\b")
-NAMES = re.compile(r"\b(Tuttiphon|Navidrome|Symfonium|Deezer|Last\.fm|LRCLIB|NetEase|Lidarr|Opus|AAC|FLAC|WAV|AIFF|ALAC|"
+NAMES = re.compile(r"\b(Tuttiphon|Navidrome|Symfonium|Deezer|Last\.fm|ListenBrainz|LRCLIB|NetEase|Lidarr|Opus|AAC|FLAC|WAV|AIFF|ALAC|"
                    r"APE|WavPack|MP3|ntfy|ReplayGain|MusicBrainz|Essentia|Docker|NAS|kbit/s|LUFS|dB|UID|GID|ffmpeg|"
                    r"ffprobe|mutagen|OK|ID|URL|IP|ISRC|BPM|HTTP|JSON|min|h|s|ms)\b")
 FUNCS = {"_": (0,), "_s": (0,), "_n": (1, 2), "_sn": (1, 2), "N_": (0,)}

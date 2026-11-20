@@ -1,11 +1,11 @@
-"""“You might still be missing”: suggestions from Last.fm that are already in the library – under a slightly different
-spelling or as part of a credit – are left out. Temp data, Last.fm mocked, no network."""
+"""“You might still be missing”: similar bands that are already in the library – under a slightly different
+spelling or as part of a credit – are left out. Temp data, band knowledge mocked, no network."""
 from tests.python import env  # noqa: F401  (before app.*)
 
 import unittest
 from unittest import mock
 
-from app import classify, lastfm
+from app import bandinfo, classify
 from app.rules import Library
 from tests.python.factory import song
 
@@ -44,7 +44,7 @@ class MissingArtistsTest(unittest.TestCase):
         similar = {"Rolf Zuckowski und seine Freunde": {"similar": [
             ["Rolf Zuckowski", 0.9], ["Simone Sommerland, Karsten Glück, Die Kita-Frösche", 0.8], ["Detlev Jöcker", 0.7],
             ["Nena", 0.6], ["Fredrik Vahle", 0.5], ["Weit weg", 0.1]]}}
-        with mock.patch.object(lastfm, "artist", side_effect=lambda name: similar.get(name)):
+        with mock.patch.object(bandinfo, "artist", side_effect=lambda name: similar.get(name)):
             got = classify.missing_artists(["Rolf Zuckowski und seine Freunde", "Unbekannt"], library())
         self.assertEqual([m["artist"] for m in got], ["Nena", "Fredrik Vahle"])
         self.assertEqual(got[0]["because"], ["Rolf Zuckowski und seine Freunde"])

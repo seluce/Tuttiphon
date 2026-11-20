@@ -54,14 +54,16 @@ export default {
   'Create': 'Anlegen',
   'Customize': 'Anpassen',
   // pages/discover/Missing.svelte
-  'With a free Last.fm key, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.': 'Mit einem kostenlosen Last.fm-Schlüssel zeigt Tuttiphon hier Bands, die euren Lieblingen ähneln, aber noch nicht in der Bibliothek sind.',
-  'Enter key →': 'Schlüssel eintragen →',
+  'With ListenBrainz or Deezer, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
+    'Mit ListenBrainz oder Deezer zeigt Tuttiphon hier Bands, die euren Lieblingen ähneln, aber noch nicht in der Bibliothek sind.',
   'The administrator sets this up.': 'Das richtet der Administrator ein.',
   'No data yet – it is created during the next run of “Understand music”.': 'Noch keine Daten – sie entstehen beim nächsten Lauf von „Musik verstehen“.',
   'similar to {names}': 'ähnlich wie {names}',
   'Show all {n}': 'Alle {n} zeigen',
-  'According to Last.fm – to listen in or as a wish list for Lidarr.': 'Laut Last.fm – zum Reinhören oder als Wunschliste für Lidarr.',
-  'According to Last.fm – tap to listen in. If you like something, the administrator can add it to the library.': 'Laut Last.fm – antippen zum Reinhören. Gefällt dir etwas, kann es der Administrator zur Bibliothek hinzufügen.',
+  'Tap to listen in on Last.fm – or as a wish list for Lidarr.':
+    'Antippen zum Reinhören auf Last.fm – oder als Wunschliste für Lidarr.',
+  'Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.':
+    'Antippen zum Reinhören auf Last.fm. Gefällt dir etwas, kann es der Administrator zur Bibliothek hinzufügen.',
   // pages/discover/Matrix.svelte
   'All': 'Alle',
   'Error': 'Fehler',
@@ -77,8 +79,10 @@ export default {
   'Year {year}': 'Jahr {year}',
   'Statistics': 'Statistik',
   'My statistics': 'Meine Statistik',
-  'What really gets played in your home – from the plays Symfonium reports to Navidrome.': 'Was bei euch wirklich läuft – aus den Wiedergaben, die Symfonium an Navidrome meldet.',
-  'What you really listen to – from the plays Symfonium reports to Navidrome.': 'Was du wirklich hörst – aus den Wiedergaben, die Symfonium an Navidrome meldet.',
+  'What really gets played in your home – from the plays your music apps report to Navidrome.':
+    'Was bei euch wirklich läuft – aus den Wiedergaben, die eure Musik-Apps an Navidrome melden.',
+  'What you really listen to – from the plays your music app reports to Navidrome.':
+    'Was du wirklich hörst – aus den Wiedergaben, die deine Musik-App an Navidrome meldet.',
   'Password missing': 'Passwort fehlt',
   'Counting your plays …': 'Zähle eure Wiedergaben …',
   'No statistics for {name}': 'Keine Statistik für {name}',
@@ -106,7 +110,8 @@ export default {
   'The vibe “Favorite songs” is missing': 'Die Richtung „Lieblingssongs“ fehlt',
   '“Forgotten favorites” created': '„Vergessene Lieblinge“ angelegt',
   'No plays counted yet': 'Noch keine Wiedergaben gezählt',
-  'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.': 'Navidrome hat für „{user}“ noch keine Wiedergaben gespeichert. In Symfonium muss „Scrobbling“ bzw. „Wiedergaben an den Server melden“ eingeschaltet sein.',
+  'Navidrome has not saved any plays for “{user}” yet. The music app has to report plays to the server – often called “Scrobbling”.':
+    'Navidrome hat für „{user}“ noch keine Wiedergaben gespeichert. Die Musik-App muss Wiedergaben an den Server melden – oft heißt das „Scrobbling“.',
   'Plays': 'Wiedergaben',
   'from {n} different song':
     'von {n} Song',
@@ -135,9 +140,10 @@ export default {
   'Create as playlist': 'Als Playlist anlegen',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.': 'Hinweis: Navidrome speichert pro Song nur, wie oft und wann zuletzt er lief – einen Verlauf über die Zeit gibt es dort nicht.',
   // pages/stats/Rueckblick.svelte
-  '“{name}” saved with {n} song – coming to Symfonium shortly':
-    '„{name}“ mit {n} Song gespeichert – kommt gleich in Symfonium',
-  '“{name}” saved with {n} songs – coming to Symfonium shortly': '„{name}“ mit {n} Songs gespeichert – kommt gleich in Symfonium',
+  '“{name}” saved with {n} song – coming to your music app shortly':
+    '„{name}“ mit {n} Song gespeichert – kommt gleich in deine Musik-App',
+  '“{name}” saved with {n} songs – coming to your music app shortly':
+    '„{name}“ mit {n} Songs gespeichert – kommt gleich in deine Musik-App',
   'Nothing counted yet': 'Noch nichts gezählt',
   'Tuttiphon has been keeping track of plays since {date}. As soon as you listen, the most played music shows up here.': 'Tuttiphon merkt sich die Wiedergaben seit {date}. Sobald ihr hört, erscheint hier, was am meisten lief.',
   'From now on Tuttiphon remembers every day what you listened to – Navidrome itself keeps no history.': 'Ab jetzt merkt sich Tuttiphon jeden Tag, was ihr gehört habt – Navidrome selbst speichert keinen Verlauf.',
@@ -172,7 +178,7 @@ export default {
   '{artist}: {world} – removed': '{artist}: {world} – entfernt',
   'loading …': 'lade …',
   '{n}× played': '{n}× gehört',
-  'Tag from Last.fm': 'Tag von Last.fm',
+  'Tag from MusicBrainz or Last.fm': 'Tag von MusicBrainz oder Last.fm',
   'Start radio': 'Radio starten',
   'Popular songs': 'Beliebte Songs',
   'read more': 'mehr lesen',
@@ -206,9 +212,10 @@ export default {
   'Similar bands you are still missing': 'Ähnliche Bands, die euch noch fehlen',
   'Sounds like these bands': 'Klingt wie diese Bands',
   'By the sound of the songs – recognized by the AI sound analysis.': 'Nach dem Klang der Songs – erkannt von der KI-Klanganalyse.',
-  'According to Last.fm – to listen in or for Lidarr.': 'Laut Last.fm – zum Reinhören oder für Lidarr.',
-  'According to Last.fm – tap to listen in.': 'Laut Last.fm – antippen zum Reinhören.',
-  'With a Last.fm key under Settings → Intelligence you get tags here, more accurate similar bands and bands you are still missing.': 'Mit einem Last.fm-Schlüssel unter Einstellungen → Intelligenz gibt es hier Tags, genauere ähnliche Bands und Bands, die euch noch fehlen.',
+  'Tap to listen in on Last.fm – or for Lidarr.': 'Antippen zum Reinhören auf Last.fm – oder für Lidarr.',
+  'Tap to listen in on Last.fm.': 'Antippen zum Reinhören auf Last.fm.',
+  'Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).':
+    'Tags und ähnliche Bands zu dieser Band kommen mit dem nächsten Lauf von „Musik verstehen“ – von ListenBrainz und Deezer (Einstellungen → Intelligenz).',
   // components/sheets/CoverSheet.svelte
   'Four album covers with title': 'Vier Album-Cover mit Titel',
   'Its own look for this format, renewed with every new selection': 'Eigener Look für dieses Format, mit jeder neuen Auswahl erneuert',
@@ -216,7 +223,8 @@ export default {
   'Color gradient with round band photos': 'Farbverlauf mit runden Bandfotos',
   'Cover of the main album': 'Cover des wichtigsten Albums',
   'Designing and uploading the cover …': 'Cover wird gestaltet und hochgeladen …',
-  'Cover set ✓ – Symfonium shows it after the next sync': 'Cover gesetzt ✓ – Symfonium zeigt es nach dem nächsten Abgleich',
+  'Cover set ✓ – your music app shows it after the next sync':
+    'Cover gesetzt ✓ – deine Musik-App zeigt es nach dem nächsten Abgleich',
   'Preparing the image …': 'Bild wird vorbereitet …',
   'Own image set ✓': 'Eigenes Bild gesetzt ✓',
   'Navidrome shows its default image again': 'Navidrome zeigt wieder sein Standardbild',
@@ -224,7 +232,8 @@ export default {
   'The image cannot be opened': 'Das Bild lässt sich nicht öffnen',
   'The image could not be shrunk': 'Bild konnte nicht verkleinert werden',
   'The playlist is not in Navidrome yet. As soon as it is applied, you can choose a cover here.': 'Die Playlist ist noch nicht in Navidrome. Sobald sie übernommen ist, kannst du hier ein Cover wählen.',
-  'The image appears in Navidrome and – after the next sync – in Symfonium. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.': 'Das Bild erscheint in Navidrome und – nach dem nächsten Abgleich – in Symfonium. Gestaltete Cover erneuert Tuttiphon von selbst, wenn sich die Playlist ändert – bei Mixen also mit jeder neuen Auswahl.',
+  'The image appears in Navidrome and – after the next sync – in the music apps. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
+    'Das Bild erscheint in Navidrome und – nach dem nächsten Abgleich – in den Musik-Apps. Gestaltete Cover erneuert Tuttiphon von selbst, wenn sich die Playlist ändert – bei Mixen also mit jeder neuen Auswahl.',
   'not possible here': 'geht hier nicht',
   'active': 'aktiv',
   'Another own image': 'Anderes eigenes Bild',
@@ -329,7 +338,8 @@ export default {
   'Saving failed: {error} – the last change was discarded.': 'Speichern fehlgeschlagen: {error} – die letzte Änderung wurde verworfen.',
   'Undone': 'Rückgängig gemacht',
   '{name} – done ✓': '{name} – fertig ✓',
-  'Your changes are now in Navidrome ✓ – Symfonium shows them after the next sync': 'Deine Änderungen sind jetzt in Navidrome ✓ – Symfonium zeigt sie nach dem nächsten Abgleich',
+  'Your changes are now in Navidrome ✓ – your music app shows them after the next sync':
+    'Deine Änderungen sind jetzt in Navidrome ✓ – deine Musik-App zeigt sie nach dem nächsten Abgleich',
   // lib/overlay.svelte.js
   'Yes': 'Ja',
   // lib/account.js

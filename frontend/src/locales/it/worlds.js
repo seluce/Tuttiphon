@@ -192,8 +192,8 @@ export default {
     'Ad es. niente canzoni di Natale d\'estate: ciò che è elencato qui compare solo in questa atmosfera.',
   'Music worlds':
     'Mondi musicali',
-  'A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, Last.fm, AI music style, language and decade.':
-    'Un mondo musicale dice chi suona. Tuttiphon li crea dalla tua libreria e inserisce da solo le nuove band – in base a generi, Last.fm, stile musicale dell\'IA, lingua e decennio.',
+  'A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, ListenBrainz, AI music style, language and decade.':
+    'Un mondo musicale dice chi suona. Tuttiphon li crea dalla tua libreria e inserisce da solo le nuove band – in base a generi, ListenBrainz, stile musicale dell\'IA, lingua e decennio.',
   'Your music sorted by kind. Tap a world to see which bands belong to it – with “Like” you keep a world in mind for your suggestions.':
     'La tua musica ordinata per tipo. Tocca un mondo per vedere quali band ne fanno parte – con «Mi piace» tieni presente un mondo per i tuoi suggerimenti.',
   'you like it':
@@ -224,8 +224,8 @@ export default {
     '{n} band in libreria',
   'no bands in your library yet':
     'ancora nessuna band in libreria',
-  'Daily Mix from {name} created – coming to Symfonium shortly':
-    'Daily Mix da {name} creato – arriva a breve in Symfonium',
+  'Daily Mix from {name} created – coming to your music app shortly':
+    'Daily Mix da {name} creato – arriva a breve nella tua app musicale',
   '{name} is no longer one of your favorite worlds':
     '{name} non è più tra i tuoi mondi preferiti',
   '{name} is now one of your favorite worlds – this improves your suggestions':
@@ -288,10 +288,10 @@ export default {
     '{names}. Possono avere un mondo musicale tutto loro.',
   'Newly included:':
     'Nuove incluse:',
-  'One playlist will then have a different name, also in Symfonium: {list}':
-    'Una playlist avrà poi un nome diverso, anche in Symfonium: {list}',
-  '{n} playlists will then have different names, also in Symfonium: {list}':
-    '{n} playlist avranno poi nomi diversi, anche in Symfonium: {list}',
+  'One playlist will then have a different name, also in the music apps: {list}':
+    'Una playlist avrà poi un nome diverso, anche nelle app musicali: {list}',
+  '{n} playlists will then have different names, also in the music apps: {list}':
+    '{n} playlist avranno poi nomi diversi, anche nelle app musicali: {list}',
   '“{from}” → “{to}”':
     '«{from}» → «{to}»',
   'Scene: {name}':
@@ -336,8 +336,8 @@ export default {
     'Con una scena, il mondo conosce le band tipiche e le aggiunge in automatico.',
   'add matching bands automatically':
     'aggiungi in automatico le band adatte',
-  'The scene’s typical bands and bands that match by genres, Last.fm, AI music style, language and decade – new ones too.':
-    'Le band tipiche della scena e le band adatte per generi, Last.fm, stile musicale dell\'IA, lingua e decennio – anche quelle nuove.',
+  'The scene’s typical bands and bands that match by genres, ListenBrainz, AI music style, language and decade – new ones too.':
+    'Le band tipiche della scena e le band adatte per generi, ListenBrainz, stile musicale dell\'IA, lingua e decennio – anche quelle nuove.',
   'Minimum length in seconds':
     'Durata minima in secondi',
   'Separate world – don’t mix into “All” playlists':
@@ -392,8 +392,8 @@ export default {
     'Per chi?',
   'Only for you – your stars & favorites count.':
     'Solo per te – contano le tue stelle e i tuoi preferiti.',
-  'This playlist shows the most played songs – from what is played in Symfonium. It changes on its own on the first of the month; it always stays one playlist.':
-    'Questa playlist mostra i brani più ascoltati – da ciò che si ascolta in Symfonium. Cambia da sola il primo del mese; resta sempre un\'unica playlist.',
+  'This playlist shows the most played songs – from what is played in the music apps. It changes on its own on the first of the month; it always stays one playlist.':
+    'Questa playlist mostra i brani più ascoltati – da ciò che si ascolta nelle app musicali. Cambia da sola il primo del mese; resta sempre un\'unica playlist.',
   'Period':
     'Periodo',
   'the last month':
@@ -434,8 +434,7 @@ export default {
     'Ordine',
   'Max. songs':
     'Max. brani',
-  'All year in Symfonium, not just in season':
-    'Tutto l\'anno in Symfonium, non solo di stagione',
+  'All year in the music apps, not just in season': 'Tutto l\'anno nelle app musicali, non solo di stagione',
   'Add or remove individual bands':
     'Aggiungi o togli singole band',
   'Also include':
@@ -516,10 +515,10 @@ export default {
     'Mix – si rinnova. Questa atmosfera sceglie in base al suono; può farlo solo Tuttiphon, quindi è disponibile solo come mix.',
   'Mix – renews itself. The songs are picked by their sound; only Tuttiphon can do that, so it is only available as a mix.':
     'Mix – si rinnova. I brani vengono scelti in base al loro suono; può farlo solo Tuttiphon, quindi è disponibile solo come mix.',
-  'Tuttiphon rebuilds the list regularly: a few songs per band, never the same band twice in a row. In between it stays the same – ideal if Symfonium should save it offline and update it automatically.':
-    'Tuttiphon ricompone l\'elenco regolarmente: pochi brani per band, mai la stessa band due volte di fila. Nel frattempo resta uguale – ideale se Symfonium deve salvarlo offline e aggiornarlo in automatico.',
-  'Navidrome reshuffles from all matching songs every time the playlist is loaded – always fresh, but unsuitable for offline downloads in Symfonium because the list keeps changing.':
-    'Navidrome rimescola da tutti i brani adatti a ogni caricamento della playlist – sempre fresca, ma non adatta ai download offline in Symfonium perché l\'elenco cambia di continuo.',
+  'Tuttiphon rebuilds the list regularly: a few songs per band, never the same band twice in a row. In between it stays the same – ideal if a music app should save it offline and update it automatically.':
+    'Tuttiphon ricompone l\'elenco regolarmente: pochi brani per band, mai la stessa band due volte di fila. Nel frattempo resta uguale – ideale se un\'app musicale deve salvarlo offline e aggiornarlo in automatico.',
+  'Navidrome reshuffles from all matching songs every time the playlist is loaded – always fresh, but unsuitable for offline downloads in music apps because the list keeps changing.':
+    'Navidrome rimescola da tutti i brani adatti a ogni caricamento della playlist – sempre fresca, ma non adatta ai download offline nelle app musicali perché l\'elenco cambia di continuo.',
   'Made for the mornings: starts calm and gets livelier, and songs that sound like what is played in the morning come more often. The length fits the usual morning round.':
     'Pensato per la mattina: inizia tranquillo e diventa più vivace, e i brani che suonano come ciò che si ascolta di mattina compaiono più spesso. La durata si adatta al solito giro del mattino.',
   'Only songs this account has never played – what sounds like its taste comes much more often. New every week by default, at most one song per album.':

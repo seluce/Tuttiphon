@@ -64,14 +64,14 @@ export const GUIDES = translated(() => [
   {
     id: 'mix', icon: 'smartphone', href: '#/entdecken',
     title: t('Mix for your phone'),
-    short: [t('Create a mix'), t('Download it once in Symfonium'), t('New songs arrive on their own')],
-    keys: t('offline download on the go auto daily weekly reshuffle symfonium'),
+    short: [t('Create a mix'), t('Download it once in your music app'), t('New songs arrive on their own')],
+    keys: t('offline download on the go auto daily weekly reshuffle music app symfonium'),
     steps: (c) => [
       { go: '#/entdecken', sel: ['[data-guide=anlegen]', '[data-guide=vorschlag]'], title: t('Ready-made mixes'), text: t('Here are mixes and playlists that match your taste. “Create” adds one of them right away.') },
       c.mix
         ? { go: c.mix, sel: ['[data-guide=pl-actions]'], title: t('Your mix'), text: t('A mix renews itself daily, weekly or monthly. “Reshuffle” puts together a different selection right away.') }
         : { go: '#/neu?type=mix', reset: true, sel: ['.stepper'], title: t('Or put it together yourself'), text: t('In the assistant you choose music and mood and, in the last step, “Mix”.') },   // i18n-ignore: route
-      { title: t('Download in Symfonium'), text: t('Open the mix in Symfonium under Playlists and download it once. When it renews, Symfonium fetches the new songs on its own at the next sync.') },
+      { title: t('Download in your music app'), text: t('Open the mix in your music app under Playlists and download it once. When it renews, apps like Symfonium fetch the new songs on their own at the next sync.') },
     ],
   },
   {
@@ -94,7 +94,7 @@ export const GUIDES = translated(() => [
       { go: '#/einstellungen/benutzer', sel: ['[data-guide=rechte]'], title: t('Who may do what?'), text: t('Everyone signs in with their own Navidrome account. Here you choose administrator, user or no access for each account – and who may change the family playlists.') },
       { go: '#/personen', sel: ['[data-guide=person-neu]'], title: t('People'), text: t('One person per account: suggestions and mixes are made for them with their favorites and without their dislikes.') },   // i18n-ignore: selector
       { go: '#/personen', sel: ['[data-guide=familie]'], title: t('The family'),   // i18n-ignore: selector
-        text: t('If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in Symfonium.') },
+        text: t('If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in their music app.') },
     ],
   },
   {
@@ -104,8 +104,8 @@ export const GUIDES = translated(() => [
     keys: t('profile preferences favorites favorite bands favorite worlds recommendations taste listening'),
     steps: (c) => !c.profile ? [noProfile(c.admin)] : [
       { go: c.profile, sel: ['[data-guide=taste]'], optional: true, title: c.admin ? t('From listening') : t('From your listening'),
-        text: c.admin ? t('Tuttiphon recognizes from what is played in Symfonium which music people like. “+” turns it into a favorite.')
-          : t('Tuttiphon recognizes from what you play in Symfonium which music you like. “+” turns it into a favorite.') },
+        text: c.admin ? t('Tuttiphon recognizes from what is played in the music apps which music people like. “+” turns it into a favorite.')
+          : t('Tuttiphon recognizes from what you play in your music app which music you like. “+” turns it into a favorite.') },
       { go: c.profile, sel: ['[data-guide=likes]'], title: c.admin ? t('Preferences') : t('What you like to hear'),
         text: t('Favorite worlds bring matching suggestions, favorite bands show up more often in the mixes.') },
       { sel: ['[data-guide=dislikes]'], title: t('Dislikes'), text: t('Bands and genres here never go into the playlists – whatever the music world or mood.') },
@@ -124,23 +124,23 @@ export const GUIDES = translated(() => [
   {
     id: 'nie', icon: 'ban', href: '#/profil',
     title: t('Stop hearing something'),
-    short: [t('Band or genre under “Dislikes”'), t('Rate the song 1 star in Symfonium'), t('What you skip comes less often')],
+    short: [t('Band or genre under “Dislikes”'), t('Rate the song 1 star in your music app'), t('What you skip comes less often')],
     keys: t('hide block ban never dislike star skip annoying'),
     steps: (c) => [
       ...(c.profile ? [{ go: c.profile, sel: ['[data-guide=dislikes]'], title: t('Dislikes'), text: t('Bands and genres here never end up in the playlists – whatever the music world or mood.') }] : [noProfile(c.admin)]),
-      { title: t('Single songs'), text: t('Rate a song 1 star in Symfonium. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.') },
+      { title: t('Single songs'), text: t('Rate a song 1 star in your music app. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.') },
     ],
   },
   {
     id: 'aendern', icon: 'edit', href: '#/playlists',
     title: t('Change a playlist'),
-    short: [t('Tap a playlist'), t('Choose “Edit”, or “…” for the cover and more'), t('Symfonium shows the change after the next sync')],
+    short: [t('Tap a playlist'), t('Choose “Edit”, or “…” for the cover and more'), t('Your music app shows the change after the next sync')],
     keys: t('edit rename name cover picture pause delete trash share family visible copy'),
     steps: (c) => [
       { go: '#/playlists', sel: ['.g-pl .pcard'], title: t('Open a playlist'), text: c.playlist ? t('Tap a playlist to open it.') : t('All playlists show up here as soon as there is a first one.') },
-      ...(c.playlist ? [{ go: c.playlist, sel: ['[data-guide=pl-actions]'], title: t('Everything at a glance'), text: t('“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves Symfonium for a while and stays kept here – or move it to the trash.') }] : []),
+      ...(c.playlist ? [{ go: c.playlist, sel: ['[data-guide=pl-actions]'], title: t('Everything at a glance'), text: t('“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves the music apps for a while and stays kept here – or move it to the trash.') }] : []),
       ...(c.family === 'share' ? [{ sel: ['[data-guide=pl-actions]'], title: t('Share with the family'),
-        text: t('In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and Symfonium.') }] : []),
+        text: t('In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and the music apps.') }] : []),
       ...(c.family === 'copy' ? [{ title: t('Family playlists'),
         text: t('Only administrators change the family’s playlists – with “Copy for me” you get your own version.') }] : []),
     ],

@@ -6,10 +6,10 @@ export default {
     '«Muéstramelo» te guía por los pasos en la propia página; debajo tienes todo para consultar. El {icon} junto a cada título de página explica esa página.',
   '“Show me” walks you through the steps right on the page. The {icon} next to every page title explains that page.':
     '«Muéstramelo» te guía por los pasos en la propia página. El {icon} junto a cada título de página explica esa página.',
-  'You say <b>who</b> should play and <b>what</b> kind of mood – from that, Tuttiphon builds playlists that keep themselves up to date: new albums are included automatically, stars from Deezer pick out the hits, and what you listen to in Symfonium makes the suggestions personal.':
-    'Tú dices <b>quién</b> debe sonar y <b>qué</b> estado de ánimo – con eso, Tuttiphon crea playlists que se mantienen al día por sí solas: los álbumes nuevos entran automáticamente, las estrellas de Deezer destacan los éxitos y lo que escuchas en Symfonium hace que las sugerencias sean personales.',
-  'You say <b>what music</b> you like and <b>what you’re in the mood for</b> – from that, Tuttiphon builds playlists from your library that keep themselves up to date. Along the way it learns from what you listen to in Symfonium. You listen to everything in Symfonium as usual.':
-    'Tú dices <b>qué música</b> te gusta y <b>qué te apetece</b> – con eso, Tuttiphon crea playlists de tu biblioteca que se mantienen al día por sí solas. Por el camino aprende de lo que escuchas en Symfonium. Todo lo escuchas en Symfonium como siempre.',
+  'You say <b>who</b> should play and <b>what</b> kind of mood – from that, Tuttiphon builds playlists that keep themselves up to date: new albums are included automatically, stars from Deezer pick out the hits, and what you listen to in your music apps makes the suggestions personal.':
+    'Tú dices <b>quién</b> debe sonar y <b>qué</b> estado de ánimo – con eso, Tuttiphon crea playlists que se mantienen al día por sí solas: los álbumes nuevos entran automáticamente, las estrellas de Deezer destacan los éxitos y lo que escucháis en vuestras apps de música hace que las sugerencias sean personales.',
+  'You say <b>what music</b> you like and <b>what you’re in the mood for</b> – from that, Tuttiphon builds playlists from your library that keep themselves up to date. Along the way it learns from what you listen to in your music app – where you listen to everything as usual.':
+    'Tú dices <b>qué música</b> te gusta y <b>qué te apetece</b> – con eso, Tuttiphon crea playlists de tu biblioteca que se mantienen al día por sí solas. Por el camino aprende de lo que escuchas en tu app de música – donde lo escuchas todo como siempre.',
   'Help & guide':
     'Ayuda y guía',
   'Search help':
@@ -46,8 +46,7 @@ export default {
     '¿Playlist o mix?',
   'Your playlists':
     'Tus playlists',
-  'Listening in Symfonium':
-    'Escuchar en Symfonium',
+  'Listening in your music app': 'Escuchar en tu app de música',
   'Music worlds & bands':
     'Mundos musicales y bandas',
   'Your statistics & your month':
@@ -70,8 +69,8 @@ export default {
     '<b>Ambiente</b> – ¿qué estado de ánimo u ocasión? Como «Fiesta», «Tranquilo» o «Navidad». El número indica cuántas canciones encajan.',
   '<b>Finishing touches</b> – name, <b>playlist or mix</b>, only the hits or everything. Right next to it you see which songs would be in it.':
     '<b>Últimos retoques</b> – nombre, <b>playlist o mix</b>, solo los éxitos o todo. Justo al lado ves qué canciones tendría.',
-  'After <Ui icon="check" primary>Create playlist</Ui> it is in Navidrome within a few seconds, and in Symfonium after the next sync.':
-    'Tras <Ui icon="check" primary>Crear playlist</Ui>, está en Navidrome en pocos segundos, y en Symfonium tras la próxima sincronización.',
+  'After <Ui icon="check" primary>Create playlist</Ui> it is in Navidrome within a few seconds, and in your music app after the next sync.':
+    'Tras <Ui icon="check" primary>Crear playlist</Ui>, está en Navidrome en pocos segundos, y en tu app de música tras la próxima sincronización.',
   'Smart playlist':
     'Playlist inteligente',
   'Navidrome reshuffles it <b>every time you open it</b> from all matching songs.':
@@ -86,8 +85,8 @@ export default {
     'Se renueva <b>cada día, cada semana o cada mes</b> y entretanto no cambia.',
   'Only a few songs per band, never the same band twice in a row.':
     'Pocas canciones por banda, nunca la misma banda dos veces seguidas.',
-  '<b>Ideal for downloading:</b> save it offline in Symfonium once – new songs arrive by themselves at the next sync.':
-    '<b>Ideal para descargar:</b> guárdalo una vez sin conexión en Symfonium – las canciones nuevas llegan automáticamente en la próxima sincronización.',
+  '<b>Ideal for downloading:</b> save it offline in your music app once – in apps like Symfonium, new songs arrive by themselves at the next sync.':
+    '<b>Ideal para descargar:</b> guárdalo una vez sin conexión en tu app de música – en apps como Symfonium, las canciones nuevas llegan automáticamente en la próxima sincronización.',
   'Don’t like the selection? <Ui icon="dice">Reshuffle</Ui> on the playlist page.':
     '¿No te gusta la selección? <Ui icon="dice">Mezclar de nuevo</Ui> en la página de la playlist.',
   '<b>Learns as you go:</b> what you skip in a mix comes up less often. Songs you rate with 1 star yourself no longer go into your mixes.':
@@ -96,8 +95,8 @@ export default {
     '<b>También los mixes de la familia:</b> si escuchas uno con tu propia cuenta, Tuttiphon lo reconoce por su orden – entonces aprende la familia, no tu propio gusto.',
   'Rule of thumb: the mix for on the go and for children’s and family music, the smart playlist for browsing at home.':
     'Regla práctica: el mix para fuera de casa y para música infantil y familiar; la playlist inteligente para explorar en casa.',
-  '<Ui icon="edit">Edit</Ui> – change music, name and type; Symfonium keeps the playlist.':
-    '<Ui icon="edit">Editar</Ui> – cambiar música, nombre y tipo; Symfonium conserva la playlist.',
+  '<Ui icon="edit">Edit</Ui> – change music, name and type; your music app keeps the playlist.':
+    '<Ui icon="edit">Editar</Ui> – cambiar música, nombre y tipo; tu app de música conserva la playlist.',
   '<Ui icon="image">Cover</Ui> – a picture from band photos and album covers, or a photo of your own.':
     '<Ui icon="image">Portada</Ui> – una imagen con fotos de bandas y portadas de álbumes, o una foto propia.',
   '<Ui icon="dice">Reshuffle</Ui> – mixes only: a different selection right away.':
@@ -110,18 +109,18 @@ export default {
     '<Ui icon="copy">Duplicar</Ui> – una copia de la playlist que primero ajustas y luego creas.',
   'Almost everything can be taken back right away with <Ui icon="undo">Undo</Ui> in the message at the bottom.':
     'Casi todo se puede deshacer al instante con <Ui icon="undo">Deshacer</Ui> en el mensaje de abajo.',
-  '<b>Offline:</b> download a mix in Symfonium once – when it renews itself, Symfonium downloads the new songs by itself.':
-    '<b>Sin conexión:</b> descarga un mix una vez en Symfonium – cuando se renueve, Symfonium descargará automáticamente las canciones nuevas.',
-  '<b>1 star:</b> rate a song you no longer want to hear with 1 star in Symfonium – then it no longer goes into your mixes.':
-    '<b>1 estrella:</b> dale 1 estrella en Symfonium a una canción que ya no quieras escuchar – así deja de entrar en tus mixes.',
+  '<b>Offline:</b> download a mix in your music app once – when it renews itself, apps like Symfonium download the new songs by themselves.':
+    '<b>Sin conexión:</b> descarga un mix una vez en tu app de música – cuando se renueve, apps como Symfonium descargarán automáticamente las canciones nuevas.',
+  '<b>1 star:</b> rate a song you no longer want to hear with 1 star in your music app – then it no longer goes into your mixes.':
+    '<b>1 estrella:</b> dale 1 estrella en tu app de música a una canción que ya no quieras escuchar – así deja de entrar en tus mixes.',
   '<Ui icon="dice">Daily Mix</Ui> – a mix from this world with one tap, new every day.':
     '<Ui icon="dice">Daily Mix</Ui> – un mix de este mundo con un toque, nuevo cada día.',
   '<Ui icon="heart">Like</Ui> – saves the world as a favorite world in your profile.':
     '<Ui icon="heart">Me gusta</Ui> – guarda el mundo como mundo favorito en tu perfil.',
   'If a band is missing or in the wrong world, let the administrator know – they look after the music worlds for everyone.':
     'Si falta una banda o está en el mundo equivocado, avisa al administrador – se encarga de los mundos musicales para todos.',
-  'You sign in with your <b>Navidrome account</b> – with the same name and password as in Symfonium. You stay signed in for 90 days.':
-    'Inicias sesión con tu <b>cuenta de Navidrome</b> – con el mismo nombre y contraseña que en Symfonium. La sesión dura 90 días.',
+  'You sign in with your <b>Navidrome account</b> – with the same name and password as in your music app. You stay signed in for 90 days.':
+    'Inicias sesión con tu <b>cuenta de Navidrome</b> – con el mismo nombre y contraseña que en tu app de música. La sesión dura 90 días.',
   '<b>Sign out:</b> tap your name at the bottom left → “Sign out”. On your phone, your name is at the top right.':
     '<b>Cerrar sesión:</b> toca tu nombre abajo a la izquierda → «Cerrar sesión». En el teléfono, tu nombre está arriba a la derecha.',
   '<b>Tour again:</b> <a class="link" href="#/einstellungen/konto">Settings → My account</a> → <Ui icon="play">Start tour</Ui>.':
@@ -132,8 +131,7 @@ export default {
     '<b>iPhone:</b> en Safari, <b>Compartir → Añadir a pantalla de inicio</b>.',
   '<b>Android:</b> in the Chrome menu, <b>⋮ → Install app</b> or “Add to Home screen”.':
     '<b>Android:</b> en el menú de Chrome, <b>⋮ → Instalar aplicación</b> o «Añadir a pantalla de inicio».',
-  'I don’t see a new playlist in Symfonium.':
-    'No veo una playlist nueva en Symfonium.',
+  'I don’t see a new playlist in the music app.': 'No veo una playlist nueva en la app de música.',
   'Why does a smart playlist only change when I open it?':
     '¿Por qué una playlist inteligente solo cambia cuando la abro?',
   'That’s how Navidrome works: smart playlists are reshuffled when their owner loads them. Mixes, on the other hand, are put together by Tuttiphon itself.':
@@ -168,12 +166,11 @@ export default {
     'El análisis de sonido con IA indica «Essentia no está instalado» o «Faltan los modelos de IA».',
   'How do I get playlists onto my phone for offline listening automatically?':
     '¿Cómo consigo que las playlists lleguen automáticamente a mi teléfono para escucharlas sin conexión?',
-  'Create the playlist as a daily, weekly or monthly mix and make it available offline in Symfonium once. When Tuttiphon renews the mix, Symfonium fetches the new songs by itself at the next sync.':
-    'Crea la playlist como mix diario, semanal o mensual y hazla disponible sin conexión una vez en Symfonium. Cuando Tuttiphon renueve el mix, Symfonium traerá automáticamente las canciones nuevas en la próxima sincronización.',
-  'Why doesn’t Symfonium show new lyrics yet?':
-    '¿Por qué Symfonium aún no muestra las letras nuevas?',
-  'Navidrome only reads new .lrc/.txt files at the next scan – “Update everything” does that automatically. After that, Symfonium may need a sync.':
-    'Navidrome solo lee los archivos .lrc/.txt nuevos en el próximo escaneo – «Actualizar todo» lo hace automáticamente. Después, puede que Symfonium necesite sincronizar.',
+  'Create the playlist as a daily, weekly or monthly mix and make it available offline in the music app once. When Tuttiphon renews the mix, apps like Symfonium fetch the new songs by themselves at the next sync.':
+    'Crea la playlist como mix diario, semanal o mensual y hazla disponible sin conexión una vez en la app de música. Cuando Tuttiphon renueve el mix, apps como Symfonium traerán automáticamente las canciones nuevas en la próxima sincronización.',
+  'Why doesn’t the music app show new lyrics yet?': '¿Por qué la app de música aún no muestra las letras nuevas?',
+  'Navidrome only reads new .lrc/.txt files at the next scan – “Update everything” does that automatically. After that, the music app may need a sync.':
+    'Navidrome solo lee los archivos .lrc/.txt nuevos en el próximo escaneo – «Actualizar todo» lo hace automáticamente. Después, puede que la app de música necesite sincronizar.',
   'The recap is still empty.':
     'El resumen aún está vacío.',
   'Navidrome doesn’t keep a history. That’s why Tuttiphon records the plays every day from its first start – so the recap fills up over time.':
@@ -204,10 +201,9 @@ export default {
     '¿Se añade cada mes una nueva playlist de resumen?',
   'Someone forgot their Navidrome password.':
     'Alguien olvidó su contraseña de Navidrome.',
-  'I don’t see my new playlist in Symfonium.':
-    'No veo mi playlist nueva en Symfonium.',
-  'Symfonium only syncs with Navidrome now and then. Wait a bit or refresh the media source in Symfonium. Also: be signed in to Symfonium with your own account – only it sees your playlists.':
-    'Symfonium solo se sincroniza con Navidrome de vez en cuando. Espera un poco o actualiza el proveedor de medios en Symfonium. Y además: inicia sesión en Symfonium con tu propia cuenta – solo esa cuenta ve tus playlists.',
+  'I don’t see my new playlist in my music app.': 'No veo mi playlist nueva en mi app de música.',
+  'Music apps only sync with Navidrome now and then. Wait a bit or refresh the library in the music app. Also: be signed in there with your own account – only it sees your playlists.':
+    'Las apps de música solo se sincronizan con Navidrome de vez en cuando. Espera un poco o actualiza la biblioteca en la app de música. Y además: inicia sesión allí con tu propia cuenta – solo esa cuenta ve tus playlists.',
   'What’s the difference between a playlist and a mix?':
     '¿Qué diferencia hay entre una playlist y un mix?',
   'Navidrome reshuffles a smart playlist every time you open it. A mix stays the same for a day, a week or a month and then renews itself – ideal for downloading.':
@@ -226,8 +222,8 @@ export default {
     'No – tus playlists son solo tuyas; las playlists de la familia son para todos. Aparte de ti, solo el administrador ve tus estadísticas y tu perfil.',
   'My statistics are empty.':
     'Mis estadísticas están vacías.',
-  'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Symfonium has to report plays to the server; that’s normally on.':
-    'Entonces a Tuttiphon le falta tu contraseña: activa «Estadísticas y estrellas» en Ajustes → Mi cuenta. O todavía no has escuchado nada desde entonces. Symfonium tiene que comunicar las reproducciones al servidor; normalmente está activado.',
+  'Then Tuttiphon doesn’t have your password: turn on “Statistics & stars” under Settings → My account. Or you haven’t listened to anything since. Your music app has to report plays to the server (“Scrobbling”); that’s normally on.':
+    'Entonces a Tuttiphon le falta tu contraseña: activa «Estadísticas y estrellas» en Ajustes → Mi cuenta. O todavía no has escuchado nada desde entonces. Tu app de música tiene que comunicar las reproducciones al servidor («Scrobbling»); normalmente está activado.',
   'Tuttiphon detects them itself from your library – such as 80s hits, Eurodance or German rap – and sorts new bands in by itself. The worlds you listen to are at the very front.':
     'Tuttiphon los detecta por su cuenta en tu biblioteca – como éxitos de los 80, Eurodance o rap alemán – y clasifica automáticamente las bandas nuevas. Los mundos que escuchas aparecen los primeros.',
   'A band is missing or in the wrong place.':
@@ -288,8 +284,8 @@ export default {
     'Conservar este mix',
   'In the “…” menu of a mix: save the current selection as a fixed playlist that never changes. For a smart playlist it is called “Save as fixed playlist”.':
     'En el menú «…» de un mix: guardar la selección actual como playlist fija que nunca cambia. En una playlist inteligente se llama «Guardar como playlist fija».',
-  'Playlist for everyone – every account sees it in Navidrome and Symfonium.':
-    'Playlist para todos – todas las cuentas la ven en Navidrome y Symfonium.',
+  'Playlist for everyone – every account sees it in Navidrome and the music apps.':
+    'Playlist para todos – todas las cuentas la ven en Navidrome y las apps de música.',
   'Free lyrics database; provides synced and plain lyrics.':
     'Base de datos de letras libre; ofrece letras sincronizadas y simples.',
   'Modern, very efficient audio format – at 160 kbit/s hardly distinguishable from the original.':
@@ -338,8 +334,8 @@ export default {
     'En el teléfono, <Ui icon="more">Más</Ui> abajo lleva a todas las demás páginas.',
   'Under <a class="link" href="#/profil">My profile</a> you see what Tuttiphon knows about your taste. Your mixes and suggestions build on it.':
     'En <a class="link" href="#/profil">Mi perfil</a> ves lo que Tuttiphon sabe de tu gusto. Tus mixes y sugerencias se basan en ello.',
-  '<b>From your listening:</b> what you play in Symfonium, mark as a favorite or rate, Tuttiphon learns by itself. <Ui icon="plus">Remember</Ui> turns it into a favorite.':
-    '<b>De lo que escuchas:</b> Tuttiphon aprende por su cuenta de lo que escuchas en Symfonium, marcas como favorito o valoras. <Ui icon="plus">Recordar</Ui> lo convierte en favorito.',
+  '<b>From your listening:</b> what you play in your music app, mark as a favorite or rate, Tuttiphon learns by itself. <Ui icon="plus">Remember</Ui> turns it into a favorite.':
+    '<b>De lo que escuchas:</b> Tuttiphon aprende por su cuenta de lo que escuchas en tu app de música, marcas como favorito o valoras. <Ui icon="plus">Recordar</Ui> lo convierte en favorito.',
   '<b>Favorite music worlds, bands and vibes:</b> come up more often in your mixes, and you get matching playlist ideas.':
     '<b>Mundos musicales, bandas y ambientes favoritos:</b> salen más a menudo en tus mixes y recibes ideas de playlists afines.',
   '<b>Dislikes:</b> bands or genres that <b>never</b> end up in your playlists.':
@@ -386,16 +382,16 @@ export default {
     '<Ui icon="pin">Conservar este mix</Ui> – la selección actual como playlist fija que nunca cambia.',
   '<Ui icon="trash">Move to trash</Ui> – can be restored for 30 days.':
     '<Ui icon="trash">Mover a la papelera</Ui> – se puede restaurar durante 30 días.',
-  '<b>Seasonal playlists</b> such as Christmas are only in Symfonium during their season and come back by themselves.':
-    'Las <b>playlists de temporada</b>, como Navidad, solo están en Symfonium durante su temporada y vuelven automáticamente.',
+  '<b>Seasonal playlists</b> such as Christmas are only in your music app during their season and come back by themselves.':
+    'Las <b>playlists de temporada</b>, como Navidad, solo están en tu app de música durante su temporada y vuelven automáticamente.',
   '<b>Your playlists</b> are only yours, <b>family playlists</b> are for everyone. If you may not change one, <Ui icon="copy">Copy for me</Ui> gives you your own version.':
     '<b>Tus playlists</b> son solo tuyas; las <b>playlists de la familia</b> son para todos. Si no puedes cambiar una, <Ui icon="copy">Copiar para mí</Ui> te da tu propia versión.',
-  'Everything you create here appears in Symfonium after the next sync – or right away if you refresh the media source there.':
-    'Todo lo que creas aquí aparece en Symfonium tras la próxima sincronización – o al instante si allí actualizas el proveedor de medios.',
-  '<b>Listening counts:</b> what you play in Symfonium shapes your statistics, taste and mixes.':
-    '<b>Escuchar cuenta:</b> lo que escuchas en Symfonium da forma a tus estadísticas, tu gusto y tus mixes.',
-  '<b>Radio and smart queue by sound:</b> in Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers) and choose “Sonic Analysis” for the smart queue in the player. The next songs then come from Tuttiphon – picked for you and with variety between bands.':
-    '<b>Radio y cola inteligente por sonido:</b> en Symfonium, activa «Use similar tracks for Radio Mix» para el servidor (Manage media providers) y elige «Sonic Analysis» para la cola inteligente en el reproductor. Las siguientes canciones vendrán entonces de Tuttiphon – elegidas para ti y con variedad entre bandas.',
+  'Everything you create here appears in your music app after the next sync – or right away if you refresh the library there.':
+    'Todo lo que creas aquí aparece en tu app de música tras la próxima sincronización – o al instante si allí actualizas la biblioteca.',
+  '<b>Listening counts:</b> what you play in your music app shapes your statistics, taste and mixes.':
+    '<b>Escuchar cuenta:</b> lo que escuchas en tu app de música da forma a tus estadísticas, tu gusto y tus mixes.',
+  '<b>Radio and smart queue by sound:</b> when your music app asks Navidrome for similar songs – Instant Mix, song radio –, the next songs come from Tuttiphon: picked for you and with variety between bands. In Symfonium, turn on “Use similar tracks for Radio Mix” for the server (Manage media providers) and choose “Sonic Analysis” for the smart queue in the player.':
+    '<b>Radio y cola inteligente por sonido:</b> si tu app de música pide a Navidrome canciones parecidas – Instant Mix, radio de canción –, las siguientes canciones vienen de Tuttiphon: elegidas para ti y con variedad entre bandas. En Symfonium, activa para ello «Use similar tracks for Radio Mix» para el servidor (Manage media providers) y elige «Sonic Analysis» para la cola inteligente en el reproductor.',
   'A <b>music world</b> groups similar bands, such as “Medieval” with Saltatio Mortis and In Extremo. Under <a class="link" href="#/welten">Music worlds</a>, the ones you listen to come first.':
     'Un <b>mundo musical</b> agrupa bandas parecidas, como «Medieval» con Saltatio Mortis e In Extremo. En <a class="link" href="#/welten">Mundos musicales</a> aparecen primero los que escuchas.',
   '<b>Tap a band</b> – albums, similar bands and <Ui icon="radio">Start radio</Ui>.':

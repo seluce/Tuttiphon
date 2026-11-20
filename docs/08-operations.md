@@ -471,7 +471,7 @@ web interface, “similar songs”, song and artist radio in Symfonium and other
 `getArtistInfo2`) and the OpenSubsonic extension `sonicSimilarity` (`getSonicSimilarTracks`, `findSonicPath`) then
 follow the sound of the own files ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Needs
 Navidrome 0.64 or later (plugins, Instant Mix and the `sonicSimilarity` extension); the answers come from the AI
-sound analysis, so the Docker image – without it, the plugin answers with the radio (Last.fm, genres).
+sound analysis, so the Docker image – without it, the plugin answers with the radio (similar bands, genres).
 
 1. **Key:** Settings → Navidrome → “Navidrome plugin” → “Create key” (shown once – copy it).
 2. **Plugin file:** “Download the plugin” there (`/plugin/tuttiphon.ndp`, part of the image) or `tuttiphon.ndp` from
@@ -490,8 +490,10 @@ sound analysis, so the Docker image – without it, the plugin answers with the 
    is Navidrome itself), and not an https address through a reverse proxy: such a proxy may turn the requests from the
    Navidrome container away (Navidrome's log then says “Tuttiphon answered 403: …”). The file name stays exactly
    `tuttiphon.ndp` – Navidrome takes it as the plugin's name in the list of agents.
-5. **Symfonium:** in the settings of the Navidrome server (Settings → Media providers → the server), turn on “Use
-   similar tracks for Radio Mix” – Instant Mix, song radio and the smart queue then come from Tuttiphon.
+5. **Music apps:** apps that ask Navidrome for similar songs (Instant Mix, song radio) get them from Tuttiphon
+   without any setting. In **Symfonium**, turn on “Use similar tracks for Radio Mix” in the settings of the Navidrome
+   server (Settings → Media providers → the server) – Instant Mix, song radio and the smart queue then come from
+   Tuttiphon.
 
 Check: Settings → Navidrome in Tuttiphon shows “Last request from Navidrome” after an Instant Mix – with the person
 the answer was for (when it was unclear: the family, without a family “for everyone”) – and “Plays from Navidrome” after a song (with the accounts). The answers
@@ -566,7 +568,7 @@ responsible instance, so not on the PC while a container is running) and on dema
 | `backup/` | originals of taken-over handmade playlists and overwritten third-party files | yes |
 | `state/history.jsonl`, `logs/` | history and logs of the runs | optional |
 | `state/lyrics.json` | when each song was last searched | optional (without it: searched again) |
-| `state/lastfm.json` | Last.fm responses, valid for 30 days | optional (fetched again) |
+| `state/bands.json`, `state/lastfm.json` | similar bands and tags from ListenBrainz, MusicBrainz, Deezer and Last.fm, valid for 30 days | optional (fetched again – what Last.fm delivered only with a key) |
 | `state/mixes.json`, `daily.json`, `watch.json`, `watch_files.json` | today's mix selection, last daily refresh, state of the folder watch and the files it has seen | optional |
 | `state/auto_assigned.json` | bands that the classification has already assigned to a music world automatically | optional – without it, a band that was taken out again can be classified automatically again |
 | `state/audio.defekt-….json`, `state/ml.defekt-….json` | damaged result files of the sound analysis or the AI, set aside | no – for rescuing by hand, can be deleted afterwards |

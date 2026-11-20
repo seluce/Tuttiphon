@@ -76,9 +76,9 @@
 </script>
 
 <Card title={t('Navidrome plugin')} icon="puzzle" guide="plugin">
-  <p class="muted small">{t('With the plugin, Navidrome asks Tuttiphon for similar songs and passes every play on: Instant Mix, song and artist radio and the smart queue in Symfonium then follow the sound of your own music files – also for bands that other services hardly know. Needs Navidrome 0.64 or later.')}</p>
+  <p class="muted small">{t('With the plugin, Navidrome asks Tuttiphon for similar songs and passes every play on: Instant Mix, song and artist radio in the music apps and Symfonium’s smart queue then follow the sound of your own music files – also for bands that other services hardly know. Needs Navidrome 0.64 or later.')}</p>
   {#if st}
-    <Row label={t('Songs with a sound vector')} hint={st.vectors ? '' : t('No sound vectors yet – the AI sound analysis of the Docker image adds them night by night. Until then the plugin answers with similar bands from Last.fm and the genres.')}>
+    <Row label={t('Songs with a sound vector')} hint={st.vectors ? '' : t('No sound vectors yet – the AI sound analysis of the Docker image adds them night by night. Until then the plugin answers with similar bands from ListenBrainz, Deezer and Last.fm and with the genres.')}>
       <b>{fmt(st.vectors)}</b>
     </Row>
     <Row label={t('Key')} hint={st.key ? t('Created {when}', { when: relTime(st.keyAt) }) : t('Navidrome signs in to Tuttiphon with it.')}>
@@ -130,7 +130,7 @@
         <span class="muted">{t('If there is a list already, put “tuttiphon,” in front of it – without one these are Navidrome’s defaults. The docker-compose line wins over navidrome.toml. Restart Navidrome afterwards; where Tuttiphon has no answer, Navidrome asks the next ones.')}</span>
       </li>
       <li>{@html t('In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.', { address: addressHtml })}</li>
-      <li>{@html t('In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.')}</li>
+      <li>{@html t('Music apps that ask Navidrome for similar songs – for Instant Mix or song radio – then get them from Tuttiphon. In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.')}</li>
     </ol>
   </div>
   <div class="hint">{t('Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family – without a family for everyone. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a person has kid-safe mode or is a child profile.')}</div>

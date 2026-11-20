@@ -184,12 +184,12 @@
           <div class="wel-hero">
             <div class="eyebrow">{t('Welcome to Tuttiphon')}</div>
             <h1>{me.name ? t('Hello {name}!', { name: me.name }) : t('Hello!')}</h1>
-            <p class="lead">{t('Tuttiphon puts together playlists from your music library – matching your taste, and they keep themselves up to date. You then find them in Symfonium as usual.')}</p>
+            <p class="lead">{t('Tuttiphon puts together playlists from your music library – matching your taste, and they keep themselves up to date. You then find them in your music app as usual.')}</p>
           </div>
           <TipCards items={[
             ['sparkles', t('Made for you'), t('You say what you like to hear – Tuttiphon suggests ready-made playlists.')],
             ['dice', t('Something new every day'), t('Mixes regularly put themselves together anew, with just a few songs per band.')],
-            ['smartphone', t('Simply in Symfonium'), t('Your playlists show up in Symfonium just like all the others.')],
+            ['smartphone', t('Simply in your music app'), t('Your playlists show up in your music app just like all the others.')],
           ]} />
           <p class="muted small">{t('This takes about two minutes. You can change everything later under “My profile”.')}</p>
           {#if existing || isAdmin()}
@@ -220,7 +220,7 @@
           <p class="muted mb-4">{t('Tap everything you like – you can pick several. A music world groups similar bands together.')}</p>
           {#if heard}
             <div class="note mb-4 flex gap-2.5 items-center"><Icon name="sparkles" size={18} class="shrink-0" />
-              <span>{t('What you listen to most in Symfonium is already selected. Tap whatever does not fit or is missing.')}</span></div>
+              <span>{t('What you listen to most in your music app is already selected. Tap whatever does not fit or is missing.')}</span></div>
           {/if}
           <div class="pick g-cards">
             {#each weltenSorted as w (w.id)}
@@ -279,7 +279,7 @@
           <div>
             <h2 class="mb-1.5">{t('Your first playlists')}</h2>
             <p class="muted mb-1.5">{t('I have already selected a few suggestions – tap what you would like to have.')}</p>
-            <p class="hint mb-4">{t('“Mix” means: it regularly puts itself together anew and stays the same in between – ideal for downloading in Symfonium. Navidrome reshuffles the others every time they are played.')}</p>
+            <p class="hint mb-4">{t('“Mix” means: it regularly puts itself together anew and stays the same in between – ideal for downloading in your music app. Navidrome reshuffles the others every time they are played.')}</p>
             <div class="pick g-cards">
               {#each offers as x (x.key)}
                 <button class="pickcard" class:on={picks.has(x.key)} onclick={() => togglePick(x.key)}>
@@ -305,8 +305,8 @@
             <h1>{t('Done – great to have you here!')}</h1>
             <p class="lead">
               {picks.size
-                ? tn(picks.size, 'Your playlist will be in Navidrome in a moment. In Symfonium it appears under “Playlists” after the next sync.',
-                  'Your {n} playlists will be in Navidrome in a moment. In Symfonium they appear under “Playlists” after the next sync.')
+                ? tn(picks.size, 'Your playlist will be in Navidrome in a moment. In your music app it appears under “Playlists” after the next sync.',
+                  'Your {n} playlists will be in Navidrome in a moment. In your music app they appear under “Playlists” after the next sync.')
                 : t('Under “Discover” you always find ready-made suggestions for you.')}
             </p>
           </div>

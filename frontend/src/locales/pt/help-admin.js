@@ -128,8 +128,8 @@ export default {
     '<b>Ambiente</b> – o que toca: p. ex. «Festa», «Calma», «Natal». Os números mostram quantas músicas encaixam.',
   '<b>Finishing touches</b> – name, <b>smart playlist or mix</b>, hits only or everything, add or remove single bands. On the right you see right away what comes out.':
     '<b>Retoques finais</b> – nome, <b>playlist inteligente ou mix</b>, só os êxitos ou tudo, adicionar ou remover bandas individuais. À direita vê logo o resultado.',
-  'After “Create playlist” it shows up in Navidrome automatically within a few seconds, and in Symfonium at the next sync.':
-    'Depois de «Criar playlist», ela aparece automaticamente no Navidrome em poucos segundos e no Symfonium na sincronização seguinte.',
+  'After “Create playlist” it shows up in Navidrome automatically within a few seconds, and in the music apps at the next sync.':
+    'Depois de «Criar playlist», ela aparece automaticamente no Navidrome em poucos segundos e nas apps de música na sincronização seguinte.',
   'Smart playlist':
     'Playlist inteligente',
   '<b>Dynamic, by rules:</b> Navidrome reshuffles all matching songs <b>every time it’s loaded</b>.':
@@ -138,16 +138,16 @@ export default {
     'As músicas novas entram de imediato.',
   'The same band can come up several times in a row.':
     'A mesma banda pode aparecer várias vezes seguidas.',
-  'Not suitable for offline downloads in Symfonium – the list changes every time it’s loaded.':
-    'Não é adequada para transferências offline no Symfonium – a lista muda sempre que é carregada.',
+  'Not suitable for offline downloads in music apps – the list changes every time it’s loaded.':
+    'Não é adequada para transferências offline em apps de música – a lista muda sempre que é carregada.',
   'Mix':
     'Mix',
   '<b>Fixed, but renews itself:</b> Tuttiphon puts together a new selection <b>daily, weekly or monthly</b> – in between it stays the same.':
     '<b>Fixo, mas renova-se:</b> o Tuttiphon monta uma nova seleção <b>diária, semanal ou mensalmente</b> – entretanto mantém-se igual.',
   '<b>At most 3 songs per band</b>, never the same band twice in a row. The maximum is adjustable or “any”.':
     '<b>No máximo 3 músicas por banda</b>, nunca a mesma banda duas vezes seguidas. O máximo é ajustável ou «qualquer».',
-  '<b>Ideal for offline:</b> save the playlist offline in Symfonium once – after each renewal, Symfonium downloads the new songs automatically at the next sync.':
-    '<b>Ideal para offline:</b> guarde a playlist offline no Symfonium uma vez – após cada renovação, o Symfonium transfere automaticamente as músicas novas na sincronização seguinte.',
+  '<b>Ideal for offline:</b> save the playlist offline in the music app once – after each renewal, apps like Symfonium download the new songs automatically at the next sync.':
+    '<b>Ideal para offline:</b> guarde a playlist offline na app de música uma vez – após cada renovação, apps como o Symfonium transferem automaticamente as músicas novas na sincronização seguinte.',
   'Choose the blend: balanced, more hits or more lesser-known songs; recently played songs come up less often.':
     'Escolha a mistura: equilibrada, mais êxitos ou mais músicas menos conhecidas; as músicas ouvidas recentemente aparecem menos vezes.',
   'Don’t like today’s selection? {reshuffle} on the playlist page.':
@@ -156,8 +156,8 @@ export default {
     'Baralhar de novo',
   'Rule of thumb: for streaming and “everything by …” lists, the smart playlist. For kids’ and family music and everything that should go offline onto the phone, the mix – e.g. “Kids · Seasons” as a weekly mix.':
     'Regra prática: para streaming e listas «tudo de …», a playlist inteligente. Para música infantil e de família e tudo o que deve ir offline para o telemóvel, o mix – p. ex. «Crianças · Estações do ano» como mix semanal.',
-  '{edit} – everything can be changed; the name and ID in Navidrome stay, Symfonium keeps the playlist.':
-    '{edit} – tudo pode ser alterado; o nome e o ID no Navidrome mantêm-se, o Symfonium conserva a playlist.',
+  '{edit} – everything can be changed; the name and ID in Navidrome stay, the music apps keep the playlist.':
+    '{edit} – tudo pode ser alterado; o nome e o ID no Navidrome mantêm-se, as apps de música conservam a playlist.',
   '{pause} – disappears from Navidrome but stays here with all its settings. Simply activate it again later.':
     '{pause} – desaparece do Navidrome, mas fica aqui com todas as definições. Basta reativá-la mais tarde.',
   'Pause playlist':
@@ -170,8 +170,8 @@ export default {
     'As outras ações estão no menu {more} ao lado:',
   'Keep this mix':
     'Guardar este mix',
-  '{cover} – your own picture for Navidrome and Symfonium.':
-    '{cover} – uma imagem própria para o Navidrome e o Symfonium.',
+  '{cover} – your own picture for Navidrome and the music apps.':
+    '{cover} – uma imagem própria para o Navidrome e as apps de música.',
   'Cover':
     'Capa',
   'Almost everything can be taken back right away with <b>“Undo”</b> in the message at the bottom.':
@@ -236,12 +236,12 @@ export default {
     'Enviar teste',
   '<b>Restoring</b> works by hand:':
     'O <b>restauro</b> faz-se à mão:',
-  'Everyone in the family can sign in with their own <b>Navidrome account</b> – with the same name and password as in Symfonium. Tuttiphon checks the password directly with Navidrome; there are no separate passwords.':
-    'Todos na família podem iniciar sessão com a sua própria <b>conta do Navidrome</b> – com o mesmo nome e a mesma palavra-passe que no Symfonium. O Tuttiphon verifica a palavra-passe diretamente com o Navidrome; não há palavras-passe separadas.',
+  'Everyone in the family can sign in with their own <b>Navidrome account</b> – with the same name and password as in their music app. Tuttiphon checks the password directly with Navidrome; there are no separate passwords.':
+    'Todos na família podem iniciar sessão com a sua própria <b>conta do Navidrome</b> – com o mesmo nome e a mesma palavra-passe que na sua app de música. O Tuttiphon verifica a palavra-passe diretamente com o Navidrome; não há palavras-passe separadas.',
   '<b>Administrator</b> – sees and changes everything. Default for Navidrome admins such as root.':
     '<b>Administrador</b> – vê e altera tudo. Predefinição para os administradores do Navidrome, como o root.',
-  '<b>No access</b> – cannot sign in to Tuttiphon; Navidrome and Symfonium keep working.':
-    '<b>Sem acesso</b> – não pode iniciar sessão no Tuttiphon; o Navidrome e o Symfonium continuam a funcionar.',
+  '<b>No access</b> – cannot sign in to Tuttiphon; Navidrome and the music apps keep working.':
+    '<b>Sem acesso</b> – não pode iniciar sessão no Tuttiphon; o Navidrome e as apps de música continuam a funcionar.',
   'Make it reachable via https through a reverse proxy such as nginx – then Tuttiphon can also be installed as an app.':
     'Torne-o acessível por https através de um proxy inverso como o nginx – assim o Tuttiphon também pode ser instalado como app.',
   'Tuttiphon can be put on the home screen like an app – with its own icon. iPhone: in Safari <b>Share → Add to Home Screen</b>. Android: Chrome menu <b>⋮ → Add to Home screen</b> or “Install app”.':
@@ -250,8 +250,8 @@ export default {
     'Como app «a sério», com janela própria, só funciona por https, p. ex. com um proxy inverso no NAS. Com o endereço http normal obtém um atalho que funciona igualmente bem. Mais em <a class="link" href="#/einstellungen/allgemein">Definições → Geral</a>.',
   'Playlists that were already in the <code>00_SmartPlaylists</code> folder don’t disappear. The home page offers to <b>take them over</b>: then Tuttiphon keeps maintaining them, their rules stay unchanged, and the original file is backed up first.':
     'As playlists que já estavam na pasta <code>00_SmartPlaylists</code> não desaparecem. A página inicial oferece-se para as <b>assumir</b>: assim o Tuttiphon continua a mantê-las, as regras ficam inalteradas e é feita primeiro uma cópia de segurança do ficheiro original.',
-  'Regular playlists you create by hand in Navidrome or Symfonium are never touched by the tool.':
-    'As playlists normais que cria à mão no Navidrome ou no Symfonium nunca são tocadas pela ferramenta.',
+  'Regular playlists you create by hand in Navidrome or a music app are never touched by the tool.':
+    'As playlists normais que cria à mão no Navidrome ou numa app de música nunca são tocadas pela ferramenta.',
   'At the first start you set the password of the <b>local administrator</b> in the browser – with the setup code from the container log. It turns on sign-in; you change it later under Settings → Users & permissions.':
     'No primeiro arranque, define no navegador a palavra-passe do <b>administrador local</b> – com o código de configuração do registo do contentor. Ela ativa o início de sessão; mais tarde, altera-a em Definições → Utilizadores e permissões.',
   'From then on Tuttiphon asks everyone for their username and password.':
@@ -264,8 +264,8 @@ export default {
     'Coloque o ficheiro – sem descompactar e com o nome exato <b>tuttiphon.ndp</b> – na pasta de plugins do Navidrome, ponha <code>tuttiphon</code> em primeiro lugar na lista de agentes do Navidrome (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) e reinicie o Navidrome.',
   'In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.':
     'No Navidrome, em «Settings → Plugins», ative «Tuttiphon», introduza o endereço do Tuttiphon na rede doméstica e a chave, e dê-lhe acesso a todos os utilizadores.',
-  'In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.':
-    'No Symfonium, ative «Use similar tracks for Radio Mix» para o servidor Navidrome («Manage media providers» → o servidor) e escolha «Sonic Analysis» para a fila inteligente no leitor.',
+  'Music apps that ask Navidrome for similar songs – for Instant Mix or song radio – then get them from Tuttiphon. In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.':
+    'As apps de música que pedem ao Navidrome músicas semelhantes – para o Instant Mix ou a rádio de música – recebem-nas então do Tuttiphon. No Symfonium, ative «Use similar tracks for Radio Mix» para o servidor Navidrome («Manage media providers» → o servidor) e escolha «Sonic Analysis» para a fila inteligente no leitor.',
   'The home page shows at a glance what’s going on: the big <b>“Update everything”</b> button, your mixes, <b>“To review”</b> with what needs you – such as new bands or missing passwords – and what was played and added. You arrange the sections under <a class="link" href="#/einstellungen/start">Settings → Home page</a>.':
     'A página inicial mostra num relance o que se passa: o grande botão <b>«Atualizar tudo»</b>, os seus mixes, <b>«Para rever»</b> com o que precisa de si – como bandas novas ou palavras-passe em falta – e o que foi ouvido e adicionado. As secções organizam-se em <a class="link" href="#/einstellungen/start">Definições → Página inicial</a>.',
   '<b>“Update everything”</b> runs all steps in order – convert, lyrics, covers, sound analysis, playlists, scan, Deezer stars. Which steps take part you set under <a class="link" href="#/einstellungen/ablaeufe">Settings → Automation</a>; the log is under <a class="link" href="#/verlauf">History</a>.':
@@ -304,8 +304,8 @@ export default {
     '<b>Pelo som:</b> «para adormecer», «sem voz» ou «piano calmo».',
   '<b>In the lyrics:</b> one line is enough, such as “hands up in the air”.':
     '<b>Nas letras:</b> basta um verso, como «mãos no ar».',
-  'A music world groups bands, such as “Medieval” with Saltatio Mortis and In Extremo. <b>Music worlds appear on their own:</b> from genres, Last.fm, AI and language Tuttiphon recognizes what your library offers – and puts new bands into their world.':
-    'Um mundo musical agrupa bandas, como «Medieval» com Saltatio Mortis e In Extremo. <b>Os mundos musicais surgem sozinhos:</b> a partir de géneros, Last.fm, IA e idioma, o Tuttiphon reconhece o que a sua biblioteca oferece – e coloca as bandas novas no seu mundo.',
+  'A music world groups bands, such as “Medieval” with Saltatio Mortis and In Extremo. <b>Music worlds appear on their own:</b> from genres, ListenBrainz, AI and language Tuttiphon recognizes what your library offers – and puts new bands into their world.':
+    'Um mundo musical agrupa bandas, como «Medieval» com Saltatio Mortis e In Extremo. <b>Os mundos musicais surgem sozinhos:</b> a partir de géneros, ListenBrainz, IA e idioma, o Tuttiphon reconhece o que a sua biblioteca oferece – e coloca as bandas novas no seu mundo.',
   'Worlds Tuttiphon created carry the {auto} badge; rename or delete them – a deleted one won’t come back.':
     'Os mundos criados pelo Tuttiphon têm o distintivo {auto}; pode mudar-lhes o nome ou eliminá-los – um mundo eliminado não volta.',
   '{new} creates a world of your own; {rebuild} puts a changed world together from its scene again.':
@@ -328,18 +328,18 @@ export default {
     '<b>No telemóvel:</b> com as notificações ativas, cada pessoa ativa os seus dispositivos no seu perfil.',
   '<a class="link" href="#/statistik">Statistics</a> shows per person the most played bands, songs and albums, the listening time – and <b>forgotten favorites</b>, as a playlist with one click. At the top you switch between week, 30 days and year; every recap can be kept as a fixed playlist.':
     '<a class="link" href="#/statistik">Estatísticas</a> mostra, por pessoa, as bandas, músicas e álbuns mais ouvidos, o tempo de audição – e as <b>favoritas esquecidas</b>, como playlist com um clique. No topo alterna entre semana, 30 dias e ano; cada resumo pode ser guardado como playlist fixa.',
-  'It is based on the plays Symfonium reports, so leave “Scrobbling” on in Symfonium. Tuttiphon counts them for accounts with a stored password or through the Navidrome plugin – the recap grows from the first day.':
-    'Baseia-se nas reproduções que o Symfonium comunica, por isso deixe «Scrobbling» ativado no Symfonium. O Tuttiphon conta-as para as contas com palavra-passe guardada ou através do plugin do Navidrome – o resumo cresce desde o primeiro dia.',
-  'For “Only the hits” and the order of top songs in Symfonium, Tuttiphon gives stars by popularity on Deezer – day to day only for new songs. A match only counts if band and title fit.':
-    'Para «Só os êxitos» e a ordem das melhores músicas no Symfonium, o Tuttiphon atribui estrelas segundo a popularidade no Deezer – no dia a dia, só para músicas novas. Uma correspondência só conta se a banda e o título coincidirem.',
+  'It is based on the plays the music apps report, so leave “Scrobbling” (reporting plays) on there. Tuttiphon counts them for accounts with a stored password or through the Navidrome plugin – the recap grows from the first day.':
+    'Baseia-se nas reproduções que as apps de música comunicam, por isso deixe lá «Scrobbling» (comunicar reproduções) ativado. O Tuttiphon conta-as para as contas com palavra-passe guardada ou através do plugin do Navidrome – o resumo cresce desde o primeiro dia.',
+  'For “Only the hits” and the order of top songs in apps like Symfonium, Tuttiphon gives stars by popularity on Deezer – day to day only for new songs. A match only counts if band and title fit.':
+    'Para «Só os êxitos» e a ordem das melhores músicas em apps como o Symfonium, o Tuttiphon atribui estrelas segundo a popularidade no Deezer – no dia a dia, só para músicas novas. Uma correspondência só conta se a banda e o título coincidirem.',
   'Under <a class="link" href="#/einstellungen/deezer">Settings → Deezer stars</a> you set how many stars each popularity rank gets – the chart shows the distribution right away.':
     'Em <a class="link" href="#/einstellungen/deezer">Definições → Estrelas do Deezer</a> define quantas estrelas recebe cada posição de popularidade – o gráfico mostra logo a distribuição.',
   '<b>Highlight top tracks per band</b> – if many songs of a band share the top star count, the most popular get one more.':
     '<b>Destacar as melhores faixas por banda</b> – se muitas músicas de uma banda partilharem o número máximo de estrelas, as mais populares recebem mais uma.',
   '<b>Refresh every night</b>, <b>Retry not found</b> and <b>Check everything again</b> keep the stars up to date.':
     '<b>Atualizar todas as noites</b>, <b>Tentar de novo as não encontradas</b> e <b>Verificar tudo de novo</b> mantêm as estrelas atualizadas.',
-  'Tuttiphon finds missing lyrics and puts them next to the songs – synced ones scroll along in Symfonium. Navidrome reads them at the next scan.':
-    'O Tuttiphon encontra as letras em falta e coloca-as ao lado das músicas – as sincronizadas acompanham a música no Symfonium. O Navidrome incorpora-as na leitura seguinte.',
+  'Tuttiphon finds missing lyrics and puts them next to the songs – synced ones scroll along in many music apps. Navidrome reads them at the next scan.':
+    'O Tuttiphon encontra as letras em falta e coloca-as ao lado das músicas – as sincronizadas acompanham a música em muitas apps de música. O Navidrome incorpora-as na leitura seguinte.',
   '<b>Fast:</b> each run searches a few minutes at most, new songs first; the rest follows.':
     '<b>Rápido:</b> cada execução procura no máximo alguns minutos, primeiro as músicas novas; o resto vem depois.',
   '<b>Lyrics search & kid-safe mode:</b> all lyrics go into a search index – so the search finds songs by a line, and kid-safe mode detects explicit lyrics.':
@@ -360,8 +360,8 @@ export default {
     '<b>A mesma gravação duas vezes:</b> uma impressão digital de áudio encontra-a, também noutro formato; o resultado está em <a class="link" href="#/einstellungen/bibliothek">Definições → Verificar biblioteca</a>.',
   '<b>Radio and gaps:</b> “Start radio” in the band window plays the band with similar bands; Discover shows similar bands you are still missing.':
     '<b>Rádio e lacunas:</b> «Iniciar rádio» na janela da banda toca a banda com bandas semelhantes; «Descobrir» mostra bandas semelhantes que ainda lhe faltam.',
-  'The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
-    'À noite, a análise trata do que ainda está pendente. Num NAS, a primeira passagem da IA demora várias noites; depois só se juntam as músicas novas. O Last.fm precisa de uma chave gratuita. Os pormenores estão no <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">manual</a>.',
+  'The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Similar bands and tags come from ListenBrainz and Deezer, free and without a key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.':
+    'À noite, a análise trata do que ainda está pendente. Num NAS, a primeira passagem da IA demora várias noites; depois só se juntam as músicas novas. As bandas semelhantes e as etiquetas vêm do ListenBrainz e do Deezer, de graça e sem chave. Os pormenores estão no <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">manual</a>.',
   'If you like, Tuttiphon watches the music folder (<a class="link" href="#/einstellungen/ablaeufe">Settings → Automation → Folder watch</a>). New music – e.g. from Lidarr – is then processed on its own: converted, lyrics, scan, sound, Deezer stars.':
     'Se quiser, o Tuttiphon vigia a pasta de música (<a class="link" href="#/einstellungen/ablaeufe">Definições → Automação → Vigilância de pastas</a>). A música nova – p. ex. do Lidarr – é então processada sozinha: conversão, letras, leitura, som, estrelas do Deezer.',
   'It looks every 5–60 minutes and waits until freshly copied files are complete.':
@@ -374,16 +374,16 @@ export default {
     'O Tuttiphon converte os ficheiros sem perdas novos, como FLAC, para <b>Opus</b> ou <b>AAC</b> – soa igual com cerca de um quinto do espaço. O Opus é ideal para Android, o AAC para iPhone e Mac.',
   'The original only goes to the archive once the new file has been checked; nothing there is ever overwritten.':
     'O original só vai para o arquivo depois de o ficheiro novo ter sido verificado; lá nada é alguma vez substituído.',
-  '<b>Even out loudness:</b> if you like, Tuttiphon writes ReplayGain values into the files at night – with ReplayGain on in Symfonium, all songs play equally loud.':
-    '<b>Equilibrar o volume:</b> se quiser, o Tuttiphon escreve valores ReplayGain nos ficheiros durante a noite – com o ReplayGain ativo no Symfonium, todas as músicas tocam com o mesmo volume.',
+  '<b>Even out loudness:</b> if you like, Tuttiphon writes ReplayGain values into the files at night – with ReplayGain on in the music app, all songs play equally loud.':
+    '<b>Equilibrar o volume:</b> se quiser, o Tuttiphon escreve valores ReplayGain nos ficheiros durante a noite – com o ReplayGain ativo na app de música, todas as músicas tocam com o mesmo volume.',
   '<b>Duplicates</b> – the same song twice in an album, on several albums or as the same recording in another format.':
     '<b>Duplicados</b> – a mesma música duas vezes num álbum, em vários álbuns ou como a mesma gravação noutro formato.',
   '<b>Gaps and oddities</b> – albums with gaps in the track numbers, very short files, songs without a genre, MP3 below 128 kbit/s.':
     '<b>Lacunas e estranhezas</b> – álbuns com lacunas na numeração das faixas, ficheiros muito curtos, músicas sem género, MP3 abaixo de 128 kbit/s.',
   '<b>Missing covers:</b> for albums without any picture, Tuttiphon fetches one (Cover Art Archive or Deezer) and saves it as cover.jpg next to the music. Existing pictures stay untouched.':
     '<b>Capas em falta:</b> para álbuns sem imagem, o Tuttiphon vai buscar uma (Cover Art Archive ou Deezer) e guarda-a como cover.jpg ao lado da música. As imagens existentes ficam intactas.',
-  'With the Tuttiphon plugin (Navidrome 0.64 or later), Instant Mix, song radio and the smart queue in Symfonium follow the sound of your own files – and Navidrome passes every play on.':
-    'Com o plugin do Tuttiphon (Navidrome 0.64 ou posterior), o Instant Mix, a rádio de música e a fila inteligente no Symfonium seguem o som dos seus próprios ficheiros – e o Navidrome transmite cada reprodução.',
+  'With the Tuttiphon plugin (Navidrome 0.64 or later), Instant Mix and song radio in the music apps and Symfonium’s smart queue follow the sound of your own files – and Navidrome passes every play on.':
+    'Com o plugin do Tuttiphon (Navidrome 0.64 ou posterior), o Instant Mix e a rádio de música nas apps de música e a fila inteligente do Symfonium seguem o som dos seus próprios ficheiros – e o Navidrome transmite cada reprodução.',
   'Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family, or for everyone if there is none. Songs with explicit lyrics stay out as soon as a person has kid-safe mode or is a child profile. The card shows for whom it last answered.':
     'O Navidrome não diz quem pergunta; o Tuttiphon percebe-o pelas reproduções e responde para a pessoa que está a ouvir – caso contrário, para a família ou, se não houver família, para todos. As músicas com letras explícitas ficam de fora assim que uma pessoa tiver o modo seguro para crianças ou for um perfil infantil. O cartão mostra para quem respondeu da última vez.',
   'Turn on notifications under <a class="link" href="#/einstellungen/benachrichtigungen">Settings → Notifications</a> and tap “Turn on for this device” on the phone – this needs the https address, on the iPhone the home screen. Each person turns on their devices in their profile.':
@@ -410,8 +410,8 @@ export default {
     'Em <a class="link" href="#/einstellungen/benutzer">Definições → Utilizadores e permissões</a> define as funções e quem pode alterar as playlists da família; um breve assistente guia os novos utilizadores pelo seu perfil.',
   'The local administrator signs in under “Local administrator” on the sign-in page – also when Navidrome is not reachable.':
     'O administrador local inicia sessão em «Administrador local» na página de início de sessão – também quando o Navidrome não está acessível.',
-  'Symfonium syncs only now and then – wait or refresh the media source there. A person’s playlists only show up in their own account, family playlists in every account.':
-    'O Symfonium só sincroniza de vez em quando – aguarde ou atualize lá a fonte de multimédia. As playlists de uma pessoa só aparecem na sua própria conta; as playlists da família, em todas as contas.',
+  'Music apps sync only now and then – wait or refresh the library there. A person’s playlists only show up in their own account, family playlists in every account.':
+    'As apps de música só sincronizam de vez em quando – aguarde ou atualize lá a biblioteca. As playlists de uma pessoa só aparecem na sua própria conta; as playlists da família, em todas as contas.',
   'The deeper it listens, the more accurate: “Deep” listens to the whole song, “Fast” only briefly. Tempo and energy are reliable; the mood is an estimate – the AI sound analysis in the Docker image makes it much better.':
     'Quanto mais a fundo ouve, mais preciso: «Profundo» ouve a música inteira, «Rápido» só um pouco. O andamento e a energia são fiáveis; o estado de espírito é uma estimativa – a análise de som com IA da imagem Docker torna-o muito melhor.',
   'Mixes learn: what someone skips comes up less often for a while, songs they rate 1 star themselves not at all. Switch: Settings → Playlists → “Mixes that learn”.':
@@ -420,8 +420,8 @@ export default {
     'O Navidrome entrega a playlist de forma diferente do cálculo do Tuttiphon. Num mix, normalmente o Navidrome não encontra alguns ficheiros – «Atualizar tudo» volta a escrevê-lo; numa playlist inteligente, abra-a e guarde-a de novo.',
   'Both are only in the Docker image; on a PC Tuttiphon carries on with its own sound analysis. If the models are missing in the container, rebuild the image.':
     'Ambos só existem na imagem Docker; num computador, o Tuttiphon continua com a sua própria análise de som. Se faltarem os modelos no contentor, reconstrua a imagem.',
-  'Tuttiphon detects them itself from genres, Last.fm, AI style and language. Deleted worlds don’t come back; turn it off under Settings → Intelligence.':
-    'O Tuttiphon deteta-os sozinho a partir de géneros, Last.fm, estilo da IA e idioma. Os mundos eliminados não voltam; desative isto em Definições → Inteligência.',
+  'Tuttiphon detects them itself from genres, ListenBrainz, AI style and language. Deleted worlds don’t come back; turn it off under Settings → Intelligence.':
+    'O Tuttiphon deteta-os sozinho a partir de géneros, ListenBrainz, estilo da IA e idioma. Os mundos eliminados não voltam; desative isto em Definições → Inteligência.',
   'No – “Your October” becomes “Your November” on the 1st; it stays one playlist. “Keep this mix” in the “…” menu keeps one forever.':
     'Não – «O seu outubro» passa a «O seu novembro» no dia 1; continua a ser uma só playlist. «Guardar este mix» no menu «…» guarda uma para sempre.',
   'In the container log, in the line “Setup code:” – in the Docker app of your NAS or with “docker logs tuttiphon”; opening the sign-in page writes it there again. It is also in setup-code.txt in the data folder.':
@@ -432,24 +432,24 @@ export default {
     'Os seus mixes aprendem: o que salta aparece menos vezes durante algum tempo, as músicas a que dá 1 estrela deixam de aparecer. Afinal gosta de uma música? Dê-lhe mais estrelas.',
   'Type it into the search field at the top, such as “hands up in the air” – under “In the lyrics” you find the song.':
     'Escreva-o no campo de pesquisa no topo, como «mãos no ar» – em «Nas letras» encontra a música.',
-  'For a quick listen, yes: tap a song. It doesn’t count toward your statistics – for real listening there’s Symfonium.':
-    'Para ouvir rapidamente, sim: toque numa música. Não conta para as suas estatísticas – para ouvir a sério há o Symfonium.',
+  'For a quick listen, yes: tap a song. It doesn’t count toward your statistics – for real listening there’s your music app.':
+    'Para ouvir rapidamente, sim: toque numa música. Não conta para as suas estatísticas – para ouvir a sério há a sua app de música.',
   '<b>Next episode</b> – for accounts that listen to audio plays: the next episode of every series, new every day.':
     '<b>Próximo episódio</b> – para contas que ouvem audiodramas: o próximo episódio de cada série, novo todos os dias.',
   'Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).':
     'Saltar músicas orienta de imediato a fila inteligente: após duas seguidas, muda para outro som. De poucas em poucas músicas entra uma que a conta nunca ouviu – a frequência define-se por pessoa no perfil («Músicas novas na fila»).',
   'The family':
     'A família',
-  'If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in Symfonium.':
-    'Se quiser, o Tuttiphon cria uma conta do Navidrome para a família. As playlists dela são para todos – os dispositivos partilhados, como o carro, usam-na no Symfonium.',
-  '<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it – or takes one Navidrome already has, such as the car’s. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.':
-    '<b>A família</b> (opcional): «Configurar a família» cria-lhe uma conta própria no Navidrome – ou usa uma que o Navidrome já tem, como a do carro. As playlists dela são para todos – os dispositivos partilhados, como o carro ou o tablet da cozinha, usam-na no Symfonium.',
+  'If you like, Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – shared devices such as the car use it in their music app.':
+    'Se quiser, o Tuttiphon cria uma conta do Navidrome para a família. As playlists dela são para todos – os dispositivos partilhados, como o carro, usam-na na sua app de música.',
+  '<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it – or takes one Navidrome already has, such as the car’s. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in their music app.':
+    '<b>A família</b> (opcional): «Configurar a família» cria-lhe uma conta própria no Navidrome – ou usa uma que o Navidrome já tem, como a do carro. As playlists dela são para todos – os dispositivos partilhados, como o carro ou o tablet da cozinha, usam-na na sua app de música.',
   'With <a class="link" href="#/neu">New playlist</a> you put one together yourself – in four short steps:':
     'Com <a class="link" href="#/neu">Nova playlist</a> monta uma por si – em quatro passos curtos:',
-  '<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and Symfonium.':
-    '<b>Para quem?</b> – só para si ou para toda a família: todos veem as playlists da família no Navidrome e no Symfonium.',
-  '<b>Shared devices</b> such as the car or a kitchen tablet can use the family account in Symfonium – the administrator sets it up.':
-    'Os <b>dispositivos partilhados</b>, como o carro ou um tablet da cozinha, podem usar a conta da família no Symfonium – é o administrador que a configura.',
+  '<b>For whom?</b> – just for you, or for the whole family: everyone sees family playlists in Navidrome and the music apps.':
+    '<b>Para quem?</b> – só para si ou para toda a família: todos veem as playlists da família no Navidrome e nas apps de música.',
+  '<b>Shared devices</b> such as the car or a kitchen tablet can use the family account in their music app – the administrator sets it up.':
+    'Os <b>dispositivos partilhados</b>, como o carro ou um tablet da cozinha, podem usar a conta da família na sua app de música – é o administrador que a configura.',
   'Can two people share one Navidrome account?':
     'Duas pessoas podem partilhar uma conta do Navidrome?',
   'No – one account, one person. Create an account of their own for everyone in Navidrome under “Users”, then add them under People. Shared devices such as the car use the family account.':
@@ -462,8 +462,8 @@ export default {
     'Playlist da família',
   'Family account':
     'Conta da família',
-  'Navidrome account of the family – for shared devices such as the car or the kitchen tablet in Symfonium.':
-    'Conta do Navidrome da família – para dispositivos partilhados, como o carro ou o tablet da cozinha, no Symfonium.',
+  'Navidrome account of the family – for shared devices such as the car or the kitchen tablet.':
+    'Conta do Navidrome da família – para dispositivos partilhados, como o carro ou o tablet da cozinha.',
   'In December the year waits on the start page as a story – for every person and for the family, with a picture to share. Under year, “Watch as a story” opens it any time.':
     'Em dezembro, o ano espera na página inicial como história – para cada pessoa e para a família, com uma imagem para partilhar. No ano, «Ver como história» abre-o a qualquer momento.',
 }

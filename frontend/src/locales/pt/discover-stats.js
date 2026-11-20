@@ -92,10 +92,8 @@ export default {
     'Criar',
   'Customize':
     'Personalizar',
-  'With a free Last.fm key, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
-    'Com uma chave gratuita do Last.fm, o Tuttiphon mostra aqui bandas parecidas com as suas favoritas que ainda não estão na biblioteca.',
-  'Enter key →':
-    'Introduzir chave →',
+  'With ListenBrainz or Deezer, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
+    'Com o ListenBrainz ou o Deezer, o Tuttiphon mostra aqui bandas parecidas com as suas favoritas que ainda não estão na biblioteca.',
   'The administrator sets this up.':
     'É o administrador que configura isto.',
   'No data yet – it is created during the next run of “Understand music”.':
@@ -104,10 +102,10 @@ export default {
     'semelhante a {names}',
   'Show all {n}':
     'Mostrar todas as {n}',
-  'According to Last.fm – to listen in or as a wish list for Lidarr.':
-    'Segundo o Last.fm – para ouvir um pouco ou como lista de desejos para o Lidarr.',
-  'According to Last.fm – tap to listen in. If you like something, the administrator can add it to the library.':
-    'Segundo o Last.fm – toque para ouvir um pouco. Se gostar de algo, o administrador pode adicioná-lo à biblioteca.',
+  'Tap to listen in on Last.fm – or as a wish list for Lidarr.':
+    'Toque para ouvir um pouco no Last.fm – ou como lista de desejos para o Lidarr.',
+  'Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.':
+    'Toque para ouvir um pouco no Last.fm. Se gostar de algo, o administrador pode adicioná-lo à biblioteca.',
   'All':
     'Todos',
   'Error':
@@ -134,10 +132,10 @@ export default {
     'Estatísticas',
   'My statistics':
     'As minhas estatísticas',
-  'What really gets played in your home – from the plays Symfonium reports to Navidrome.':
-    'O que realmente se ouve lá em casa – a partir das reproduções que o Symfonium comunica ao Navidrome.',
-  'What you really listen to – from the plays Symfonium reports to Navidrome.':
-    'O que realmente ouve – a partir das reproduções que o Symfonium comunica ao Navidrome.',
+  'What really gets played in your home – from the plays your music apps report to Navidrome.':
+    'O que realmente se ouve lá em casa – a partir das reproduções que as vossas apps de música comunicam ao Navidrome.',
+  'What you really listen to – from the plays your music app reports to Navidrome.':
+    'O que realmente ouve – a partir das reproduções que a sua app de música comunica ao Navidrome.',
   'Password missing':
     'Falta a palavra-passe',
   'Counting your plays …':
@@ -186,8 +184,8 @@ export default {
     '«Favoritas esquecidas» criada',
   'No plays counted yet':
     'Ainda não há reproduções contadas',
-  'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.':
-    'O Navidrome ainda não guardou reproduções de «{user}». No Symfonium, «Scrobbling» ou «Report plays to the server» tem de estar ativado.',
+  'Navidrome has not saved any plays for “{user}” yet. The music app has to report plays to the server – often called “Scrobbling”.':
+    'O Navidrome ainda não guardou reproduções de «{user}». A app de música tem de comunicar as reproduções ao servidor – muitas vezes chama-se «Scrobbling».',
   'Plays':
     'Reproduções',
   'from {n} different song':
@@ -238,10 +236,10 @@ export default {
     'Criar como playlist',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Nota: o Navidrome só guarda quantas vezes e quando cada música tocou pela última vez – não mantém histórico ao longo do tempo.',
-  '“{name}” saved with {n} song – coming to Symfonium shortly':
-    '«{name}» guardada com {n} música – chega ao Symfonium em breve',
-  '“{name}” saved with {n} songs – coming to Symfonium shortly':
-    '«{name}» guardada com {n} músicas – chega ao Symfonium em breve',
+  '“{name}” saved with {n} song – coming to your music app shortly':
+    '«{name}» guardada com {n} música – chega à sua app de música em breve',
+  '“{name}” saved with {n} songs – coming to your music app shortly':
+    '«{name}» guardada com {n} músicas – chega à sua app de música em breve',
   'Nothing counted yet':
     'Ainda nada contado',
   'Tuttiphon has been keeping track of plays since {date}. As soon as you listen, the most played music shows up here.':
@@ -304,8 +302,7 @@ export default {
     'a carregar …',
   '{n}× played':
     'ouvida {n}×',
-  'Tag from Last.fm':
-    'Etiqueta do Last.fm',
+  'Tag from MusicBrainz or Last.fm': 'Etiqueta do MusicBrainz ou do Last.fm',
   'Start radio':
     'Iniciar rádio',
   'Popular songs':
@@ -368,12 +365,10 @@ export default {
     'Soa como estas bandas',
   'By the sound of the songs – recognized by the AI sound analysis.':
     'Pelo som das músicas – reconhecido pela análise de som com IA.',
-  'According to Last.fm – to listen in or for Lidarr.':
-    'Segundo o Last.fm – para ouvir um pouco ou para o Lidarr.',
-  'According to Last.fm – tap to listen in.':
-    'Segundo o Last.fm – toque para ouvir um pouco.',
-  'With a Last.fm key under Settings → Intelligence you get tags here, more accurate similar bands and bands you are still missing.':
-    'Com uma chave do Last.fm em Definições → Inteligência, recebe aqui etiquetas, bandas semelhantes mais precisas e bandas que ainda lhe faltam.',
+  'Tap to listen in on Last.fm – or for Lidarr.': 'Toque para ouvir um pouco no Last.fm – ou para o Lidarr.',
+  'Tap to listen in on Last.fm.': 'Toque para ouvir um pouco no Last.fm.',
+  'Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).':
+    'As etiquetas e as bandas semelhantes desta banda chegam com a próxima execução de «Compreender a música» – do ListenBrainz e do Deezer (Definições → Inteligência).',
   'Four album covers with title':
     'Quatro capas de álbuns com título',
   'Its own look for this format, renewed with every new selection':
@@ -386,8 +381,8 @@ export default {
     'Capa do álbum principal',
   'Designing and uploading the cover …':
     'A criar e a carregar a capa …',
-  'Cover set ✓ – Symfonium shows it after the next sync':
-    'Capa definida ✓ – o Symfonium mostra-a após a sincronização seguinte',
+  'Cover set ✓ – your music app shows it after the next sync':
+    'Capa definida ✓ – a sua app de música mostra-a após a sincronização seguinte',
   'Preparing the image …':
     'A preparar a imagem …',
   'Own image set ✓':
@@ -402,8 +397,8 @@ export default {
     'Não foi possível reduzir a imagem',
   'The playlist is not in Navidrome yet. As soon as it is applied, you can choose a cover here.':
     'A playlist ainda não está no Navidrome. Assim que for aplicada, pode escolher aqui uma capa.',
-  'The image appears in Navidrome and – after the next sync – in Symfonium. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
-    'A imagem aparece no Navidrome e – após a sincronização seguinte – no Symfonium. O Tuttiphon renova sozinho as capas criadas quando a playlist muda – nos mixes, portanto, a cada nova seleção.',
+  'The image appears in Navidrome and – after the next sync – in the music apps. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
+    'A imagem aparece no Navidrome e – após a sincronização seguinte – nas apps de música. O Tuttiphon renova sozinho as capas criadas quando a playlist muda – nos mixes, portanto, a cada nova seleção.',
   'not possible here':
     'não é possível aqui',
   'active':
@@ -590,8 +585,8 @@ export default {
     'Anulado',
   '{name} – done ✓':
     '{name} – concluído ✓',
-  'Your changes are now in Navidrome ✓ – Symfonium shows them after the next sync':
-    'As suas alterações já estão no Navidrome ✓ – o Symfonium mostra-as após a sincronização seguinte',
+  'Your changes are now in Navidrome ✓ – your music app shows them after the next sync':
+    'As suas alterações já estão no Navidrome ✓ – a sua app de música mostra-as após a sincronização seguinte',
   'Yes':
     'Sim',
   'Password for “{user}”':

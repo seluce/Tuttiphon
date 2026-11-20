@@ -1,16 +1,17 @@
 # 01 – Architecture
 
-This chapter shows where Tuttiphon sits between Navidrome and Symfonium, what the running process consists of and
+This chapter shows where Tuttiphon sits between Navidrome and the music apps, what the running process consists of and
 how the project is structured. It ends with the command line and all environment variables. Details on data,
 endpoints and processes are in the topic chapters: [Data model](02-data-model.md),
 [API](03-api.md), [Playlists](04-playlists.md), [Maintenance](05-maintenance.md),
 [Security](07-security.md), [Operations](08-operations.md).
 
-## How Navidrome, Tuttiphon and Symfonium work together
+## How Navidrome, Tuttiphon and the music apps work together
 
 - **Navidrome** is the music server (usually as a container on a NAS; Tuttiphon reaches it via `NAV_URL`). It reads the
   music folder during a scan and stores the library, playlists, stars and plays per account.
-- **Symfonium** is the app on the phones. It only talks to Navidrome (Subsonic API) and knows nothing about Tuttiphon.
+- **Music apps** (Symfonium, Feishin, Substreamer, Navidrome's web interface …) are what people listen with. They only
+  talk to Navidrome (Subsonic API) and know nothing about Tuttiphon.
 - **Tuttiphon** is a Python server (PC or Docker container). It changes Navidrome in two ways: through **files**
   in the music folder that Navidrome reads in at the next scan, and through **API calls** to Navidrome.
 
@@ -22,8 +23,8 @@ flowchart LR
   end
   NT["Tuttiphon<br/>(PC or Docker)"]
   ND["Navidrome"]
-  SY["Symfonium"]
-  EXT["LRCLIB · NetEase<br/>Deezer · Last.fm"]
+  SY["Music apps<br/>(e.g. Symfonium)"]
+  EXT["LRCLIB · NetEase · Deezer<br/>ListenBrainz · MusicBrainz · Last.fm"]
   NT -- "writes playlists, lyrics, Opus" --> M
   NT -- "moves originals" --> A
   ND -- "scan" --> M
@@ -50,7 +51,7 @@ HTTP 429 it waits up to three times (`Retry-After`, otherwise 5, 10, 15 s).
 
 ### What Tuttiphon creates and changes in Navidrome
 
-| What | How | Code | What Symfonium sees |
+| What | How | Code | What the music apps see |
 |---|---|---|---|
 | Smart playlists | `.nsp` file (JSON rules) in the playlist folder; by default the file name starts with `Auto – ` (setting `filePrefix`) | `playlists.write()` | a playlist whose contents Navidrome builds from the rules |
 | Mixes | `.m3u` with a fixed song list and paths relative to the playlist folder; changes daily, weekly or monthly | `mixer.m3u()` | a fixed playlist that only changes at the changeover |
@@ -64,7 +65,7 @@ HTTP 429 it waits up to three times (`Retry-After`, otherwise 5, 10, 15 s).
 | Scan | `startScan` (changes only or full) | `TaskRunner._step_scan()` | – |
 
 Navidrome identifies a playlist by its **file path**. That is why every playlist keeps its file name (field `file` in
-`config.json`) – even after renaming, it stays the same playlist in Navidrome and Symfonium (same ID, the offline copy
+`config.json`) – even after renaming, it stays the same playlist in Navidrome and the music apps (same ID, the offline copy
 stays). Navidrome reads name, description and visibility from the file only on the first import; after that
 Tuttiphon sets them via the API. Which Navidrome playlist belongs to which file is determined by `navidrome_index()` via the
 path: only playlists whose folder has exactly the same name as the playlist folder count. So Tuttiphon's and
@@ -82,7 +83,7 @@ Tuttiphon sync name, owner and visibility.
 - **Song list** (`library.CACHE`, valid for 15 minutes): neutral – always via the admin account with the average
   rating (stars only approximate, no one's favorites). A person's own view (their stars, favorites, plays) is a song
   list of their account (`stats.songs_for()`, `mixer.person_lib()`) when its password is stored.
-- **Plays:** Symfonium reports every play to Navidrome. Tuttiphon reads `playCount` and `played` per account for
+- **Plays:** the music apps report every play to Navidrome (scrobbling). Tuttiphon reads `playCount` and `played` per account for
   statistics, recap and mixes – see [Intelligence](06-intelligence.md).
 - **Accounts** with the admin flag: the basis of the roles. An account that doesn't exist in Navidrome has no access
   to Tuttiphon. The most recently read account list is stored in `state/navidrome_users.json` and applies as long as Navidrome
@@ -192,7 +193,7 @@ The scheduler catches errors and tries again in the next pass.
 | Song list | `library.CACHE` | reloaded in the background after 15 min – until then the previous one applies, nobody waits (if loading fails, again after one minute). `invalidate()` after a scan, set stars, new credentials: the next request waits for the fresh one. After that the memory of the old one is returned to the system (`release_memory()`, glibc `malloc_trim`). `GET /api/library?refresh=1` reloads only for administrators and at most once per minute. Kept lean: only the needed fields, recurring values (album, band, genres, artist and genre entries) exist only once (`navidrome._slim()`) – 22,400 songs take about 26 MB |
 | Computed pages | `web._memoized()` | valid as long as `config.json`, the song list and the date don't change; outdated states drop out with the next entry, otherwise at most 60 entries (least recently used first); playlist status at most 20 s old |
 | New music worlds during warm-up | `web._sync_welten()` | `autowelten.sync()` only if the song list, worlds, hidden scenes or `settings.welten` have changed since the last time |
-| World assignment | `autowelten._memo` | per loaded song list (weak reference), recomputed on new Last.fm tags, AI results, scene catalog or after a completed lyrics read-in (`liedtext.generation()`) |
+| World assignment | `autowelten._memo` | per loaded song list (weak reference), recomputed on new band tags, AI results, scene catalog or after a completed lyrics read-in (`liedtext.generation()`) |
 | Lyrics index | `liedtext.derb()`, `liedtext.languages()` | until `liedtexte.db` or `liedtexte.db-wal` changes; if reading fails (locked), the last result applies |
 | Deezer numbers | `deezer.stats()` | until `state/deezer.json` changes (modification time + size) |
 | Plays per period | `rueckblick.plays_between()` | per account and period, until the folder `state/plays/<account>/` changes; at most 32 entries, callers get a copy |
@@ -236,7 +237,7 @@ run.
 | `selfcheck.py` | self-check after the scan: song counts in Navidrome against Tuttiphon's own evaluation |
 | `suggest.py` | ready-made playlist suggestions and the “To review” list |
 | `scenes.py` | scene catalog from `scenes.json`: typical bands and identifying features per music world |
-| `autowelten.py` | music worlds emerge on their own: classifies bands by genres, Last.fm, AI style, language and decade, creates missing worlds ([Intelligence](06-intelligence.md#automatic-music-worlds-appautoweltenpy)) |
+| `autowelten.py` | music worlds emerge on their own: classifies bands by genres, tags, AI style, language and decade, creates missing worlds ([Intelligence](06-intelligence.md#automatic-music-worlds-appautoweltenpy)) |
 | `liedtext.py` | lyrics index (SQLite FTS5): search for lyric lines, language per song, kid-safe mode |
 | `notify.py` | notifications to the phone: which events go to whom, once per event; sent via the app (`webpush.py`) and ntfy |
 | `webpush.py` | notifications via the app itself (web push): devices per account, encryption (RFC 8291) and sender keys (VAPID) |
@@ -251,7 +252,8 @@ run.
 | `audio.py` | sound analysis with `ffmpeg`: tempo, energy, danceability, mood; mood labels (`MOODS`, `moods()`) |
 | `ml.py` | AI sound analysis (Essentia): run, state `state/ml.json`, merging with Tuttiphon's own measurement (`fuse()`), music styles per band – doesn't load TensorFlow itself |
 | `ml_worker.py` | analysis process of the AI sound analysis (started by `ml.py`); downloads the models when the image is built (`--download`) |
-| `lastfm.py` | similar bands and tags from Last.fm, cached for 30 days |
+| `bandinfo.py` | similar bands and tags from ListenBrainz/MusicBrainz and Deezer (no key), merged with Last.fm's, cached for 30 days ([Intelligence](06-intelligence.md#similar-bands-and-tags)) |
+| `lastfm.py` | similar bands and tags from Last.fm (own key), cached for 30 days |
 | `classify.py` | merges features per song (`song_features()`), assigns bands to a music world (suggestions, automatic classification, `state/auto_assigned.json`), radio, “You’re still missing” |
 | `taste.py` | taste per account from plays, favorites and stars given by hand ([Intelligence](06-intelligence.md#taste-per-account-apptastepy)) |
 | `soundtaste.py` | sound taste per account: a few typical sounds of what the account plays, from the AI's sound vectors ([Intelligence](06-intelligence.md#sound-taste-appsoundtastepy)) |

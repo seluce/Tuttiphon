@@ -37,8 +37,8 @@
     <Seg options={[['smart', t('Smart playlist')], ['mix', t('Mix – renews itself')]]} value={p.type === 'mix' ? 'mix' : 'smart'} onchange={pick} />
     <div class="hint">
       {p.type === 'mix'
-        ? t('Tuttiphon rebuilds the list regularly: a few songs per band, never the same band twice in a row. In between it stays the same – ideal if Symfonium should save it offline and update it automatically.')
-        : t('Navidrome reshuffles from all matching songs every time the playlist is loaded – always fresh, but unsuitable for offline downloads in Symfonium because the list keeps changing.')}
+        ? t('Tuttiphon rebuilds the list regularly: a few songs per band, never the same band twice in a row. In between it stays the same – ideal if a music app should save it offline and update it automatically.')
+        : t('Navidrome reshuffles from all matching songs every time the playlist is loaded – always fresh, but unsuitable for offline downloads in music apps because the list keeps changing.')}
     </div>
   {/if}
 </Field>

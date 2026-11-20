@@ -128,7 +128,7 @@
 </Card>
 
 <Card title={t('Even out loudness')} icon="waves">
-  <p class="muted small">{t('At night Tuttiphon measures how loud each song is and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in Symfonium and all songs play equally loud, even in a mix from a children\'s song to metal.')}</p>
+  <p class="muted small">{t('At night Tuttiphon measures how loud each song is and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in the music app and all songs play equally loud, even in a mix from a children\'s song to metal.')}</p>
   <Row label={t('Leveling on')} hint={t('Writes once into every music file. Each file is copied and checked first, only then replaced. Values that already came from elsewhere stay.')}>
     <Toggle label={t('Leveling on')} obj={ld} key="enabled" def={false} />
   </Row>

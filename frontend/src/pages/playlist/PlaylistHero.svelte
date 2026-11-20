@@ -93,7 +93,7 @@
       <h1>{d.name}<HelpLink /></h1>
       <div class="hero-meta">
         <StatePill state={st.state || d.state || status} />
-        {#if st.back}<span class="muted">{t('back in Symfonium from {date}', { date: new Date(st.back + 'T00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })}</span>{/if}
+        {#if st.back}<span class="muted">{t('back in the music apps from {date}', { date: new Date(st.back + 'T00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })}</span>{/if}
         {#if p.album}
           <span>{@render bold(tword(d.count, '{n} song this week', '{n} songs this week'), fmt(d.count))}</span>
           <span>{tn(d.pool, 'from {n} album never played', 'from {n} albums never played')}</span>

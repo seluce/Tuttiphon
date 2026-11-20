@@ -98,6 +98,21 @@
   "few": "Last.fm: zaktualizowano {n} zespoły.",
   "many": "Last.fm: zaktualizowano {n} zespołów."
  },
+ "Similar bands: {current} bands up to date, {todo} to load (at most {minutes} min).": "Podobne zespoły: aktualne zespoły: {current}, do wczytania: {todo} (najwyżej {minutes} min).",
+ "Similar bands: {current} bands up to date, {todo} to load.": "Podobne zespoły: aktualne zespoły: {current}, do wczytania: {todo}.",
+ "Similar bands: {n} band updated, {later} follow in the next run.": "Podobne zespoły: zaktualizowano {n} zespół, pozostałe ({later}) w następnym przebiegu.",
+ "Similar bands: {n} bands updated, {later} follow in the next run.": {
+  "few": "Podobne zespoły: zaktualizowano {n} zespoły, pozostałe ({later}) w następnym przebiegu.",
+  "many": "Podobne zespoły: zaktualizowano {n} zespołów, pozostałe ({later}) w następnym przebiegu."
+ },
+ "Similar bands: {n} band updated.": "Podobne zespoły: zaktualizowano {n} zespół.",
+ "Similar bands: {n} bands updated.": {
+  "few": "Podobne zespoły: zaktualizowano {n} zespoły.",
+  "many": "Podobne zespoły: zaktualizowano {n} zespołów."
+ },
+ "⚠ {source} does not answer – left out for this run: {error}": "⚠ {source} nie odpowiada – pominięto w tym przebiegu: {error}",
+ "⚠ Last.fm keeps answering with errors – left out for this run.": "⚠ Last.fm ciągle odpowiada błędami – pominięto w tym przebiegu.",
+ "Similar bands": "Podobne zespoły",
  "Fetching missing covers is turned off.": "Pobieranie brakujących okładek jest wyłączone.",
  "Albums without any cover: {n} – taking the first {max}.": "Albumy bez żadnej okładki: {n} – pobieranie pierwszych {max}.",
  "Albums without any cover: {n}": "Albumy bez żadnej okładki: {n}",

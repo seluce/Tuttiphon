@@ -84,9 +84,9 @@
 
 {#snippet idee()}
   {#if admin}
-    <p>{@html t('You say <b>who</b> should play and <b>what</b> kind of mood – from that, Tuttiphon builds playlists that keep themselves up to date: new albums are included automatically, stars from Deezer pick out the hits, and what you listen to in Symfonium makes the suggestions personal.')}</p>
+    <p>{@html t('You say <b>who</b> should play and <b>what</b> kind of mood – from that, Tuttiphon builds playlists that keep themselves up to date: new albums are included automatically, stars from Deezer pick out the hits, and what you listen to in your music apps makes the suggestions personal.')}</p>
   {:else}
-    <p>{@html t('You say <b>what music</b> you like and <b>what you’re in the mood for</b> – from that, Tuttiphon builds playlists from your library that keep themselves up to date. Along the way it learns from what you listen to in Symfonium. You listen to everything in Symfonium as usual.')}</p>
+    <p>{@html t('You say <b>what music</b> you like and <b>what you’re in the mood for</b> – from that, Tuttiphon builds playlists from your library that keep themselves up to date. Along the way it learns from what you listen to in your music app – where you listen to everything as usual.')}</p>
   {/if}
   <Idea {admin} />
 {/snippet}

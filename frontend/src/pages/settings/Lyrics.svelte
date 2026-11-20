@@ -38,7 +38,7 @@
 {/snippet}
 
 <Card title={t('Find lyrics automatically')} icon="mic">
-  <p class="muted small">{t('Tuttiphon looks up missing lyrics on LRCLIB, and on NetEase too if you like, and puts them next to the songs: synced lyrics as .lrc, otherwise as .txt. Navidrome reads them in at the next scan, Symfonium shows them while playing.')}</p>
+  <p class="muted small">{t('Tuttiphon looks up missing lyrics on LRCLIB, and on NetEase too if you like, and puts them next to the songs: synced lyrics as .lrc, otherwise as .txt. Navidrome reads them in at the next scan, music apps show them while playing.')}</p>
   <div>
     {#if stats === null}
       <div class="skel h-[70px]"></div>
@@ -86,7 +86,7 @@
 </Card>
 
 <Card title={t('Cleanup')} icon="eraser">
-  <Row label={t('Delete duplicate lyrics')} hint={t('If there is an .lrc next to a .txt, the .txt goes – otherwise Symfonium sometimes shows the wrong lyrics.')}>
+  <Row label={t('Delete duplicate lyrics')} hint={t('If there is an .lrc next to a .txt, the .txt goes – otherwise music apps sometimes show the wrong lyrics.')}>
     <Toggle label={t('Delete duplicate lyrics')} obj={ly} key="cleanup" />
   </Row>
 </Card>

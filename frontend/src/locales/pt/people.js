@@ -124,8 +124,8 @@ export default {
     'Nome, ícone e cor',
   'e.g. Mia · ':
     'p. ex. Mia · ',
-  'Goes in front of every playlist name – so you spot your playlists in Symfonium at a glance.':
-    'Fica antes de cada nome de playlist – assim reconhece as suas playlists no Symfonium num relance.',
+  'Goes in front of every playlist name – so you spot your playlists in the music app at a glance.':
+    'Fica antes de cada nome de playlist – assim reconhece as suas playlists na app de música num relance.',
   'Delete person':
     'Eliminar pessoa',
   'Your suggestions under “Discover” and “For you” are built from this.':
@@ -254,8 +254,8 @@ export default {
     'Olá, {name}!',
   'Hello!':
     'Olá!',
-  'Tuttiphon puts together playlists from your music library – matching your taste, and they keep themselves up to date. You then find them in Symfonium as usual.':
-    'O Tuttiphon monta playlists a partir da sua biblioteca de música – à medida do seu gosto, e mantêm-se sempre atualizadas. Depois encontra-as no Symfonium, como habitualmente.',
+  'Tuttiphon puts together playlists from your music library – matching your taste, and they keep themselves up to date. You then find them in your music app as usual.':
+    'O Tuttiphon monta playlists a partir da sua biblioteca de música – à medida do seu gosto, e mantêm-se sempre atualizadas. Depois encontra-as na sua app de música, como habitualmente.',
   'Made for you':
     'Feito para si',
   'You say what you like to hear – Tuttiphon suggests ready-made playlists.':
@@ -264,10 +264,9 @@ export default {
     'Algo novo todos os dias',
   'Mixes regularly put themselves together anew, with just a few songs per band.':
     'Os mixes montam-se de novo regularmente, com poucas músicas por banda.',
-  'Simply in Symfonium':
-    'Simplesmente no Symfonium',
-  'Your playlists show up in Symfonium just like all the others.':
-    'As suas playlists aparecem no Symfonium como todas as outras.',
+  'Simply in your music app': 'Simplesmente na sua app de música',
+  'Your playlists show up in your music app just like all the others.':
+    'As suas playlists aparecem na sua app de música como todas as outras.',
   'This takes about two minutes. You can change everything later under “My profile”.':
     'Demora cerca de dois minutos. Pode alterar tudo mais tarde em «O meu perfil».',
   'Later – look around first':
@@ -284,8 +283,8 @@ export default {
     'O que gosta de ouvir?',
   'Tap everything you like – you can pick several. A music world groups similar bands together.':
     'Toque em tudo aquilo de que gosta – pode escolher vários. Um mundo musical agrupa bandas semelhantes.',
-  'What you listen to most in Symfonium is already selected. Tap whatever does not fit or is missing.':
-    'O que mais ouve no Symfonium já está selecionado. Toque no que não encaixa ou no que falta.',
+  'What you listen to most in your music app is already selected. Tap whatever does not fit or is missing.':
+    'O que mais ouve na sua app de música já está selecionado. Toque no que não encaixa ou no que falta.',
   'Your favorite bands':
     'As suas bandas favoritas',
   'Tap the bands you especially like – they show up more often in your playlists. Not here? Search below.':
@@ -312,16 +311,16 @@ export default {
     'As suas primeiras playlists',
   'I have already selected a few suggestions – tap what you would like to have.':
     'Já selecionei algumas sugestões – toque no que gostaria de ter.',
-  '“Mix” means: it regularly puts itself together anew and stays the same in between – ideal for downloading in Symfonium. Navidrome reshuffles the others every time they are played.':
-    '«Mix» significa: monta-se de novo regularmente e, entretanto, mantém-se igual – ideal para transferir no Symfonium. As outras, o Navidrome volta a baralhar sempre que são reproduzidas.',
+  '“Mix” means: it regularly puts itself together anew and stays the same in between – ideal for downloading in your music app. Navidrome reshuffles the others every time they are played.':
+    '«Mix» significa: monta-se de novo regularmente e, entretanto, mantém-se igual – ideal para transferir na sua app de música. As outras, o Navidrome volta a baralhar sempre que são reproduzidas.',
   'Mix':
     'Mix',
   'Done – great to have you here!':
     'Concluído – que bom que está por cá!',
-  'Your playlist will be in Navidrome in a moment. In Symfonium it appears under “Playlists” after the next sync.':
-    'A sua playlist estará no Navidrome dentro de momentos. No Symfonium aparece em «Playlists» após a sincronização seguinte.',
-  'Your {n} playlists will be in Navidrome in a moment. In Symfonium they appear under “Playlists” after the next sync.':
-    'As suas {n} playlists estarão no Navidrome dentro de momentos. No Symfonium aparecem em «Playlists» após a sincronização seguinte.',
+  'Your playlist will be in Navidrome in a moment. In your music app it appears under “Playlists” after the next sync.':
+    'A sua playlist estará no Navidrome dentro de momentos. Na sua app de música aparece em «Playlists» após a sincronização seguinte.',
+  'Your {n} playlists will be in Navidrome in a moment. In your music app they appear under “Playlists” after the next sync.':
+    'As suas {n} playlists estarão no Navidrome dentro de momentos. Na sua app de música aparecem em «Playlists» após a sincronização seguinte.',
   'Under “Discover” you always find ready-made suggestions for you.':
     'Em «Descobrir» encontra sempre sugestões prontas para si.',
   'Your mixes of today and new suggestions – your home page.':
@@ -434,8 +433,8 @@ export default {
     '{n} %',
   'From {name}’s listening':
     'Do que {name} ouve',
-  'Tuttiphon recognized this from what you listen to in Symfonium, mark as favorite and rate yourself. Your suggestions and mixes are built from it.':
-    'O Tuttiphon reconheceu isto pelo que ouve no Symfonium, marca como favorito e classifica. As suas sugestões e mixes são feitos a partir daqui.',
+  'Tuttiphon recognized this from what you listen to in your music app, mark as favorite and rate yourself. Your suggestions and mixes are built from it.':
+    'O Tuttiphon reconheceu isto pelo que ouve na sua app de música, marca como favorito e classifica. As suas sugestões e mixes são feitos a partir daqui.',
   'Recognized from what {name} listens to, marks as favorite and rates. Suggestions and mixes are built from it.':
     'Reconhecido pelo que {name} ouve, marca como favorito e classifica. As sugestões e os mixes são feitos a partir daqui.',
   'Also learns from the sound of what you play.':
@@ -460,8 +459,8 @@ export default {
     'É assim que soa o que ouve',
   'This is how what is played sounds':
     'É assim que soa o que é ouvido',
-  'As soon as you listen more in Symfonium or mark favorites, Tuttiphon recognizes your taste here.':
-    'Assim que ouvir mais no Symfonium ou marcar favoritos, o Tuttiphon reconhece aqui o seu gosto.',
+  'As soon as you listen more in your music app or mark favorites, Tuttiphon recognizes your taste here.':
+    'Assim que ouvir mais na sua app de música ou marcar favoritos, o Tuttiphon reconhece aqui o seu gosto.',
   '{name} has not listened enough yet to recognize the taste.':
     '{name} ainda não ouviu o suficiente para se reconhecer o gosto.',
   'Tuttiphon recognizes your taste from what you listen to as soon as statistics & stars are turned on.':
@@ -490,22 +489,22 @@ export default {
     'De vez em quando',
   'Often':
     'Muitas vezes',
-  'In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.':
-    'Na fila inteligente e no Instant Mix do Symfonium, de poucas em poucas músicas entra uma que nunca ouviu – a que mais soa ao que está a tocar.',
-  'In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
-    'Na fila inteligente e no Instant Mix do Symfonium, de poucas em poucas músicas entra uma que {name} nunca ouviu – a que mais soa ao que está a tocar.',
+  'In Instant Mix and the smart queue, a song you have never played comes in every few songs – the one that sounds most like what is playing.':
+    'No Instant Mix e na fila inteligente, de poucas em poucas músicas entra uma que nunca ouviu – a que mais soa ao que está a tocar.',
+  'In Instant Mix and the smart queue, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.':
+    'No Instant Mix e na fila inteligente, de poucas em poucas músicas entra uma que {name} nunca ouviu – a que mais soa ao que está a tocar.',
   'for everyone':
     'para todos',
-  'Tuttiphon creates a Navidrome account for the family or takes one that already exists. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in Symfonium.':
-    'O Tuttiphon cria uma conta do Navidrome para a família ou usa uma que já existe. As playlists dela são para todos – e os dispositivos partilhados, no carro ou no tablet da cozinha, podem reproduzi-las no Symfonium.',
+  'Tuttiphon creates a Navidrome account for the family or takes one that already exists. Its playlists are for everyone – and shared devices, in the car or on the kitchen tablet, can play them in their music app.':
+    'O Tuttiphon cria uma conta do Navidrome para a família ou usa uma que já existe. As playlists dela são para todos – e os dispositivos partilhados, no carro ou no tablet da cozinha, podem reproduzi-las na sua app de música.',
   'The family’s account “{account}” is ready.':
     'A conta da família «{account}» está pronta.',
   'Password – shown only now:':
     'Palavra-passe – mostrada só agora:',
-  'Shared devices – in the car, on the kitchen tablet – sign in to Navidrome in Symfonium with this account and play the family playlists. Nobody signs in to Tuttiphon with it.':
-    'Os dispositivos partilhados – no carro, no tablet da cozinha – iniciam sessão no Navidrome, no Symfonium, com esta conta e reproduzem as playlists da família. Ninguém inicia sessão no Tuttiphon com ela.',
-  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – every account sees them in Navidrome and Symfonium.':
-    'O Tuttiphon cria uma conta do Navidrome para a família. As playlists dela são para todos – todas as contas as veem no Navidrome e no Symfonium.',
+  'Shared devices – in the car, on the kitchen tablet – sign in to Navidrome in their music app with this account and play the family playlists. Nobody signs in to Tuttiphon with it.':
+    'Os dispositivos partilhados – no carro, no tablet da cozinha – iniciam sessão no Navidrome, na sua app de música, com esta conta e reproduzem as playlists da família. Ninguém inicia sessão no Tuttiphon com ela.',
+  'Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – every account sees them in Navidrome and the music apps.':
+    'O Tuttiphon cria uma conta do Navidrome para a família. As playlists dela são para todos – todas as contas as veem no Navidrome e nas apps de música.',
   'Navidrome account':
     'Conta do Navidrome',
   'Letters, digits, dots, hyphens and underscores. Tuttiphon picks a random password and stores it.':
@@ -514,8 +513,8 @@ export default {
     'Todas as contas do Navidrome já têm uma pessoa.',
   'Playlists for everyone':
     'Playlists para todos',
-  'The family’s playlists are in this account and for everyone. Shared devices play them with it in Symfonium – nobody signs in to Tuttiphon with it.':
-    'As playlists da família estão nesta conta e são para todos. Os dispositivos partilhados reproduzem-nas com ela no Symfonium – ninguém inicia sessão no Tuttiphon com ela.',
+  'The family’s playlists are in this account and for everyone. Shared devices play them with it in their music app – nobody signs in to Tuttiphon with it.':
+    'As playlists da família estão nesta conta e são para todos. Os dispositivos partilhados reproduzem-nas com ela na sua app de música – ninguém inicia sessão no Tuttiphon com ela.',
   'Delete family':
     'Eliminar família',
   'Its {n} playlist is deleted too. The Navidrome account “{account}” stays – you can remove it in Navidrome.':
@@ -536,14 +535,14 @@ export default {
     'Todos',
   'Administrators only':
     'Só administradores',
-  'The family’s account – for shared devices in Symfonium, nobody signs in to Tuttiphon with it':
-    'A conta da família – para dispositivos partilhados no Symfonium; ninguém inicia sessão no Tuttiphon com ela',
+  'The family’s account – for shared devices, nobody signs in to Tuttiphon with it':
+    'A conta da família – para dispositivos partilhados; ninguém inicia sessão no Tuttiphon com ela',
   'New account':
     'Conta nova',
   'Existing account':
     'Conta existente',
-  'The family uses an account Navidrome already has – for example the one in the car. Its playlists are for everyone – every account sees them in Navidrome and Symfonium.':
-    'A família usa uma conta que o Navidrome já tem – por exemplo, a do carro. As playlists dela são para todos – todas as contas as veem no Navidrome e no Symfonium.',
+  'The family uses an account Navidrome already has – for example the one in the car. Its playlists are for everyone – every account sees them in Navidrome and the music apps.':
+    'A família usa uma conta que o Navidrome já tem – por exemplo, a do carro. As playlists dela são para todos – todas as contas as veem no Navidrome e nas apps de música.',
   'Password of “{user}”':
     'Palavra-passe de «{user}»',
   'Tuttiphon checks the password and stores it – for the family’s stars, plays and recap. The account stays as it is.':

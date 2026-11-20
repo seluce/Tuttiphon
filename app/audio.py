@@ -10,7 +10,7 @@ and the song is tried again after 30 days. ffmpeg runs with lower priority (nice
 Features (0–1, except bpm):
   bpm, beat (confidence of the tempo), energy (loudness/density), dance (steady pulse),
   bright (bright timbre), rough (distorted/noisy), dyn (dynamics), arousal (how wound up),
-  valence (basic mood, refined by Last.fm tags)
+  valence (basic mood, refined by the band tags)
 """
 import json
 import math
@@ -291,7 +291,7 @@ def _with_bpm(bpm, beat, energy, bright, rough):
     tempo_n = _clip(((bpm or 100) - 70) / 90)
     dance = _clip((beat - 0.4) / 0.55) * (1 if bpm and 90 <= bpm <= 145 else 0.6) * (0.4 + 0.6 * energy)
     arousal = _clip(0.55 * energy + 0.25 * tempo_n + 0.2 * dance)
-    # the basic mood from the sound is only a rough estimate – Last.fm tags refine it (classify.py)
+    # the basic mood from the sound is only a rough estimate – the band tags refine it (classify.py)
     valence = _clip(0.3 * bright + 0.3 * tempo_n + 0.4 * dance - 0.25 * max(0.0, rough - 0.6))
     return dance, arousal, valence
 
@@ -328,7 +328,7 @@ def moods(f):
         out.append("tanzbar")
     if v > 0.6 and a > 0.35:
         out.append("froh")
-    if v < 0.35 and a < 0.55 and f.get("vsrc") in ("tags", "ml"):   # only when confirmed by Last.fm tags or the AI
+    if v < 0.35 and a < 0.55 and f.get("vsrc") in ("tags", "ml"):   # only when confirmed by band tags or the AI
         out.append("melancholisch")
     if a < 0.3 and e < 0.3 and (f.get("bpm") or 100) < 118 and f.get("dance", 0) < 0.45:   # no steady groove
         out.append("schlaf")

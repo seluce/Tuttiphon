@@ -46,7 +46,7 @@
       <Switch label={t('Replace “text only” with synced later')} hidelabel checked={ly.upgradePlain} onchange={(v) => (ly.upgradePlain = v)} />
     </Row>
   {/if}
-  <Row label={t('Delete duplicate lyrics')} hint={t('If there is an .lrc next to a .txt, the .txt goes – otherwise Symfonium sometimes shows the wrong lyrics.')}>
+  <Row label={t('Delete duplicate lyrics')} hint={t('If there is an .lrc next to a .txt, the .txt goes – otherwise music apps sometimes show the wrong lyrics.')}>
     <Switch label={t('Delete duplicate lyrics')} hidelabel checked={ly.cleanup} onchange={(v) => (ly.cleanup = v)} />
   </Row>
 </Card>

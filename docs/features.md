@@ -19,7 +19,7 @@ the [technical handbook](README.md).
 
 A playlist is **music world × vibe × person** – for example *The 90s × Good mood for the family*.
 
-- **Music worlds** form on their own from your library: genres, Last.fm tags, the AI's music styles, the language of
+- **Music worlds** form on their own from your library: genres, tags, the AI's music styles, the language of
   the lyrics and the decade. A catalog of 30 scenes knows their typical bands, so new albums join automatically.
 - **Vibes** narrow it down: genres, topics, seasons, decades – or the sound itself (calm, danceable, falling asleep,
   in the background …).
@@ -83,12 +83,13 @@ Every song is listened to – locally, at night, gently on a few cores:
   radio, "sounds like these bands", and to sort new bands into the right music world.
 - **Navidrome plugin**: with it, Navidrome asks Tuttiphon – Instant Mix, song and artist radio, "similar songs" and
   related artists in Navidrome, Symfonium, Feishin and other apps follow the sound of your own files, also for bands
-  that Last.fm hardly knows; sound paths from one song to another for apps that support OpenSubsonic's
+  that hardly anyone knows; sound paths from one song to another for apps that support OpenSubsonic's
   `sonicSimilarity`. It also passes every play on as it happens – exact listening times and real skips for the
   mixes, and the recap even for accounts without a stored password. The smart queue **learns in the moment** (skip
   twice and it turns to another sound) and **mixes in songs never played** – every few songs, set per person.
 - **Taste per person**: what someone plays, favors and rates – including how it sounds – shapes their suggestions.
-- Last.fm (optional, free key) adds similar bands and tags.
+- **Similar bands and tags** from ListenBrainz (with the tags of MusicBrainz) and Deezer – free and without a key;
+  Last.fm adds its own with a key (Last.fm gives working keys only with a Pro subscription).
 
 ## For the whole family
 
@@ -97,7 +98,7 @@ Every song is listened to – locally, at night, gently on a few cores:
 Everyone signs in with their own **Navidrome account** and gets their own view: their mixes, their statistics, their
 profile with likes and dislikes – one person per account, and their playlists are their own. The **family** can have an
 account of its own, which Tuttiphon creates: its playlists are for everyone – shared devices in the car or on the
-kitchen tablet play them in Symfonium –, and mixes like “What everyone likes” bring everyone's taste together.
+kitchen tablet play them in their music app –, and mixes like “What everyone likes” bring everyone's taste together.
 Administrators see and change everything; users create their own playlists and change the family's too, unless only
 administrators may. A **local administrator** works even when Navidrome is
 down. The interface speaks **English, German, French, Dutch, Spanish, Italian, Portuguese and Polish**, works on the phone and can be installed as an app; "Show me"
@@ -121,10 +122,11 @@ Tuttiphon works locally. It contacts these services only for the functions named
 
 | Service | for | when |
 |---|---|---|
-| Deezer API | popularity for stars, missing album covers | rating new songs, cover search |
+| Deezer API | popularity for stars, missing album covers, similar bands | rating new songs, cover search, “Understand music” (can be turned off) |
 | LRCLIB, NetEase | lyrics | lyrics search (NetEase optional) |
+| ListenBrainz | similar bands, the tags of MusicBrainz | “Understand music” (can be turned off) |
 | Last.fm | similar bands, tags | only with your own API key |
-| MusicBrainz, Cover Art Archive | ISRC for the Deezer search, album covers | when needed |
+| MusicBrainz, Cover Art Archive | ISRC for the Deezer search, a band's MusicBrainz ID by its name, album covers | when needed |
 | Push services (Google, Mozilla, Apple, Microsoft), ntfy | notifications | only if turned on |
 | essentia.upf.edu | the AI models | once, while the image is built |
 

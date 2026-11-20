@@ -21,7 +21,7 @@
 
 <div class="page">
   <PageHead title={t('Music worlds')} sub={admin
-    ? t('A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, Last.fm, AI music style, language and decade.')
+    ? t('A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, ListenBrainz, AI music style, language and decade.')
     : t('Your music sorted by kind. Tap a world to see which bands belong to it – with “Like” you keep a world in mind for your suggestions.')}>
     {#snippet actions()}
       {#if admin}<button class="btn primary" data-guide="welt-neu" onclick={addWelt}><Icon name="plus" size={18} />{t('New music world')}</button>{/if}<!-- i18n-ignore: guide id -->

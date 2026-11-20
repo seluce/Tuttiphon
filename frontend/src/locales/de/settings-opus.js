@@ -37,7 +37,8 @@ export default {
   'Owner of new files': 'Besitzer neuer Dateien',
   'Empty = the user Tuttiphon runs as (user: in docker-compose.yaml). Otherwise UID:GID as in Lidarr – only works with sufficient rights.': 'Leer = der Benutzer, unter dem Tuttiphon läuft (user: in docker-compose.yaml). Sonst UID:GID wie bei Lidarr – klappt nur mit ausreichenden Rechten.',
   'Even out loudness': 'Lautstärke angleichen',
-  "At night Tuttiphon measures how loud each song is and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in Symfonium and all songs play equally loud, even in a mix from a children's song to metal.": 'Tuttiphon misst nachts, wie laut jeder Song ist, und schreibt ReplayGain-Werte in die Dateien, ohne sie neu zu kodieren. Schaltest du in Symfonium ReplayGain ein, klingen alle Songs gleich laut, auch im Mix vom Kinderlied zum Metal.',
+  'At night Tuttiphon measures how loud each song is and writes ReplayGain values into the files without re-encoding them. Turn on ReplayGain in the music app and all songs play equally loud, even in a mix from a children\'s song to metal.':
+    'Tuttiphon misst nachts, wie laut jeder Song ist, und schreibt ReplayGain-Werte in die Dateien, ohne sie neu zu kodieren. Schaltest du in der Musik-App ReplayGain ein, klingen alle Songs gleich laut, auch im Mix vom Kinderlied zum Metal.',
   'Leveling on': 'Angleichen aktiv',
   'Writes once into every music file. Each file is copied and checked first, only then replaced. Values that already came from elsewhere stay.': 'Schreibt einmal in jede Musikdatei. Jede Datei wird vorher kopiert und geprüft, erst dann ersetzt. Werte, die schon von woanders stammen, bleiben.',
   'Album values too': 'Auch Album-Werte',

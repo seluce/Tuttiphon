@@ -375,7 +375,7 @@ def build_nsp(cfg, playlist, ctx=None):
         rules.append({"any": _dedupe([r for a in arts for r in ({"is": {"artist": a}}, {"is": {"albumartist": a}})] + extra)
                       or [{"is": {"title": _s("– no favorite bands yet –")}}]})   # matches nothing
         rules.append({"inTheLast": {"dateadded": int(fav.get("days") or 60)}})
-    elif radio:   # radio: seed band(s) + similar bands that are in the library (Last.fm, otherwise genres)
+    elif radio:   # radio: seed band(s) + similar bands that are in the library (band knowledge, otherwise genres)
         if ctx.lib is not None:
             from .classify import radio_artists
             arts = radio_artists(radio.get("seed", []), ctx.lib, limit=int(radio.get("bands") or 25))
@@ -1056,8 +1056,8 @@ def summary(cfg, playlist, ctx=None):
                   n=options(playlist)["size"], start=start, end=end),
                 _("Changes by itself on the first of the month – it always stays one playlist")]
     if playlist.get("radio"):
-        lines.append(_("Radio: {seeds} – plus up to {n} similar bands from your library (according to Last.fm, otherwise "
-                       "by genres)", seeds=" & ".join(playlist["radio"].get("seed", [])), n=playlist["radio"].get("bands") or 25))
+        lines.append(_("Radio: {seeds} – plus up to {n} similar bands from your library (according to ListenBrainz and "
+                       "Deezer, otherwise by genres)", seeds=" & ".join(playlist["radio"].get("seed", [])), n=playlist["radio"].get("bands") or 25))
     if playlist.get("fav"):
         arts = favorite_artists(cfg, person_of(cfg, playlist), ctx)
         days = int(playlist["fav"].get("days") or 60)
@@ -1159,10 +1159,10 @@ def summary(cfg, playlist, ctx=None):
         # {every} mid-sentence, {Every} at the start of a sentence (German)
         every = _(how)   # i18n-ignore: N_ constant
         if o.get("perArtist"):
-            lines.append(_("Rebuilt {every}, the list stays the same in between (ideal for offline in Symfonium) – never "
+            lines.append(_("Rebuilt {every}, the list stays the same in between (ideal for offline in the music app) – never "
                            "the same band twice in a row", every=every, Every=every.capitalize()))
         else:
-            lines.append(_("Rebuilt {every}, the list stays the same in between (ideal for offline in Symfonium)",
+            lines.append(_("Rebuilt {every}, the list stays the same in between (ideal for offline in the music app)",
                            every=every, Every=every.capitalize()))
         if S.get("mixLearn", True):
             lines.append(_("Learns as you listen: skipped songs come up less often, songs rated 1 star by hand not at all"))
@@ -1238,7 +1238,7 @@ def sound_of(cfg, playlist):
 
 
 def apply_sound(cfg, lib, playlist, ids):
-    """Only songs whose sound matches the filter (sound analysis + Last.fm mood)."""
+    """Only songs whose sound matches the filter (sound analysis + the mood of the band tags)."""
     snd = sound_of(cfg, playlist)
     if not snd:
         return ids
@@ -1255,10 +1255,10 @@ _sound_lock = threading.Lock()
 def _sound_matches(lib, snd):
     """All songs of the list that fit a sound filter – once per filter and state of the measurements (the suggestions
     ask for the same filters hundreds of times)."""
-    from . import audio, lastfm, ml
+    from . import audio, bandinfo, ml
     from .classify import song_features
     feats = song_features(lib)
-    stamps = (audio._cache["stamp"], ml.stamp(), lastfm._mem["stamp"])
+    stamps = (audio._cache["stamp"], ml.stamp(), bandinfo.stamp())
     key = (ml.songs_key(lib), stamps, json.dumps(snd, sort_keys=True, ensure_ascii=False))
     with _sound_lock:
         hit = _sound_memo.get(key)

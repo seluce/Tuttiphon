@@ -26,6 +26,22 @@ export default {
     'Wpisz klucz',
   'Last.fm key saved ✓':
     'Zapisano klucz Last.fm ✓',
+  'Key removed': 'Klucz usunięty',
+  'Tuttiphon then no longer asks Last.fm. What Last.fm has delivered so far stays in use.':
+    'Tuttiphon nie będzie już wtedy pytać Last.fm. To, co Last.fm już dostarczył, pozostaje w użyciu.',
+  'Similar bands and tags': 'Podobne zespoły i tagi',
+  '{n} band known': '{n} znany zespół',
+  '{n} bands known': { few: '{n} znane zespoły', many: '{n} znanych zespołów' },
+  'ListenBrainz and Deezer are turned off': 'ListenBrainz i Deezer są wyłączone',
+  'ListenBrainz knows {lb}, Deezer {dz}': 'ListenBrainz zna {lb}, Deezer {dz}',
+  'Similar bands from what ListenBrainz listeners play one after another, plus the band’s tags from MusicBrainz. Tuttiphon finds the band by the MusicBrainz ID in the files – Lidarr and Picard write it – or by its exact name.':
+    'Podobne zespoły na podstawie tego, czego słuchacze ListenBrainz słuchają jeden po drugim, a do tego tagi zespołu z MusicBrainz. Tuttiphon znajduje zespół po identyfikatorze MusicBrainz w plikach – zapisują go Lidarr i Picard – albo po dokładnej nazwie.',
+  'Similar bands from Deezer – strong for regional music and children’s songs too. Tuttiphon finds the band by its exact name.':
+    'Podobne zespoły z Deezer – mocne także przy muzyce regionalnej i piosenkach dla dzieci. Tuttiphon znajduje zespół po dokładnej nazwie.',
+  'Last.fm (optional)': 'Last.fm (opcjonalnie)',
+  'Last.fm gives working keys only with a Pro subscription. With one, its similar bands and tags are added. What Last.fm has delivered so far stays in use either way.':
+    'Last.fm wydaje działające klucze tylko z subskrypcją Pro. Z takim kluczem dochodzą jego podobne zespoły i tagi. To, co Last.fm już dostarczył, i tak pozostaje w użyciu.',
+  'Last.fm no longer accepts the key': 'Last.fm nie przyjmuje już klucza',
   'Sound analysis':
     'Analiza brzmienia',
   'Tuttiphon listens to every song – completely locally, with no cloud and no costs. This gives sound vibes such as “Falling asleep” or “Running wild”, mixes that wind down calmly and the classification of new bands. A pass has two stages:':
@@ -125,8 +141,8 @@ export default {
     'Rdzenie procesora dla AI',
   'The AI may use at most this many cores – the rest stays free for Navidrome.':
     'AI może używać najwyżej tylu rdzeni – reszta zostaje wolna dla Navidrome.',
-  'Free with your own key: similar bands for radio, suggestions and “You might still be missing”, plus genre and mood tags for classifying new bands. Everything is cached for 30 days.':
-    'Za darmo z własnym kluczem: podobne zespoły dla radia, propozycji i „Tego może wam jeszcze brakować”, a do tego tagi gatunku i nastroju do klasyfikacji nowych zespołów. Wszystko jest buforowane przez 30 dni.',
+  'For radio, suggestions and “You might still be missing” and for classifying new bands – free and without a key. Everything is cached for 30 days.':
+    'Dla radia, propozycji i „Tego może wam jeszcze brakować” oraz do klasyfikacji nowych zespołów – za darmo i bez klucza. Wszystko jest buforowane przez 30 dni.',
   'Key entered':
     'Klucz wpisany',
   'No key yet':
@@ -142,24 +158,24 @@ export default {
     'Klucz API',
   '•••••• entered':
     '•••••• wpisany',
-  'You can get a key for free at last.fm/api/account/create. It is only stored on your NAS.':
-    'Klucz dostaniesz za darmo na last.fm/api/account/create. Jest przechowywany tylko na twoim NAS.',
+  'Keys are at last.fm/api/account/create. The key is only stored on your NAS.':
+    'Klucze są na last.fm/api/account/create. Klucz jest przechowywany tylko na twoim NAS.',
   'Time limit per run':
     'Limit czasu na przebieg',
-  'Tuttiphon loads Last.fm data for at most this long. The first pass takes a few minutes.':
-    'Tuttiphon wczytuje dane z Last.fm najwyżej tak długo. Pierwszy przebieg trwa kilka minut.',
+  'Tuttiphon loads similar bands and tags for at most this long, per source. The first pass can take an hour or longer – the night analysis does it on the side.':
+    'Tuttiphon wczytuje podobne zespoły i tagi najwyżej tak długo, dla każdego źródła. Pierwszy przebieg może potrwać godzinę lub dłużej – analiza nocna zrobi to przy okazji.',
   'Music worlds':
     'Światy muzyczne',
-  'From genres, Last.fm tags, AI music style, language and decade, Tuttiphon recognizes which music worlds your library offers – such as 80s hits, Eurodance, German rap or Schlager & party – and classifies every band. New bands go into their world on their own.':
-    'Na podstawie gatunków, tagów Last.fm, stylu muzycznego AI, języka i dekady Tuttiphon rozpoznaje, jakie światy muzyczne oferuje twoja biblioteka – np. hity lat 80., Eurodance, niemiecki rap albo Schlager i impreza – i klasyfikuje każdy zespół. Nowe zespoły same trafiają do swojego świata.',
+  'From genres, tags, AI music style, language and decade, Tuttiphon recognizes which music worlds your library offers – such as 80s hits, Eurodance, German rap or Schlager & party – and classifies every band. New bands go into their world on their own.':
+    'Na podstawie gatunków, tagów, stylu muzycznego AI, języka i dekady Tuttiphon rozpoznaje, jakie światy muzyczne oferuje twoja biblioteka – np. hity lat 80., Eurodance, niemiecki rap albo Schlager i impreza – i klasyfikuje każdy zespół. Nowe zespoły same trafiają do swojego świata.',
   'Create music worlds automatically':
     'Twórz światy muzyczne automatycznie',
   'From 4 bands and 60 songs, or from just 2 bands if someone listens to them a lot. Deleted worlds don’t come back.':
     'Od 4 zespołów i 60 piosenek albo już od 2 zespołów, jeśli ktoś dużo ich słucha. Usunięte światy nie wracają.',
   'Classify new bands':
     'Klasyfikuj nowe zespoły',
-  'For bands without a music world, Tuttiphon works out where they fit – from similar bands on Last.fm, tags, genres, the music styles of the AI sound analysis and the scene catalog. With match rate and reasoning.':
-    'Dla zespołów bez świata muzycznego Tuttiphon ustala, gdzie pasują – na podstawie podobnych zespołów w Last.fm, tagów, gatunków, stylów muzycznych z analizy brzmienia AI i katalogu scen. Z poziomem dopasowania i uzasadnieniem.',
+  'For bands without a music world, Tuttiphon works out where they fit – from similar bands on ListenBrainz and Deezer, tags, genres, the music styles of the AI sound analysis and the scene catalog. With match rate and reasoning.':
+    'Dla zespołów bez świata muzycznego Tuttiphon ustala, gdzie pasują – na podstawie podobnych zespołów w ListenBrainz i Deezer, tagów, gatunków, stylów muzycznych z analizy brzmienia AI i katalogu scen. Z poziomem dopasowania i uzasadnieniem.',
   'What happens with matches':
     'Co dzieje się z dopasowaniami',
   '“Suggest” shows them under “To review” on the home page.':
@@ -185,8 +201,7 @@ export default {
     'dodaj',
   'No bands without a music world right now.':
     'Na razie brak zespołów bez świata muzycznego.',
-  'Vibes from Last.fm tags for bands without a genre':
-    'Klimaty z tagów Last.fm dla zespołów bez gatunku',
+  'Vibes from tags for bands without a genre': 'Klimaty z tagów dla zespołów bez gatunku',
   'assign':
     'przypisz',
   'Analyze everything without a time limit':
@@ -241,8 +256,8 @@ export default {
     'Włączone',
   'Tuttiphon knows your plays, stars and favorites – for your statistics, your stars and more accurate suggestions.':
     'Tuttiphon zna twoje odtworzenia, gwiazdki i ulubione – dla twoich statystyk, twoich gwiazdek i trafniejszych propozycji.',
-  'For Tuttiphon to show your statistics and set Deezer stars in your account, it needs your Navidrome password once – the same as in Symfonium. It stays on your NAS.':
-    'Aby Tuttiphon mógł pokazywać twoje statystyki i ustawiać gwiazdki Deezer na twoim koncie, potrzebuje raz twojego hasła Navidrome – tego samego co w Symfonium. Zostaje ono na twoim NAS.',
+  'For Tuttiphon to show your statistics and set Deezer stars in your account, it needs your Navidrome password once – the same as in your music app. It stays on your NAS.':
+    'Aby Tuttiphon mógł pokazywać twoje statystyki i ustawiać gwiazdki Deezer na twoim koncie, potrzebuje raz twojego hasła Navidrome – tego samego co w aplikacji muzycznej. Zostaje ono na twoim NAS.',
   'your Navidrome password':
     'twoje hasło Navidrome',
   'Your profile':
@@ -273,8 +288,8 @@ export default {
     'Duża platforma muzyczna z wieloma zsynchronizowanymi tekstami, także dla muzyki zachodniej. Nieoficjalny interfejs, nieco wolniejszy.',
   'Find lyrics automatically':
     'Znajduj teksty automatycznie',
-  'Tuttiphon looks up missing lyrics on LRCLIB, and on NetEase too if you like, and puts them next to the songs: synced lyrics as .lrc, otherwise as .txt. Navidrome reads them in at the next scan, Symfonium shows them while playing.':
-    'Tuttiphon wyszukuje brakujące teksty w LRCLIB, a jeśli chcesz, także w NetEase, i zapisuje je obok piosenek: zsynchronizowane jako .lrc, inne jako .txt. Navidrome wczytuje je przy następnym skanie, Symfonium pokazuje je podczas odtwarzania.',
+  'Tuttiphon looks up missing lyrics on LRCLIB, and on NetEase too if you like, and puts them next to the songs: synced lyrics as .lrc, otherwise as .txt. Navidrome reads them in at the next scan, music apps show them while playing.':
+    'Tuttiphon wyszukuje brakujące teksty w LRCLIB, a jeśli chcesz, także w NetEase, i zapisuje je obok piosenek: zsynchronizowane jako .lrc, inne jako .txt. Navidrome wczytuje je przy następnym skanie, aplikacje muzyczne pokazują je podczas odtwarzania.',
   'No numbers yet – they appear with the first run.':
     'Jeszcze brak liczb – pojawią się po pierwszym przebiegu.',
   'synced':
@@ -331,8 +346,8 @@ export default {
     'Porządki',
   'Delete duplicate lyrics':
     'Usuń zdublowane teksty',
-  'If there is an .lrc next to a .txt, the .txt goes – otherwise Symfonium sometimes shows the wrong lyrics.':
-    'Jeśli obok .txt jest .lrc, .txt znika – inaczej Symfonium czasem pokazuje zły tekst.',
+  'If there is an .lrc next to a .txt, the .txt goes – otherwise music apps sometimes show the wrong lyrics.':
+    'Jeśli obok .txt jest .lrc, .txt znika – inaczej aplikacje muzyczne czasem pokazują zły tekst.',
   'Search all missing now':
     'Szukaj teraz wszystkich brakujących',
   'Retry recent misses too':
@@ -438,8 +453,8 @@ export default {
     'Najlepsze utwory i odświeżanie',
   'Highlight top tracks per band':
     'Wyróżniaj najlepsze utwory każdego zespołu',
-  'If many songs of a band share the highest star count, the most popular get one more star. This way Symfonium sorts the top tracks correctly. Takes effect on the next run.':
-    'Jeśli wiele piosenek zespołu ma najwyższą liczbę gwiazdek, najpopularniejsze dostają jedną gwiazdkę więcej. Dzięki temu Symfonium poprawnie sortuje najlepsze utwory. Działa od następnego przebiegu.',
+  'If many songs of a band share the highest star count, the most popular get one more star. This way apps like Symfonium sort the top tracks correctly. Takes effect on the next run.':
+    'Jeśli wiele piosenek zespołu ma najwyższą liczbę gwiazdek, najpopularniejsze dostają jedną gwiazdkę więcej. Dzięki temu aplikacje takie jak Symfonium poprawnie sortują najlepsze utwory. Działa od następnego przebiegu.',
   'Refresh every night':
     'Odświeżaj co noc',
   'Checks {n} songs on Deezer again every night in the time window of the night analysis – always the ones unchecked the longest, so the stars stay up to date.':
@@ -598,12 +613,12 @@ export default {
     'W poniedziałki do osoby, jeśli ma „Odkryte dla ciebie” albo „Album tygodnia”.',
   'Navidrome plugin':
     'Wtyczka Navidrome',
-  'With the plugin, Navidrome asks Tuttiphon for similar songs and passes every play on: Instant Mix, song and artist radio and the smart queue in Symfonium then follow the sound of your own music files – also for bands that other services hardly know. Needs Navidrome 0.64 or later.':
-    'Dzięki wtyczce Navidrome pyta Tuttiphon o podobne piosenki i przekazuje każde odtworzenie: Instant Mix, radio piosenki i wykonawcy oraz inteligentna kolejka w Symfonium podążają wtedy za brzmieniem twoich własnych plików muzycznych – także dla zespołów, których inne serwisy prawie nie znają. Wymaga Navidrome 0.64 lub nowszego.',
+  'With the plugin, Navidrome asks Tuttiphon for similar songs and passes every play on: Instant Mix, song and artist radio in the music apps and Symfonium’s smart queue then follow the sound of your own music files – also for bands that other services hardly know. Needs Navidrome 0.64 or later.':
+    'Dzięki wtyczce Navidrome pyta Tuttiphon o podobne piosenki i przekazuje każde odtworzenie: Instant Mix, radio piosenki i wykonawcy w aplikacjach muzycznych oraz inteligentna kolejka Symfonium podążają wtedy za brzmieniem twoich własnych plików muzycznych – także dla zespołów, których inne serwisy prawie nie znają. Wymaga Navidrome 0.64 lub nowszego.',
   'Songs with a sound vector':
     'Piosenki z wektorem brzmienia',
-  'No sound vectors yet – the AI sound analysis of the Docker image adds them night by night. Until then the plugin answers with similar bands from Last.fm and the genres.':
-    'Jeszcze brak wektorów brzmienia – analiza brzmienia AI w obrazie Docker dodaje je noc po nocy. Do tego czasu wtyczka odpowiada podobnymi zespołami z Last.fm i gatunkami.',
+  'No sound vectors yet – the AI sound analysis of the Docker image adds them night by night. Until then the plugin answers with similar bands from ListenBrainz, Deezer and Last.fm and with the genres.':
+    'Jeszcze brak wektorów brzmienia – analiza brzmienia AI w obrazie Docker dodaje je noc po nocy. Do tego czasu wtyczka odpowiada podobnymi zespołami z ListenBrainz, Deezer i Last.fm oraz gatunkami.',
   'Key':
     'Klucz',
   'Created {when}':
@@ -638,8 +653,8 @@ export default {
     'Jeśli lista już istnieje, wstaw przed nią „tuttiphon,” – bez niej to są domyślne wartości Navidrome. Wiersz w docker-compose ma pierwszeństwo przed navidrome.toml. Potem uruchom ponownie Navidrome; gdzie Tuttiphon nie ma odpowiedzi, Navidrome pyta kolejnych.',
   'In Navidrome under <b>Settings → Plugins</b> turn on “Tuttiphon”, enter the address and the key and allow it <b>all users</b> (for the plays). Ideally the address in the home network, e.g. <code>http://&lt;NAS&gt;:8765</code> – not an https address through a reverse proxy, which may turn Navidrome away. This browser reaches Tuttiphon at <code>{address}</code>.':
     'W Navidrome w <b>Settings → Plugins</b> włącz „Tuttiphon”, wpisz adres i klucz i zezwól na <b>all users</b> – wszystkich użytkowników (dla odtworzeń). Najlepiej adres w sieci domowej, np. <code>http://&lt;NAS&gt;:8765</code> – nie adres https przez reverse proxy, który może odrzucić Navidrome. Ta przeglądarka łączy się z Tuttiphon pod <code>{address}</code>.',
-  'In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
-    'W Symfonium włącz dla serwera Navidrome <b>„Use similar tracks for Radio Mix”</b> („Manage media providers” → serwer) i wybierz <b>„Sonic Analysis”</b> dla inteligentnej kolejki w odtwarzaczu.',
+  'Music apps that ask Navidrome for similar songs – for Instant Mix or song radio – then get them from Tuttiphon. In Symfonium, turn on <b>“Use similar tracks for Radio Mix”</b> for the Navidrome server (Manage media providers → the server) and choose <b>“Sonic Analysis”</b> for the smart queue in the player.':
+    'Aplikacje muzyczne, które pytają Navidrome o podobne piosenki – dla Instant Mix albo radia piosenki – dostają je wtedy od Tuttiphon. W Symfonium włącz dla serwera Navidrome <b>„Use similar tracks for Radio Mix”</b> („Manage media providers” → serwer) i wybierz <b>„Sonic Analysis”</b> dla inteligentnej kolejki w odtwarzaczu.',
   'Navidrome does not say who is asking. If the song is playing on exactly one account – or only one account is playing – the answer is for that person: without their dislikes, without what they just heard or rated 1 star, what they often skip comes later, and after two songs of a band other bands come first. Otherwise for the family – without a family for everyone. Children’s music only for children’s songs, and without songs with explicit lyrics as soon as a person has kid-safe mode or is a child profile.':
     'Navidrome nie mówi, kto pyta. Jeśli piosenka gra właśnie na dokładnie jednym koncie – albo odtwarza tylko jedno konto – odpowiedź jest dla tej osoby: bez tego, czego nie lubi, bez tego, czego właśnie słuchała lub co oceniła na 1 gwiazdkę; to, co często pomija, pojawia się później, a po dwóch piosenkach jednego zespołu najpierw pojawiają się inne zespoły. W przeciwnym razie dla rodziny – bez rodziny dla wszystkich. Muzyka dziecięca tylko do piosenek dla dzieci i bez piosenek z wulgarnymi tekstami, gdy tylko jakaś osoba ma włączony tryb dla dzieci albo ma profil dziecka.',
   'Create a new key?':

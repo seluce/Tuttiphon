@@ -94,7 +94,7 @@
     <div class="eyebrow">{date}</div>
     <h1>{me.name ? t('{greeting}, {name}!', { greeting: greeting(), name: me.name }) : t('{greeting}!', { greeting: greeting() })}<HelpLink /></h1>
     {#if !mine.length}
-      <p class="lead max-w-[620px] opacity-92">{t('This is where your own playlists are made. Pick a suggestion below – one tap creates it and it shows up in Symfonium.')}</p>
+      <p class="lead max-w-[620px] opacity-92">{t('This is where your own playlists are made. Pick a suggestion below – one tap creates it and it shows up in your music app.')}</p>
     {/if}
     <div class="hero-meta">
       <span>{tn(mine.length, '{n} playlist of your own', '{n} playlists of your own')}</span>
@@ -186,7 +186,7 @@
       <div class="skel h-[120px]"></div>
     {:else if woche.error}
       <div class="card">
-        <p class="muted">{woche.noPw ? t('For your personal listening stats, Tuttiphon needs your Navidrome password once – the same one as in Symfonium. It stays on your NAS.') : woche.error}</p>
+        <p class="muted">{woche.noPw ? t('For your personal listening stats, Tuttiphon needs your Navidrome password once – the same one as in your music app. It stays on your NAS.') : woche.error}</p>
         {#if woche.noPw}<a class="btn sm primary" href="#/einstellungen/konto"><Icon name="key" size={15} />{t('Turn on stats')}</a>{/if}
       </div>
     {:else if !woche.d.totals.plays}
@@ -194,7 +194,7 @@
         <p class="muted">
           {recent(woche.d)
             ? t('Tuttiphon has been counting since {date} – as soon as you listen, this shows what you played most.', { date: new Date(woche.d.since).toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) })
-            : t('You haven’t listened to anything this week yet – or Symfonium hasn’t reported the plays yet.')}
+            : t('You haven’t listened to anything this week yet – or your music app hasn’t reported the plays yet.')}
         </p>
       </div>
     {:else}
@@ -212,8 +212,8 @@
   {#if family.length}
     <Section title={t('Family playlists')} icon="users">
       <p class="muted small -mt-1.5 mb-3">{familyEditable
-        ? t('For the whole family – everyone hears them in Symfonium, and you can change them here too.')
-        : t('For the whole family – everyone hears them in Symfonium. With “Copy for me” you get your own version to adjust.')}</p>
+        ? t('For the whole family – everyone hears them in their music app, and you can change them here too.')
+        : t('For the whole family – everyone hears them in their music app. With “Copy for me” you get your own version to adjust.')}</p>
       <Carousel>{#each family as p (p.id)}<PlaylistCard {p} />{/each}</Carousel>
     </Section>
   {/if}
@@ -238,7 +238,7 @@
     <Section title={t('How it works')} icon="help" action={helpLink}>
       <TipCards items={[
         ['heart', t('Your taste'), t('In “My profile” you set your favorite worlds, favorite bands and dislikes. The suggestions are based on them.')],
-        ['smartphone', t('Listen in Symfonium'), t('New playlists go to Navidrome automatically. They show up in Symfonium after the next sync.')],
+        ['smartphone', t('Listen in your music app'), t('New playlists go to Navidrome automatically. They show up in your music app after the next sync.')],
         ...(familyPerson() ? [['eye', t('Who sees what'), t('Your playlists are just for you. The family playlists are for everyone.')]] : []),
       ]} />
     </Section>

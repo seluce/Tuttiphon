@@ -64,12 +64,11 @@ export default {
     'Mix voor je telefoon',
   'Create a mix':
     'Maak een mix',
-  'Download it once in Symfonium':
-    'Download hem één keer in Symfonium',
+  'Download it once in your music app': 'Download hem één keer in je muziek-app',
   'New songs arrive on their own':
     'Nieuwe nummers komen vanzelf',
-  'offline download on the go auto daily weekly reshuffle symfonium':
-    'offline downloaden onderweg automatisch dagelijks wekelijks husselen symfonium',
+  'offline download on the go auto daily weekly reshuffle music app symfonium':
+    'offline downloaden onderweg automatisch dagelijks wekelijks husselen muziek-app app symfonium',
   'Ready-made mixes':
     'Kant-en-klare mixen',
   'Here are mixes and playlists that match your taste. “Create” adds one of them right away.':
@@ -82,10 +81,9 @@ export default {
     'Of stel hem zelf samen',
   'In the assistant you choose music and mood and, in the last step, “Mix”.':
     'In de assistent kies je muziek en stemming en in de laatste stap “Mix”.',
-  'Download in Symfonium':
-    'Downloaden in Symfonium',
-  'Open the mix in Symfonium under Playlists and download it once. When it renews, Symfonium fetches the new songs on its own at the next sync.':
-    'Open de mix in Symfonium onder Playlists en download hem één keer. Als hij vernieuwt, haalt Symfonium de nieuwe nummers vanzelf op bij de volgende synchronisatie.',
+  'Download in your music app': 'Downloaden in je muziek-app',
+  'Open the mix in your music app under Playlists and download it once. When it renews, apps like Symfonium fetch the new songs on their own at the next sync.':
+    'Open de mix in je muziek-app onder Playlists en download hem één keer. Als hij vernieuwt, halen apps zoals Symfonium de nieuwe nummers vanzelf op bij de volgende synchronisatie.',
   'Adjust music worlds':
     'Muziekwerelden aanpassen',
   'Open music worlds':
@@ -140,10 +138,10 @@ export default {
     'Uit het luisteren',
   'From your listening':
     'Uit jouw luistergedrag',
-  'Tuttiphon recognizes from what is played in Symfonium which music people like. “+” turns it into a favorite.':
-    'Tuttiphon herkent aan wat er in Symfonium wordt afgespeeld welke muziek mensen mooi vinden. “+” maakt er een favoriet van.',
-  'Tuttiphon recognizes from what you play in Symfonium which music you like. “+” turns it into a favorite.':
-    'Tuttiphon herkent aan wat je in Symfonium afspeelt welke muziek je mooi vindt. “+” maakt er een favoriet van.',
+  'Tuttiphon recognizes from what is played in the music apps which music people like. “+” turns it into a favorite.':
+    'Tuttiphon herkent aan wat er in de muziek-apps wordt afgespeeld welke muziek mensen mooi vinden. “+” maakt er een favoriet van.',
+  'Tuttiphon recognizes from what you play in your music app which music you like. “+” turns it into a favorite.':
+    'Tuttiphon herkent aan wat je in je muziek-app afspeelt welke muziek je mooi vindt. “+” maakt er een favoriet van.',
   'Preferences':
     'Voorkeuren',
   'What you like to hear':
@@ -176,8 +174,7 @@ export default {
     'Iets niet meer horen',
   'Band or genre under “Dislikes”':
     'Band of genre onder “Liever niet”',
-  'Rate the song 1 star in Symfonium':
-    'Geef het nummer 1 ster in Symfonium',
+  'Rate the song 1 star in your music app': 'Geef het nummer 1 ster in je muziek-app',
   'What you skip comes less often':
     'Wat je overslaat, komt minder vaak',
   'hide block ban never dislike star skip annoying':
@@ -186,16 +183,16 @@ export default {
     'Bands en genres hier komen nooit in de playlists terecht – welke muziekwereld of stemming het ook is.',
   'Single songs':
     'Losse nummers',
-  'Rate a song 1 star in Symfonium. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
-    'Geef een nummer 1 ster in Symfonium. Dan komt het niet meer in je mixen. Wat je in de mix vaak overslaat, komt vanzelf minder vaak.',
+  'Rate a song 1 star in your music app. Then it no longer comes into your mixes. What you often skip in the mix comes less often on its own.':
+    'Geef een nummer 1 ster in je muziek-app. Dan komt het niet meer in je mixen. Wat je in de mix vaak overslaat, komt vanzelf minder vaak.',
   'Change a playlist':
     'Een playlist wijzigen',
   'Tap a playlist':
     'Tik op een playlist',
   'Choose “Edit”, or “…” for the cover and more':
     'Kies “Bewerken”, of “…” voor de cover en meer',
-  'Symfonium shows the change after the next sync':
-    'Symfonium toont de wijziging na de volgende synchronisatie',
+  'Your music app shows the change after the next sync':
+    'Je muziek-app toont de wijziging na de volgende synchronisatie',
   'edit rename name cover picture pause delete trash share family visible copy':
     'bewerken hernoemen naam cover afbeelding pauzeren verwijderen prullenbak delen gezin zichtbaar kopiëren',
   'Open a playlist':
@@ -206,12 +203,12 @@ export default {
     'Alle playlists verschijnen hier zodra er een eerste is.',
   'Everything at a glance':
     'Alles in één oogopslag',
-  '“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves Symfonium for a while and stays kept here – or move it to the trash.':
-    '“Bewerken” wijzigt muziek en naam. Onder “…” ontwerp je de cover, pauzeer je de playlist – hij verdwijnt dan een tijdje uit Symfonium en blijft hier bewaard – of verplaats je hem naar de prullenbak.',
+  '“Edit” changes music and name. Under “…” you design the cover, pause the playlist – it then leaves the music apps for a while and stays kept here – or move it to the trash.':
+    '“Bewerken” wijzigt muziek en naam. Onder “…” ontwerp je de cover, pauzeer je de playlist – hij verdwijnt dan een tijdje uit de muziek-apps en blijft hier bewaard – of verplaats je hem naar de prullenbak.',
   'Share with the family':
     'Delen met het gezin',
-  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and Symfonium.':
-    'Kies in “Bewerken” bij “Voor wie?” het gezin – dan ziet iedereen de playlist in Navidrome en Symfonium.',
+  'In “Edit”, choose the family under “For whom?” – then everyone sees the playlist in Navidrome and the music apps.':
+    'Kies in “Bewerken” bij “Voor wie?” het gezin – dan ziet iedereen de playlist in Navidrome en de muziek-apps.',
   'Turn on kid-safe mode':
     'Kindveilige modus inschakelen',
   'Open the profile':
@@ -394,8 +391,8 @@ export default {
     'een cover als cover.jpg opslaan voor albums zonder afbeelding – bestaande blijven',
   'Understand music':
     'Muziek begrijpen',
-  'analyze the sound with our own measurement and AI, fetch Last.fm knowledge, classify new bands – with a time limit':
-    'de klank analyseren met eigen meting en AI, Last.fm-kennis ophalen, nieuwe bands indelen – met tijdslimiet',
+  'analyze the sound with our own measurement and AI, fetch similar bands and tags, classify new bands – with a time limit':
+    'de klank analyseren met eigen meting en AI, vergelijkbare bands en tags ophalen, nieuwe bands indelen – met tijdslimiet',
   'Write playlists':
     'Playlists schrijven',
   'Smart playlists & mixes into the playlist folder':
@@ -570,8 +567,8 @@ export default {
     'Tuttiphon is op dit moment niet bereikbaar. Het start vanzelf zodra de server er weer is.',
   'Tuttiphon – Sign in':
     'Tuttiphon – Inloggen',
-  'Sign in with your Navidrome account – with the same name and password as in Symfonium.':
-    'Log in met je Navidrome-account – met dezelfde naam en hetzelfde wachtwoord als in Symfonium.',
+  'Sign in with your Navidrome account – with the same name and password as in your music app.':
+    'Log in met je Navidrome-account – met dezelfde naam en hetzelfde wachtwoord als in je muziek-app.',
   'Please enter your username.':
     'Voer je gebruikersnaam in.',
   'Please enter the password.':
@@ -652,6 +649,7 @@ export default {
     'Hoezen ophalen',
   'Fetching Last.fm knowledge':
     'Last.fm-kennis ophalen',
+  'Fetching similar bands': 'Vergelijkbare bands ophalen',
   'Measuring loudness':
     'Luidheid meten',
   'Classifying bands':

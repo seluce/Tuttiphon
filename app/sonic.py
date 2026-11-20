@@ -3,7 +3,7 @@ song, an album or a band (Instant Mix, "similar songs", song and artist radio in
 path of songs from one song to another, each step sounding close to the last.
 
 Answers come from the sound vectors of the AI sound analysis (similar.py); a song without one falls back to the radio
-(Last.fm's similar bands and genres, classify.radio_artists()) ordered by the features we measured. Songs are
+(similar bands of the band knowledge and genres, classify.radio_artists()) ordered by the features we measured. Songs are
 Navidrome's own ids, so the plugin can hand them on as they are.
 
 Navidrome does not say who asks. But Tuttiphon knows from the live plays (listen.py) who is playing what: if the
@@ -44,7 +44,7 @@ _ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_FILES = (_ROOT / "plugin" / "tuttiphon.ndp",                     # in the Docker image
                 _ROOT / "navidrome-plugin" / "dist" / "tuttiphon.ndp")   # built here (tools/build-plugin.sh)
 MAX_COUNT = 200        # never more songs per answer
-RADIO_BONUS = 0.1      # a band Last.fm counts as similar moves up this much (artist radio)
+RADIO_BONUS = 0.1      # a band counted as similar (band knowledge) moves up this much (artist radio)
 RUN_MAX = 2            # the smart queue: after this many songs of one band in a row, other bands come first …
 RUN_FACTOR = 0.2       # … (that band's scores times this)
 HOUR_FACTOR = 0.85     # a band heard several times in the last hour: times this for every further song of it
@@ -642,7 +642,7 @@ def _artist_songs(lib, name=None, artist_id=None):
 
 def songs_like_artist(cfg, lib, name=None, artist_id=None, count=50, exclude=frozenset(), personal=False, who=None):
     """Artist radio: songs that sound like the band – its own (up to a third), of bands that sound like it and of
-    those Last.fm counts as similar (they move up by RADIO_BONUS, the similarity shown stays the sound's); without
+    those counted as similar by the band knowledge (they move up by RADIO_BONUS, the similarity shown stays the sound's); without
     vectors the radio's bands, shuffled by the day. personal / who: for the person listening to the band (_who())."""
     count = _clamp(count)
     own, artist = _artist_songs(lib, name, artist_id)

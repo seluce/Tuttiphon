@@ -113,7 +113,8 @@ export default {
 
   // pages/Welten.svelte – overview of music worlds
   'Music worlds': 'Musikwelten',
-  'A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, Last.fm, AI music style, language and decade.': 'Eine Musikwelt sagt, wer spielt. Tuttiphon legt sie aus eurer Bibliothek selbst an und ordnet neue Bands von selbst ein – nach Genres, Last.fm, KI-Musikstil, Sprache und Jahrzehnt.',
+  'A music world says who plays. Tuttiphon creates them from your library and sorts new bands in on its own – by genres, ListenBrainz, AI music style, language and decade.':
+    'Eine Musikwelt sagt, wer spielt. Tuttiphon legt sie aus eurer Bibliothek selbst an und ordnet neue Bands von selbst ein – nach Genres, ListenBrainz, KI-Musikstil, Sprache und Jahrzehnt.',
   'Your music sorted by kind. Tap a world to see which bands belong to it – with “Like” you keep a world in mind for your suggestions.': 'Eure Musik nach Art sortiert. Antippen zeigt, welche Bands dazugehören – mit „Gefällt mir“ merkst du dir eine Welt für deine Vorschläge.',
   'you like it': 'gefällt dir',
   'you listen to it often': 'hörst du oft',
@@ -133,7 +134,8 @@ export default {
   'no bands in your library yet': 'noch keine Bands bei euch',
 
   // pages/welten/WeltView.svelte – music world for users
-  'Daily Mix from {name} created – coming to Symfonium shortly': 'Daily Mix aus {name} angelegt – kommt gleich in Symfonium',
+  'Daily Mix from {name} created – coming to your music app shortly':
+    'Daily Mix aus {name} angelegt – kommt gleich in deine Musik-App',
   '{name} is no longer one of your favorite worlds': '{name} ist nicht mehr bei deinen Lieblingswelten',
   '{name} is now one of your favorite worlds – this improves your suggestions': '{name} gehört jetzt zu deinen Lieblingswelten – das verbessert deine Vorschläge',
   'All music worlds': 'Alle Musikwelten',
@@ -167,8 +169,10 @@ export default {
   'No longer included:': 'Nicht mehr dabei:',
   '{names}. They can get a music world of their own.': '{names}. Sie können eine eigene Musikwelt bekommen.',
   'Newly included:': 'Neu dabei:',
-  'One playlist will then have a different name, also in Symfonium: {list}': 'Eine Playlist heißt danach anders, auch in Symfonium: {list}',
-  '{n} playlists will then have different names, also in Symfonium: {list}': '{n} Playlists heißen danach anders, auch in Symfonium: {list}',
+  'One playlist will then have a different name, also in the music apps: {list}':
+    'Eine Playlist heißt danach anders, auch in den Musik-Apps: {list}',
+  '{n} playlists will then have different names, also in the music apps: {list}':
+    '{n} Playlists heißen danach anders, auch in den Musik-Apps: {list}',
   '“{from}” → “{to}”': '„{from}“ → „{to}“',
   'Scene: {name}': 'Szene: {name}',
   'Playlist from this world': 'Playlist aus dieser Welt',
@@ -191,7 +195,8 @@ export default {
   'Scene': 'Szene',
   'With a scene, the world knows the typical bands and adds them automatically.': 'Mit einer Szene kennt die Welt die typischen Bands und nimmt sie automatisch auf.',
   'add matching bands automatically': 'passende Bands automatisch dazunehmen',
-  'The scene’s typical bands and bands that match by genres, Last.fm, AI music style, language and decade – new ones too.': 'Typische Bands der Szene und Bands, die nach Genres, Last.fm, KI-Musikstil, Sprache und Jahrzehnt passen – auch neue.',
+  'The scene’s typical bands and bands that match by genres, ListenBrainz, AI music style, language and decade – new ones too.':
+    'Typische Bands der Szene und Bands, die nach Genres, ListenBrainz, KI-Musikstil, Sprache und Jahrzehnt passen – auch neue.',
   'Minimum length in seconds': 'Mindestlänge in Sekunden',
   'Separate world – don’t mix into “All” playlists': 'Eigene Welt – nicht in „Alle“-Playlists mischen',
   'Advanced: album series, genres, exclusions': 'Für Fortgeschrittene: Alben-Reihen, Genres, Ausschlüsse',
@@ -222,7 +227,8 @@ export default {
   'For whom?': 'Für wen?',
   'Only for you – your stars & favorites count.':
     'Nur für dich – deine Sterne & Favoriten zählen.',
-  'This playlist shows the most played songs – from what is played in Symfonium. It changes on its own on the first of the month; it always stays one playlist.': 'Diese Playlist zeigt die meistgehörten Songs – aus dem, was in Symfonium gehört wird. Sie wechselt am Monatsersten von selbst, es bleibt immer eine Playlist.',
+  'This playlist shows the most played songs – from what is played in the music apps. It changes on its own on the first of the month; it always stays one playlist.':
+    'Diese Playlist zeigt die meistgehörten Songs – aus dem, was in den Musik-Apps gehört wird. Sie wechselt am Monatsersten von selbst, es bleibt immer eine Playlist.',
   'Period': 'Zeitraum',
   'the last month': 'der letzte Monat',
   'the year so far': 'das Jahr bis jetzt',
@@ -243,7 +249,7 @@ export default {
   'last {n} days': 'letzte {n} Tage',
   'Order': 'Reihenfolge',
   'Max. songs': 'Max. Songs',
-  'All year in Symfonium, not just in season': 'Das ganze Jahr in Symfonium, nicht nur zur Saison',
+  'All year in the music apps, not just in season': 'Das ganze Jahr in den Musik-Apps, nicht nur zur Saison',
   'Add or remove individual bands': 'Einzelne Bands dazu oder raus',
   'Also include': 'Zusätzlich aufnehmen',
   'Never in this playlist': 'Nie in dieser Playlist',
@@ -291,8 +297,10 @@ export default {
   'Mix – renews itself': 'Mix – erneuert sich',
   'Mix – renews itself. This vibe picks by sound; only Tuttiphon can do that, so it is only available as a mix.': 'Mix – erneuert sich. Diese Richtung wählt nach dem Klang aus; das kann nur Tuttiphon, deshalb gibt es sie nur als Mix.',
   'Mix – renews itself. The songs are picked by their sound; only Tuttiphon can do that, so it is only available as a mix.': 'Mix – erneuert sich. Die Songs werden nach ihrem Klang ausgewählt; das kann nur Tuttiphon, deshalb gibt es sie nur als Mix.',
-  'Tuttiphon rebuilds the list regularly: a few songs per band, never the same band twice in a row. In between it stays the same – ideal if Symfonium should save it offline and update it automatically.': 'Tuttiphon stellt die Liste regelmäßig neu zusammen: wenige Songs pro Band, nie dieselbe Band zweimal hintereinander. Dazwischen bleibt sie gleich – ideal, wenn Symfonium sie offline speichern und automatisch aktualisieren soll.',
-  'Navidrome reshuffles from all matching songs every time the playlist is loaded – always fresh, but unsuitable for offline downloads in Symfonium because the list keeps changing.': 'Navidrome würfelt bei jedem Abruf neu aus allen passenden Songs – immer frisch, aber für Offline-Downloads in Symfonium ungeeignet, weil sich die Liste ständig ändert.',
+  'Tuttiphon rebuilds the list regularly: a few songs per band, never the same band twice in a row. In between it stays the same – ideal if a music app should save it offline and update it automatically.':
+    'Tuttiphon stellt die Liste regelmäßig neu zusammen: wenige Songs pro Band, nie dieselbe Band zweimal hintereinander. Dazwischen bleibt sie gleich – ideal, wenn eine Musik-App sie offline speichern und automatisch aktualisieren soll.',
+  'Navidrome reshuffles from all matching songs every time the playlist is loaded – always fresh, but unsuitable for offline downloads in music apps because the list keeps changing.':
+    'Navidrome würfelt bei jedem Abruf neu aus allen passenden Songs – immer frisch, aber für Offline-Downloads in Musik-Apps ungeeignet, weil sich die Liste ständig ändert.',
   'Made for the mornings: starts calm and gets livelier, and songs that sound like what is played in the morning come more often. The length fits the usual morning round.': 'Gemacht für die Morgenstunden: beginnt ruhig und wird lebhafter, und Songs, die so klingen wie das, was morgens gehört wird, kommen öfter. Die Länge passt zur üblichen Morgenrunde.',
   'Only songs this account has never played – what sounds like its taste comes much more often. New every week by default, at most one song per album.': 'Nur Songs, die dieses Konto noch nie gespielt hat – was nach seinem Geschmack klingt, kommt deutlich öfter. Standardmäßig jede Woche neu, höchstens ein Song pro Album.',
   'Album of the week: one whole album this account has never played, picked by its taste – favorite bands first – in album order. New every Monday; during the week it stays the same.': 'Album der Woche: ein ganzes Album, das dieses Konto noch nie gespielt hat, nach seinem Geschmack ausgewählt – Lieblingsbands zuerst – in Albumreihenfolge. Jeden Montag neu; während der Woche bleibt es gleich.',

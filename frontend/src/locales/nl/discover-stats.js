@@ -92,10 +92,8 @@ export default {
     'Maken',
   'Customize':
     'Aanpassen',
-  'With a free Last.fm key, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
-    'Met een gratis Last.fm-sleutel toont Tuttiphon hier bands die op je favorieten lijken, maar nog niet in de bibliotheek staan.',
-  'Enter key →':
-    'Sleutel invoeren →',
+  'With ListenBrainz or Deezer, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.':
+    'Met ListenBrainz of Deezer toont Tuttiphon hier bands die op je favorieten lijken maar nog niet in de bibliotheek staan.',
   'The administrator sets this up.':
     'De beheerder stelt dit in.',
   'No data yet – it is created during the next run of “Understand music”.':
@@ -104,10 +102,10 @@ export default {
     'lijkt op {names}',
   'Show all {n}':
     'Alle {n} tonen',
-  'According to Last.fm – to listen in or as a wish list for Lidarr.':
-    'Volgens Last.fm – om even te luisteren of als verlanglijst voor Lidarr.',
-  'According to Last.fm – tap to listen in. If you like something, the administrator can add it to the library.':
-    'Volgens Last.fm – tik om even te luisteren. Vind je iets mooi, dan kan de beheerder het aan de bibliotheek toevoegen.',
+  'Tap to listen in on Last.fm – or as a wish list for Lidarr.':
+    'Tik om even te luisteren op Last.fm – of als verlanglijst voor Lidarr.',
+  'Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.':
+    'Tik om even te luisteren op Last.fm. Vind je iets mooi, dan kan de beheerder het aan de bibliotheek toevoegen.',
   'All':
     'Alle',
   'Error':
@@ -134,10 +132,10 @@ export default {
     'Statistieken',
   'My statistics':
     'Mijn statistieken',
-  'What really gets played in your home – from the plays Symfonium reports to Navidrome.':
-    'Wat er bij jullie echt wordt gespeeld – op basis van de afspeelbeurten die Symfonium aan Navidrome doorgeeft.',
-  'What you really listen to – from the plays Symfonium reports to Navidrome.':
-    'Waar je echt naar luistert – op basis van de afspeelbeurten die Symfonium aan Navidrome doorgeeft.',
+  'What really gets played in your home – from the plays your music apps report to Navidrome.':
+    'Wat er bij jullie echt wordt gespeeld – op basis van de afspeelbeurten die jullie muziek-apps aan Navidrome doorgeven.',
+  'What you really listen to – from the plays your music app reports to Navidrome.':
+    'Waar je echt naar luistert – op basis van de afspeelbeurten die je muziek-app aan Navidrome doorgeeft.',
   'Password missing':
     'Wachtwoord ontbreekt',
   'Counting your plays …':
@@ -186,8 +184,8 @@ export default {
     '“Vergeten favorieten” gemaakt',
   'No plays counted yet':
     'Nog geen afspeelbeurten geteld',
-  'Navidrome has not saved any plays for “{user}” yet. In Symfonium, “Scrobbling” or “Report plays to the server” must be turned on.':
-    'Navidrome heeft nog geen afspeelbeurten voor “{user}” opgeslagen. In Symfonium moet “Scrobbling” of “Report plays to the server” aan staan.',
+  'Navidrome has not saved any plays for “{user}” yet. The music app has to report plays to the server – often called “Scrobbling”.':
+    'Navidrome heeft nog geen afspeelbeurten voor “{user}” opgeslagen. De muziek-app moet afspeelbeurten aan de server doorgeven – vaak heet dat “Scrobbling”.',
   'Plays':
     'Afspeelbeurten',
   'from {n} different song':
@@ -238,10 +236,10 @@ export default {
     'Als playlist maken',
   'Note: Navidrome only stores how often and when each song last played – it keeps no history over time.':
     'Let op: Navidrome slaat alleen op hoe vaak en wanneer elk nummer het laatst is gespeeld – het houdt geen geschiedenis bij.',
-  '“{name}” saved with {n} song – coming to Symfonium shortly':
-    '“{name}” opgeslagen met {n} nummer – komt zo in Symfonium',
-  '“{name}” saved with {n} songs – coming to Symfonium shortly':
-    '“{name}” opgeslagen met {n} nummers – komt zo in Symfonium',
+  '“{name}” saved with {n} song – coming to your music app shortly':
+    '“{name}” opgeslagen met {n} nummer – komt zo in je muziek-app',
+  '“{name}” saved with {n} songs – coming to your music app shortly':
+    '“{name}” opgeslagen met {n} nummers – komt zo in je muziek-app',
   'Nothing counted yet':
     'Nog niets geteld',
   'Tuttiphon has been keeping track of plays since {date}. As soon as you listen, the most played music shows up here.':
@@ -304,8 +302,7 @@ export default {
     'laden …',
   '{n}× played':
     '{n}× gespeeld',
-  'Tag from Last.fm':
-    'Tag van Last.fm',
+  'Tag from MusicBrainz or Last.fm': 'Tag van MusicBrainz of Last.fm',
   'Start radio':
     'Radio starten',
   'Popular songs':
@@ -368,12 +365,10 @@ export default {
     'Klinkt als deze bands',
   'By the sound of the songs – recognized by the AI sound analysis.':
     'Op basis van de klank van de nummers – herkend door de AI-klankanalyse.',
-  'According to Last.fm – to listen in or for Lidarr.':
-    'Volgens Last.fm – om even te luisteren of voor Lidarr.',
-  'According to Last.fm – tap to listen in.':
-    'Volgens Last.fm – tik om even te luisteren.',
-  'With a Last.fm key under Settings → Intelligence you get tags here, more accurate similar bands and bands you are still missing.':
-    'Met een Last.fm-sleutel onder Instellingen → Intelligentie krijg je hier tags, nauwkeurigere vergelijkbare bands en bands die je nog mist.',
+  'Tap to listen in on Last.fm – or for Lidarr.': 'Tik om even te luisteren op Last.fm – of voor Lidarr.',
+  'Tap to listen in on Last.fm.': 'Tik om even te luisteren op Last.fm.',
+  'Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).':
+    'Tags en vergelijkbare bands voor deze band komen met de volgende ronde van “Muziek begrijpen” – van ListenBrainz en Deezer (Instellingen → Intelligentie).',
   'Four album covers with title':
     'Vier albumcovers met titel',
   'Its own look for this format, renewed with every new selection':
@@ -386,8 +381,8 @@ export default {
     'Cover van het hoofdalbum',
   'Designing and uploading the cover …':
     'Cover ontwerpen en uploaden …',
-  'Cover set ✓ – Symfonium shows it after the next sync':
-    'Cover ingesteld ✓ – Symfonium toont hem na de volgende synchronisatie',
+  'Cover set ✓ – your music app shows it after the next sync':
+    'Cover ingesteld ✓ – je muziek-app toont hem na de volgende synchronisatie',
   'Preparing the image …':
     'Afbeelding voorbereiden …',
   'Own image set ✓':
@@ -402,8 +397,8 @@ export default {
     'De afbeelding kon niet worden verkleind',
   'The playlist is not in Navidrome yet. As soon as it is applied, you can choose a cover here.':
     'De playlist staat nog niet in Navidrome. Zodra hij is toegepast, kun je hier een cover kiezen.',
-  'The image appears in Navidrome and – after the next sync – in Symfonium. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
-    'De afbeelding verschijnt in Navidrome en – na de volgende synchronisatie – in Symfonium. Tuttiphon vernieuwt ontworpen covers vanzelf als de playlist verandert – bij mixen dus met elke nieuwe selectie.',
+  'The image appears in Navidrome and – after the next sync – in the music apps. Tuttiphon renews designed covers by itself when the playlist changes – so for mixes with every new selection.':
+    'De afbeelding verschijnt in Navidrome en – na de volgende synchronisatie – in de muziek-apps. Tuttiphon vernieuwt ontworpen covers vanzelf als de playlist verandert – bij mixen dus met elke nieuwe selectie.',
   'not possible here':
     'hier niet mogelijk',
   'active':
@@ -590,8 +585,8 @@ export default {
     'Ongedaan gemaakt',
   '{name} – done ✓':
     '{name} – klaar ✓',
-  'Your changes are now in Navidrome ✓ – Symfonium shows them after the next sync':
-    'Je wijzigingen staan nu in Navidrome ✓ – Symfonium toont ze na de volgende synchronisatie',
+  'Your changes are now in Navidrome ✓ – your music app shows them after the next sync':
+    'Je wijzigingen staan nu in Navidrome ✓ – je muziek-app toont ze na de volgende synchronisatie',
   'Yes':
     'Ja',
   'Password for “{user}”':

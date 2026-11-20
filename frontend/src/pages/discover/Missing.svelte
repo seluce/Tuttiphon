@@ -1,4 +1,4 @@
-<!-- Bands similar to your favorites that are not in the library yet (Last.fm). -->
+<!-- Bands similar to your favorites that are not in the library yet (band knowledge: ListenBrainz, Deezer, Last.fm). -->
 <script>
   import Icon from '../../components/Icon.svelte'
   import { isAdmin, defaultOwner } from '../../lib/state.svelte.js'
@@ -13,11 +13,11 @@
   api(`/api/missing${owner ? `?person=${encodeURIComponent(owner)}` : ''}`).then((r) => (d = r)).catch(() => {})
 </script>
 
-{#if d && !d.lastfm}
+{#if d && !d.sources}
   <!-- as before: a card that looks like a note -->
   <div class="card note px-3.5 py-3 rounded-small bg-surface-2">
-    {t('With a free Last.fm key, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.')}
-    {#if admin}<a class="link" href="#/einstellungen/intel">{t('Enter key →')}</a>{:else}{t('The administrator sets this up.')}{/if}
+    {t('With ListenBrainz or Deezer, Tuttiphon shows bands here that resemble your favorites but are not in the library yet.')}
+    {#if admin}<a class="link" href="#/einstellungen/intel">{t('Turn on →')}</a>{:else}{t('The administrator sets this up.')}{/if}
   </div>
 {:else if d && !d.missing.length}
   <p class="muted small">{t('No data yet – it is created during the next run of “Understand music”.')}</p>
@@ -36,6 +36,6 @@
     <button type="button" class="btn sm ghost mt-2" onclick={() => (all = true)}><Icon name="down" size={16} />{t('Show all {n}', { n: d.missing.length })}</button>
   {/if}
   <p class="hint mt-2">{admin
-    ? t('According to Last.fm – to listen in or as a wish list for Lidarr.')
-    : t('According to Last.fm – tap to listen in. If you like something, the administrator can add it to the library.')}</p>
+    ? t('Tap to listen in on Last.fm – or as a wish list for Lidarr.')
+    : t('Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.')}</p>
 {/if}

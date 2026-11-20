@@ -99,7 +99,7 @@
         </div>
       </div>
     {/if}
-    <p class="muted small">{t('Shared devices – in the car, on the kitchen tablet – sign in to Navidrome in Symfonium with this account and play the family playlists. Nobody signs in to Tuttiphon with it.')}</p>
+    <p class="muted small">{t('Shared devices – in the car, on the kitchen tablet – sign in to Navidrome in their music app with this account and play the family playlists. Nobody signs in to Tuttiphon with it.')}</p>
     <div class="btns"><button class="btn primary" onclick={closeSheet}><Icon name="check" size={16} />{t('Done')}</button></div>
   </div>
 {:else}
@@ -108,8 +108,8 @@
       <Seg options={[['new', t('New account')], ['existing', t('Existing account')]]} bind:value={mode} onchange={() => (error = '')} />
     {/if}
     <p class="muted small">{mode === 'existing'
-      ? t('The family uses an account Navidrome already has – for example the one in the car. Its playlists are for everyone – every account sees them in Navidrome and Symfonium.')
-      : t('Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – every account sees them in Navidrome and Symfonium.')}</p>
+      ? t('The family uses an account Navidrome already has – for example the one in the car. Its playlists are for everyone – every account sees them in Navidrome and the music apps.')
+      : t('Tuttiphon creates a Navidrome account for the family. Its playlists are for everyone – every account sees them in Navidrome and the music apps.')}</p>
     <div class="flex gap-3.5 items-center">
       <PersonAvatar p={avatar} size={56} />
       <label class="f flex-1 min-w-0">{t('Name')}

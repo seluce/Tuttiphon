@@ -278,7 +278,7 @@ export async function pollTask() {
     S.running = st.running
     if (was && !st.running) {
       if (isAdmin()) toast(t('{name} – done ✓', { name: st.name }))
-      else if (isApplyRun(st)) toast(t('Your changes are now in Navidrome ✓ – Symfonium shows them after the next sync'))
+      else if (isApplyRun(st)) toast(t('Your changes are now in Navidrome ✓ – your music app shows them after the next sync'))
       // first take over what the server changed (e.g. classified bands), then save open changes –
       // otherwise the older state of the interface would overwrite the server's assignments
       mergeServerFields(await api('/api/config'))

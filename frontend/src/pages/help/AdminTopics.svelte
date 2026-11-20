@@ -61,7 +61,7 @@
     <li><span>{@html t('<b>Vibe</b> – what’s on: e.g. “Party”, “Calm”, “Christmas”. The numbers show how many songs fit.')}</span></li>
     <li><span>{@html t('<b>Finishing touches</b> – name, <b>smart playlist or mix</b>, hits only or everything, add or remove single bands. On the right you see right away what comes out.')}</span></li>
   </Steps>
-  <p>{t('After “Create playlist” it shows up in Navidrome automatically within a few seconds, and in Symfonium at the next sync.')}</p>
+  <p>{t('After “Create playlist” it shows up in Navidrome automatically within a few seconds, and in the music apps at the next sync.')}</p>
 {/snippet}
 
 {#snippet mix()}
@@ -70,12 +70,12 @@
       <li>{@html t('<b>Dynamic, by rules:</b> Navidrome reshuffles all matching songs <b>every time it’s loaded</b>.')}</li>
       <li>{t('New songs are included right away.')}</li>
       <li>{t('The same band can come up several times in a row.')}</li>
-      <li>{t('Not suitable for offline downloads in Symfonium – the list changes every time it’s loaded.')}</li>
+      <li>{t('Not suitable for offline downloads in music apps – the list changes every time it’s loaded.')}</li>
     </CompareCard>
     <CompareCard icon="dice" title={t('Mix')}>
       <li>{@html t('<b>Fixed, but renews itself:</b> Tuttiphon puts together a new selection <b>daily, weekly or monthly</b> – in between it stays the same.')}</li>
       <li>{@html t('<b>At most 3 songs per band</b>, never the same band twice in a row. The maximum is adjustable or “any”.')}</li>
-      <li>{@html t('<b>Ideal for offline:</b> save the playlist offline in Symfonium once – after each renewal, Symfonium downloads the new songs automatically at the next sync.')}</li>
+      <li>{@html t('<b>Ideal for offline:</b> save the playlist offline in the music app once – after each renewal, apps like Symfonium download the new songs automatically at the next sync.')}</li>
       <li>{t('Choose the blend: balanced, more hits or more lesser-known songs; recently played songs come up less often.')}</li>
       <li>{@render withUi(t('Don’t like today’s selection? {reshuffle} on the playlist page.'), { reshuffle: ['dice', t('Reshuffle')] })}</li>
     </CompareCard>
@@ -97,14 +97,14 @@
 {#snippet playlists()}
   <p>{t('A playlist’s page shows a preview, its bands and in plain words how it is made; a click on a song plays it.')}</p>
   <Bullets>
-    <li>{@render withUi(t('{edit} – everything can be changed; the name and ID in Navidrome stay, Symfonium keeps the playlist.'), { edit: ['edit', t('Edit')] })}</li>
+    <li>{@render withUi(t('{edit} – everything can be changed; the name and ID in Navidrome stay, the music apps keep the playlist.'), { edit: ['edit', t('Edit')] })}</li>
   </Bullets>
   <p>{@render withUi(t('The other actions are in the {more} menu next to it:'), { more: ['more', ''] })}</p>
   <Bullets>
     <li>{@render withUi(t('{pause} – disappears from Navidrome but stays here with all its settings. Simply activate it again later.'), { pause: ['pause', t('Pause playlist')] })}</li>
     <li>{@render withUi(t('{trash} – filed under “Trash”, deleted for good after 30 days.'), { trash: ['trash', t('Move to trash')] })}</li>
     <li>{@render withUi(t('{keep} – the current selection as a fixed playlist that never changes again.'), { keep: ['pin', t('Keep this mix')] })}</li>
-    <li>{@render withUi(t('{cover} – your own picture for Navidrome and Symfonium.'), { cover: ['image', t('Cover')] })}</li>
+    <li>{@render withUi(t('{cover} – your own picture for Navidrome and the music apps.'), { cover: ['image', t('Cover')] })}</li>
   </Bullets>
   <p>{@render withUi(t('<b>Keeping things tidy:</b> seasonal playlists such as Christmas are only in Navidrome during their season. “To review” reports playlists nobody listens to, with {pause}, and playlists with the same selection.'), { pause: ['pause', t('Pause playlist')] })}</p>
   <p>{@html t('Almost everything can be taken back right away with <b>“Undo”</b> in the message at the bottom.')}</p>
@@ -130,7 +130,7 @@
 {/snippet}
 
 {#snippet welten()}
-  <p>{@html t('A music world groups bands, such as “Medieval” with Saltatio Mortis and In Extremo. <b>Music worlds appear on their own:</b> from genres, Last.fm, AI and language Tuttiphon recognizes what your library offers – and puts new bands into their world.')}</p>
+  <p>{@html t('A music world groups bands, such as “Medieval” with Saltatio Mortis and In Extremo. <b>Music worlds appear on their own:</b> from genres, ListenBrainz, AI and language Tuttiphon recognizes what your library offers – and puts new bands into their world.')}</p>
   <Bullets>
     <li>{@render withUi(t('Worlds Tuttiphon created carry the {auto} badge; rename or delete them – a deleted one won’t come back.'), { auto: ['sparkles', t('created by Tuttiphon')] })}</li>
     <li>{@html t('Kids and audio dramas become <b>separate worlds</b>: they are left out of playlists made from “All”.')}</li>
@@ -163,7 +163,7 @@
     <li>{@html t('<b>Kid-safe mode:</b> “Leave out songs with explicit lyrics” in the profile; songs detected wrongly can be allowed under <a class="link" href="#/einstellungen/lyrics">Settings → Lyrics</a>.')}</li>
     <li>{@html t('<b>Child profile:</b> for a child with an account of their own – children’s music belongs to their whole library, and kid-safe mode stays on.')}</li>
     <li>{@html t('<b>To the phone:</b> with notifications on, every person turns on their devices in their profile.')}</li>
-    <li>{@html t('<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it – or takes one Navidrome already has, such as the car’s. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in Symfonium.')}</li>
+    <li>{@html t('<b>The family</b> (optional): “Set up the family” creates a Navidrome account of its own for it – or takes one Navidrome already has, such as the car’s. Its playlists are for everyone – shared devices such as the car or the kitchen tablet use it in their music app.')}</li>
   </Bullets>
   <p>{@html t('With their own sign-in, everyone maintains their own profile – more under <a class="link" href="#/hilfe/konten">Users & sign-in</a>.')}</p>
 {/snippet}
@@ -171,11 +171,11 @@
 {#snippet statistik()}
   <p>{@html t('<a class="link" href="#/statistik">Statistics</a> shows per person the most played bands, songs and albums, the listening time – and <b>forgotten favorites</b>, as a playlist with one click. At the top you switch between week, 30 days and year; every recap can be kept as a fixed playlist.')}</p>
   <p>{t('In December the year waits on the start page as a story – for every person and for the family, with a picture to share. Under year, “Watch as a story” opens it any time.')}</p>
-  <p>{t('It is based on the plays Symfonium reports, so leave “Scrobbling” on in Symfonium. Tuttiphon counts them for accounts with a stored password or through the Navidrome plugin – the recap grows from the first day.')}</p>
+  <p>{t('It is based on the plays the music apps report, so leave “Scrobbling” (reporting plays) on there. Tuttiphon counts them for accounts with a stored password or through the Navidrome plugin – the recap grows from the first day.')}</p>
 {/snippet}
 
 {#snippet aktualisieren()}
-  <p>{@html t('For “Only the hits” and the order of top songs in Symfonium, Tuttiphon gives stars by popularity on Deezer – day to day only for new songs. A match only counts if band and title fit.')}</p>
+  <p>{@html t('For “Only the hits” and the order of top songs in apps like Symfonium, Tuttiphon gives stars by popularity on Deezer – day to day only for new songs. A match only counts if band and title fit.')}</p>
   <p>{@html t('Under <a class="link" href="#/einstellungen/deezer">Settings → Deezer stars</a> you set how many stars each popularity rank gets – the chart shows the distribution right away.')}</p>
   <Bullets>
     <li>{@html t('<b>Who gets stars?</b> – stars in Navidrome are per account; here you choose the accounts.')}</li>
@@ -186,7 +186,7 @@
 {/snippet}
 
 {#snippet lyrics()}
-  <p>{t('Tuttiphon finds missing lyrics and puts them next to the songs – synced ones scroll along in Symfonium. Navidrome reads them at the next scan.')}</p>
+  <p>{t('Tuttiphon finds missing lyrics and puts them next to the songs – synced ones scroll along in many music apps. Navidrome reads them at the next scan.')}</p>
   <Bullets>
     <li>{@html t('<b>Providers:</b> LRCLIB and, if you like, NetEase – in an order you choose. Synced lyrics win.')}</li>
     <li>{@html t('<b>Fast:</b> each run searches a few minutes at most, new songs first; the rest follows.')}</li>
@@ -206,7 +206,7 @@
     <li>{@html t('<b>Same recording twice:</b> an audio fingerprint finds it, also in another format; the result is under <a class="link" href="#/einstellungen/bibliothek">Settings → Check library</a>.')}</li>
     <li>{@html t('<b>Radio and gaps:</b> “Start radio” in the band window plays the band with similar bands; Discover shows similar bands you are still missing.')}</li>
   </Bullets>
-  <p>{@html t('The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Last.fm needs a free key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.')}</p>
+  <p>{@html t('The analysis works through what is open at night. The AI’s first pass takes several nights on a NAS; after that only new songs are added. Similar bands and tags come from ListenBrainz and Deezer, free and without a key. Details are in the <a class="link" href="https://github.com/seluce/tuttiphon/blob/main/docs/06-intelligence.md" target="_blank" rel="noopener">handbook</a>.')}</p>
 {/snippet}
 
 {#snippet watch()}
@@ -227,7 +227,7 @@
     <li>{t('Tags such as MusicBrainz IDs and ISRC, lyrics and the cover move along.')}</li>
   </Bullets>
   <p>{@html t('Target format, quality, formats and waiting time: <a class="link" href="#/einstellungen/opus">Settings → Conversion</a>; the archive folder is set under <a class="link" href="#/einstellungen/speicher">Settings → Storage locations</a>.')}</p>
-  <p>{@html t('<b>Even out loudness:</b> if you like, Tuttiphon writes ReplayGain values into the files at night – with ReplayGain on in Symfonium, all songs play equally loud.')}</p>
+  <p>{@html t('<b>Even out loudness:</b> if you like, Tuttiphon writes ReplayGain values into the files at night – with ReplayGain on in the music app, all songs play equally loud.')}</p>
 {/snippet}
 
 {#snippet bibliothek()}
@@ -240,12 +240,12 @@
 {/snippet}
 
 {#snippet plugin()}
-  <p>{t('With the Tuttiphon plugin (Navidrome 0.64 or later), Instant Mix, song radio and the smart queue in Symfonium follow the sound of your own files – and Navidrome passes every play on.')}</p>
+  <p>{t('With the Tuttiphon plugin (Navidrome 0.64 or later), Instant Mix and song radio in the music apps and Symfonium’s smart queue follow the sound of your own files – and Navidrome passes every play on.')}</p>
   <Steps>
     <li><span>{@html t('Under <a class="link" href="#/einstellungen/navidrome">Settings → Navidrome</a>, create a key in the card “Navidrome plugin” and download the plugin.')}</span></li>
     <li><span>{@html t('Put the file – not unpacked and named exactly <b>tuttiphon.ndp</b> – into Navidrome’s plugins folder, put <code>tuttiphon</code> first in Navidrome’s list of agents (navidrome.toml: <code>Agents = "tuttiphon,deezer,lastfm,listenbrainz"</code>, docker-compose: <code>ND_AGENTS=…</code>) and restart Navidrome.')}</span></li>
     <li><span>{t('In Navidrome under Settings → Plugins, turn on “Tuttiphon”, enter Tuttiphon’s address in the home network and the key, and allow it all users.')}</span></li>
-    <li><span>{t('In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.')}</span></li>
+    <li><span>{t('Music apps that ask Navidrome for similar songs – for Instant Mix or song radio – then get them from Tuttiphon. In Symfonium, turn on “Use similar tracks for Radio Mix” for the Navidrome server (Manage media providers → the server) and choose “Sonic Analysis” for the smart queue in the player.')}</span></li>
   </Steps>
   <p>{t('Navidrome does not say who is asking; Tuttiphon sees it from the plays and answers for the person listening – otherwise for the family, or for everyone if there is none. Songs with explicit lyrics stay out as soon as a person has kid-safe mode or is a child profile. The card shows for whom it last answered.')}</p>
   <p>{t('Skips steer the smart queue at once: after two in a row it turns to another sound. Every few songs one the account has never played comes in – how often is set per person in the profile (“New songs in the queue”).')}</p>
@@ -288,11 +288,11 @@
 {/snippet}
 
 {#snippet konten()}
-  <p>{@html t('Everyone in the family can sign in with their own <b>Navidrome account</b> – with the same name and password as in Symfonium. Tuttiphon checks the password directly with Navidrome; there are no separate passwords.')}</p>
+  <p>{@html t('Everyone in the family can sign in with their own <b>Navidrome account</b> – with the same name and password as in their music app. Tuttiphon checks the password directly with Navidrome; there are no separate passwords.')}</p>
   <Bullets>
     <li>{@html t('<b>Administrator</b> – sees and changes everything. Default for Navidrome admins such as root.')}</li>
     <li>{@html t('<b>User</b> – own home page, playlists and profile; listens to the family playlists and changes them unless only administrators may.')}</li>
-    <li>{@html t('<b>No access</b> – cannot sign in to Tuttiphon; Navidrome and Symfonium keep working.')}</li>
+    <li>{@html t('<b>No access</b> – cannot sign in to Tuttiphon; Navidrome and the music apps keep working.')}</li>
   </Bullets>
   <p>{@html t('Under <a class="link" href="#/einstellungen/benutzer">Settings → Users & permissions</a> you set the roles and who may change the family playlists; new users are guided through their profile by a short assistant.')}</p>
   <Steps>
@@ -310,5 +310,5 @@
 
 {#snippet alt()}
   <p>{@html t('Playlists that were already in the <code>00_SmartPlaylists</code> folder don’t disappear. The home page offers to <b>take them over</b>: then Tuttiphon keeps maintaining them, their rules stay unchanged, and the original file is backed up first.')}</p>
-  <p>{t('Regular playlists you create by hand in Navidrome or Symfonium are never touched by the tool.')}</p>
+  <p>{t('Regular playlists you create by hand in Navidrome or a music app are never touched by the tool.')}</p>
 {/snippet}

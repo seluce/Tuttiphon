@@ -12,12 +12,12 @@ The handbook describes the current state of the code. Whoever changes something 
 
 | | Chapter | What it covers |
 |---|---|---|
-| 1 | [Architecture](01-architecture.md) | Navidrome, Tuttiphon and Symfonium; process and threads; modules; folders; command line |
+| 1 | [Architecture](01-architecture.md) | Navidrome, Tuttiphon and the music apps; process and threads; modules; folders; command line |
 | 2 | [Data model](02-data-model.md) | `config.json` with all fields and its version, `.env`, `state/`, `logs/`, `backup/` |
 | 3 | [API](03-api.md) | all HTTP endpoints with permissions, parameters and responses |
 | 4 | [Playlists](04-playlists.md) | music world × vibe × person, rules, writing and syncing, takeover, mixes and how they learn from listening, suggestions, combined search, covers |
 | 5 | [Maintenance](05-maintenance.md) | runs and steps, short pause while applying, “Update everything”, Opus, lyrics, Deezer, scan with self-check, daily refresh, night analysis, folder watch |
-| 6 | [Intelligence](06-intelligence.md) | sound analysis, AI sound analysis (Essentia), moods, Last.fm, classification of new bands, taste per account, statistics and recap |
+| 6 | [Intelligence](06-intelligence.md) | sound analysis, AI sound analysis (Essentia), moods, similar bands and tags (ListenBrainz, Deezer, Last.fm), classification of new bands, taste per account, statistics and recap |
 | 7 | [Security](07-security.md) | sign-in and lockout, roles, sessions, local administrator and setup mode, network lock, reverse proxy, what the server filters |
 | 8 | [Operations](08-operations.md) | PC and Docker, publishing the image, memory and CPU, storage locations, updates, versions and going back, the Navidrome plugin, backup, multiple instances, troubleshooting, server log |
 | 9 | [Interface](09-interface.md) | Svelte structure, state and saving, windows, “For you”, search, music world, tour and welcome, design, tests, extending |
@@ -36,7 +36,7 @@ The handbook describes the current state of the code. Whoever changes something 
 | Scene | `scene` | catalog of typical bands of a music genre (`app/scenes.json`); linked music worlds take in these bands automatically |
 | Vibe | `stil` | What is played: genre, topic, season, decade or special filter; sound vibes select by the sound analysis |
 | Person | `person` | Who the playlist is for: one person per Navidrome account – the owner of its playlists (private there), with likes and dislikes |
-| Family | `family: true` | optional person with a Navidrome account of its own that Tuttiphon creates: its playlists are for everyone, “What everyone likes” exists only there; nobody signs in to Tuttiphon with its account, shared devices use it in Symfonium. Who may change its playlists: `settings.familyEdit` |
+| Family | `family: true` | optional person with a Navidrome account of its own that Tuttiphon creates: its playlists are for everyone, “What everyone likes” exists only there; nobody signs in to Tuttiphon with its account, shared devices use it in their music app. Who may change its playlists: `settings.familyEdit` |
 | Smart playlist | `.nsp` | rule file; Navidrome selects anew from all matching songs on every request |
 | Mix | `type: "mix"`, `.m3u` | fixed selection that Tuttiphon puts together anew daily, weekly or monthly |
 | Radio | `radio.seed` | mix of a band and similar bands |

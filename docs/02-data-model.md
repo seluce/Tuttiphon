@@ -233,7 +233,9 @@ If the playlist folder is not inside the music folder, `playlists.playlist_dir()
 | `analysis.depth` | string | `"standard"` | analysis depth: `schnell` (fast), `standard`, `gruendlich` (thorough), `tief` (deep) | one of the four values |
 | `analysis.budgetMinutes` | number | `10` | time limit of the sound analysis per run, `0` = none | 0–1440 |
 | `analysis.workers` | number | `0` | concurrent analyses, `0` = half the number of CPU cores | 0–32 |
-| `analysis.lastfmBudget` | number | `3` | time limit for Last.fm per run, `0` = none | 0–600 |
+| `analysis.listenbrainz` | bool | `true` | similar bands and tags from ListenBrainz and MusicBrainz | yes/no |
+| `analysis.deezerSimilar` | bool | `true` | similar bands from Deezer | yes/no |
+| `analysis.bandBudget` | number | `3` | time limit for the similar bands per run and source (ListenBrainz and Deezer, then Last.fm), `0` = none | 0–600 |
 | `analysis.classify` | string | `"suggest"` | classification of new bands: `off`, `suggest` (suggestions; with `autoNew`, new bands are assigned directly), `auto` (assign directly from the threshold on) | one of the three values |
 | `analysis.autoThreshold` | number | `0.75` | minimum match rate for `auto` | 0.3–1 |
 | `analysis.autoNew` | boolean | `true` | only with `classify: "suggest"`: classify new bands (first song at most 30 days in the library) right away from `max(0.75, autoThreshold)` on; interface: “Classify new bands right away” | – |
@@ -273,7 +275,7 @@ person too, with an account Tuttiphon created for it.
 | `icon` | string | icon as `i:<name>` (e.g. `i:home`) |
 | `color` | string | avatar color (interface only; without a value, the interface computes one from the `id`) |
 | `user` | string | **required** – Navidrome account, unique among the people (case-insensitive): owner of the playlists, whose stars, favorites and plays count; maps the account to its person (`auth.own_person()`) |
-| `family` | boolean | `true` = the family entry, at most one. Its account belongs to Tuttiphon (`POST /api/family` creates it or takes one Navidrome already has; nobody signs in to Tuttiphon with it, shared devices can use it in Symfonium). Its playlists are for everyone: public in Navidrome (`rules.build_nsp()`) and visible to every account in Tuttiphon (`auth.visible_playlist()`); only its playlists can be “What everyone likes” (`together`); the names of its formats speak of “us” (“Our sound”, “Discovered for us”). Never a child profile. Only administrators change the entry |
+| `family` | boolean | `true` = the family entry, at most one. Its account belongs to Tuttiphon (`POST /api/family` creates it or takes one Navidrome already has; nobody signs in to Tuttiphon with it, shared devices can use it in their music app). Its playlists are for everyone: public in Navidrome (`rules.build_nsp()`) and visible to every account in Tuttiphon (`auth.visible_playlist()`); only its playlists can be “What everyone likes” (`together`); the names of its formats speak of “us” (“Our sound”, “Discovered for us”). Never a child profile. Only administrators change the entry |
 | `prefix` | string | is put in front of the playlist names, e.g. `"Anna · "` (the family: `""`) |
 | `likes.welten` / `likes.stile` / `likes.artists` | lists | favorite worlds, vibes and bands: basis for suggestions, radio and “You’re still missing” |
 | `dislikes.artists` / `dislikes.genres` | lists | dislikes: left out of every playlist of this person |
@@ -281,7 +283,7 @@ person too, with an account Tuttiphon created for it.
 | `push` | string | own ntfy topic for notifications (`[A-Za-z0-9_-]{1,64}`): news from the favorite bands, new for you this week, monthly recap ([Operations](08-operations.md#notifications)); other accounts never see it. Notifications via the app need no topic – there the account's devices count (`state/push.json`) |
 | `child` | boolean | child profile – only the administrator sets it: the children's music belongs to the whole library for this person ([Playlists](04-playlists.md#music-world-welt)), kid-safe mode is always on (`config.normalize_persons()` sets `clean` when loading and saving), `tasteExclude` has no effect, no card or hint to keep children's music out of the taste. Never on the family |
 | `tasteExclude` | list | ids of music worlds that do not count for the person's taste – e.g. `["kinder"]` on a parent's account: their songs count neither as liked nor as disliked, so discoveries, album of the week, own sound, favorite bands and good morning follow the person's own music. The family playlists keep them ([Intelligence](06-intelligence.md#taste-per-person)). No effect on a child profile; the interface does not offer it for the family. Users set it for their own person; ids of worlds that no longer exist are removed when the configuration is loaded or saved |
-| `newEvery` | number | never played songs in the plugin's answers (smart queue, Instant Mix, song and artist radio in Symfonium): every n-th song one the account has never played – `0` never, `5` now and then, `3` often; missing = 5 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Users set it for their own person (Profile → “New songs in the queue”, only while the plugin is in use); validation: the integer `0`, `3` or `5` (not `3.0`) |
+| `newEvery` | number | never played songs in the plugin's answers (Instant Mix, song and artist radio in the music apps, Symfonium's smart queue): every n-th song one the account has never played – `0` never, `5` now and then, `3` often; missing = 5 ([Intelligence](06-intelligence.md#for-navidrome-the-plugin-appsonicpy)). Users set it for their own person (Profile → “New songs in the queue”, only while the plugin is in use); validation: the integer `0`, `3` or `5` (not `3.0`) |
 
 A person's playlists are private – only their account sees them in Navidrome, in Tuttiphon the account and the
 administrators –, the family's are for everyone.
@@ -643,7 +645,7 @@ locks these fields. Other variables (`TUTTIPHON_DATA`, `TUTTIPHON_HOSTS` …) ar
 | `NAV_URL` | Navidrome address, e.g. `http://192.168.1.10:4533` | Settings → Navidrome, environment |
 | `NAV_PUBLIC_URL` | address for “Open in Navidrome” links; empty = `NAV_URL` | Settings → Navidrome, environment |
 | `NAV_ADMIN_USER`, `NAV_ADMIN_PASS` | admin access: song list, scan, playlist sync, accounts, covers | Settings → Navidrome, environment |
-| `NAV_PASS_<ACCOUNT>` | password of a Navidrome account (for stars, personal statistics, mixes from the person's perspective, exact preview). The family's account gets a random password from `POST /api/family` (shown once, for shared devices in Symfonium) – an account Navidrome already had keeps its own, checked and stored there –, so its stars, plays and recap work like any account's | administrators: password dialog (e.g. Settings → Navidrome), “New person” assistant; users: Settings → My account (`/api/me/password`); sign-in with “Turn on statistics & stars” (not for the admin account); the family's: `POST /api/family` |
+| `NAV_PASS_<ACCOUNT>` | password of a Navidrome account (for stars, personal statistics, mixes from the person's perspective, exact preview). The family's account gets a random password from `POST /api/family` (shown once, for shared devices) – an account Navidrome already had keeps its own, checked and stored there –, so its stars, plays and recap work like any account's | administrators: password dialog (e.g. Settings → Navidrome), “New person” assistant; users: Settings → My account (`/api/me/password`); sign-in with “Turn on statistics & stars” (not for the admin account); the family's: `POST /api/family` |
 | `NTFY_TOKEN` | access token for protected topics on your own ntfy server; `/api/status` only reports whether one exists (`env.ntfyToken`) | by hand, environment |
 | `TUTTIPHON_HOSTS` | additional host names, comma-separated, through which Tuttiphon is reachable without a password (otherwise only `127.0.0.1`, `localhost`, `::1`) | by hand, environment |
 | `TUTTIPHON_TRUSTED_PROXIES` | reverse proxies whose `X-Forwarded-For` and `X-Forwarded-Proto` count: addresses or networks, comma-separated (e.g. `172.16.0.0/12`). Then the sign-in lockout counts each person's own address, and sign-ins via https get the `Secure` cookie ([Security](07-security.md#client-address)) | by hand, environment |
@@ -721,7 +723,8 @@ environment and in `.env` ([Keys](#keys)).
 | `sound_vectors.json` | sound vector of the AI per song (128 bytes, base64) – for sound similarity | `analyse` step (`ml.run()`) | cache like `ml.json` (about 4.5 MB for 25,000 songs); deleting = the AI analyzes all songs again |
 | `fingerprints.json` | audio fingerprint per song (about 3.3 KB each) | `analyse` step (`fingerprint.run()`) | cache, deletable (renewed by itself in the next nights); not in the backup |
 | `fingerprint_matches.json` | result of the last comparison of the fingerprints – groups of the same recording – and counters for the status | `analyse` step (`fingerprint.run()`) | state, small; deleting = compared again in the next run |
-| `lastfm.json` | tags and similar bands from Last.fm | `analyse` step | cache (30 days) |
+| `bands.json` | similar bands and tags from ListenBrainz, MusicBrainz and Deezer | `analyse` step (`bandinfo.refresh()`) | cache (30 days) |
+| `lastfm.json` | tags and similar bands from Last.fm (only with a key) | `analyse` step | cache (30 days); without a key it is not fetched again – keep it |
 | `lyrics.json` | when each song was last searched | `lyrics` step | state, deletable |
 | `liedtexte.db` (with `-wal`/`-shm`) | full-text index of all lyrics (SQLite FTS5, WAL mode) with source, modification time, language and “explicit” per song – for lyrics search, kid-safe mode and automatic music worlds | `scan` step, first search (`liedtext.update()`) | cache, deletable (re-indexed in the background, a few minutes); not in the backup |
 | `covers.json` | per album: when a cover was searched, whether one was found and where from (`t`, `ok`, `src`) | `cover` step | state, deletable (then everything is searched again) |
@@ -885,7 +888,7 @@ the last 2000 lines.
 to apply changes, also for the step that was running; the continuation gets its own entry named
 “… (continued)”). If a step appears twice in `steps` (folder watch: `scan` before and after `analyse`),
 `results` holds only the result of the last one. After a scan, `summary` additionally contains `selfcheck: {checked, problems}`; after `analyse`, one entry per part:
-`lastfm`, `audio`, `ml` and possibly `assigned`. A run that the lock against other instances doesn't even let start leaves no entry.
+`bands`, `lastfm`, `audio`, `ml` and possibly `assigned`. A run that the lock against other instances doesn't even let start leaves no entry.
 `tasks.history()` reads the file and adds runs from logs in `logs/` that have no entry. An
 entry may refer to a log that tidy-up has already deleted.
 
@@ -964,10 +967,19 @@ out unreadable loses its vector. A damaged file is set aside as `sound_vectors.d
 songs concerned are then simply analyzed again. Read by `app/similar.py`
 ([Sound similarity](06-intelligence.md#sound-similarity-appsimilarpy)).
 
+### bands.json
+
+`{artists, lastRun}`: per band name `{t, src, mbid, dz, tags, listenbrainz, deezer}` – fetch time, the sources that
+answered (`listenbrainz`, `deezer`), the band's MusicBrainz ID and Deezer ID (`""`/`0`: none found), up to 30 tags
+`[name, 0–100]` from MusicBrainz and the similar bands `[name, 0–1]` of ListenBrainz (up to 60) and Deezer (up to 20).
+An entry is fetched again after 30 days and as soon as a source turned on is missing from `src`
+([Intelligence](06-intelligence.md#similar-bands-and-tags)).
+
 ### lastfm.json
 
-`{artists, lastRun}`: per band name `{t, tags, similar}` – fetch time, up to 30 tags `[name, weight]` and up to
-60 similar bands `[name, match]`. Entries older than 30 days are fetched again on the next run.
+`{artists, lastRun, keyRejected}`: per band name `{t, tags, similar}` – fetch time, up to 30 tags `[name, weight]` and
+up to 60 similar bands `[name, match]`. Entries older than 30 days are fetched again on the next run – only with a key;
+without one the data stays in use. `keyRejected`: a short hash of the key Last.fm refused (until another key works).
 
 ### lyrics.json
 

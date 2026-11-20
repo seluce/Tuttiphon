@@ -19,7 +19,7 @@ export const STEP_INFO = translated(() => ({
   flac: ['headphones', t('Convert music'), t('new FLAC files → Opus or AAC, archive originals as set')],
   lyrics: ['mic', t('Find & tidy up lyrics'), t('fetch missing lyrics with a time limit, delete duplicate .txt')],
   cover: ['image', t('Fetch missing covers'), t('save a cover as cover.jpg for albums without any picture – existing ones stay')],
-  analyse: ['brain', t('Understand music'), t('analyze the sound with our own measurement and AI, fetch Last.fm knowledge, classify new bands – with a time limit')],
+  analyse: ['brain', t('Understand music'), t('analyze the sound with our own measurement and AI, fetch similar bands and tags, classify new bands – with a time limit')],
   playlists: ['playlists', t('Write playlists'), t('Smart playlists & mixes into the playlist folder')],
   scan: ['refresh', t('Navidrome scan & sync'), t('Navidrome reads everything in, names & owners are synced')],
   deezer: ['star', t('Deezer rating'), t('look up new songs on Deezer and set stars')],

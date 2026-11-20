@@ -3,7 +3,7 @@
 This chapter describes how Tuttiphon maintains the library: how a run is started, locked, logged, canceled and briefly
 paused for an apply, what “Update everything” does and how each step works in detail – Opus conversion, lyrics,
 Navidrome scan with self-check, Deezer stars. It also covers the schedules (daily refresh, night analysis, daily
-tidy-up, folder watch) and the command line. Sound analysis, AI sound analysis, Last.fm and classification are in
+tidy-up, folder watch) and the command line. Sound analysis, AI sound analysis, similar bands and classification are in
 [06-intelligence.md](06-intelligence.md); writing and syncing the playlists and learning the mixes are in
 [04-playlists.md](04-playlists.md).
 
@@ -17,7 +17,7 @@ A **run** executes one or more **steps** one after another. There are seven step
 | `flac` | Convert music | `app/opus.py` | lossless files → Opus or AAC, archive/keep/delete the original |
 | `lyrics` | Find & tidy up lyrics | `app/lyrics.py` | delete duplicate `.txt`, search LRCLIB/NetEase for missing lyrics |
 | `cover` | Fetch missing covers | `app/albumcover.py` | for albums with no image at all, save a cover from the Cover Art Archive or Deezer as `cover.jpg` ([below](#step-cover-fetch-missing-covers)) |
-| `analyse` | Understand music (sound, AI & Last.fm) | `app/audio.py`, `app/ml.py`, `app/lastfm.py`, `app/classify.py`, `app/fingerprint.py` | Last.fm data, sound analysis, AI sound analysis, classification of new bands, audio fingerprints (same recording twice) |
+| `analyse` | Understand music (sound, AI & similar bands) | `app/audio.py`, `app/ml.py`, `app/bandinfo.py`, `app/lastfm.py`, `app/classify.py`, `app/fingerprint.py` | similar bands and tags (ListenBrainz, Deezer, Last.fm), sound analysis, AI sound analysis, classification of new bands, audio fingerprints (same recording twice) |
 | `playlists` | Write playlists | `app/playlists.py`, `app/feedback.py` | evaluate expired mix periods (learning mixes), write `.nsp`/`.m3u` to the playlist folder |
 | `scan` | Navidrome scan & sync | `app/navidrome.py`, `app/playlists.py`, `app/selfcheck.py` | trigger the scan and wait for it, sync playlists in Navidrome, renew covers, self-check |
 | `deezer` | Deezer rating | `app/deezer.py` | popularity on Deezer → stars in Navidrome |
@@ -141,7 +141,7 @@ Indented detail lines, such as the duration “   (12 s)” or individual files,
 `status(since)` returns `running`, `name`, `steps`, the current `step` and its index `pos`, `durations` (seconds per
 step), `elapsed`, `progress`, the `results` so far, `finishedAt` and all lines with a number greater than `since`.
 `progress` comes from `app/progress.py`: the steps' modules report the part they are at (`progress.part(id, total,
-until)`) and every item done (`progress.at(done)`) – conversion per file, lyrics, Last.fm, sound analysis, AI,
+until)`) and every item done (`progress.at(done)`) – conversion per file, lyrics, similar bands, Last.fm, sound analysis, AI,
 loudness, fingerprints and Deezer per song or band, covers per album, playlists per playlist, the scan with the files
 Navidrome has read; maintenance, learning, classification, sync, lyrics index and self-check only name their part.
 The runner clears it at every step and at the end; the remaining time comes from the pace so far
@@ -241,7 +241,7 @@ The option `dry_run` is passed to every step. What each step does in a dry run:
 |---|---|
 | `flac` | lists the files, what would happen to the original and which cover would be saved from the file; converts nothing. The archive checks run too (without the write test); an archive name taken by a different file shows the free name the original would get. |
 | `lyrics` | lists the `.txt` files to be deleted; **still queries the providers**, but saves neither lyrics nor `state/lyrics.json` |
-| `analyse` | measures nothing (no AI either), does not query Last.fm and saves nothing; only reports “(dry run) Last.fm and sound analysis skipped. Classification: N confident suggestions.” (confidence of 0.6 or more) |
+| `analyse` | measures nothing (no AI either), asks no source for similar bands and saves nothing; only reports “(dry run) Similar bands and sound analysis skipped. Classification: N confident suggestions.” (confidence of 0.6 or more) |
 | `playlists` | shows which files would be written or removed; writes nothing, does not change the configuration, does not evaluate mix periods and does not record a mix selection |
 | `scan` | starts no Navidrome scan, no sync and no self-check; only reports “(dry run) [Full] Navidrome scan and sync skipped.” |
 | `deezer` | queries Deezer and logs the stars; sets no stars and does not save `state/deezer.json` |
@@ -259,10 +259,10 @@ instance report and the lock file are written, plus the log file and the history
 | `overwrite_manual` | `deezer` | also overwrite manually set stars | Deezer card / `--overwrite-manual` |
 | `lyrics_all` | `lyrics` | also songs recently searched without success, no time limit | “Retry recent misses too” / `--lyrics-all` |
 | `lyrics_full` | `lyrics` | no time limit | “Search all missing now” / – |
-| `analyse_full` | `analyse` | Last.fm, sound analysis and AI sound analysis without a time limit | “Analyze everything without a time limit” / – |
+| `analyse_full` | `analyse` | similar bands, sound analysis and AI sound analysis without a time limit | “Analyze everything without a time limit” / – |
 | `lyrics_files` | `lyrics` | only these files, tags from the file | folder watch only |
 | `flac_files` | `flac` | convert only these files, without the waiting time `minAgeMinutes` | folder watch only |
-| `night_until` | `analyse` | sound analysis and AI without a time limit, but at the latest until this point in time (a `time.time()` value); Last.fm keeps its time limit | night analysis only |
+| `night_until` | `analyse` | sound analysis and AI without a time limit, but at the latest until this point in time (a `time.time()` value); the similar bands keep their time limit | night analysis only |
 
 `api_task_start()` accepts only the first seven options from the request body and validates `deezer_mode`.
 
@@ -286,7 +286,7 @@ Time limits keep a run from taking hours after large imports – whatever is not
 | Part | Setting | Default | No limit |
 |---|---|---|---|
 | Lyrics search | `settings.lyrics.budgetMinutes` | 5 min | `0`, `lyrics_full`, `lyrics_all` |
-| Last.fm | `settings.analysis.lastfmBudget` | 3 min | `0`, `analyse_full` |
+| Similar bands (per source: ListenBrainz and Deezer, then Last.fm) | `settings.analysis.bandBudget` | 3 min | `0`, `analyse_full` |
 | Sound analysis | `settings.analysis.budgetMinutes` | 10 min | `0`, `analyse_full`; night analysis until the end of its window |
 | AI sound analysis | `settings.analysis.mlBudget` | 15 min | `0`, `analyse_full`; night analysis until the end of its window |
 | Audio fingerprints | `settings.analysis.budgetMinutes` | 10 min | `0`, `analyse_full`; night analysis until the end of its window |
@@ -572,9 +572,11 @@ runs once a week in the night analysis (`albumcover.due()`: `state/covers.json` 
 
 `_step_analyse()` works in five parts one after another, each with a time limit:
 
-1. **Last.fm** (only with a key): load tags and similar bands – first bands without a music world, then by number of
-   songs. Any error from this – an invalid key as well as an unexpected exception – is logged as a warning
-   “⚠ Last.fm: …”; sound analysis, AI and classification still run.
+1. **Similar bands and tags**: first ListenBrainz and Deezer (free, without a key, each can be turned off), then
+   Last.fm (only with a key) – first bands without a music world, then by number of songs
+   ([Intelligence](06-intelligence.md#similar-bands-and-tags)). Any error from this – a source that does not answer,
+   a key Last.fm no longer accepts, an unexpected exception – is logged as a warning (“⚠ Similar bands: …”,
+   “⚠ Last.fm: …”); sound analysis, AI and classification still run.
 2. **Sound analysis** (if `settings.analysis.enabled`): measure songs not yet analyzed, new ones first
    (`audio.run()`, time limit `budgetMinutes`).
 3. **AI sound analysis** (if `settings.analysis.ml` is also on and the run was not canceled): `ml.run()` over the
@@ -597,7 +599,7 @@ With `analyse_full`, parts 1–3 and 5 run without a time limit; with `night_unt
 run without a time limit, but at most until that point in time – first the sound analysis, then the AI (then
 loudness) and the audio fingerprints get the remaining time. In a dry run all parts are skipped; the step only
 reports the number of confident suggestions. If the run is canceled after part 1, the step ends immediately (result
-`abgebrochen`). The history lists the figures per part (`lastfm`, `audio`, `ml`, `loudness`, `assigned`,
+`abgebrochen`). The history lists the figures per part (`bands`, `lastfm`, `audio`, `ml`, `loudness`, `assigned`,
 `fingerprints`). Everything else is in [06-intelligence.md](06-intelligence.md).
 
 ## Steps `playlists` and `scan`
@@ -652,7 +654,7 @@ runs, which scan as well. Every active playlist that Navidrome already knows is 
 
 | Type | Expected | In Navidrome | Skipped if … |
 |---|---|---|---|
-| Smart playlist | Tuttiphon's own evaluation of the same rules (`Library.match()`, at most `limit`) – with the stars and favorites of the playlist owner (`mixer.person_lib()`) | `owner_count()`: Subsonic `getPlaylist`, signed in **as the owner** (with their password); the returned entries are counted. Navidrome evaluates a smart playlist freshly only for its owner; missing files are thus not counted – as in Symfonium | the owner's stars are not known (no password for their account – with average ratings there would be false alarms) or Tuttiphon cannot evaluate a rule |
+| Smart playlist | Tuttiphon's own evaluation of the same rules (`Library.match()`, at most `limit`) – with the stars and favorites of the playlist owner (`mixer.person_lib()`) | `owner_count()`: Subsonic `getPlaylist`, signed in **as the owner** (with their password); the returned entries are counted. Navidrome evaluates a smart playlist freshly only for its owner; missing files are thus not counted – as in the music apps | the owner's stars are not known (no password for their account – with average ratings there would be false alarms) or Tuttiphon cannot evaluate a rule |
 | Mix | number of entries in the `.m3u` (if a song is missing in Navidrome, the paths are usually wrong) | `NativeApi.playlist_count()` (admin): `songCount` of the playlist | the `.m3u` is not readable |
 
 If the query for a playlist fails, the log shows “⚠ Self-check <name>: …”, and the check continues with the
@@ -845,7 +847,7 @@ sound analysis and AI – at night until the end of the window, otherwise with `
 
 The measurement runs with low priority (`nice -n 19`) in its own process group – “Cancel” ends it right away.
 
-Navidrome reads the values at the next scan and passes them on to Symfonium; turn on ReplayGain there.
+Navidrome reads the values at the next scan and passes them on to the music apps; turn on ReplayGain there.
 
 ## Daily refresh
 
@@ -920,7 +922,7 @@ It is called in every round of the scheduler and starts a run if all of the foll
 Then `RUNNER.start([…], night_until=<end>, deezer_mode="refresh")` starts with the steps `cover`, `deezer`,
 `analyse` – depending on what is due; name “Sound analysis (at night)”, “Refresh Deezer (at night)” or “Missing covers
 (at night)”. The `analyse` step
-works as usual (Last.fm with its time limit, classification at the end); only sound analysis and AI run without
+works as usual (similar bands with their time limit, classification at the end); only sound analysis and AI run without
 `budgetMinutes`/`mlBudget` until the end: first the own measurement, then the AI with the remaining time. Whatever
 stays open is handled the next night. If the run cannot be started (another instance is working), the next round tries
 again. Like the other schedules, the night analysis is skipped on a PC instance as long as a container is
@@ -1006,7 +1008,7 @@ and in the container. `check()` is called every minute from `daily_loop()`:
 | `flac` | `watch.convert` on, conversion turned on and at least one new file is lossless |
 | `lyrics` | `watch.lyrics` on |
 | `scan` | always |
-| `analyse` | `settings.analysis.enabled` on (after the scan, so that Navidrome knows the new songs); only the new music (`new_files`): Last.fm for the bands of the new songs, sound analysis and AI for those songs, loudness and fingerprints at most 2 minutes – the rest of the analysis backlog follows in the regular runs and at night, so the playlists after it do not wait for it ([06-intelligence.md](06-intelligence.md#suggestion-or-automatic)) |
+| `analyse` | `settings.analysis.enabled` on (after the scan, so that Navidrome knows the new songs); only the new music (`new_files`): similar bands for the bands of the new songs, sound analysis and AI for those songs, loudness and fingerprints at most 2 minutes – the rest of the analysis backlog follows in the regular runs and at night, so the playlists after it do not wait for it ([06-intelligence.md](06-intelligence.md#suggestion-or-automatic)) |
 | `playlists`, `scan` (second time) | after `analyse`, if the classification may classify new bands by itself: `analysis.classify` = `auto` or `suggest` with `analysis.autoNew` (default) |
 | `deezer` | `watch.deezer` on |
 

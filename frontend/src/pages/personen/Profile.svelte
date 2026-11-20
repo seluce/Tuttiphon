@@ -170,8 +170,8 @@
         <Seg class="justify-self-start" options={[['0', t('Never')], ['5', t('Now and then')], ['3', t('Often')]]} value={String(p.newEvery ?? 5)}
           onchange={(v) => { p.newEvery = Number(v); ch() }} />
         <div class="hint">{self
-          ? t('In Symfonium’s smart queue and Instant Mix, a song you have never played comes in every few songs – the one that sounds most like what is playing.')
-          : t('In Symfonium’s smart queue and Instant Mix, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.', { name: p.name })}</div>
+          ? t('In Instant Mix and the smart queue, a song you have never played comes in every few songs – the one that sounds most like what is playing.')
+          : t('In Instant Mix and the smart queue, a song {name} has never played comes in every few songs – the one that sounds most like what is playing.', { name: p.name })}</div>
       </Field>
     {/if}
   </div>
@@ -227,13 +227,13 @@
         <input class="input" value={p.prefix || ''} placeholder={t('e.g. Mia · ')} onchange={(e) => { p.prefix = e.currentTarget.value; ch() }} />
       </label>
       {#if self}
-        <div class="hint -mt-2">{t('Goes in front of every playlist name – so you spot your playlists in Symfonium at a glance.')}</div>
+        <div class="hint -mt-2">{t('Goes in front of every playlist name – so you spot your playlists in the music app at a glance.')}</div>
       {:else}
         {#if fam}
           <div class="field">
             <span class="lbl">{t('Navidrome account')}</span>
             <b>{p.user}</b>
-            <div class="hint">{t('The family’s playlists are in this account and for everyone. Shared devices play them with it in Symfonium – nobody signs in to Tuttiphon with it.')}</div>
+            <div class="hint">{t('The family’s playlists are in this account and for everyone. Shared devices play them with it in their music app – nobody signs in to Tuttiphon with it.')}</div>
           </div>
         {:else}
           <label class="f">{t('Navidrome user')}

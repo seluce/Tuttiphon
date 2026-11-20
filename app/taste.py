@@ -211,7 +211,7 @@ def _compute(cfg, plib, user, today, exclude=()):
     # children's music together (each song once – a song can be in several worlds): is it a child's account?
     child_share = round(sum(sc for i, sc in pos.items() if i in kids) / total, 4)
 
-    # sound and mood (measurement + AI + Last.fm, as in the sound filters)
+    # sound and mood (measurement + AI + band tags, as in the sound filters)
     feats = song_features(plib)
     acc, wsum = defaultdict(float), defaultdict(float)
     moods = Counter()

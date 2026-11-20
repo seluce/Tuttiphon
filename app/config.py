@@ -933,7 +933,10 @@ def _validate_settings(st):
         raise ValueError(_("Settings: {key} must be yes/no", key="lyrics.providers.on"))
     an = st.get("analysis") or {}
     _num(an, "budgetMinutes", 0, 1440, N_("Sound analysis: time limit"))
-    _num(an, "lastfmBudget", 0, 600, N_("Last.fm: time limit"))
+    _num(an, "bandBudget", 0, 600, N_("Similar bands: time limit"))
+    for key in ("listenbrainz", "deezerSimilar"):
+        if not isinstance(an.get(key, True), bool):
+            raise ValueError(_("Settings: {key} must be yes/no", key=f"analysis.{key}"))
     _num(an, "workers", 0, 32, N_("Sound analysis: parallel analyses"))
     _num(an, "autoThreshold", 0.3, 1, N_("Classification: minimum confidence"))
     _num(an, "mlBudget", 0, 1440, N_("AI sound analysis: time limit"))

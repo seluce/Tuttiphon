@@ -20,19 +20,19 @@ export const MIXEVERY = translated(() => ({
     eyebrow: t('Daily Mix · new every day'),
     title: t('Today in the mix'),
     songs: (n) => tword(n, '{n} song today', '{n} songs today'),
-    about: (n) => t('These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in Symfonium.', { n }),
+    about: (n) => t('These exact {n} songs are in Navidrome today – tomorrow morning there is a new selection. Until then the list stays the same – good for offline in the music app.', { n }),
   },
   week: {
     eyebrow: t('Weekly Mix · new every week'),
     title: t('This week in the mix'),
     songs: (n) => tword(n, '{n} song this week', '{n} songs this week'),
-    about: (n) => t('These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in Symfonium.', { n }),
+    about: (n) => t('These exact {n} songs are in Navidrome this week – next Monday there is a new selection. Until then the list stays the same – good for offline in the music app.', { n }),
   },
   month: {
     eyebrow: t('Monthly Mix · new every month'),
     title: t('This month in the mix'),
     songs: (n) => tword(n, '{n} song this month', '{n} songs this month'),
-    about: (n) => t('These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in Symfonium.', { n }),
+    about: (n) => t('These exact {n} songs are in Navidrome this month – on the first of the month there is a new selection. Until then the list stays the same – good for offline in the music app.', { n }),
   },
 }))
 

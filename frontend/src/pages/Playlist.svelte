@@ -114,7 +114,7 @@
           </div>
           <p class="muted small -mt-1.5 mb-2.5">
             {p.album
-              ? t('One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in Symfonium.')
+              ? t('One whole album, in album order – next Monday there is a new one. Until then the list stays the same – good for offline in the music app.')
               : p.episodes
               ? t('The next episode of every series, the one heard last first – tomorrow morning it moves on to what was heard today.')
               : mix

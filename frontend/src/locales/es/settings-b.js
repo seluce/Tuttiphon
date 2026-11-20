@@ -36,8 +36,7 @@ export default {
     'Conversión',
   'Intelligence':
     'Inteligencia',
-  'Sound, Last.fm, classification':
-    'Sonido, Last.fm, clasificación',
+  'Sound, similar bands, classification': 'Sonido, bandas parecidas, clasificación',
   'Automation':
     'Automatización',
   'Update everything, daily, folder watch':
@@ -140,14 +139,14 @@ export default {
     'la contraseña guardada ya no funciona',
   'Who may do what?':
     '¿Quién puede hacer qué?',
-  'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.':
-    'Cada uno inicia sesión con su propia cuenta de Navidrome – con el mismo nombre y contraseña que en Symfonium.',
+  'Everyone signs in with their own Navidrome account – with the same name and password as in their music app.':
+    'Cada uno inicia sesión con su propia cuenta de Navidrome – con el mismo nombre y contraseña que en su app de música.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.':
     'Lo ve y lo cambia todo: todas las playlists, mundos musicales, ambientes, personas y todos los ajustes – incluidos Deezer, letras y conversión.',
   'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
     'Tiene su propia página de inicio «Para ti», sus propias playlists y su propio perfil. Escucha las playlists de la familia – y las cambia, salvo que solo puedan hacerlo los administradores.',
-  'Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.':
-    'No puede iniciar sesión en Tuttiphon. Navidrome y Symfonium siguen funcionando.',
+  'Cannot sign in to Tuttiphon. Navidrome and the music apps keep working.':
+    'No puede iniciar sesión en Tuttiphon. Navidrome y las apps de música siguen funcionando.',
   'you':
     'tú',
   'Default: {role}':
@@ -238,8 +237,8 @@ export default {
     'Mantener el orden',
   'Seasonal playlists only in season':
     'Playlists de temporada solo en su temporada',
-  'Christmas, Halloween, summer … are not in Symfonium outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
-    'Navidad, Halloween, verano … no están en Symfonium fuera de su temporada y vuelven automáticamente a tiempo. Algunas playlists se pueden mostrar todo el año desde la ventana de edición.',
+  'Christmas, Halloween, summer … are not in the music apps outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
+    'Navidad, Halloween, verano … no están en las apps de música fuera de su temporada y vuelven automáticamente a tiempo. Algunas playlists se pueden mostrar todo el año desde la ventana de edición.',
   'Mixes that learn':
     'Mixes que aprenden',
   'Learn from listening':

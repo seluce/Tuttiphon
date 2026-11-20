@@ -21,7 +21,7 @@ export default {
   'Providers, search & cleanup': 'Anbieter, Suchen & Aufräumen',
   'Conversion': 'Umwandlung',
   'Intelligence': 'Intelligenz',
-  'Sound, Last.fm, classification': 'Klang, Last.fm, Einordnung',
+  'Sound, similar bands, classification': 'Klang, ähnliche Bands, Einordnung',
   'Automation': 'Abläufe',
   'Update everything, daily, folder watch': 'Alles aktualisieren, täglich, Ordner-Überwachung',
   'Backup': 'Sicherung',
@@ -79,11 +79,13 @@ export default {
   'statistics on': 'Statistik an',
   'stored password no longer works': 'hinterlegtes Passwort funktioniert nicht mehr',
   'Who may do what?': 'Wer darf was?',
-  'Everyone signs in with their own Navidrome account – with the same name and password as in Symfonium.': 'Jeder meldet sich mit dem eigenen Navidrome-Konto an – mit demselben Namen und Passwort wie in Symfonium.',
+  'Everyone signs in with their own Navidrome account – with the same name and password as in their music app.':
+    'Jeder meldet sich mit dem eigenen Navidrome-Konto an – mit demselben Namen und Passwort wie in der Musik-App.',
   'Sees and changes everything: all playlists, music worlds, vibes, people and all settings – including Deezer, lyrics and conversion.': 'Sieht und ändert alles: alle Playlists, Musikwelten, Richtungen, Personen und alle Einstellungen – auch Deezer, Lyrics und Umwandlung.',
   'Has their own “For you” home page, their own playlists and their own profile. Listens to the family playlists – and changes them unless only administrators may.':
     'Hat eine eigene Startseite „Für dich“, eigene Playlists und ein eigenes Profil. Hört die Familien-Playlists – und ändert sie, wenn das nicht nur Administratoren dürfen.',
-  'Cannot sign in to Tuttiphon. Navidrome and Symfonium keep working.': 'Kann sich in Tuttiphon nicht anmelden. Navidrome und Symfonium funktionieren weiter.',
+  'Cannot sign in to Tuttiphon. Navidrome and the music apps keep working.':
+    'Kann sich in Tuttiphon nicht anmelden. Navidrome und die Musik-Apps funktionieren weiter.',
   'you': 'du',
   'Default: {role}': 'Standard: {role}',
   'You cannot change your own role': 'Die eigene Rolle lässt sich nicht selbst ändern',
@@ -137,7 +139,8 @@ export default {
   'A few seconds after a change, Tuttiphon writes the playlists and has Navidrome scan briefly. Off = via the “Apply” button.': 'Ein paar Sekunden nach einer Änderung schreibt Tuttiphon die Playlists und lässt Navidrome kurz scannen. Aus = über den Knopf „Übernehmen“.',
   'Keep it tidy': 'Übersichtlich halten',
   'Seasonal playlists only in season': 'Saison-Playlists nur zur Saison',
-  'Christmas, Halloween, summer … are not in Symfonium outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.': 'Weihnachten, Halloween, Sommer … stehen außerhalb ihrer Zeit nicht in Symfonium und kommen rechtzeitig von selbst zurück. Einzelne Playlists lassen sich im Bearbeiten-Fenster das ganze Jahr zeigen.',
+  'Christmas, Halloween, summer … are not in the music apps outside their season and come back on their own in good time. Single playlists can be shown all year in the edit window.':
+    'Weihnachten, Halloween, Sommer … stehen außerhalb ihrer Zeit nicht in den Musik-Apps und kommen rechtzeitig von selbst zurück. Einzelne Playlists lassen sich im Bearbeiten-Fenster das ganze Jahr zeigen.',
   'Mixes that learn': 'Mixe lernen mit',
   'Learn from listening': 'Aus dem Hören lernen',
   'Songs that get skipped in a mix come up less often for a while. Songs someone rates with 1 star themselves – e.g. in Symfonium – no longer come into their mixes. Takes effect from the next new mix.': 'Songs, die im Mix übersprungen werden, kommen eine Zeit lang seltener. Songs, die jemand selbst mit 1 Stern bewertet – z. B. in Symfonium –, kommen in dessen Mixe nicht mehr. Wirkt ab dem nächsten neuen Mix.',

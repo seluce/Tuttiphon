@@ -65,8 +65,8 @@
 
 <div class="page">
   <PageHead title={admin ? t('Statistics') : t('My statistics')} sub={admin
-    ? t('What really gets played in your home – from the plays Symfonium reports to Navidrome.')
-    : t('What you really listen to – from the plays Symfonium reports to Navidrome.')}>
+    ? t('What really gets played in your home – from the plays your music apps report to Navidrome.')
+    : t('What you really listen to – from the plays your music app reports to Navidrome.')}>
     {#snippet actions()}
       {#if persons.length > 1}
         <div class="seg" {@attach showChosen(personId)}>

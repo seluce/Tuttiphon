@@ -19,7 +19,8 @@
   export function partName(id) {
     return ({
       maintenance: t('Long-term maintenance'), flac: t('Converting music'), lyrics: t('Searching lyrics'),
-      cover: t('Fetching covers'), lastfm: t('Fetching Last.fm knowledge'), audio: t('Sound analysis'),
+      cover: t('Fetching covers'), bands: t('Fetching similar bands'), lastfm: t('Fetching Last.fm knowledge'),
+      audio: t('Sound analysis'),
       ml: t('AI sound analysis'), loudness: t('Measuring loudness'), classify: t('Classifying bands'),
       fingerprints: t('Audio fingerprints'), learn: t('Learning from mixes'), playlists: t('Writing playlists'),
       scan: t('Navidrome is reading everything in'), sync: t('Syncing with Navidrome'), lyricsindex: t('Indexing lyrics'),
@@ -32,7 +33,7 @@
     if (total) {
       if (id === 'flac') return tn(total, '{done} of {n} file', '{done} of {n} files', d)
       if (id === 'cover') return tn(total, '{done} of {n} album', '{done} of {n} albums', d)
-      if (id === 'lastfm') return tn(total, '{done} of {n} band', '{done} of {n} bands', d)
+      if (id === 'bands' || id === 'lastfm') return tn(total, '{done} of {n} band', '{done} of {n} bands', d)
       if (id === 'playlists') return tn(total, '{done} of {n} playlist', '{done} of {n} playlists', d)
       return tn(total, '{done} of {n} song', '{done} of {n} songs', d)
     }

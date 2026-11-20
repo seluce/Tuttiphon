@@ -173,13 +173,15 @@ class WatchRunTest(unittest.TestCase):
                 calls[name] = kw
                 return {}
             return f
-        from app import classify, fingerprint, lastfm, lautstaerke
+        from app import bandinfo, classify, fingerprint, lastfm, lautstaerke
         runner = tasks.TaskRunner()
         with mock.patch.object(tasks.CACHE, "get", return_value=self.lib), \
              mock.patch.object(tasks, "load_config", return_value=self.cfg), \
              mock.patch.object(tasks, "update_config", side_effect=lambda fn: fn(copy.deepcopy(self.cfg))), \
              mock.patch.object(lastfm, "api_key", return_value="k"), \
              mock.patch.object(lastfm, "refresh", side_effect=lambda names, **kw: calls.update(lastfm=names) or {}), \
+             mock.patch.object(bandinfo, "refresh",
+                               side_effect=lambda names, use, **kw: calls.update(bands=(names, use, kw["budget"])) or {}), \
              mock.patch.object(audio, "run", side_effect=rec("audio")), mock.patch.object(ml, "run", side_effect=rec("ml")), \
              mock.patch.object(lautstaerke, "settings", return_value={"enabled": True}), \
              mock.patch.object(lautstaerke, "run", side_effect=rec("loudness")), \
@@ -194,6 +196,7 @@ class WatchRunTest(unittest.TestCase):
     def test_folder_watch_analyzes_only_the_new_songs(self):
         calls = self.analyse(new_files=[str(self.root / "Neue Band/Album/01 Lied.flac")])
         self.assertEqual(calls["lastfm"], ["Neue Band"])
+        self.assertEqual(calls["bands"], (["Neue Band"], ["listenbrainz", "deezer"], 3))   # ListenBrainz and Deezer first
         self.assertEqual(calls["audio"]["only"], {"neu1"})
         self.assertEqual(calls["ml"]["only"], {"neu1"})
         self.assertEqual(calls["loudness"]["budget"], tasks.WATCH_BUDGET)
@@ -202,6 +205,7 @@ class WatchRunTest(unittest.TestCase):
     def test_regular_run_analyzes_everything(self):
         calls = self.analyse()
         self.assertEqual(set(calls["lastfm"]), {"Neue Band", "Alte Band"})
+        self.assertEqual(set(calls["bands"][0]), {"Neue Band", "Alte Band"})
         self.assertIsNone(calls["audio"]["only"])
         self.assertIsNone(calls["ml"]["only"])
         self.assertIsNone(calls["loudness"]["budget"])

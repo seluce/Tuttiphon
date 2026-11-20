@@ -4,7 +4,7 @@ without a cloud. Adds to our own sound analysis (audio.py) what loudness and spe
 * mood: happy, sad, relaxed, aggressive, party · danceability · vocals or instrumental ·
   acoustic or electronic
 * music style: 400 styles (Discogs), e.g. "Rock---Power Metal" – averaged per band, this helps classify new bands,
-  even when Last.fm does not know them
+  even when no source has tags for them
 * themes (MTG-Jamendo, 56 classes): nine of them – Christmas, film music, epic, dark … (THEMES) – for sound filters and
   the search; the others repeat the moods or are too vague
 * instruments (MTG-Jamendo, 40 classes: piano, electric guitar, violin …) – for sound filters and the search
@@ -14,7 +14,7 @@ without a cloud. Adds to our own sound analysis (audio.py) what loudness and spe
 * a sound vector per song (state/sound_vectors.json, app/similar.py): which songs and bands sound alike
 
 Merged in classify.song_features(): the AI values refine the basic mood, arousal and danceability of our own
-measurement (together with the Last.fm tags) and add the moods "instrumental" and "acoustic". The AI only runs over
+measurement (together with the band tags) and add the moods "instrumental" and "acoustic". The AI only runs over
 songs the sound analysis already knows.
 
 Available when Essentia (package essentia-tensorflow) is installed and the models are in MODELS_DIR – the Docker
@@ -624,7 +624,7 @@ def _clip(x):
 
 
 def fuse(f, m, tag_valence=None):
-    """Our own measurement f (audio.derive) + AI values m (+ Last.fm mood) -> features for moods and sound filters.
+    """Our own measurement f (audio.derive) + AI values m (+ mood of the band tags) -> features for moods and sound filters.
     The AI recognizes mood much better than loudness and spectrum; tempo and energy stay from the measurement."""
     v = dict(zip(KEYS, m))
     ml_val = _clip(0.5 + 0.4 * (v["happy"] - v["sad"]) + 0.15 * (v["party"] - 0.5))
