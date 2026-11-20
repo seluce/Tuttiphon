@@ -86,7 +86,9 @@ class SafetyTest(unittest.TestCase):
         res = self.run_opus(original="delete")
         self.assertEqual((res["converted"], res["errors"]), (0, 1), self.log)
         self.assertEqual(tree(self.music), ["Band/Album/01 Lied.flac"])   # no Opus, no .part, the original stays
-        self.assertIn("length does not match", self.text())
+        # which check catches it depends on ffmpeg: older versions such as 6.1 skip the zeros quietly (the new file is
+        # too short), newer ones report decoding errors of the FLAC decoder
+        self.assertRegex(self.text(), r"length does not match|\[flac @", self.log)
 
     def test_cut_off_wav_keeps_the_original(self):
         src = tone(self.dir / "02 Lied.wav", seconds=10, args=("-c:a", "pcm_s16le"))

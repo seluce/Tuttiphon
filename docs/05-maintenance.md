@@ -367,8 +367,8 @@ ffmpeg -nostdin -v error -y -i <source> -map 0:a:0 -map_metadata -1 -c:a aac -b:
   completely (`ffmpeg -i <new> -map 0:a:0 -ac 1 -ar 8000 -f u8 -`, counting the samples) and compares that with the
   length the source **declares** (`declared_length()`): FLAC from `STREAMINFO` (total samples / sample rate), WAV from
   the size of the `data` chunk (PCM only), AIFF from the `COMM` chunk, everything else from `ffprobe`. A file that is
-  still being copied or was never fully downloaded (zeros where audio should be – ffmpeg skips them silently) still
-  declares its full length, the decoded result is shorter. More than 0.3 s difference (AAC pads up to one frame) or
+  still being copied or was never fully downloaded (zeros where audio should be – older ffmpeg versions such as
+  6.1 skip them silently, newer ones report decoding errors) still declares its full length, the decoded result is shorter. More than 0.3 s difference (AAC pads up to one frame) or
   any decoding error → the conversion fails, the original stays. The decoding is registered with the runner like the
   conversion.
 - **AAC tags:** In `.m4a`, ffmpeg writes only the common fields. `copy_tags_mp4()` therefore uses mutagen to transfer
