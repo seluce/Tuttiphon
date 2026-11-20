@@ -828,12 +828,13 @@ a restart) – so that roles are correct even then. After a failure, the server 
 
 | Field | Meaning |
 |---|---|
-| `r` | Deezer rank; `null` = not found on Deezer |
+| `r` | Deezer rank – or, with `src`, a rank on Deezer's scale from the number of ListenBrainz listeners; `null` = found nowhere |
 | `s` | stars computed from it |
 | `t` | time of the check (seconds) |
 | `u` | stars Tuttiphon has set per account. A star in Navidrome that matches neither the new value nor `u` (and isn't 0) counts as set by hand and stays – except with `overwriteManual` |
 | `i` | ISRC through which the song was found (MusicBrainz → Deezer) – used directly on the next check |
 | `b` | 1 = as a top song of its band, one star more than the levels give |
+| `src` | `"lb"` = the rank comes from ListenBrainz (Deezer did not find the song or did not answer); missing = Deezer |
 | `full` | only while a full check (mode `full`) is running or interrupted: start and song count; afterwards the end is in `lastFull` |
 
 If `deezer.json` is missing, all songs count as new. Process and modes: [Maintenance](05-maintenance.md).
@@ -969,9 +970,10 @@ songs concerned are then simply analyzed again. Read by `app/similar.py`
 
 ### bands.json
 
-`{artists, lastRun}`: per band name `{t, src, mbid, dz, tags, listenbrainz, deezer}` – fetch time, the sources that
+`{artists, lastRun}`: per band name `{t, src, mbid, dz, tags, listenbrainz, ids, deezer}` – fetch time, the sources that
 answered (`listenbrainz`, `deezer`), the band's MusicBrainz ID and Deezer ID (`""`/`0`: none found), up to 30 tags
-`[name, 0–100]` from MusicBrainz and the similar bands `[name, 0–1]` of ListenBrainz (up to 60) and Deezer (up to 20).
+`[name, 0–100]` from MusicBrainz, the similar bands `[name, 0–1]` of ListenBrainz (up to 60) with their MusicBrainz IDs
+(`ids`: `{name: ID}`, for the links to ListenBrainz) and those of Deezer (up to 20).
 An entry is fetched again after 30 days and as soon as a source turned on is missing from `src`
 ([Intelligence](06-intelligence.md#similar-bands-and-tags)).
 

@@ -258,8 +258,14 @@ export default {
   'no stars': 'ohne',
   'This is how {n} songs with a known Deezer rank are distributed; {missing} were not found on Deezer.': 'So verteilen sich {n} Songs mit bekanntem Deezer-Rang; {missing} wurden bei Deezer nicht gefunden.',
   'This is how {n} songs with a known Deezer rank are distributed.': 'So verteilen sich {n} Songs mit bekanntem Deezer-Rang.',
+  '{n} of them were rated by their ListenBrainz listeners.':
+    'Davon wurden {n} nach ihren Hörern bei ListenBrainz bewertet.',
   'Defaults': 'Standardwerte',
   'Recalculate stars now': 'Sterne jetzt neu berechnen',
+  'When Deezer does not know a song': 'Wenn Deezer einen Song nicht kennt',
+  'Ask ListenBrainz': 'ListenBrainz fragen',
+  'For songs Deezer does not find – and for all songs while Deezer does not answer – the number of ListenBrainz listeners decides the stars. Only works for files with a MusicBrainz ID, as Lidarr and Picard write them. Songs with a Deezer rank keep it.':
+    'Für Songs, die Deezer nicht findet – und für alle Songs, solange Deezer nicht antwortet –, entscheidet die Zahl der Hörer bei ListenBrainz über die Sterne. Klappt nur bei Dateien mit MusicBrainz-ID, wie Lidarr und Picard sie schreiben. Songs mit Deezer-Rang behalten ihn.',
   'Top tracks and refreshing': 'Top-Titel und Auffrischen',
   'Highlight top tracks per band': 'Top-Titel je Band hervorheben',
   'If many songs of a band share the highest star count, the most popular get one more star. This way apps like Symfonium sort the top tracks correctly. Takes effect on the next run.':

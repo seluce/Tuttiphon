@@ -102,10 +102,10 @@ export default {
     'lijkt op {names}',
   'Show all {n}':
     'Alle {n} tonen',
-  'Tap to listen in on Last.fm – or as a wish list for Lidarr.':
-    'Tik om even te luisteren op Last.fm – of als verlanglijst voor Lidarr.',
-  'Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.':
-    'Tik om even te luisteren op Last.fm. Vind je iets mooi, dan kan de beheerder het aan de bibliotheek toevoegen.',
+  'Tap to listen in on ListenBrainz – or as a wish list for Lidarr.':
+    'Tik om even te luisteren op ListenBrainz – of als verlanglijst voor Lidarr.',
+  'Tap to listen in on ListenBrainz. If you like something, the administrator can add it to the library.':
+    'Tik om even te luisteren op ListenBrainz. Vind je iets mooi, dan kan de beheerder het aan de bibliotheek toevoegen.',
   'All':
     'Alle',
   'Error':
@@ -365,8 +365,8 @@ export default {
     'Klinkt als deze bands',
   'By the sound of the songs – recognized by the AI sound analysis.':
     'Op basis van de klank van de nummers – herkend door de AI-klankanalyse.',
-  'Tap to listen in on Last.fm – or for Lidarr.': 'Tik om even te luisteren op Last.fm – of voor Lidarr.',
-  'Tap to listen in on Last.fm.': 'Tik om even te luisteren op Last.fm.',
+  'Tap to listen in on ListenBrainz – or for Lidarr.': 'Tik om even te luisteren op ListenBrainz – of voor Lidarr.',
+  'Tap to listen in on ListenBrainz.': 'Tik om even te luisteren op ListenBrainz.',
   'Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).':
     'Tags en vergelijkbare bands voor deze band komen met de volgende ronde van “Muziek begrijpen” – van ListenBrainz en Deezer (Instellingen → Intelligentie).',
   'Four album covers with title':

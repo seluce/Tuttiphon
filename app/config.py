@@ -914,7 +914,7 @@ def _validate_settings(st):
     if dz.get("users") is not None and not (isinstance(dz["users"], list) and all(isinstance(u, str) for u in dz["users"])):
         raise ValueError(_("Settings: Deezer users invalid"))
     _num(dz, "rate", 1, 15, N_("Deezer requests per second"))
-    for key in ("topBoost", "refresh"):
+    for key in ("topBoost", "refresh", "listenbrainz"):
         if key in dz and not isinstance(dz[key], bool):
             raise ValueError(_("Settings: Deezer {key} must be yes/no", key=key))
     ld = st.get("loudness") or {}

@@ -413,7 +413,8 @@ def in_library(name, known):
 
 
 def missing_artists(seeds, lib, limit=24):
-    """Similar bands the library is still missing (by frequency over all seed bands)."""
+    """Similar bands the library is still missing (by frequency over all seed bands) – with their MusicBrainz ID ("mbid",
+    may be empty) for the link to ListenBrainz."""
     known = library_artist_parts(lib)
     score, because = Counter(), defaultdict(list)
     for seed in seeds:
@@ -421,11 +422,12 @@ def missing_artists(seeds, lib, limit=24):
             if m >= 0.2 and not in_library(name, known):
                 score[name] += m
                 because[name].append(seed)
-    return [{"artist": a, "score": round(s, 2), "because": because[a][:3]} for a, s in score.most_common(limit)]
+    return [{"artist": a, "score": round(s, 2), "because": because[a][:3], "mbid": bandinfo.mbid(a)}
+            for a, s in score.most_common(limit)]
 
 
 def artist_profile(name, lib):
-    """For the artist panel: tags, similar bands (present/missing), sound profile."""
+    """For the artist panel: tags, similar bands (present; missing with their MusicBrainz ID), sound profile."""
     known = bandinfo.artist(name)
     a = known or {}
     present = {x.lower(): x for x in rules.artist_stats(lib.songs)[0]}
@@ -446,7 +448,7 @@ def artist_profile(name, lib):
                                                      if c >= max(2, len(mine) // 4)],
                 "styles": [ml.style_label(k) for k, x in ml.artist_styles(lib).get(name, {}).items() if x >= 0.4][:4]}
     return {"tags": [t for t, c in a.get("tags", []) if t not in NOISE][:8], "similar": sim_here[:12],
-            "missing": sim_missing[:10], "sound": prof, "known": known is not None, "soundsLike": sounds_like}
+            "missing": [[s, m, bandinfo.mbid(s)] for s, m in sim_missing[:10]], "sound": prof, "known": known is not None, "soundsLike": sounds_like}
 
 
 def song_details(lib, i):

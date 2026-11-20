@@ -13,6 +13,7 @@ from app import bandinfo, lastfm
 
 NIGHTWISH = "00a9f935-ba93-4fc8-a33a-993abe9c936b"
 ROLF = "60a2a697-21d8-4a32-bdd4-53aaf0f13943"
+WITHIN = "eb5f0d6c-9a3e-4c47-8f6b-1b2b5a1f7d10"
 
 
 class Services:
@@ -34,7 +35,7 @@ class Services:
                     'artist:"Nobody"': [{"id": "x", "name": "Nobody Else", "score": "100"}]}
             return {"artists": hits.get(q["query"], [])}
         if parts.path.startswith("/similar-artists"):
-            return {NIGHTWISH: [{"name": "Within Temptation", "artist_mbid": "wt", "score": 3000},
+            return {NIGHTWISH: [{"name": "Within Temptation", "artist_mbid": WITHIN, "score": 3000},
                                 {"name": "Epica", "artist_mbid": "ep", "score": 1500}],
                     ROLF: [{"name": "Simone Sommerland", "artist_mbid": "ss", "score": 100}]}.get(q["artist_mbids"], [])
         if parts.path.startswith("/1/metadata/artist"):
@@ -84,6 +85,17 @@ class BandKnowledgeTest(unittest.TestCase):
         self.assertEqual((stored["Rolf Zuckowski"]["mbid"], stored["Nightwish"]["dz"]), (ROLF, 2))   # the most fans
         self.assertEqual(stored["Rolf Zuckowski"]["src"], ["listenbrainz", "deezer"])
         self.assertEqual([s for s, _m in bandinfo.artist("Rolf Zuckowski")["similar"]], ["Detlev Jöcker", "Simone Sommerland"])
+
+    def test_ids_for_the_links(self):
+        self.refresh(["Nightwish", "Rolf Zuckowski"])
+        self.assertEqual(bandinfo.mbid("Within Temptation"), WITHIN)   # named by ListenBrainz as a similar band
+        self.assertEqual(bandinfo.mbid("within temptation"), WITHIN)
+        self.assertEqual(bandinfo.mbid("Rolf Zuckowski"), ROLF)        # the band's own ID
+        self.assertEqual(bandinfo.mbid("Epica"), "")                    # no valid ID in the answer
+        self.assertEqual(bandinfo.mbid("Tarja"), "")                    # only Deezer knows it
+        self.services.broken.add("labs.api.listenbrainz.org")
+        self.refresh(["Nightwish"], everything=True)
+        self.assertEqual(bandinfo.mbid("Within Temptation"), WITHIN)   # ListenBrainz failed: the IDs stay
 
     def test_nothing_twice_and_a_source_turned_on_later(self):
         self.refresh(["Nightwish"], use=["listenbrainz"])

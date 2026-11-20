@@ -705,8 +705,9 @@ If the search finds nothing, it goes via the **ISRC**: Navidrome's own API suppl
 (`mbzRecordingID`, from Lidarr), MusicBrainz its ISRCs (`MusicBrainz.isrcs()`, at most one request per second), and
 `https://api.deezer.com/track/isrc:<ISRC>` the exact song including its rank. The ISRC is remembered (`i`) and used
 directly at the next check. In a sample, this route found two thirds of the songs not found before.
-No hit → rank `null` (“not found”). If the song previously had stars that still come from Tuttiphon (the account's
-star = the one last set), they are removed (`cleared`) – they came from a wrongly matched song.
+Still no hit → [ListenBrainz](#listenbrainz-as-the-second-source) if it is on, otherwise rank `null` (“not found”).
+If the song previously had stars that still come from Tuttiphon (the account's star = the one last set), they are
+removed (`cleared`) – they came from a wrongly matched song.
 
 **Top tracks** (`top_songs()`, `settings.deezer.topBoost`): if at least two different songs of a band (grouped by album
 artist) share the highest star count and it is below 5, up to three of them get one more star – the most popular
@@ -719,8 +720,54 @@ not checked for the longest time first (`refresh_order()`, by `t`). A library of
 about two weeks; this way the ranks stay current.
 
 Requests are throttled to `settings.deezer.rate` per second (default 9; Deezer allows 50 in 5 s). Network errors and
-error responses (e.g. quota exceeded) are retried up to six times with increasing pauses; after that the step aborts
-with an error, and the progress so far is saved.
+error responses (e.g. quota exceeded) are retried up to six times with increasing pauses. After that, with ListenBrainz
+on, the run goes on without Deezer ([below](#listenbrainz-as-the-second-source)); with ListenBrainz off, the step
+aborts with an error, and the progress so far is saved.
+
+### ListenBrainz as the second source
+
+`settings.deezer.listenbrainz` (default on). ListenBrainz – free and without a key – counts for every recording how
+many of its listeners played it (`POST https://api.listenbrainz.org/1/popularity/recording`, up to 1,000 MusicBrainz
+recording IDs per request, `ListenBrainz.listeners()`). Tuttiphon asks it
+
+- for songs Deezer does not find, neither by the search nor by the ISRC, and
+- while Deezer does not answer: after the first song whose six attempts failed, the rest of the run does without
+  Deezer (logged once) and asks ListenBrainz for every song **without a Deezer rank** – new songs, songs not found so
+  far and those rated by ListenBrainz before.
+
+The recording ID comes from Navidrome's own API (`mbzRecordingID`, written by Lidarr and Picard); songs without one get
+nothing from ListenBrainz. There is one request per block of 200 songs (`second()` in `run()`); with
+`X-RateLimit-Remaining` ≤ 1 it waits `X-RateLimit-Reset-In`, HTTP 429 and 5xx are retried up to four times, 400 counts
+as “nothing known”.
+
+`listeners_to_rank()` turns the number of listeners into a rank on Deezer's scale, so the levels and the top tracks work
+unchanged – log-linear between the points of `LB_ANCHORS`, above the last one the rank stays:
+
+| ListenBrainz listeners | 1 | 10 | 100 | 1,000 | 10,000 | 100,000 |
+|---|---|---|---|---|---|---|
+| rank | 10,000 | 100,000 | 380,000 | 540,000 | 600,000 | 690,000 |
+| stars (default levels) | 1 | 2 | 3 | 3 | 4 | 4 |
+
+From 100 listeners on, the points are measured: 141 top songs of 24 bands from Schlager to metal, the Deezer rank
+next to the ListenBrainz listeners of the same recording (by ISRC via MusicBrainz), the median rank per range of
+listeners; the rank correlation was 0.59 – good enough for a band's order, not for the exact star. Below 100 listeners
+the sample says little (it only holds songs Deezer knows well), so fewer listeners give fewer stars. The stand-in never
+gives five stars.
+
+The entry gets `"src": "lb"`, the log line shows `lb:` instead of `r:`, the summary “… of them from ListenBrainz”. The
+next check asks Deezer first again; a rank from Deezer replaces the stand-in.
+
+- A song **with a Deezer rank** is never rated by ListenBrainz. While Deezer does not answer, it stays as it is –
+  without a new check date, so it comes again in the next run.
+- If no source can say anything (Deezer does not answer, and ListenBrainz has no listeners or there is no ID), the song
+  is left out: no entry, no star removed. The summary says “N songs left for the next run”, and a full check is not
+  finished then.
+- If ListenBrainz does not answer, it is left out for the rest of the run (logged once); songs it rated before keep
+  their stars.
+
+ListenBrainz' listeners lean towards its community: rock, metal, indie and electronic music are much better covered
+than Schlager or children's songs, for which Deezer stays the better source. With the setting off, everything works as
+before: Deezer only, and a Deezer that does not answer stops the step.
 
 ### Thresholds: rank → stars
 
@@ -747,7 +794,9 @@ The settings page also shows the distribution of the stored ranks in buckets of 
 | `missing` | with an entry, but rank `null` | yes |
 | `both` | both: without an entry or with rank `null` | yes |
 | `full` | all whose entry is older than the start of the full check | yes |
-| `recalc` | all with a stored rank | no – only reapply the thresholds |
+| `recalc` | all with a stored rank (from ListenBrainz too) | no – only reapply the thresholds |
+
+Every mode that asks Deezer also asks ListenBrainz for what Deezer does not find.
 
 The full check can be resumed: at the start, `state/deezer.json` records the start time and song count under `full`.
 A canceled run continues next time with the songs whose timestamp lies before that. Only when it runs through without
@@ -802,7 +851,7 @@ missing, the log refers to Settings → Navidrome.
 ```
 
 `r` rank (`null` = not found), `s` stars, `t` time of the check, `u` last set stars per account, `i` ISRC (if found
-that way), `b` 1 = one extra star as a top track. Full description in
+that way), `b` 1 = one extra star as a top track, `src` `"lb"` = the rank comes from ListenBrainz. Full description in
 [02-data-model.md](02-data-model.md).
 
 ### Settings `settings.deezer`
@@ -816,6 +865,7 @@ that way), `b` 1 = one extra star as a top track. Full description in
 | `rate` | `9` | 1–15 | requests per second to Deezer |
 | `topBoost` | `true` | yes/no | one more star for a band's top tracks ([above](#search-and-rank)) |
 | `refresh` | `true` | yes/no | re-check a batch every night ([Night analysis](#night-analysis)) |
+| `listenbrainz` | `true` | yes/no | ListenBrainz as the second source ([above](#listenbrainz-as-the-second-source)) |
 
 ## Even out loudness
 

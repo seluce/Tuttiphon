@@ -53,7 +53,9 @@ Tuttiphon looks up every song on Deezer and turns its popularity rank into **one
 every family account. Apps that sort by rating – like the *top tracks* of an artist in Symfonium – then show what
 people actually know, and the *only the hits* playlists know what a hit is. The match is careful (band and title must
 fit, with a fallback over MusicBrainz and ISRC), the levels are adjustable, the best-known songs of each band get a
-bonus star, and **stars someone gave by hand are kept** unless you choose to overwrite them.
+bonus star, and **stars someone gave by hand are kept** unless you choose to overwrite them. Songs Deezer does not
+know – and every song while Deezer does not answer – get their stars from the number of ListenBrainz listeners, as
+long as the file has a MusicBrainz ID; songs with a Deezer rank keep it.
 
 The idea and the default rank levels come from [dztnr](https://github.com/scatolo/dztnr) by scatolo (a fork of
 [sptnr](https://github.com/krestaino/sptnr) by Kevin Restaino); Tuttiphon extends it to several accounts.
@@ -124,7 +126,7 @@ Tuttiphon works locally. It contacts these services only for the functions named
 |---|---|---|
 | Deezer API | popularity for stars, missing album covers, similar bands | rating new songs, cover search, “Understand music” (can be turned off) |
 | LRCLIB, NetEase | lyrics | lyrics search (NetEase optional) |
-| ListenBrainz | similar bands, the tags of MusicBrainz | “Understand music” (can be turned off) |
+| ListenBrainz | similar bands, the tags of MusicBrainz; listeners per song as the second source for stars | “Understand music”, rating songs Deezer does not find (both can be turned off) |
 | Last.fm | similar bands, tags | only with your own API key |
 | MusicBrainz, Cover Art Archive | ISRC for the Deezer search, a band's MusicBrainz ID by its name, album covers | when needed |
 | Push services (Google, Mozilla, Apple, Microsoft), ntfy | notifications | only if turned on |

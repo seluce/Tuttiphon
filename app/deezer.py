@@ -15,13 +15,20 @@ search finds nothing, the file's MusicBrainz ID (from Lidarr) leads via MusicBra
 song on Deezer ("i"). A song that had stars and is not found any more loses them again (only if they still come from
 Tuttiphon).
 Top tracks ("b"): if many songs of a band share its highest star count, up to three clearly most popular ones get one
-star more – otherwise Symfonium could not tell them apart from the rest (settings.deezer.topBoost).
+star more – otherwise apps like Symfonium could not tell them apart from the rest (settings.deezer.topBoost).
+
+ListenBrainz as the second source (settings.deezer.listenbrainz, on by default): for songs Deezer does not find, and
+for every song while Deezer does not answer, the number of ListenBrainz listeners of the recording (by the file's
+MusicBrainz ID, free and without a key) gives a rank on Deezer's scale ("src": "lb"). Songs Deezer has a rank for are
+never rated by ListenBrainz – if Deezer does not answer, they stay as they are until the next run.
 """
 import difflib
+import http.client
 import unicodedata
 from collections import defaultdict
 import datetime as dt
 import json
+import math
 import os
 import re
 import threading
@@ -40,6 +47,10 @@ STATE_FILE = STATE_DIR / "deezer.json"
 API = "https://api.deezer.com/search"
 RATE = 9.0          # requests per second (Deezer allows 50 per 5 s)
 WORKERS = 4
+LB_API = "https://api.listenbrainz.org/1/popularity/recording"
+LB_BATCH = 1000     # recording IDs per request (ListenBrainz' limit)
+DOWN = "down"       # lookup result: Deezer did not answer
+_MBID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 
 DEFAULT_THRESHOLDS = [10000, 100000, 300000, 600000, 850000]   # like get_rating_from_rank() in dztnr.py
@@ -54,12 +65,35 @@ def rank_to_stars(rank, thresholds=None):
     return 5
 
 
+# ListenBrainz listeners of a song -> rank on Deezer's scale: log-linear between these points. From 100 listeners on
+# measured on 141 top songs of 24 bands both services know (median Deezer rank per number of listeners, rank
+# correlation 0.59); below that the sample says little (it only has songs Deezer knows well), so fewer listeners give
+# fewer stars. Above the last point the rank stays – the stand-in never gives five stars. ListenBrainz has far fewer
+# listeners than Deezer, more of them from rock, metal and indie, hardly any from Schlager and children's songs.
+LB_ANCHORS = [(1, 10000), (10, 100000), (100, 380000), (1000, 540000), (10000, 600000), (100000, 690000)]
+
+
+def listeners_to_rank(users):
+    """Number of ListenBrainz listeners -> a rank on Deezer's scale (0 … ~1 million) – or None without listeners."""
+    if not users or users < 1:
+        return None
+    x = math.log10(users)
+    pts = [(math.log10(u), r) for u, r in LB_ANCHORS]
+    if x <= pts[0][0]:
+        return pts[0][1]
+    for (x0, r0), (x1, r1) in zip(pts, pts[1:]):
+        if x <= x1:
+            return int(round(r0 + (r1 - r0) * (x - x0) / (x1 - x0)))
+    return pts[-1][1]
+
+
 REFRESH_PER_RUN = 1500   # songs checked per "refresh" run (at night) – every song gets its turn about every 15 nights
 
 
 def settings(cfg=None):
     return {"thresholds": DEFAULT_THRESHOLDS, "users": None, "overwriteManual": False, "pipelineMode": "new", "rate": RATE,
-            "topBoost": True, "refresh": True, **((cfg or load_config())["settings"].get("deezer") or {})}
+            "topBoost": True, "refresh": True, "listenbrainz": True,
+            **((cfg or load_config())["settings"].get("deezer") or {})}
 
 
 def rank_histogram():
@@ -73,7 +107,8 @@ def rank_histogram():
             buckets[min(100, int(r) // 10000)] += 1
         elif "r" in e:
             not_found += 1
-    return {"bucket": 10000, "counts": buckets, "notFound": not_found, "total": len(entries), "perNight": REFRESH_PER_RUN}
+    return {"bucket": 10000, "counts": buckets, "notFound": not_found, "total": len(entries), "perNight": REFRESH_PER_RUN,
+            "listenbrainz": sum(1 for e in entries.values() if e.get("r") and e.get("src") == "lb")}
 
 
 class DeezerClient:
@@ -157,6 +192,50 @@ class MusicBrainz:
                 return [x for x in (json.loads(resp.read().decode("utf-8")).get("isrcs") or []) if isinstance(x, str)][:3]
         except (urllib.error.URLError, TimeoutError, ValueError, ConnectionError):
             return []
+
+
+class ListenBrainz:
+    """Listeners per recording by its MusicBrainz ID – free and without a key, up to 1000 IDs per request
+    (ListenBrainz allows 30 requests per 10 s; a run asks once per 200 songs at most)."""
+
+    def __init__(self, attempts=4):
+        self.attempts = attempts
+
+    def listeners(self, mbids):
+        """{recording ID: number of listeners} for the IDs ListenBrainz has listeners for. ConnectionError if
+        ListenBrainz does not answer."""
+        ids = [m for m in dict.fromkeys(mbids) if _MBID.fullmatch(m or "")]
+        out = {}
+        for k in range(0, len(ids), LB_BATCH):
+            for row in self._post(ids[k:k + LB_BATCH]):
+                n = row.get("total_user_count") if isinstance(row, dict) else None
+                if isinstance(n, int) and not isinstance(n, bool) and n > 0 and row.get("recording_mbid") in ids:
+                    out[row["recording_mbid"]] = n
+        return out
+
+    def _post(self, ids):
+        from .bandinfo import USER_AGENT
+        for attempt in range(self.attempts):
+            req = urllib.request.Request(LB_API, data=json.dumps({"recording_mbids": ids}).encode("utf-8"),
+                                         headers={"User-Agent": USER_AGENT, "Content-Type": "application/json",
+                                                  "Accept": "application/json"})
+            try:
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    left, reset = resp.headers.get("X-RateLimit-Remaining"), resp.headers.get("X-RateLimit-Reset-In")
+                if str(left or "").isdigit() and int(left) <= 1 and str(reset or "").isdigit():
+                    time.sleep(min(10, int(reset)))
+                return data if isinstance(data, list) else []
+            except urllib.error.HTTPError as e:
+                if e.code == 400:   # an ID ListenBrainz does not accept: nothing to learn from this batch
+                    return []
+                if e.code not in (429, 500, 502, 503, 504):
+                    raise ConnectionError(f"ListenBrainz: HTTP {e.code}") from e
+                reset = e.headers.get("X-RateLimit-Reset-In") if e.headers else None
+                time.sleep(min(10, int(reset)) if str(reset or "").isdigit() else 2 * (attempt + 1))
+            except (urllib.error.URLError, TimeoutError, ValueError, ConnectionError, http.client.HTTPException):
+                time.sleep(2 * (attempt + 1))
+        raise ConnectionError(_("ListenBrainz does not respond (tried several times)"))
 
 
 # ---------------------------------------------------------------------------- matching: does a hit belong to the song?
@@ -303,6 +382,7 @@ def stats(state=None, songs=None):
     out = {
         "known": len(entries),
         "found": sum(1 for e in entries.values() if e.get("r")),
+        "listenbrainz": sum(1 for e in entries.values() if e.get("r") and e.get("src") == "lb"),
         "notFound": sum(1 for e in entries.values() if "r" in e and not e.get("r")),
         "lastRun": state.get("lastRun"),
         "lastFull": state.get("lastFull"),
@@ -424,10 +504,13 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
     else:
         log(_sn(len(todo), "To rate: {n} song ({label})", "To rate: {n} songs ({label})", label=label))
     result = {"processed": 0, "found": 0, "notFound": 0, "set": 0, "kept": 0, "cleared": 0, "isrc": 0, "top": 0,
-              "stopped": False}
+              "lb": 0, "skipped": 0, "stopped": False}
 
     deezer = DeezerClient(rate=float(dz.get("rate") or RATE))
     mb = MusicBrainz()
+    lb = ListenBrainz() if dz.get("listenbrainz", True) is not False and mode != "recalc" else None
+    down = {"deezer": False, "lb": False}   # a service that stopped answering: left out for the rest of the run
+    down_lock = threading.Lock()
     native = None
     started = time.time()
     boost_on = bool(dz.get("topBoost", True))
@@ -444,32 +527,82 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
         except (NavidromeError, ValueError, KeyError, TypeError):
             return None
 
+    def gone(service, error):
+        """The first time a service does not answer: say so once – the rest of the run does without it."""
+        with down_lock:
+            if down[service]:
+                return
+            down[service] = True
+        if service == "deezer":
+            log(_s("⚠ Deezer does not answer ({error}) – for the rest of this run ListenBrainz rates the songs Deezer "
+                   "has no rank for yet; the others stay as they are.", error=error))
+        else:
+            log(_s("⚠ ListenBrainz does not answer ({error}) – it is left out for the rest of this run.", error=error))
+
     def lookup(song):
+        """(song, Deezer rank or None or DOWN or "stop", ISRC, recording ID for ListenBrainz)"""
         if stop is not None and stop.is_set():
-            return song, "stop", None
+            return song, "stop", None, None
         if mode == "recalc":   # look nothing up – take the saved rank
-            return song, entries[song["id"]]["r"], None
-        rank = deezer.best_rank(song)
-        if rank:
-            return song, rank, None
-        known = (entries.get(song["id"]) or {}).get("i")   # fallback: exactly via the ISRC
-        for isrc in [known] if known else mb.isrcs(mbid_of(song)):
-            rank = deezer.rank_by_isrc(isrc)
-            if rank:
-                return song, rank, isrc
-        return song, None, None
+            return song, entries[song["id"]]["r"], None, None
+        prev = entries.get(song["id"]) or {}
+        mbid = None
+        if not down["deezer"]:
+            try:
+                rank = deezer.best_rank(song)
+            except ConnectionError as e:
+                if lb is None:
+                    raise
+                gone("deezer", e)
+            else:
+                if rank:
+                    return song, rank, None, None
+                known = prev.get("i")   # fallback: exactly via the ISRC
+                if not known:
+                    mbid = mbid_of(song)
+                for isrc in [known] if known else mb.isrcs(mbid):
+                    rank = deezer.rank_by_isrc(isrc)
+                    if rank:
+                        return song, rank, isrc, None
+                if lb is None or down["lb"]:
+                    return song, None, None, None
+                return song, None, None, mbid or mbid_of(song)
+        if prev.get("r") and prev.get("src") != "lb":
+            return song, DOWN, None, None   # Deezer's rank stays – no stand-in for it
+        return song, DOWN, None, (mbid_of(song) if not down["lb"] else None)
+
+    def second(rows):
+        """ListenBrainz for the songs of a portion Deezer did not find or could not be asked about – one request."""
+        want = [r[3] for r in rows if r[1] in (None, DOWN) and r[3]]
+        if not want or lb is None or down["lb"]:
+            heard = {}
+        else:
+            try:
+                heard = lb.listeners(want)
+            except ConnectionError as e:
+                gone("lb", e)
+                heard = {}
+        out = []
+        for song, rank, isrc, mbid in rows:
+            if rank in (None, DOWN) and mbid in heard:
+                out.append((song, listeners_to_rank(heard[mbid]), None, "lb"))
+            elif rank is None and down["lb"] and (entries.get(song["id"]) or {}).get("src") == "lb":
+                out.append((song, DOWN, None, None))   # rated by ListenBrainz before, which does not answer: stays
+            else:
+                out.append((song, rank, isrc, None))
+        return out
 
     try:
         _process(todo, pool_lookup=lookup, entries=entries, users=users, mode=mode, dry_run=dry_run,
                  overwrite_manual=overwrite_manual, result=result, log=log, state=state, started=started,
-                 thresholds=thresholds, boosted=boosted)
+                 thresholds=thresholds, boosted=boosted, second=second, lb=lb is not None)
         if boost_on and not result["stopped"]:   # top tracks after the new ranks: only what changes because of them
             boosted = top_songs(songs, entries, thresholds)
             by_id = {s["id"]: s for s in songs}
             for sid, e in list(entries.items()):
                 if e.get("r") and sid in by_id and _stars(e["r"], thresholds, sid in boosted) != e.get("s"):
                     _apply(by_id[sid], e["r"], entries, users, "top", dry_run, overwrite_manual, result, log, thresholds,
-                           boosted=boosted, isrc=e.get("i"))
+                           boosted=boosted, isrc=e.get("i"), src=e.get("src"))
         if not result["stopped"]:
             _catch_up(songs, {s["id"] for s in todo}, entries, state, users, dry_run, overwrite_manual, result, log, stop)
     finally:   # also when an error stops the run: save what was done, otherwise our own stars later count as "manual"
@@ -478,7 +611,7 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
 
     now = dt.datetime.now().strftime("%d.%m.%Y %H:%M")
     state["lastRun"] = now
-    if mode == "full" and not result["stopped"] and not max_songs:
+    if mode == "full" and not result["stopped"] and not result["skipped"] and not max_songs:   # skipped: they come next time
         state.pop("full", None)
         state["lastFull"] = now
     if not dry_run:
@@ -493,6 +626,10 @@ def run(env, mode="new", dry_run=False, max_songs=0, log=print, stop=None, overw
               _sn(result["kept"], "{n} manual rating kept", "{n} manual ratings kept")]
     if result["cleared"]:
         parts.append(_sn(result["cleared"], "{n} wrong star removed", "{n} wrong stars removed"))
+    if result["lb"]:
+        parts.insert(1, _s("{n} of them from ListenBrainz", n=result["lb"]))
+    if result["skipped"]:
+        parts.append(_sn(result["skipped"], "{n} song left for the next run", "{n} songs left for the next run"))
     if result["top"]:
         parts.append(_sn(result["top"], "{n} top track highlighted", "{n} top tracks highlighted"))
     log(_s("Deezer done: {details}.", details=", ".join(parts)))
@@ -509,18 +646,26 @@ def _stars(rank, thresholds, boost):
 
 
 def _process(todo, pool_lookup, entries, users, mode, dry_run, overwrite_manual, result, log, state, started, thresholds=None,
-             boosted=frozenset()):
+             boosted=frozenset(), second=None, lb=False):
+    """pool_lookup(song) -> (song, rank, isrc[, recording ID]); second(rows) -> rows of (song, rank, isrc, source)
+    – the second source for a whole portion at once."""
     progress.part("deezer", len(todo))
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         for chunk_start in range(0, len(todo), 200):
             chunk = todo[chunk_start:chunk_start + 200]
-            for k, (song, rank, isrc) in enumerate(pool.map(pool_lookup, chunk), 1):
+            rows = []
+            for k, row in enumerate(pool.map(pool_lookup, chunk), 1):
                 progress.at(chunk_start + k)
+                rows.append(tuple(row) + (None,) * (4 - len(row)))
+            for song, rank, isrc, src in second(rows) if second else rows:
                 if rank == "stop":
                     result["stopped"] = True
                     continue
+                if rank == DOWN:   # no source could say anything: the entry stays, the song comes again next time
+                    result["skipped"] = result.get("skipped", 0) + 1
+                    continue
                 _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, log, thresholds,
-                       boosted=boosted, isrc=isrc)
+                       boosted=boosted, isrc=isrc, src=src, lb=lb)
             done = chunk_start + len(chunk)
             if not dry_run:
                 save_state(state)
@@ -534,17 +679,22 @@ def _process(todo, pool_lookup, entries, users, mode, dry_run, overwrite_manual,
 
 
 def _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, log, thresholds=None,
-           boosted=frozenset(), isrc=None):
-    """mode "top": only adjust the stars to the top-track rule (rank as saved, no new check date)."""
-    for k in ("cleared", "isrc", "top"):
+           boosted=frozenset(), isrc=None, src=None, lb=False):
+    """mode "top": only adjust the stars to the top-track rule (rank as saved, no new check date). src "lb": the rank
+    comes from ListenBrainz; lb: ListenBrainz was asked too (for the line of a song not found)."""
+    for k in ("cleared", "isrc", "top", "lb"):
         result.setdefault(k, 0)
     artist = song.get("artist") or song.get("displayArtist") or ""
     boost = song["id"] in boosted
     stars = _stars(rank, thresholds, boost) if rank else None
     prev = entries.get(song["id"], {})
+    if mode in ("top", "recalc"):   # the saved rank – and where it came from
+        src = prev.get("src")
     entry = {"r": rank, "s": stars, "t": prev.get("t") if mode == "top" else int(time.time()), "u": dict(prev.get("u", {}))}
     if isrc or prev.get("i"):
         entry["i"] = isrc or prev["i"]
+    if src == "lb" and stars is not None:
+        entry["src"] = "lb"
     if boost:
         entry["b"] = 1
     if mode == "top":
@@ -552,9 +702,14 @@ def _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, 
     else:
         result["processed"] += 1
         result["isrc"] += bool(isrc)
+        result["lb"] += src == "lb" and stars is not None and mode != "recalc"
     if stars is None:
         result["notFound"] += 1
-        log(_s("  ?? {artist} – {title} (not found on Deezer)", artist=artist, title=song.get("title")))
+        if lb:
+            log(_s("  ?? {artist} – {title} (neither on Deezer nor on ListenBrainz)", artist=artist,
+                   title=song.get("title")))
+        else:
+            log(_s("  ?? {artist} – {title} (not found on Deezer)", artist=artist, title=song.get("title")))
         if prev.get("s"):   # not found (any more): remove the stars Tuttiphon set
             for user, (nav, current) in users.items():
                 cur = current.get(song["id"], 0) or 0
@@ -593,7 +748,7 @@ def _apply(song, rank, entries, users, mode, dry_run, overwrite_manual, result, 
         changed = prev.get("s") is not None and prev.get("s") != stars
         if mode not in ("full", "recalc", "refresh", "top") or changed or notes:
             # the annotations in brackets are translated one by one and appended to the line
-            log(f"  {'★' * stars}{'☆' * (5 - stars)}  r:{rank:<7} {artist} – {song.get('title')}"
+            log(f"  {'★' * stars}{'☆' * (5 - stars)}  {'lb' if src == 'lb' else 'r'}:{rank:<7} {artist} – {song.get('title')}"
                 + ("  " + _s("(before {stars}★)", stars=prev["s"]) if changed else "")
                 + (f"  ({'; '.join(notes)})" if notes else ""))
     entries[song["id"]] = entry

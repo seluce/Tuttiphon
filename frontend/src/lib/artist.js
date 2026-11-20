@@ -11,6 +11,14 @@ export function openArtist(name) {
   openSheet({ title: name, component: ArtistSheet, props: { name } })
 }
 
+/** A band's page at ListenBrainz (listening in without a sign-in) – by its MusicBrainz ID, otherwise a search for
+ *  the name. */
+export function bandPage(name, mbid) {
+  return mbid
+    ? `https://listenbrainz.org/artist/${encodeURIComponent(mbid)}/`
+    : `https://listenbrainz.org/search/?search_term=${encodeURIComponent(name)}&search_type=artist`
+}
+
 /** Create a "similar to …" radio as a mix (new every week) – or open the existing one. For your own person
  *  (administrators without one: the family's); without a person of your own, the welcome comes first – for
  *  administrators when there is no person at all: adding one. */

@@ -102,10 +102,10 @@ export default {
     'semelhante a {names}',
   'Show all {n}':
     'Mostrar todas as {n}',
-  'Tap to listen in on Last.fm – or as a wish list for Lidarr.':
-    'Toque para ouvir um pouco no Last.fm – ou como lista de desejos para o Lidarr.',
-  'Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.':
-    'Toque para ouvir um pouco no Last.fm. Se gostar de algo, o administrador pode adicioná-lo à biblioteca.',
+  'Tap to listen in on ListenBrainz – or as a wish list for Lidarr.':
+    'Toque para ouvir um pouco no ListenBrainz – ou como lista de desejos para o Lidarr.',
+  'Tap to listen in on ListenBrainz. If you like something, the administrator can add it to the library.':
+    'Toque para ouvir um pouco no ListenBrainz. Se gostar de algo, o administrador pode adicioná-lo à biblioteca.',
   'All':
     'Todos',
   'Error':
@@ -365,8 +365,8 @@ export default {
     'Soa como estas bandas',
   'By the sound of the songs – recognized by the AI sound analysis.':
     'Pelo som das músicas – reconhecido pela análise de som com IA.',
-  'Tap to listen in on Last.fm – or for Lidarr.': 'Toque para ouvir um pouco no Last.fm – ou para o Lidarr.',
-  'Tap to listen in on Last.fm.': 'Toque para ouvir um pouco no Last.fm.',
+  'Tap to listen in on ListenBrainz – or for Lidarr.': 'Toque para ouvir um pouco no ListenBrainz – ou para o Lidarr.',
+  'Tap to listen in on ListenBrainz.': 'Toque para ouvir um pouco no ListenBrainz.',
   'Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).':
     'As etiquetas e as bandas semelhantes desta banda chegam com a próxima execução de «Compreender a música» – do ListenBrainz e do Deezer (Definições → Inteligência).',
   'Four album covers with title':

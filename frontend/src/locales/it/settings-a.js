@@ -451,10 +451,16 @@ export default {
     'Ecco come si distribuiscono {n} brani con rank Deezer noto; {missing} non sono stati trovati su Deezer.',
   'This is how {n} songs with a known Deezer rank are distributed.':
     'Ecco come si distribuiscono {n} brani con rank Deezer noto.',
+  '{n} of them were rated by their ListenBrainz listeners.':
+    'Di questi, {n} sono stati valutati in base ai loro ascoltatori su ListenBrainz.',
   'Defaults':
     'Valori predefiniti',
   'Recalculate stars now':
     'Ricalcola le stelle ora',
+  'When Deezer does not know a song': 'Quando Deezer non conosce un brano',
+  'Ask ListenBrainz': 'Chiedere a ListenBrainz',
+  'For songs Deezer does not find – and for all songs while Deezer does not answer – the number of ListenBrainz listeners decides the stars. Only works for files with a MusicBrainz ID, as Lidarr and Picard write them. Songs with a Deezer rank keep it.':
+    'Per i brani che Deezer non trova – e per tutti i brani finché Deezer non risponde – il numero di ascoltatori su ListenBrainz decide le stelle. Funziona solo con file che hanno un ID MusicBrainz, come quelli scritti da Lidarr e Picard. I brani con un rank Deezer lo mantengono.',
   'Top tracks and refreshing':
     'Brani top e aggiornamento',
   'Highlight top tracks per band':

@@ -7,6 +7,13 @@ released.
 
 ## Unreleased
 
+- **Stars without depending on Deezer alone:** songs Deezer does not find now get their stars from how many
+  ListenBrainz listeners played them – free and without a key, for files with a MusicBrainz ID (as Lidarr and Picard
+  write them). If Deezer stops answering, the run carries on with ListenBrainz for the songs without a Deezer rank;
+  songs with a Deezer rank keep their stars, and nothing is removed. On by default, Settings → Deezer stars → “Ask
+  ListenBrainz”.
+- **Listen in on ListenBrainz:** bands you might still be missing (Discover and the band window) now open their page at
+  ListenBrainz instead of Last.fm – with a “Play all” of their popular songs, without a sign-in.
 - **Texts for every music app:** the interface and the server's messages no longer assume Symfonium – they speak of
   your music app, whichever you use with Navidrome. Symfonium is only named for its own settings (radio mix with
   similar songs, smart queue by sonic analysis) and where only apps like it do something (top tracks by stars,

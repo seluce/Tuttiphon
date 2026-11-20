@@ -331,8 +331,9 @@ and already offers “Rate now” for the new songs (note `deezer-…`).
 ### Discover
 
 `pages/Discover.svelte` (`#/entdecken`): ready-made suggestions per person, new music worlds, “You might also like –
-not in your library yet” (administrators: “You might still be missing”, `discover/Missing.svelte` – with ListenBrainz
-and Deezer turned off and without a Last.fm key, `sources: false`, a note instead) and, folded, the
+not in your library yet” (administrators: “You might still be missing”, `discover/Missing.svelte` – each band links to
+its page at ListenBrainz, `bandPage()` in `lib/artist.js`: by its MusicBrainz ID, otherwise a search for the name; with
+ListenBrainz and Deezer turned off and without a Last.fm key, `sources: false`, a note instead) and, folded, the
 table of all music world × vibe combinations (`discover/Matrix.svelte`, computed only when first unfolded; a tap on a
 cell opens the editor for a new playlist of `defaultOwner()` – a user without a person of their own goes to the
 welcome assistant instead).
@@ -424,7 +425,8 @@ kid-safe mode hides don't open ([API](03-api.md#songs--listening-in)).
 
 The **band window** (`components/sheets/ArtistSheet.svelte`, `openArtist(name)`) shows, after “Similar bands in your
 library” (band knowledge), “Sounds like these bands”: `soundsLike` from `GET /api/artist` (AI sound vectors) as round pictures
-that open that band's window – without the bands already listed above; missing without sound vectors.
+that open that band's window – without the bands already listed above; missing without sound vectors. Then “Similar
+bands you are still missing” – links to the bands' pages at ListenBrainz (`bandPage()`).
 
 ### Music world for users
 
@@ -753,8 +755,10 @@ browser in as local administrator.
 ### Settings → Deezer stars
 
 `pages/settings/Deezer.svelte`. “From popularity to stars”: the five rank levels and, from `GET /api/deezer/ranks`, how
-the songs with a known Deezer rank spread over the star counts with these levels; while no song has a rank yet, only
-“No numbers yet – they appear with the first run.”, without bars. “Who gets stars?” has one switch per account from
+the songs with a known Deezer rank spread over the star counts with these levels (with how many of them ListenBrainz
+rated, `listenbrainz`); while no song has a rank yet, only “No numbers yet – they appear with the first run.”, without
+bars. “When Deezer does not know a song”: the switch “Ask ListenBrainz” (`deezer.listenbrainz`, on by default).
+“Who gets stars?” has one switch per account from
 `starAccounts()` (`pages/personen/shared.js`): every person's account – the family's too – plus accounts still in
 `deezer.users` without a person, so a switched-off one can be switched on again; an account without a stored password
 (`S.status.env.users[].ok`) shows a lock. Switching one (`toggleStars()`) turns `deezer.users` into a list; deleting a

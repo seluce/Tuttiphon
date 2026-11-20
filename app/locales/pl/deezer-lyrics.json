@@ -1,5 +1,8 @@
 {
  "Deezer does not respond (tried several times)": "Deezer nie odpowiada (kilka prób)",
+ "ListenBrainz does not respond (tried several times)": "ListenBrainz nie odpowiada (kilka prób)",
+ "⚠ Deezer does not answer ({error}) – for the rest of this run ListenBrainz rates the songs Deezer has no rank for yet; the others stay as they are.": "⚠ Deezer nie odpowiada ({error}) – do końca tego przebiegu ListenBrainz ocenia piosenki, dla których Deezer nie ma jeszcze rankingu; pozostałe zostają bez zmian.",
+ "⚠ ListenBrainz does not answer ({error}) – it is left out for the rest of this run.": "⚠ ListenBrainz nie odpowiada ({error}) – pominięty do końca tego przebiegu.",
  "{n} song in Navidrome.": "{n} piosenka w Navidrome.",
  "{n} songs in Navidrome.": {
   "few": "{n} piosenki w Navidrome.",
@@ -27,6 +30,7 @@
   "many": "Do oceny: {n} piosenek ({label})"
  },
  "{found} found ({isrc} of them via the ISRC)": "znaleziono {found} (w tym przez ISRC: {isrc})",
+ "{n} of them from ListenBrainz": "w tym z ListenBrainz: {n}",
  "{n} found": "znaleziono {n}",
  "{n} not found": "nie znaleziono {n}",
  "{n} rating set": "ustawiono {n} ocenę",
@@ -44,6 +48,11 @@
   "few": "usunięto {n} błędne gwiazdki",
   "many": "usunięto {n} błędnych gwiazdek"
  },
+ "{n} song left for the next run": "{n} piosenka zostaje na następny przebieg",
+ "{n} songs left for the next run": {
+  "few": "{n} piosenki zostają na następny przebieg",
+  "many": "{n} piosenek zostaje na następny przebieg"
+ },
  "{n} top track highlighted": "wyróżniono {n} najlepszy utwór",
  "{n} top tracks highlighted": {
   "few": "wyróżniono {n} najlepsze utwory",
@@ -53,6 +62,7 @@
  "Stopped – progress is saved.": "Zatrzymano – postęp jest zapisany.",
  "  … {done}/{total} ({rate:.1f} songs/s, about {minutes} min left)": "  … {done}/{total} ({rate:.1f} piosenek/s, zostało ok. {minutes} min)",
  "  ?? {artist} – {title} (not found on Deezer)": "  ?? {artist} – {title} (nie znaleziono w Deezer)",
+ "  ?? {artist} – {title} (neither on Deezer nor on ListenBrainz)": "  ?? {artist} – {title} (ani w Deezer, ani w ListenBrainz)",
  "  ⚠ {artist} – {title}: star for {user} not removed ({error})": "  ⚠ {artist} – {title}: nie usunięto gwiazdki dla konta {user} ({error})",
  "top track of the band": "najlepszy utwór zespołu",
  "no longer a top track": "już nie najlepszy utwór",

@@ -749,6 +749,9 @@ its genres, the scene catalog and the AI's music styles still work for it.
 
 `artist(name)` merges everything into `{"tags", "similar"}`: every tag and every similar band (case ignored) with its
 strongest value from any source, the strongest first. What Last.fm delivered stays in use without a key too.
+`mbid(name)` gives a band's MusicBrainz ID – its own (`mbid`) or the one ListenBrainz sent along with it as a similar
+band (`ids`), otherwise `""`. Bands the library is still missing link to their page at ListenBrainz with it
+(`listenbrainz.org/artist/<id>/`, listening in without a sign-in), without an ID to a ListenBrainz search for the name.
 `stamp()` (the state of `state/bands.json` and `state/lastfm.json`) is part of the memos that depend on it –
 `song_features()`, the sound filters, the automatic music worlds and `GET /api/intel`.
 

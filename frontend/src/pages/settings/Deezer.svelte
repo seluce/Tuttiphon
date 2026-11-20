@@ -1,4 +1,5 @@
-<!-- Settings → Deezer stars: levels rank → stars with distribution, who gets stars, behavior in the full run. -->
+<!-- Settings → Deezer stars: levels rank → stars with distribution, ListenBrainz as the second source, who gets stars,
+     behavior in the full run. -->
 <script>
   import Icon from '../../components/Icon.svelte'
   import Seg from '../../components/Seg.svelte'
@@ -102,13 +103,20 @@
       </div>
       <p class="hint mt-2">{hist.notFound
         ? t('This is how {n} songs with a known Deezer rank are distributed; {missing} were not found on Deezer.', { n: fmt(ranked), missing: fmt(hist.notFound) })
-        : t('This is how {n} songs with a known Deezer rank are distributed.', { n: fmt(ranked) })}</p>
+        : t('This is how {n} songs with a known Deezer rank are distributed.', { n: fmt(ranked) })}{#if hist.listenbrainz}
+        {' '}{t('{n} of them were rated by their ListenBrainz listeners.', { n: fmt(hist.listenbrainz) })}{/if}</p>
     {/if}
   </div>
   <div class="btns">
     <button class="btn sm ghost" onclick={() => { dz.thresholds = [...(hist?.defaults || DEFAULTS)]; changed() }}>{t('Defaults')}</button>
     <button class="btn sm primary" disabled={S.running} onclick={recalc}><Icon name="refresh" size={15} />{t('Recalculate stars now')}</button>
   </div>
+</Card>
+
+<Card title={t('When Deezer does not know a song')} icon="headphones">
+  <Row label={t('Ask ListenBrainz')} hint={t('For songs Deezer does not find – and for all songs while Deezer does not answer – the number of ListenBrainz listeners decides the stars. Only works for files with a MusicBrainz ID, as Lidarr and Picard write them. Songs with a Deezer rank keep it.')}>
+    <Toggle label={t('Ask ListenBrainz')} obj={dz} key="listenbrainz" def={true} />
+  </Row>
 </Card>
 
 <Card title={t('Top tracks and refreshing')} icon="trending">

@@ -451,10 +451,16 @@ export default {
     'Zo zijn {n} nummers met een bekende Deezer-rang verdeeld; {missing} zijn niet op Deezer gevonden.',
   'This is how {n} songs with a known Deezer rank are distributed.':
     'Zo zijn {n} nummers met een bekende Deezer-rang verdeeld.',
+  '{n} of them were rated by their ListenBrainz listeners.':
+    'Daarvan zijn er {n} beoordeeld op basis van hun luisteraars op ListenBrainz.',
   'Defaults':
     'Standaardwaarden',
   'Recalculate stars now':
     'Sterren nu herberekenen',
+  'When Deezer does not know a song': 'Als Deezer een nummer niet kent',
+  'Ask ListenBrainz': 'ListenBrainz vragen',
+  'For songs Deezer does not find – and for all songs while Deezer does not answer – the number of ListenBrainz listeners decides the stars. Only works for files with a MusicBrainz ID, as Lidarr and Picard write them. Songs with a Deezer rank keep it.':
+    'Voor nummers die Deezer niet vindt – en voor alle nummers zolang Deezer niet antwoordt – bepaalt het aantal luisteraars op ListenBrainz de sterren. Werkt alleen bij bestanden met een MusicBrainz-ID, zoals Lidarr en Picard die schrijven. Nummers met een Deezer-rang houden die.',
   'Top tracks and refreshing':
     'Toptracks en verversen',
   'Highlight top tracks per band':

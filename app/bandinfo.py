@@ -45,10 +45,11 @@ LB_WEIGHT = 0.8     # ListenBrainz counts a little less: its lists lean towards 
 DZ_STEP = 0.04      # Deezer gives an order without values: the first 1.0, each further one 0.04 less (at least 0.2)
 MAX_TAGS, MAX_SIMILAR = 30, 60
 GIVE_UP = 5         # this many failures in a row: the source is left out for the rest of the run
+_MBID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 _lock = threading.Lock()
 _mem = {"stamp": None, "data": None}
-_view = {"v": (None, {})}   # (stamps of both caches, merged data)
+_view = {"v": (None, {}), "ids": {}}   # (stamps of both caches, merged data); band in lower case → MBID
 
 
 class BandError(Exception):
@@ -128,7 +129,7 @@ def _mb_find(name):
 
 
 def _lb_similar(mbid):
-    """Similar bands by ListenBrainz: [[name, 0–1]], the most similar first."""
+    """Similar bands by ListenBrainz: ([[name, 0–1]], the most similar first; {name: MusicBrainz ID} for the links)."""
     data = _get(f"{LB_SIMILAR}?" + urllib.parse.urlencode({"artist_mbids": mbid, "algorithm": LB_ALGORITHM}), PACE["lb"])
     if isinstance(data, list) and data and isinstance(data[0], dict) and isinstance(data[0].get("data"), list):
         data = data[0]["data"]   # the older answer of the labs API: the rows inside "data"
@@ -136,8 +137,10 @@ def _lb_similar(mbid):
     scores = [float(r.get("score") or 0) for r in rows]
     top = max(scores, default=0)
     if top <= 0:
-        return []
-    return [[r["name"], round(LB_WEIGHT * s / top, 3)] for r, s in zip(rows, scores) if s > 0][:MAX_SIMILAR]
+        return [], {}
+    rows = [(r, s) for r, s in zip(rows, scores) if s > 0][:MAX_SIMILAR]
+    return ([[r["name"], round(LB_WEIGHT * s / top, 3)] for r, s in rows],
+            {r["name"]: r["artist_mbid"] for r, _s in rows if _MBID.fullmatch(str(r.get("artist_mbid") or ""))})
 
 
 def _lb_tags(mbid):
@@ -255,18 +258,29 @@ def _merged():
     seen, data = _view["v"]
     if seen != key:
         own, lf = load()["artists"], lastfm.load()["artists"]
-        data = {}
+        data, ids = {}, {}
         for name in own.keys() | lf.keys():
             a, b = own.get(name) or {}, lf.get(name) or {}
             data[name] = {"tags": _merge([a.get("tags"), b.get("tags")], MAX_TAGS),
                           "similar": _merge([a.get("listenbrainz"), a.get("deezer"), b.get("similar")], MAX_SIMILAR)}
-        _view["v"] = (key, data)
+            for other, mbid in (a.get("ids") or {}).items():
+                ids.setdefault(other.lower(), mbid)
+        for name, a in own.items():   # the band's own ID wins over what other bands' lists say
+            if a.get("mbid"):
+                ids[name.lower()] = a["mbid"]
+        _view["v"], _view["ids"] = (key, data), ids
     return data
 
 
 def artist(name):
     """{"tags": [[tag, 0–100]], "similar": [[band, 0–1]]} from every source, or None if no source was asked yet."""
     return _merged().get(name)
+
+
+def mbid(name):
+    """The band's MusicBrainz ID if ListenBrainz named it (as the band itself or as a similar band) – or ""."""
+    _merged()
+    return _view.get("ids", {}).get((name or "").lower(), "")
 
 
 def sources(an):
@@ -321,8 +335,8 @@ def refresh(names, use, log=print, stop=None, budget=None, everything=False, ids
                 try:
                     if src == "listenbrainz":
                         mbid = ids.get(name) or old.get("mbid") or _mb_find(name)
-                        entry.update(mbid=mbid or "", tags=_lb_tags(mbid) if mbid else [],
-                                     listenbrainz=_lb_similar(mbid) if mbid else [])
+                        sim, sim_ids = _lb_similar(mbid) if mbid else ([], {})
+                        entry.update(mbid=mbid or "", tags=_lb_tags(mbid) if mbid else [], listenbrainz=sim, ids=sim_ids)
                     else:
                         dz = old.get("dz") or _dz_find(name)
                         entry.update(dz=dz or 0, deezer=_dz_similar(dz) if dz else [])
@@ -339,7 +353,7 @@ def refresh(names, use, log=print, stop=None, budget=None, everything=False, ids
                     break
                 continue
             for field, src in (("mbid", "listenbrainz"), ("tags", "listenbrainz"), ("listenbrainz", "listenbrainz"),
-                               ("dz", "deezer"), ("deezer", "deezer")):
+                               ("ids", "listenbrainz"), ("dz", "deezer"), ("deezer", "deezer")):
                 if src not in entry["src"] and field in old and src in want:
                     entry[field] = old[field]   # a source that failed this time: its data so far stays
             arts[name] = entry

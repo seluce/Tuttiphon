@@ -1,6 +1,6 @@
 <!--
   Artist sheet: picture, albums, bio – and everywhere the band appears (music worlds, vibes, people, playlists),
-  similar bands (band knowledge: ListenBrainz, Deezer, Last.fm) and bands that sound alike (AI sound vectors, without the ones already listed).
+  similar bands (band knowledge: ListenBrainz, Deezer, Last.fm; missing ones link to ListenBrainz) and bands that sound alike (AI sound vectors, without the ones already listed).
   Opened via lib/artist.js → openArtist(name).
 -->
 <script>
@@ -14,7 +14,7 @@
   import { ownerOrder } from '../../lib/playlist.js'
   import { closeSheet, toast } from '../../lib/overlay.svelte.js'
   import { api } from '../../lib/api.js'
-  import { openArtist, startRadio } from '../../lib/artist.js'
+  import { openArtist, startRadio, bandPage } from '../../lib/artist.js'
   import { fmt, plural } from '../../lib/format.js'
   import { t, tn } from '../../lib/i18n.svelte.js'
 
@@ -262,11 +262,11 @@
     {#if a.missing?.length}
       <Field label={t('Similar bands you are still missing')}>
         <div class="toggles">
-          {#each a.missing as [m]}
-            <a class="toggle" href="https://www.last.fm/music/{encodeURIComponent(m)}" target="_blank" rel="noopener">{m}<Icon name="external" size={13} /></a>
+          {#each a.missing as [m, , mbid]}
+            <a class="toggle" href={bandPage(m, mbid)} target="_blank" rel="noopener">{m}<Icon name="external" size={13} /></a>
           {/each}
         </div>
-        <div class="hint">{admin ? t('Tap to listen in on Last.fm – or for Lidarr.') : t('Tap to listen in on Last.fm.')}</div>
+        <div class="hint">{admin ? t('Tap to listen in on ListenBrainz – or for Lidarr.') : t('Tap to listen in on ListenBrainz.')}</div>
       </Field>
     {/if}
 

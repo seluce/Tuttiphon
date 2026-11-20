@@ -60,10 +60,10 @@ export default {
   'No data yet – it is created during the next run of “Understand music”.': 'Noch keine Daten – sie entstehen beim nächsten Lauf von „Musik verstehen“.',
   'similar to {names}': 'ähnlich wie {names}',
   'Show all {n}': 'Alle {n} zeigen',
-  'Tap to listen in on Last.fm – or as a wish list for Lidarr.':
-    'Antippen zum Reinhören auf Last.fm – oder als Wunschliste für Lidarr.',
-  'Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.':
-    'Antippen zum Reinhören auf Last.fm. Gefällt dir etwas, kann es der Administrator zur Bibliothek hinzufügen.',
+  'Tap to listen in on ListenBrainz – or as a wish list for Lidarr.':
+    'Antippen zum Reinhören auf ListenBrainz – oder als Wunschliste für Lidarr.',
+  'Tap to listen in on ListenBrainz. If you like something, the administrator can add it to the library.':
+    'Antippen zum Reinhören auf ListenBrainz. Gefällt dir etwas, kann es der Administrator zur Bibliothek hinzufügen.',
   // pages/discover/Matrix.svelte
   'All': 'Alle',
   'Error': 'Fehler',
@@ -212,8 +212,8 @@ export default {
   'Similar bands you are still missing': 'Ähnliche Bands, die euch noch fehlen',
   'Sounds like these bands': 'Klingt wie diese Bands',
   'By the sound of the songs – recognized by the AI sound analysis.': 'Nach dem Klang der Songs – erkannt von der KI-Klanganalyse.',
-  'Tap to listen in on Last.fm – or for Lidarr.': 'Antippen zum Reinhören auf Last.fm – oder für Lidarr.',
-  'Tap to listen in on Last.fm.': 'Antippen zum Reinhören auf Last.fm.',
+  'Tap to listen in on ListenBrainz – or for Lidarr.': 'Antippen zum Reinhören auf ListenBrainz – oder für Lidarr.',
+  'Tap to listen in on ListenBrainz.': 'Antippen zum Reinhören auf ListenBrainz.',
   'Tags and similar bands for this band come with the next run of “Understand music” – from ListenBrainz and Deezer (Settings → Intelligence).':
     'Tags und ähnliche Bands zu dieser Band kommen mit dem nächsten Lauf von „Musik verstehen“ – von ListenBrainz und Deezer (Einstellungen → Intelligenz).',
   // components/sheets/CoverSheet.svelte

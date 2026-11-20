@@ -1,9 +1,11 @@
-<!-- Bands similar to your favorites that are not in the library yet (band knowledge: ListenBrainz, Deezer, Last.fm). -->
+<!-- Bands similar to your favorites that are not in the library yet (band knowledge: ListenBrainz, Deezer, Last.fm) –
+     each links to its page at ListenBrainz. -->
 <script>
   import Icon from '../../components/Icon.svelte'
   import { isAdmin, defaultOwner } from '../../lib/state.svelte.js'
   import { api } from '../../lib/api.js'
   import { t } from '../../lib/i18n.svelte.js'
+  import { bandPage } from '../../lib/artist.js'
 
   const admin = isAdmin()
   const FIRST = 6   // this many first, the rest on request
@@ -25,7 +27,7 @@
   <div class="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-2.5">
     {#each all ? d.missing : d.missing.slice(0, FIRST) as m}
       <a class="grid grid-cols-[32px_minmax(0,1fr)_auto] gap-2.5 items-center px-3 py-2.5 rounded-card bg-surface border border-line no-underline hover:border-line-2"
-        href="https://www.last.fm/music/{encodeURIComponent(m.artist)}" target="_blank" rel="noopener">
+        href={bandPage(m.artist, m.mbid)} target="_blank" rel="noopener">
         <div class="hi"><Icon name="music" size={18} /></div>
         <div class="min-w-0"><b class="ell block">{m.artist}</b><div class="tiny muted ell">{t('similar to {names}', { names: m.because.join(', ') })}</div></div>
         <Icon name="external" size={14} />
@@ -36,6 +38,6 @@
     <button type="button" class="btn sm ghost mt-2" onclick={() => (all = true)}><Icon name="down" size={16} />{t('Show all {n}', { n: d.missing.length })}</button>
   {/if}
   <p class="hint mt-2">{admin
-    ? t('Tap to listen in on Last.fm – or as a wish list for Lidarr.')
-    : t('Tap to listen in on Last.fm. If you like something, the administrator can add it to the library.')}</p>
+    ? t('Tap to listen in on ListenBrainz – or as a wish list for Lidarr.')
+    : t('Tap to listen in on ListenBrainz. If you like something, the administrator can add it to the library.')}</p>
 {/if}

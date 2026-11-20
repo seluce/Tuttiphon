@@ -44,10 +44,12 @@ class MissingArtistsTest(unittest.TestCase):
         similar = {"Rolf Zuckowski und seine Freunde": {"similar": [
             ["Rolf Zuckowski", 0.9], ["Simone Sommerland, Karsten Glück, Die Kita-Frösche", 0.8], ["Detlev Jöcker", 0.7],
             ["Nena", 0.6], ["Fredrik Vahle", 0.5], ["Weit weg", 0.1]]}}
-        with mock.patch.object(bandinfo, "artist", side_effect=lambda name: similar.get(name)):
+        with mock.patch.object(bandinfo, "artist", side_effect=lambda name: similar.get(name)), \
+             mock.patch.object(bandinfo, "mbid", side_effect=lambda name: {"Nena": "nena-id"}.get(name, "")):
             got = classify.missing_artists(["Rolf Zuckowski und seine Freunde", "Unbekannt"], library())
         self.assertEqual([m["artist"] for m in got], ["Nena", "Fredrik Vahle"])
         self.assertEqual(got[0]["because"], ["Rolf Zuckowski und seine Freunde"])
+        self.assertEqual([m["mbid"] for m in got], ["nena-id", ""])   # for the link to ListenBrainz
 
 
 if __name__ == "__main__":
