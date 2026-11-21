@@ -56,7 +56,7 @@ class NeverPlayedTest(SonicCase):
     a song that sounds like something else never comes in; one overdue comes first."""
 
     def mix(self, out, ranked, since, played, every=3):
-        me = {"person": {"id": "niklas", "newEvery": every}, "user": "niklas", "sure": True}
+        me = {"person": {"id": "niklas", "newEvery": every}, "user": "niklas", "sure": True, "live": True}
         with mock.patch.object(sonic, "_played", return_value=frozenset(self.lib.songs[i]["id"] for i in played)), \
                 mock.patch.object(sonic, "_since_new", return_value=since):
             return sonic._mix_new(self.lib, out, ranked, me)

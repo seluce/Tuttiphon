@@ -88,7 +88,9 @@ Every song is listened to – locally, at night, gently on a few cores:
   that hardly anyone knows; sound paths from one song to another for apps that support OpenSubsonic's
   `sonicSimilarity`. It also passes every play on as it happens – exact listening times and real skips for the
   mixes, and the recap even for accounts without a stored password. The smart queue **learns in the moment** (skip
-  twice and it turns to another sound) and **mixes in songs never played** – every few songs, set per person.
+  twice and it turns to another sound), **keeps a common thread** (what you listened to in the last half hour, so it
+  doesn't wander off), brings back what you heard earlier today only when little else fits, and **mixes in songs never
+  played** – every few songs, set per person.
 - **Taste per person**: what someone plays, favors and rates – including how it sounds – shapes their suggestions.
 - **Similar bands and tags** from ListenBrainz (with the tags of MusicBrainz) and Deezer – free and without a key;
   Last.fm adds its own with a key (Last.fm gives working keys only with a Pro subscription).

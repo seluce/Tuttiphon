@@ -10,11 +10,13 @@ Navidrome does not say who asks. But Tuttiphon knows from the live plays (listen
 song asked about (or a song of the band or album) is playing on exactly one account – or only one account is playing
 at all – the answer is for that account's person (_listener(), one person per account): their "All" (without the
 separate worlds such as children's music and audio plays – unless the song asked for is in one of them) and dislikes,
-without what they heard in the last hours or rated 1 star by hand, songs they skip further down. When that is unclear,
+without what they heard in the last hours or rated 1 star by hand, songs they skip or heard earlier today further
+down. When that is unclear,
 the answer is the family's (its dislikes; without a family nobody's) – and always without live recordings and the
 like (settings.excludeTitles, minDuration) and without explicit songs as soon as a person is kid-safe, never loosened
 on a guess (the family's kid-safe mode too: the one asking may be its shared device). The smart queue learns in the
-moment: what was skipped in the last minutes steers the next answer away from its sound (_steer()). And every few
+moment: what was skipped in the last minutes steers the next answer away from its sound (_steer()), and what was
+listened to in the last half hour keeps a common thread (_anchor()), so the queue does not wander off. And every few
 songs one the account has never played comes in (_mix_new(), the person's "newEvery"). An answer short of the count
 asked for is filled up from the songs that may come (_fill()) – otherwise Navidrome adds its own picks, which know
 nothing of kid-safe mode and dislikes.
@@ -56,6 +58,10 @@ SKIPPED_BAND = (0.7, 0.5, 0.25)    # songs of the skipped bands: scores times th
 NEW_EVERY = 5          # default of a person's "newEvery": every 5th song one the account has never played (0: never)
 NEW_CHOICES = (0, 3, 5)
 NEW_FLOOR = 0.2        # a never played song comes in only this similar at least (and as the weakest of the answer)
+ANCHOR = 0.3           # the smart queue's common thread: the sound asked for moves this much toward …
+ANCHOR_SONGS = 6       # … the mean sound of the last (up to) this many songs listened to on …
+ANCHOR_SECONDS = 1800  # … in the last half hour – so one song after the other does not wander off
+TODAY_FACTOR = 0.5     # a song heard earlier today (before the last HEARD_SECONDS) only comes when little else fits
 _lock = threading.Lock()
 _memo = {}
 _seen = {"at": None, "calls": 0, "for": None, "forAt": None, "guess": False}   # the plugin's last call (settings page)
@@ -227,18 +233,18 @@ def _all_batch():
 
 
 def _listener(cfg, ids):
-    """The person listening to one of these songs (listen.listener()) -> (person, sure) – the person of that account
-    (one person per account; the family's on a shared device), (None, False) if that is unclear or the account's plays
-    are not kept (listen.allowed())."""
+    """The person listening to one of these songs (listen.listener()) -> (person, sure, live) – the person of that
+    account (one person per account; the family's on a shared device), (None, False, False) if that is unclear or the
+    account's plays are not kept (listen.allowed()). live: sure, or the only account playing anything right now."""
     from . import listen
     from .config import slug
-    folder, sure = listen.listener(ids)
+    folder, sure, live = listen.listener(ids)
     if not folder:
-        return None, False
+        return None, False, False
     people = [p for p in cfg.get("personen", []) if p.get("user") and slug(p["user"]) == folder]
     if len(people) != 1 or not listen.allowed(cfg, people[0]["user"]):
-        return None, False   # also: two accounts whose names give the same folder name
-    return people[0], sure
+        return None, False, False   # also: two accounts whose names give the same folder name
+    return people[0], sure, live
 
 
 def _rated_one(lib, user):
@@ -307,19 +313,26 @@ def _variety(lib, user, seed):
     return out
 
 
+def _day_start():
+    """Unix time of today's midnight (local time)."""
+    return dt.datetime.combine(dt.date.today(), dt.time()).timestamp()
+
+
 def _who(cfg, lib, ids, personal, seed=None):
     """For whom the answer is: (view, indices to leave out, {index: factor}, me) – view for _pool()/_view(): (person
-    id, plain); me: {"person", "user", "sure"} of the one listening, None when that is unclear (then the family's
-    answer, _view()). For the person listening to one of these song ids:
+    id, plain); me: {"person", "user", "sure", "live", "seed"} of the one listening, None when that is unclear (then
+    the family's answer, _view()). For the person listening to one of these song ids:
     * sure (the song is playing on their account right now): their "All" and dislikes; what they heard in the last
-      hours (listen.heard()) or rated 1 star by hand stays out, what they skip comes further down
-      (feedback.factors(), with "Mixes that learn" on), and for the songs like `seed` (the smart queue) variety
-      between bands (_variety());
-    * a guess: their dislikes, what they just heard and skip – but no children's music of a child profile, no 1-stars,
-      no variety (it may be someone else asking).
+      hours (listen.heard()) or rated 1 star by hand stays out, what they skip or heard earlier today comes further
+      down (feedback.factors() with "Mixes that learn" on, TODAY_FACTOR), and for the songs like `seed` (the smart
+      queue) variety between bands (_variety());
+    * a guess: their dislikes, what they heard and skip – but no children's music of a child profile, no 1-stars (it
+      may be someone else asking). Variety, steering, the common thread and never played songs only if their account
+      is the only one playing anything (live): then it is nearly always the smart queue asking about the next song
+      before its "now playing" arrived.
     _FAMILY if not asked or unclear."""
     _last.person, _last.guess = None, False
-    person, sure = _listener(cfg, ids) if personal else (None, False)
+    person, sure, live = _listener(cfg, ids) if personal else (None, False, False)
     if not person:
         fam = next((p for p in cfg.get("personen", []) if p.get("family")), None)
         _last.person = (fam.get("name") or fam["id"]) if fam else None   # the family's answer
@@ -328,15 +341,21 @@ def _who(cfg, lib, ids, personal, seed=None):
     _last.person, _last.guess = person.get("name") or person["id"], not sure
     user = person["user"]
     index = lib.index_of()
-    out = set(listen.heard(user)) | (set(_rated_one(lib, user)) if sure else set())
+    heard = set(listen.heard(user))
+    out = heard | (set(_rated_one(lib, user)) if sure else set())
     leave = frozenset(index[s] for s in out if s in index)
     factor = {}
     if cfg["settings"].get("mixLearn", True):
         factor = {index[s]: f for s, f in feedback.factors(user).items() if s in index}
-    if seed is not None and sure:
+    for s in set(listen.heard(user, max(0, time.time() - _day_start()))) - out:   # heard earlier today
+        if s in index:
+            factor[index[s]] = factor.get(index[s], 1.0) * TODAY_FACTOR
+    if seed is not None and live:
         for j, f in _variety(lib, user, seed).items():
             factor[j] = factor.get(j, 1.0) * f
-    return (person["id"], not sure), leave, factor, {"person": person, "user": user, "sure": sure}
+    me = {"person": person, "user": user, "sure": sure, "live": live,
+          "seed": lib.songs[seed]["id"] if seed is not None else None}
+    return (person["id"], not sure), leave, factor, me
 
 
 def _favour(scored, factor):
@@ -346,12 +365,13 @@ def _favour(scored, factor):
     return sorted(((i, sc * factor.get(i, 1.0)) for i, sc in scored), key=lambda x: -x[1])
 
 
-def _steer(lib, idx, user, vec):
+def _steer(lib, idx, user, vec, seed_id=None):
     """The smart queue after skips (listen.moment()): away from the sound of what was skipped in the last minutes – after
-    two skips in a row clearly, and toward the songs listened to on – and the skipped bands further down.
+    two skips in a row clearly, and toward the songs listened to on – and the skipped bands further down. seed_id: the
+    song asked about (if it has not arrived as playing yet, the song before it counts as ended).
     -> (unit vector, {index: factor})"""
     from . import listen
-    m = listen.moment(user)
+    m = listen.moment(user, next_id=seed_id)
     if not m["skipped"]:
         return vec, {}
     level = min(m["streak"], 2)
@@ -374,6 +394,21 @@ def _steer(lib, idx, user, vec):
     return vec, factor
 
 
+def _anchor(lib, idx, user, vec, seed_id=None):
+    """The smart queue's common thread: the sound asked for moves a little (ANCHOR) toward the mean sound of the songs
+    the account listened to on in the last half hour (the last ANCHOR_SONGS) – one song after the other otherwise
+    wanders off (from quiet acoustic songs to metal within an hour). -> unit vector"""
+    from . import listen
+    if vec is None:
+        return vec
+    index = lib.index_of()
+    kept = [s for s in listen.moment(user, ANCHOR_SECONDS, next_id=seed_id)["kept"] if s != seed_id and s in index]
+    centre = similar.mean_unit([v for v in (_sound(lib, idx, index[s]) for s in kept[-ANCHOR_SONGS:]) if v is not None])
+    if centre is None:
+        return vec
+    return similar.unit([x + ANCHOR * c for x, c in zip(vec, centre)]) or vec
+
+
 def _played(user):
     """Song ids this account has played – counted by Tuttiphon (rueckblick.played_ever()) or live in the last two days.
     Empty if nothing is known about the account (then nothing counts as never played)."""
@@ -382,10 +417,13 @@ def _played(user):
     return ever | listen.heard(user, 2 * 86400) if ever else frozenset()
 
 
-def _since_new(user):
-    """Songs the account played since the last one an answer brought as never played (the song playing now included)."""
+def _since_new(user, seed_id=None):
+    """Songs the account played since the last one an answer brought as never played (the song playing now included –
+    seed_id: the song asked about, also when its "now playing" has not arrived yet)."""
     from . import listen
     seq = listen.sequence(user)
+    if seed_id and (not seq or seq[-1] != seed_id):
+        seq.append(seed_id)
     with _lock:
         given = dict(_given.get(user.lower(), {}))
     for k, sid in enumerate(reversed(seq)):
@@ -407,13 +445,13 @@ def _monotone(out):
 
 def _mix_new(lib, out, ranked, me, seeds=()):
     """Every n-th song of the answer one the account has never played (the person's "newEvery", NEW_EVERY by default;
-    only for the one listening for sure) – the most similar of them, counted on from the last one brought, so the
+    only for the one listening for sure or the only account playing) – the most similar of them, counted on from the last one brought, so the
     smart queue (which takes the first song of each answer) gets one every n songs (one overdue comes first). It takes
     the place and the similarity of the song it pushes on, the songs after it keep theirs; only one as similar as the
     weakest song of the answer and at least NEW_FLOOR comes in – none rather than one that sounds like something else.
     out: the answer, ranked: all candidates best first. Without anything known about the account the answer stays as
     it is."""
-    if not me or not me["sure"] or not out:
+    if not me or not me["live"] or not out:
         return out
     every = me["person"].get("newEvery", NEW_EVERY)
     played = _played(me["user"]) if every else frozenset()
@@ -427,7 +465,7 @@ def _mix_new(lib, out, ranked, me, seeds=()):
     floor = max(NEW_FLOOR, min(sc for _i, sc in out))
     fresh = (x for x in ranked if x[1] >= floor and x[0] not in taken and songs[x[0]]["id"] not in played)
     out, given, changed = list(out), [], False
-    for pos in range(max(0, every - 1 - _since_new(me["user"])), len(out), every):
+    for pos in range(max(0, every - 1 - _since_new(me["user"], me.get("seed"))), len(out), every):
         if songs[out[pos][0]]["id"] not in played:
             given.append(songs[out[pos][0]]["id"])
             continue
@@ -601,8 +639,9 @@ def similar_songs(cfg, lib, song_id, count=50, personal=False):
             return hit
     idx = similar.index(lib)
     vec = _sound(lib, idx, i)
-    if me and me["sure"]:   # the smart queue: skipped just now – somewhere else
-        vec, away = _steer(lib, idx, me["user"], vec)
+    if me and me["live"]:   # the smart queue: a common thread, and somewhere else after a skip just now
+        vec = _anchor(lib, idx, me["user"], vec, song_id)
+        vec, away = _steer(lib, idx, me["user"], vec, song_id)
         factor = {**factor, **{j: factor.get(j, 1.0) * f for j, f in away.items()}}
     scored = _favour(_closest(lib, vec, allowed, exclude={i} | leave), factor)
     out = _diverse(lib, scored, count, seeds=[i])

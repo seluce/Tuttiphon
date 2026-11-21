@@ -319,33 +319,36 @@ def _on(state):
 
 
 def listener(ids, now=None):
-    """Who is listening -> (account folder (config.slug of the account), sure) – (None, False) if that is unclear.
-    `ids`: the song asked about (or the songs of the band or album asked about).
+    """Who is listening -> (account folder (config.slug of the account), sure, live) – (None, False, False) if that is
+    unclear. `ids`: the song asked about (or the songs of the band or album asked about).
     sure: the latest event of exactly one account is one of these songs – it is playing it right now.
     Otherwise a guess: the one account that played one of them in the last LISTENER_SONG seconds, or – if none did –
     the one account playing anything right now (its last event at most LISTENER_ACTIVE seconds ago and not
     "stopped"). Accounts whose plays are not kept (no person, blocked) count as playing too (_active), so a question
-    of theirs is never taken for someone else's."""
+    of theirs is never taken for someone else's.
+    live: sure, or the account is the only one playing anything right now – then a guess is nearly always the smart
+    queue asking about the next song before its player's "now playing" arrived."""
     from .config import slug
     from .rueckblick import PLAYS_DIR
     now_t = now or time.time()
     try:
         folders = [f for f in PLAYS_DIR.iterdir() if f.is_dir()]
     except OSError:
-        return None, False
+        return None, False, False
     recent = {f.name: _recent(f, now_t - LISTENER_SONG, now_t) for f in folders}
+    unclear = (None, False, False)
     now_playing = [a for a, rows in recent.items() if rows and rows[-1]["id"] in ids and _on(rows[-1].get("st"))]
     if now_playing:
-        return (now_playing[0], True) if len(now_playing) == 1 else (None, False)
-    hit = [a for a, rows in recent.items() if any(r["id"] in ids for r in rows)]
-    if hit:
-        return (hit[0], False) if len(hit) == 1 else (None, False)
+        return (now_playing[0], True, True) if len(now_playing) == 1 else unclear
     playing = {a for a, rows in recent.items()
                if rows and rows[-1]["t"] >= now_t - LISTENER_ACTIVE and _on(rows[-1].get("st"))}
     with _lock:
         playing |= {slug(a) for a, (t, st) in _active.items() if t >= now_t - LISTENER_ACTIVE and _on(st)}
+    hit = [a for a, rows in recent.items() if any(r["id"] in ids for r in rows)]
+    if hit:
+        return (hit[0], False, playing == {hit[0]}) if len(hit) == 1 else unclear
     one = next(iter(playing)) if len(playing) == 1 else None
-    return (one, False) if one in recent else (None, False)
+    return (one, False, True) if one in recent else unclear
 
 
 def sequence(user, seconds=3600, now=None):
@@ -364,11 +367,13 @@ def heard(user, seconds=HEARD_SECONDS, now=None):
     return {r["id"] for r in _recent(_folder(user), now_t - seconds, now_t)}
 
 
-def moment(user, seconds=STEER_SECONDS, now=None):
-    """What this account did in the last `seconds`, song after song – for the smart queue (sonic._steer()):
-    {"skipped": song ids skipped, "kept": song ids it stayed with, "streak": skips in a row right before the song
-    playing now}, oldest first. The song playing now (the last one) is not judged yet. Skips as in summary(): from the
-    reports of the player that reported last, otherwise from the account's starts."""
+def moment(user, seconds=STEER_SECONDS, now=None, next_id=None):
+    """What this account did in the last `seconds`, song after song – for the smart queue (sonic._steer(),
+    sonic._anchor()): {"skipped": song ids skipped, "kept": song ids it stayed with, "streak": skips in a row right
+    before the song playing now}, oldest first. The song playing now (the last one) is not judged yet. Skips as in
+    summary(): from the reports of the player that reported last, otherwise from the account's starts.
+    next_id: the song asked about – if the account's last song is another one, that song ended now (the smart queue
+    asks about the next song before its "now playing" arrives) and is judged too."""
     now_t = now or time.time()
     rows = _recent(_folder(user), now_t - 2 * seconds, now_t)
     played = defaultdict(list)
@@ -385,6 +390,8 @@ def moment(user, seconds=STEER_SECONDS, now=None):
     if reports and starts and starts[-1]["t"] > seq[-1]["t"] and starts[-1]["id"] != seq[-1]["id"]:
         seq = seq + [starts[-1]]   # the new song started before its player's first report about it arrived
     segs = _segments(seq)
+    if next_id and segs and segs[-1]["id"] != next_id:
+        segs.append({"id": next_id, "t0": now_t, "t1": now_t, "pos": 0.0, "dur": None})
     skipped = set(_skipped(segs, heard))
     out = {"skipped": [], "kept": [], "streak": 0}
     judged = [seg for seg in segs[:-1] if seg["t0"] >= now_t - seconds]

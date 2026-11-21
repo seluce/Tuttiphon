@@ -631,7 +631,8 @@ everyone). If the song (or band, album) asked for is in a separate world, that w
 lead to children's songs, a rock song never to an audio play.
 
 **For the one listening** (`_who()`): the live plays (`app/listen.py`) tell who is playing what. `listen.listener()`
-looks at the day files of all accounts and gives the account and whether it is sure:
+looks at the day files of all accounts and gives the account, whether it is sure, and whether it is **live** – sure,
+or the only account playing anything right now:
 
 - **sure:** the latest event of exactly one account is the song asked about (for the artist radio a song of the band,
   for an album one of the album) and it is still on – “playing”, “starting” or “paused”; “stopped” and “expired”
@@ -639,7 +640,9 @@ looks at the day files of all accounts and gives the account and whether it is s
 - **a guess:** otherwise the one account that played one of these songs in the last 15 minutes (`LISTENER_SONG`), or –
   if none did – the one account whose last event is at most 10 minutes old and still on (`LISTENER_ACTIVE`).
   Accounts whose plays are not kept (no person, blocked) count as playing too (`listen._active`, memory only), so
-  their question is never taken for someone else's;
+  their question is never taken for someone else's. A guess is live when that account is the only one playing: then
+  it is nearly always Symfonium's smart queue asking about the next song before its player's “now playing” arrived
+  (both are sent at the start of a song, the question often arrives first);
 - **unclear** – the family's answer (without a family the neutral one): two accounts on the same song, two playing at
   once and neither the song, or two Navidrome accounts whose names give the same folder name.
 
@@ -658,33 +661,46 @@ radio:
   when sure, songs it rated 1 star by hand (`feedback.manual_dislikes()` – from the account's own song list, so only
   for accounts with a stored password; loaded in the background with `stats.songs_for()` and kept an hour,
   `_rated_one()`; the first answer goes without);
-- songs it skips come further down: scores times `feedback.factors()` (with “Mixes that learn” on);
-- when sure, for similar songs also variety between bands (`_variety()`): Symfonium's smart queue asks about every new
+- songs it skips come further down: scores times `feedback.factors()` (with “Mixes that learn” on); songs it heard
+  earlier today (since midnight, before the last 3 hours) count half (`TODAY_FACTOR` = 0.5) – in a long session the
+  queue keeps landing in the same corner of the sound and would otherwise bring them again, but in a small pool (a
+  child profile's music) they still come when little else fits;
+- when live, for similar songs also variety between bands (`_variety()`): Symfonium's smart queue asks about every new
   song and takes the most similar – mostly of the same band. From the account's songs of the last hour in order
   (`listen.sequence()`, the song asked about at the end): after `RUN_MAX` = 2 songs of one band in a row its songs
   count only a fifth (`RUN_FACTOR`), so other bands come first; a band heard n times in the last hour counts
   `HOUR_FACTOR`^(n − 1) (0.85);
-- when sure, for similar songs the queue **learns in the moment** (`_steer()`): `listen.moment()` reads the account's
+- when live, for similar songs the queue **learns in the moment** (`_steer()`): `listen.moment()` reads the account's
   last 15 minutes (`STEER_SECONDS`) song after song – skipped as in the mixes' live skips, from the reports of the
   player that reported last, otherwise from the starts (a new song's start counts even before its player's first
-  report) – and how many were skipped in a row right before the song playing now. The sound asked for moves away from
+  report) – and how many were skipped in a row right before the song playing now. If the song asked about has not
+  arrived as playing yet (`next_id`), the account's last song ended now and is judged too – otherwise the skip that
+  should turn the queue would only count one song later. The sound asked for moves away from
   the mean sound of the (last three) skipped songs: by 0.2 if the skips were earlier in the window, 0.35 after one
   right before, 0.7 after two or more in a row (`STEER_AWAY`), and after two in a row also 0.5 toward the songs listened
   to on (`STEER_BACK`); the skipped bands count 0.7 / 0.5 / 0.25 (`SKIPPED_BAND`);
-- when sure, **songs never played come in** (`_mix_new()`, similar songs, artist and album radio): every n-th song of
+- when live, for similar songs a **common thread** (`_anchor()`, before `_steer()`): one song after the other would
+  wander off – each answer only knows the song asked about, so within an hour the queue can get from quiet acoustic
+  songs to metal. The sound asked for moves 0.3 (`ANCHOR`) toward the mean sound of the last up to 6 songs
+  (`ANCHOR_SONGS`) the account listened to on in the last half hour (`ANCHOR_SECONDS`, `listen.moment()`'s `kept`,
+  without the song asked about) – the song asked about still leads; skipped songs are no part of the thread;
+- when live, **songs never played come in** (`_mix_new()`, similar songs, artist and album radio): every n-th song of
   the answer is one the account has never played – the person's `newEvery` (0 never, 5 now and then – the default –,
   3 often; Profile → “New songs in the queue”). “Played” is what Tuttiphon counted (`rueckblick.played_ever()`:
   `baseline.json` and `first.json`) plus the live plays of the last two days; without anything counted the answer stays
   as it is. The count goes on from the last never played song of an earlier answer that the account played since
-  (`_given`, memory only, `_since_new()` over `listen.sequence()`): the first place is `max(0, every − 1 − since)`, so
+  (`_given`, memory only, `_since_new()` over `listen.sequence()`, the song asked about at the end also before its
+  “now playing” arrived): the first place is `max(0, every − 1 − since)`, so
   an overdue one comes first, and the smart queue – which takes the first song of each answer – gets one every n songs
   and an Instant Mix one at every n-th place. The song brought is the most similar never played one (another recording
   than those in the answer) whose own similarity reaches `max(NEW_FLOOR, the weakest score of the answer)`
   (`NEW_FLOOR` = 0.2) – none rather than one that sounds like something else. It takes the place and the similarity of
   the song it pushes on; the songs after it keep theirs (the last one drops out), and `_monotone()` makes the
   similarities never rise along the answer, so the order holds even where a player sorts by them;
-- a guess is careful – it may be someone else asking: no 1-stars left out, no variety, no steering, no songs never
-  played, never a child profile's music, and the family's kid-safe mode stays on (it may be the family's shared device);
+- a guess is careful – it may be someone else asking: no 1-stars left out, never a child profile's music, and the
+  family's kid-safe mode stays on (it may be the family's shared device); with another account playing at the same
+  time (not live) also no variety, no steering, no common thread and no songs never played. A wrong live guess costs
+  little: a bit more variety, or a never played song by the wrong account's plays;
 - kid-safe stays as soon as any person other than the family has kid-safe mode or is a child profile – never loosened
   for the one listening; only a sure listener's answer goes without the family's own kid-safe mode;
 - not remembered (the family's answers are).

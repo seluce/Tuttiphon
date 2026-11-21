@@ -372,6 +372,93 @@ class ListenerTest(unittest.TestCase):
         self.assertFalse({"Blech-0", "Eisen-2"} & set(ids))
 
 
+class SmartQueueTest(unittest.TestCase):
+    """The smart queue asks about every new song – often before that song's "now playing" arrives: the only account
+    playing still gets variety, steering and never played songs; what it listened to in the last half hour keeps a
+    common thread; what it heard earlier today comes further down."""
+    setUp, clean, play, ask = ListenerTest.setUp, ListenerTest.clean, ListenerTest.play, ListenerTest.ask
+
+    def test_the_question_before_its_now_playing(self):
+        self.play("niklas", "Eisen-1", ago=500)
+        self.play("niklas", "Eisen-2", ago=250)    # two Eisen songs in a row – Symfonium asks about Eisen-0 next
+        bands = self.ask("Eisen-0")[1]
+        self.assertTrue(sonic.status()["lastGuess"])   # Eisen-0 has not arrived as playing: a guess …
+        self.assertNotIn("Eisen", bands[:2])       # … but the only account playing: variety as when sure
+        self.assertNotIn("Blech", bands)           # his dislike
+        self.play("niklas", "Eisen-0", ago=700)    # played on his account a while ago, and Oma plays too: careful
+        self.play("oma", "Harfe-0")
+        with mock.patch.object(sonic, "_variety", side_effect=AssertionError("no variety on a careful guess")), \
+                mock.patch.object(sonic, "_steer", side_effect=AssertionError("no steering on a careful guess")):
+            self.ask("Eisen-0")
+        self.assertEqual((sonic.status()["lastFor"], sonic.status()["lastGuess"]), ("Niklas", True))
+
+    def test_a_skip_steers_before_the_next_song_arrived(self):
+        self.play("niklas", "Harfe-1", ago=300)
+        self.play("niklas", "Stahl-1", ago=30)     # after 4:30 minutes of the harp: on to Stahl-1 …
+        self.play("niklas", "Stahl-2", ago=20)     # … left after 10 s, Stahl-2 after 20 s – Eisen-0 not arrived yet
+        from app import listen
+        self.assertEqual(listen.moment("niklas")["streak"], 1)                    # Stahl-2 still playing …
+        self.assertEqual(listen.moment("niklas", next_id="Eisen-0")["streak"], 2)  # … or left for Eisen-0
+        bands = self.ask("Eisen-0")[1]
+        self.assertTrue(sonic.status()["lastGuess"])
+        self.assertTrue(set(bands[:3]) <= {"Harfe", "Dudel", "Flöte"}, bands)    # somewhere else at once
+
+    def test_never_played_songs_before_the_next_song_arrived(self):
+        new = {"Stahl-3", "Stahl-4", "Stahl-5", "Eisen-5", "Harfe-3", "Harfe-4", "Harfe-5", "Dudel-5", "Flöte-5"}
+        folder = rueckblick._dir("niklas")
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "first.json").write_text(json.dumps({s["id"]: "2026-10-01" for s in self.lib.songs
+                                                       if s["id"] not in new}))
+        self.play("niklas", "Stahl-0", ago=60)
+        self.assertEqual((sonic._since_new("niklas"), sonic._since_new("niklas", "Eisen-0")), (1, 2))
+        ids = self.ask("Eisen-0", count=12)[0]     # Eisen-0 counts as the second song: the 3rd place is a new one
+        self.assertTrue(ids[2] in new and ids[7] in new, ids)
+
+    def test_a_common_thread(self):
+        from app import similar
+        self.play("niklas", "Eisen-0")
+        idx = similar.index(self.lib)
+        index = self.lib.index_of()
+        seed = sonic._sound(self.lib, idx, index["Eisen-0"])
+        self.assertEqual(list(sonic._anchor(self.lib, idx, "niklas", seed, "Eisen-0")), list(seed))   # nothing heard yet
+        self.clean()
+        for k, sid in enumerate(["Harfe-1", "Dudel-1", "Flöte-1"]):   # listened to on, 5 minutes each
+            self.play("niklas", sid, ago=1200 - k * 300)
+        self.play("niklas", "Stahl-1", ago=250)
+        self.play("niklas", "Stahl-2", ago=240)    # Stahl-1 skipped after 10 s: no part of the thread
+        self.play("niklas", "Eisen-0")
+        folk = similar.mean_unit([sonic._sound(self.lib, idx, index[s]) for s in ("Harfe-1", "Dudel-1", "Flöte-1",
+                                                                                  "Stahl-2")])
+        got = sonic._anchor(self.lib, idx, "niklas", seed, "Eisen-0")
+
+        def close(a, b):
+            return sum(x * y for x, y in zip(a, b))
+        self.assertAlmostEqual(close(got, folk), close(similar.unit([x + sonic.ANCHOR * c for x, c in zip(seed, folk)]), folk))
+        self.assertGreater(close(got, folk), close(seed, folk))   # a little toward what was listened to …
+        self.assertGreater(close(got, seed), 0.9)                 # … the song asked about still leads
+        with mock.patch.object(sonic, "ANCHOR_SECONDS", 200):     # all of it older than the window: no thread
+            self.assertEqual(list(sonic._anchor(self.lib, idx, "niklas", seed, "Eisen-0")), list(seed))
+        sims = [x["similarity"] for x in sonic.answer(self.cfg, self.lib, "similar", {"id": "Eisen-0", "count": "6"})["songs"]]
+        with mock.patch.object(sonic, "ANCHOR", 0):
+            plain = [x["similarity"] for x in sonic.answer(self.cfg, self.lib, "similar", {"id": "Eisen-0", "count": "6"})["songs"]]
+        self.assertLess(sims[0], plain[0])         # the metal songs are a little less close to the target now
+
+    def test_heard_earlier_today_comes_further_down(self):
+        import time
+        self.play("niklas", "Eisen-0")
+        first = self.ask(count=40)[0][0]
+        self.clean()
+        self.play("niklas", first, ago=5 * 3600)   # heard five hours ago: not left out any more …
+        self.play("niklas", "Eisen-0")
+        with mock.patch.object(sonic, "_day_start", return_value=time.time() - 10 * 3600):   # … but today
+            ids = self.ask(count=40)[0]
+        self.assertIn(first, ids)
+        self.assertGreater(ids.index(first), 0)
+        sonic._memo.clear()
+        with mock.patch.object(sonic, "_day_start", return_value=time.time() - 4 * 3600):    # yesterday: as before
+            self.assertEqual(self.ask(count=40)[0][0], first)
+
+
 class KeyTest(unittest.TestCase):
     def setUp(self):
         sonic.remove_key()

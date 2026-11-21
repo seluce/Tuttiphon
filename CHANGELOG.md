@@ -7,6 +7,11 @@ released.
 
 ## Unreleased
 
+- **Smarter queue in Symfonium:** the queue keeps a common thread – what you listened to in the last half hour
+  pulls the next songs a little toward it, so it no longer wanders from quiet songs to metal within an hour. What
+  you heard earlier today only comes back when little else fits. And when Symfonium asks about the next song before
+  its “now playing” has arrived, the answer stays yours as long as only your account is playing: variety between
+  bands, turning away after skips and never played songs work then too.
 - **Faster on the go:** pages, scripts and data now travel compressed – the first start after an update loads about
   a third (around 240 instead of 730 KB), which you notice on a phone over mobile data. A reverse proxy needs no
   setting for it.
