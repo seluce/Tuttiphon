@@ -197,6 +197,7 @@ The scheduler catches errors and tries again in the next pass.
 | Lyrics index | `liedtext.derb()`, `liedtext.languages()` | until `liedtexte.db` or `liedtexte.db-wal` changes; if reading fails (locked), the last result applies |
 | Deezer numbers | `deezer.stats()` | until `state/deezer.json` changes (modification time + size) |
 | Plays per period | `rueckblick.plays_between()` | per account and period, until the folder `state/plays/<account>/` changes; at most 32 entries, callers get a copy |
+| Compressed interface files | `web._packed_files` | gzip form of each file from the build folder, until its modification time or size changes; at most 500 entries (then emptied) – about 1 MB for a full build |
 | Playlist covers for display | `images._live` | the last 200 (version in the key; older versions of the same cover drop out) |
 | Configuration, credentials | `config.load_config()`, `config.load_env()` | in memory until the file changes (modification time + size); writing under a lock – see [Data model](02-data-model.md) |
 | Navidrome sessions | `navidrome.native_session()` | one per account, for the lifetime of the process |

@@ -16,7 +16,8 @@ The quick reference (components with props, classes, commands) is in
 
 `npm run build` writes to `web/`. Files under `web/assets/` carry a content hash in their name; the server delivers
 them with `Cache-Control: immutable`, and `index.html` and `login.html` with `no-cache` (`app/web.py`, `_static()`). So
-after a build everything is fresh right away, without the browser holding on to anything old. `web/` is generated and
+after a build everything is fresh right away, without the browser holding on to anything old. Text files go out
+compressed with gzip: the first start after an update loads about a third (German: ~240 instead of ~730 KB). `web/` is generated and
 not in Git; `tuttiphon.sh` builds it when needed, the Docker image in a separate build stage ([Operations](08-operations.md)).
 
 Without a build, the server answers `/` with 503 and the message “the interface has not been built yet”.

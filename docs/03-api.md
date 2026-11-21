@@ -44,6 +44,11 @@ state files, though (e.g. `/api/rueckblick` records the current play counts, `/i
 
 - JSON responses: `Content-Type: application/json; charset=utf-8`, `Cache-Control: no-store`, non-ASCII characters
   unescaped (`ensure_ascii=False`).
+- Compression (`Handler._send()`): text answers from 1 KB on (`text/…`, JSON, JavaScript, web manifest, SVG) go out
+  with `Content-Encoding: gzip` when the request's `Accept-Encoding` allows gzip (`gzip;q=0` doesn't), and always carry
+  `Vary: Accept-Encoding`. JSON is compressed per answer (level 6), files of the build folder once per version
+  (`_packed()`, level 9). Smaller answers, images, ZIP files, downloads of the plugin and the audio of `/api/stream`
+  stay as they are. `Content-Length` is the length that is sent, also for `HEAD`.
 - Some endpoints report errors **with status 200** in the body (the interface shows them as a result):
   `/api/env/test` and `/api/lastfm/test` (`{"ok": false, "error": …}`), `/api/opus/info` (key `error`) and
   `/api/status` (`navidrome.ok = false`).
@@ -85,7 +90,8 @@ All `GET` paths except `/api/…` (which includes `/api/stream`, audio instead o
 | `/assets/…` | `public, max-age=31536000, immutable` | Vite build with a content hash in the file name |
 | everything else (`index.html`, `login.html`, `sw.js` …) | `no-cache` | new references take effect immediately after an update |
 
-MIME types come from `mimetypes`; `.js` is always `text/javascript`, `.webmanifest` `application/manifest+json`,
+Text files go out compressed with gzip (see [Responses](#responses)); built files are compressed once and kept in
+memory until their modification time or size changes. MIME types come from `mimetypes`; `.js` is always `text/javascript`, `.webmanifest` `application/manifest+json`,
 text types get `; charset=utf-8`. Only `/login.html`, `/favicon.svg`, `/manifest.webmanifest`, `/sw.js`, `/icons/…`
 and `/assets/…` are reachable without a session. The check uses the normalized path
 (`posixpath.normpath()` after `unquote()`) – so `/assets/../index.html` or `/assets/%2e%2e/…` are not public.

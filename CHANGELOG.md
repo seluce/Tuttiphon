@@ -7,6 +7,9 @@ released.
 
 ## Unreleased
 
+- **Faster on the go:** pages, scripts and data now travel compressed – the first start after an update loads about
+  a third (around 240 instead of 730 KB), which you notice on a phone over mobile data. A reverse proxy needs no
+  setting for it.
 - **Stars without depending on Deezer alone:** songs Deezer does not find now get their stars from how many
   ListenBrainz listeners played them – free and without a key, for files with a MusicBrainz ID (as Lidarr and Picard
   write them). If Deezer stops answering, the run carries on with ListenBrainz for the songs without a Deezer rank;

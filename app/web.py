@@ -1,6 +1,7 @@
 """HTTP server: serves the interface from web/, images from Navidrome and a JSON API."""
 import datetime as dt
 import copy
+import gzip
 import json
 import math
 import mimetypes
@@ -1932,6 +1933,44 @@ def _no_constant(name):
     raise ValueError(name)   # NaN, Infinity, -Infinity are not JSON
 
 
+# Compression: text answers (pages, scripts, styles, JSON) go out with gzip when the browser accepts it – about a third
+# of the size, which counts on a phone over mobile data. Small answers stay as they are (the gain would be eaten up),
+# images and ZIP files are compressed already. Files of the build folder are compressed once per version (_packed()).
+GZIP_TYPES = ("text/", "application/json", "application/javascript", "application/manifest+json", "image/svg+xml")
+GZIP_MIN = 1024
+_packed_files = {}   # path -> (mtime_ns, size, gzip form)
+
+
+def _takes_gzip(accept):
+    """Does the request header Accept-Encoding allow gzip? ("gzip;q=0" says no)"""
+    for part in (accept or "").split(","):
+        name, _sep, params = part.partition(";")
+        if name.strip().lower() != "gzip":
+            continue
+        q = params.strip().lower()
+        if not q.startswith("q="):
+            return True
+        try:
+            return float(q[2:]) > 0
+        except ValueError:
+            return False
+    return False
+
+
+def _packed(file, st, data):
+    """gzip form of a file from the build folder; st: its os.stat() from before reading. Compressed once – a new build
+    (other modification time or size) compresses again."""
+    key = str(file)
+    hit = _packed_files.get(key)
+    if hit and hit[0] == st.st_mtime_ns and hit[1] == st.st_size:
+        return hit[2]
+    packed = gzip.compress(data, 9)
+    if len(_packed_files) > 500:   # old builds on the PC: never grows without end
+        _packed_files.clear()
+    _packed_files[key] = (st.st_mtime_ns, st.st_size, packed)
+    return packed
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "Tuttiphon"
     sys_version = ""   # the Server header without the Python version
@@ -1948,7 +1987,13 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header(k, v)
         super().end_headers()
 
-    def _send(self, data, ctype, code=200, headers=None):
+    def _send(self, data, ctype, code=200, headers=None, packed=None):
+        """packed(): the gzip form of data, when it is at hand without compressing (files of the build folder)."""
+        if len(data) >= GZIP_MIN and ctype.startswith(GZIP_TYPES) and "Content-Encoding" not in (headers or {}):
+            headers = {**(headers or {}), "Vary": "Accept-Encoding"}   # also uncompressed: caches keep both forms apart
+            if _takes_gzip(self.headers.get("Accept-Encoding") if getattr(self, "headers", None) else None):
+                data = packed() if packed else gzip.compress(data, 6)
+                headers["Content-Encoding"] = "gzip"
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
@@ -2190,7 +2235,9 @@ class Handler(BaseHTTPRequestHandler):
         # Built files under /assets/ carry a content hash in their name – so they never change. index.html and
         # login.html on the other hand are always fetched fresh, otherwise they point to old files after an update.
         cache = "public, max-age=31536000, immutable" if name.startswith("assets/") else "no-cache"
-        self._send(read_bytes(file), ctype, headers={"Cache-Control": cache})
+        st = file.stat()
+        data = read_bytes(file)
+        self._send(data, ctype, headers={"Cache-Control": cache}, packed=lambda: _packed(file, st, data))
 
     def _stream(self, query):
         """Listening in: pass a song's audio through from Navidrome (the credentials stay here). Seeking via Range."""

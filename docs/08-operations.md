@@ -289,6 +289,8 @@ proxy connects to Tuttiphon, or its network, comma-separated, e.g. `172.16.0.0/1
   unencrypted.
 - The proxy must append the client address to `X-Forwarded-For` and set `X-Forwarded-Proto`. Name it as narrowly as
   possible: whoever connects from a listed address can claim any address.
+- Compression needs no setting in the proxy: Tuttiphon sends pages, scripts and JSON compressed with gzip itself
+  (with `Vary: Accept-Encoding`); the proxy passes them on as they are.
 
 Details: [Security](07-security.md#behind-a-reverse-proxy).
 
@@ -401,7 +403,8 @@ log and leaves it as it was ([Data model](02-data-model.md#version-and-damaged-f
 new setup. Read the changelog before an update: if a version asks for something to be done first, it says so there.
 
 **Browser:** The server delivers `index.html` and `login.html` with `Cache-Control: no-cache`, and files under
-`/assets/` (content hash in the name) as `immutable` for one year. The service worker (`sw.js`) loads from the server
+`/assets/` (content hash in the name) as `immutable` for one year; text files compressed with gzip, about a third of
+their size ([API](03-api.md#responses)). The service worker (`sw.js`) loads from the server
 first and falls back to the last loaded interface only when offline. So after an update, reloading is enough.
 
 ## Notifications
