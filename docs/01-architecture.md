@@ -105,7 +105,7 @@ Tuttiphon sync name, owner and visibility.
    `--unsafe-no-password`): from then on the server requires sign-in, and without an administrator password it only
    lets the setup with the setup code through ([Security](07-security.md#running-without-a-password)). It opens the `ThreadingHTTPServer` (with
    an IPv6 address such as `::1` or `::` with `AF_INET6`) and starts `warm_up()`. Without `TUTTIPHON_NO_SCHEDULER=1` these follow: `heartbeat()` (instance registration, `app/instances.py`), a
-   thread for `rueckblick.snapshot_all()` and the scheduler thread `daily_loop()`.
+   thread for `rueckblick.snapshot_all()`, the scheduler thread `daily_loop()` and the warm-up watcher `warm_loop()`.
 4. `web.startup_report()` writes an overview to the server log (`events.say()`): version, storage locations with
    their state, Navidrome address, AI sound analysis, schedules. In the container “Ready – port 8765” follows, on the PC the line
    “Tuttiphon is running at http://…/ (Ctrl+C quits)”. In setup mode the line with the setup code comes last
@@ -119,7 +119,8 @@ Tuttiphon sync name, owner and visibility.
 |---|---|---|---|---|
 | Main thread | at startup | permanent | accepts connections (`serve_forever()`) | – |
 | Request threads | per HTTP request (daemon threads) | until the response, socket timeout 30 s | `Handler._handle()`; the signed-in person is thread-local (`auth.set_current()`) | – |
-| Warm-up | at startup; again 2.5 s after saving the configuration or credentials (`schedule_warm()`) | once | fills caches: song list, playlist status, “To review”, suggestions | – |
+| Warm-up | at startup; again 2.5 s after saving the configuration or credentials (`schedule_warm()`); from the watcher | once | `_warm_now()` fills caches: song list (loaded again if a run threw it away), what the mixes learned, new music worlds, library overview, playlist status, “To review”, suggestions – one at a time (`_warming`), one asked for meanwhile is left to the watcher | – |
+| Warm-up watcher | at startup | every 30 s (`WARM_EVERY`) | `warm_loop()`: prepares again as soon as what the remembered results depend on changed (`_base_stamp()`: modification time of `config.json`, load time of the song list, the day) or the song list was thrown away – after a run (also the auto-apply), a refresh of the song list, at midnight, a change by the server itself. Not during a run (once after it); after the song list could not be loaded it waits 5 minutes (`WARM_RETRY`). So the first page – and the plugin's first question after the night run – need not wait | `TUTTIPHON_NO_SCHEDULER=1` |
 | Open browser | 0.8 s after startup | once | `webbrowser.open()` | `--no-browser` |
 | Recap start | at startup | once | record the counter state per account (`rueckblick.snapshot_all()`) | `TUTTIPHON_NO_SCHEDULER=1` |
 | Scheduler | at startup | every 60 s, first pass after 60 s | instance registration, tidy-up, freeing memory, recap, backup, folder watch, night analysis, daily refresh (see below) | `TUTTIPHON_NO_SCHEDULER=1` |

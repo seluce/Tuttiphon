@@ -7,6 +7,10 @@ released.
 
 ## Unreleased
 
+- **Pages there right away:** Discover, “For you” and the playlists are now prepared in the background after every
+  run, after the song list was refreshed and at midnight – not only after saving. After the night run the song list
+  is loaded again at once, so neither the first opening of the app in the morning nor your music app's first
+  question waits for it.
 - **Smarter queue in Symfonium:** the queue keeps a common thread – what you listened to in the last half hour
   pulls the next songs a little toward it, so it no longer wanders from quiet songs to metal within an hour. What
   you heard earlier today only comes back when little else fits. And when Symfonium asks about the next song before

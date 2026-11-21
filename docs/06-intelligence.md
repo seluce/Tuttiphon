@@ -861,7 +861,8 @@ is not in `dismissed`, at most half of its bands are already in another world (d
 they overlap with everything) and it yields enough –
 from 4 bands and 60 songs, decade worlds from 5 bands and 80 songs, or from 2 bands and 20 songs if an account with a
 taste profile listens to these bands at least 5% of the time. `sync()` creates it (`new_welt()`, `auto` = today) – at
-server start and after every save (`warm_up()`, only if something has changed since), after the scan and after
+server start, after every save and when the warm-up watcher notices a change (`warm_up()`, `warm_loop()`, only if
+something has changed since), after the scan and after
 “Understand music”. It never touches custom worlds; deleted ones do not come back. If the interface saves a state
 that does not yet know a world created in the meantime, the world stays (`config.merge_server_fields()`) – it is only
 gone if its scene is in `dismissed`. “To review” reports new worlds for 14 days (several in one entry), the

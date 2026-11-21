@@ -41,10 +41,15 @@ _inflight = {}        # key -> Event: being computed right now (the same request
 INFLIGHT_WAIT = 120   # seconds; after that a waiting request computes the result itself
 
 
+def _base_stamp():
+    """What the remembered results (_memoized()) depend on: the configuration, the song list and the day."""
+    return (CONFIG_FILE.stat().st_mtime if CONFIG_FILE.exists() else 0, CACHE.loaded_at, dt.date.today())
+
+
 def _memoized(name, fn, *extra):
     """Remember the result as long as configuration and library have not changed – per language, since the
     results contain texts. Parallel identical requests (e.g. several pages after a save) compute it only once."""
-    stamp = (CONFIG_FILE.stat().st_mtime if CONFIG_FILE.exists() else 0, CACHE.loaded_at, dt.date.today())
+    stamp = _base_stamp()
     key = (name, *stamp, i18n.current(), extra)
     waited = False
     while True:
@@ -225,15 +230,53 @@ def _warm_learning():
         feedback.factors(p["user"])
 
 
+WARM_EVERY = 30    # seconds: the watcher (warm_loop()) looks this often whether the base of the pages changed …
+WARM_RETRY = 300   # … and after the song list could not be loaded (Navidrome away) waits this long for the next try
+_warmed = {"stamp": None, "failed": 0.0}
+_warming = threading.Lock()
+
+
+def _warm_now():
+    """Prepare expensive calculations so the pages are there right away: the song list (loaded again if a run threw it
+    away), what the mixes learned, new music worlds, and the pages the app asks for first – the library overview, the
+    playlists, "To review", the suggestions. One warm-up at a time; one asked for meanwhile is left to the watcher."""
+    if not _warming.acquire(blocking=False):
+        return
+    try:
+        try:
+            CACHE.get()
+        except Exception:   # noqa: BLE001 – Navidrome away or not set up yet: the watcher tries again later
+            _warmed["failed"] = time.time()
+            return
+        for fn in (_warm_learning, _sync_welten):
+            _safe(fn)
+        _warmed["stamp"] = _base_stamp()   # after the steps that may change it – a change from here on is noticed
+        for fn in (api_library, api_playlists, api_inbox, api_suggestions):
+            _safe(fn)
+    finally:
+        _warming.release()
+
+
 def warm_up():
-    """Prepare expensive calculations in the background so the pages are there right away."""
-    def run():
-        for fn in (lambda: CACHE.get(), _warm_learning, _sync_welten, api_playlists, api_inbox, api_suggestions):
-            try:
-                fn()
-            except Exception:
-                pass
-    threading.Thread(target=run, daemon=True).start()
+    """Prepare expensive calculations in the background so the pages are there right away (_warm_now())."""
+    threading.Thread(target=_warm_now, daemon=True).start()
+
+
+def _warm_check():
+    if RUNNER.running() or time.time() - _warmed["failed"] < WARM_RETRY:
+        return   # during a run everything changes again before it ends – after it, once
+    if not CACHE.loaded_at or _base_stamp() != _warmed["stamp"]:
+        _warm_now()
+
+
+def warm_loop():
+    """The watcher: as soon as the configuration, the song list or the day changed – after a run (also the
+    auto-apply), a refresh of the song list, at midnight, a change by the server itself – and no run is going on, the
+    pages are prepared again. A song list a run threw away (CACHE.invalidate()) is loaded again right away – otherwise
+    the first page or the plugin's first question after the night run would wait for it."""
+    while True:
+        time.sleep(WARM_EVERY)
+        _safe(_warm_check)
 
 
 _warm = {"timer": None}
@@ -2734,4 +2777,5 @@ def serve(host="127.0.0.1", port=8765, strict=True):
     heartbeat()
     threading.Thread(target=lambda: _safe(rueckblick.snapshot_all), daemon=True).start()   # recap: count from now on
     threading.Thread(target=daily_loop, daemon=True).start()
+    threading.Thread(target=warm_loop, daemon=True).start()
     return server

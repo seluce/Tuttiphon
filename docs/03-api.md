@@ -270,7 +270,9 @@ On `PUT`, the server applies:
 In both cases `normalize_playlists()` then turns every playlist with a sound filter into a mix
 ([02](02-data-model.md#playlists)). Then `validate_config()` checks the result (`400` with `"config: …"` or
 `"Settings: …"`). After saving, `AutoApply.schedule()` schedules the auto-apply in 8 s (only if
-`settings.autoApply` is on), and `schedule_warm()` precomputes the expensive pages in the background.
+`settings.autoApply` is on), and `schedule_warm()` precomputes the expensive pages in the background. Changes that
+don't come through a save (a run, a refresh of the song list, midnight) are noticed by the warm-up watcher
+(`warm_loop()`, [Architecture](01-architecture.md)) within 30 s.
 
 ## Library & status
 
