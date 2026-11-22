@@ -5,37 +5,37 @@ section into the release notes `README.txt`. If `docker-compose.yaml` has to be 
 Changes that are not released yet are collected under “Unreleased” – the version number follows when they are
 released.
 
-## Unreleased
+## 2.3.0
 
-- **Pages there right away:** Discover, “For you” and the playlists are now prepared in the background after every
-  run, after the song list was refreshed and at midnight – not only after saving. After the night run the song list
-  is loaded again at once, so neither the first opening of the app in the morning nor your music app's first
-  question waits for it.
-- **Smarter queue in Symfonium:** the queue keeps a common thread – what you listened to in the last half hour
-  pulls the next songs a little toward it, so it no longer wanders from quiet songs to metal within an hour. What
-  you heard earlier today only comes back when little else fits. And when Symfonium asks about the next song before
-  its “now playing” has arrived, the answer stays yours as long as only your account is playing: variety between
-  bands, turning away after skips and never played songs work then too.
-- **Faster on the go:** pages, scripts and data now travel compressed – the first start after an update loads about
-  a third (around 240 instead of 730 KB), which you notice on a phone over mobile data. A reverse proxy needs no
-  setting for it.
-- **Stars without depending on Deezer alone:** songs Deezer does not find now get their stars from how many
-  ListenBrainz listeners played them – free and without a key, for files with a MusicBrainz ID (as Lidarr and Picard
-  write them). If Deezer stops answering, the run carries on with ListenBrainz for the songs without a Deezer rank;
-  songs with a Deezer rank keep their stars, and nothing is removed. On by default, Settings → Deezer stars → “Ask
-  ListenBrainz”.
-- **Listen in on ListenBrainz:** bands you might still be missing (Discover and the band window) now open their page at
-  ListenBrainz instead of Last.fm – with a “Play all” of their popular songs, without a sign-in.
-- **Texts for every music app:** the interface and the server's messages no longer assume Symfonium – they speak of
-  your music app, whichever you use with Navidrome. Symfonium is only named for its own settings (radio mix with
-  similar songs, smart queue by sonic analysis) and where only apps like it do something (top tracks by stars,
-  offline playlists that update themselves).
 - **Similar bands without Last.fm:** from 1 December 2026, Last.fm keys only work with a Pro subscription. Similar
   bands and tags now come from ListenBrainz (with the tags of MusicBrainz) and Deezer – free and without a key, each
   can be turned off under Settings → Intelligence. A Last.fm key stays optional and adds its data; what Last.fm has
   delivered so far stays in use. Settings → Intelligence shows when Last.fm no longer accepts the key, and the key can
   be removed there. The time limit now applies per source (default 3 minutes) – a time limit set for Last.fm before
   has to be set again.
+- **Stars without depending on Deezer alone:** songs Deezer does not find now get their stars from how many
+  ListenBrainz listeners played them – free and without a key, for files with a MusicBrainz ID (as Lidarr and Picard
+  write them). If Deezer stops answering, the run carries on with ListenBrainz for the songs without a Deezer rank;
+  songs with a Deezer rank keep their stars, and nothing is removed. On by default, Settings → Deezer stars → “Ask
+  ListenBrainz”.
+- **Smarter queue in Symfonium:** the queue keeps a common thread – what you listened to in the last half hour
+  pulls the next songs a little toward it, so it no longer wanders from quiet songs to metal within an hour. What
+  you heard earlier today only comes back when little else fits. And when Symfonium asks about the next song before
+  its “now playing” has arrived, the answer stays yours as long as only your account is playing: variety between
+  bands, turning away after skips and never played songs work then too.
+- **Pages there right away:** Discover, “For you” and the playlists are now prepared in the background after every
+  run, after the song list was refreshed and at midnight – not only after saving. After the night run the song list
+  is loaded again at once, so neither the first opening of the app in the morning nor your music app's first
+  question waits for it.
+- **Faster on the go:** pages, scripts and data now travel compressed – the first start after an update loads about
+  a third (around 240 instead of 730 KB), which you notice on a phone over mobile data. A reverse proxy needs no
+  setting for it.
+- **Listen in on ListenBrainz:** bands you might still be missing (Discover and the band window) now open their page at
+  ListenBrainz instead of Last.fm – with a “Play all” of their popular songs, without a sign-in.
+- **Texts for every music app:** the interface and the server's messages no longer assume Symfonium – they speak of
+  your music app, whichever you use with Navidrome. Symfonium is only named for its own settings (radio mix with
+  similar songs, smart queue by sonic analysis) and where only apps like it do something (top tracks by stars,
+  offline playlists that update themselves).
 
 ## 2.2.0
 
